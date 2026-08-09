@@ -1,4 +1,9 @@
-import express, { type Express, type Request, type Response, type NextFunction } from "express";
+import express, {
+  type Express,
+  type Request,
+  type Response,
+  type NextFunction,
+} from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import rateLimit from "express-rate-limit";
@@ -13,7 +18,7 @@ const app: Express = express();
 // Optional: serve the built frontend so a single process hosts both API and site
 const frontendDist = process.env.FRONTEND_DIST
   ? path.resolve(process.env.FRONTEND_DIST)
-  : path.resolve(process.cwd(), "../bluepeak-systems/dist/public");
+  : path.resolve(process.cwd(), "../swiftjob-systems/dist/public");
 const hasFrontend = fs.existsSync(frontendDist);
 
 // Trust proxy for rate limiting behind reverse proxy
@@ -24,7 +29,7 @@ app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
     contentSecurityPolicy: false, // Disable for API, enable for frontend
-  })
+  }),
 );
 
 // Rate limiting
@@ -79,7 +84,7 @@ app.use(
         };
       },
     },
-  })
+  }),
 );
 
 app.use(cors());
@@ -94,7 +99,7 @@ app.use("/api/auth/magic-link", magicLinkLimiter);
 
 // Request ID middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
-  req.id = req.headers["x-request-id"] as string || crypto.randomUUID();
+  req.id = (req.headers["x-request-id"] as string) || crypto.randomUUID();
   res.setHeader("x-request-id", req.id);
   next();
 });
@@ -110,7 +115,11 @@ app.get("/healthz", (_req: Request, res: Response) => {
 if (hasFrontend) {
   app.use(express.static(frontendDist));
   app.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.method !== "GET" || req.path.startsWith("/api") || req.path === "/healthz") {
+    if (
+      req.method !== "GET" ||
+      req.path.startsWith("/api") ||
+      req.path === "/healthz"
+    ) {
       return next();
     }
     res.sendFile(path.join(frontendDist, "index.html"));

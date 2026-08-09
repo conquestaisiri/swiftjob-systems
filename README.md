@@ -1,4 +1,4 @@
-# BluePeak Systems - Global Workforce Platform
+# SwiftJob - Global Workforce Platform
 
 A full-stack monorepo for a global workforce platform connecting businesses with remote professionals.
 
@@ -13,7 +13,7 @@ A full-stack monorepo for a global workforce platform connecting businesses with
 │
 ├── artifacts/                    # Applications
 │   ├── api-server/               # Express API (Node.js + TypeScript)
-│   ├── bluepeak-systems/         # React 19 + Vite + Tailwind 4 frontend
+│   ├── swiftjob-systems/         # React 19 + Vite + Tailwind 4 frontend
 │   └── mockup-sandbox/           # Design system preview
 │
 ├── scripts/                      # Utility scripts
@@ -22,29 +22,29 @@ A full-stack monorepo for a global workforce platform connecting businesses with
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Language** | TypeScript (strict) |
-| **Package Manager** | pnpm 9 (workspace) |
-| **Database** | PostgreSQL (Neon/Supabase) + Drizzle ORM |
-| **API** | Express 5 + Zod validation |
-| **Frontend** | React 19 + Vite 7 + Tailwind 4 |
-| **State/Data** | TanStack Query + Wouter router |
-| **Auth** | JWT (admin) |
-| **Email** | Resend |
-| **File Storage** | Cloudflare R2 (S3-compatible) |
-| **Logging** | Pino |
-| **CI/CD** | GitHub Actions |
+| Layer               | Technology                               |
+| ------------------- | ---------------------------------------- |
+| **Language**        | TypeScript (strict)                      |
+| **Package Manager** | pnpm 9 (workspace)                       |
+| **Database**        | PostgreSQL (Neon/Supabase) + Drizzle ORM |
+| **API**             | Express 5 + Zod validation               |
+| **Frontend**        | React 19 + Vite 7 + Tailwind 4           |
+| **State/Data**      | TanStack Query + Wouter router           |
+| **Auth**            | JWT (admin)                              |
+| **Email**           | Resend                                   |
+| **File Storage**    | Cloudflare R2 (S3-compatible)            |
+| **Logging**         | Pino                                     |
+| **CI/CD**           | GitHub Actions                           |
 
 ## Features
 
 - **Careers Portal**: 14 job listings with filtering, search, pagination
 - **Application Forms**: 19 required fields + resume upload (PDF/DOC/DOCX ≤10MB)
-- **Email Notifications**: 
+- **Email Notifications**:
   - Applicant confirmation email
   - HR notification with full application details
   - Status update emails (Reviewing → Shortlisted → Rejected/Hired)
-- **Admin Dashboard**: 
+- **Admin Dashboard**:
   - Paginated application table with search/filter
   - Status management with dropdown
   - Application detail modal with resume download
@@ -67,7 +67,7 @@ A full-stack monorepo for a global workforce platform connecting businesses with
 
 ```bash
 git clone <repo-url>
-cd Blue-peak-Systems-zip
+cd swiftjob-systems
 pnpm install
 ```
 
@@ -76,26 +76,27 @@ pnpm install
 Create `.env` files in each artifact:
 
 **artifacts/api-server/.env**
+
 ```env
 # Database (create free project at https://supabase.com)
 DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.co:5432/postgres"
 
 # Resend (get from https://resend.com)
 RESEND_API_KEY="re_..."
-EMAIL_FROM="BluePeak Systems <careers.bluepeak@payservice.top>"
-HR_EMAIL="hr.bluepeak@payservice.top"
+EMAIL_FROM="SwiftJob <careers@swiftjob.payservice.top>"
+HR_EMAIL="hr@swiftjob.payservice.top"
 
 # Cloudflare R2 (get from Cloudflare Dashboard → R2)
 R2_ACCOUNT_ID="..."
 R2_ACCESS_KEY_ID="..."
 R2_SECRET_ACCESS_KEY="..."
-R2_BUCKET="bluepeaksystems"
+R2_BUCKET="swiftjobsystems"
 R2_ENDPOINT="https://<account-id>.r2.cloudflarestorage.com"
 R2_PUBLIC_URL="https://pub-<account-id>.r2.dev"
 
 # Auth
 JWT_SECRET="generate-with: openssl rand -base64 32"
-ADMIN_EMAIL="admin@bluepeak.payservice.top"
+ADMIN_EMAIL="admin@swiftjob.payservice.top"
 ADMIN_PASSWORD="secure-password-here"
 
 # App
@@ -104,7 +105,8 @@ PORT="3001"
 FRONTEND_URL="http://localhost:5173"
 ```
 
-**artifacts/bluepeak-systems/.env**
+**artifacts/swiftjob-systems/.env**
+
 ```env
 VITE_API_URL="http://localhost:3001/api"
 ```
@@ -128,11 +130,12 @@ cd artifacts/api-server
 pnpm run dev
 
 # Terminal 2: Frontend
-cd artifacts/bluepeak-systems
+cd artifacts/swiftjob-systems
 pnpm run dev
 ```
 
 Visit:
+
 - Frontend: http://localhost:5173
 - API: http://localhost:3001/api/healthz
 - Admin: http://localhost:5173/admin
@@ -152,14 +155,17 @@ pnpm run typecheck
 ### Shared Libraries
 
 **lib/db** - Database schema and client
+
 - `src/schema/applications.ts` - Applications table with full field definitions
 - `src/index.ts` - Drizzle client + pool export
 
 **lib/api-zod** - Zod validation schemas
+
 - Generated from OpenAPI spec via Orval
 - Used by both frontend and backend
 
 **lib/api-client-react** - React Query integration
+
 - `custom-fetch.ts` - Typed fetch with auth, base URL, error handling
 - Generated hooks in `src/generated/api.ts`
 
@@ -189,7 +195,7 @@ src/
 └── index.ts               # Entry point
 ```
 
-### Frontend (artifacts/bluepeak-systems)
+### Frontend (artifacts/swiftjob-systems)
 
 ```
 src/
@@ -219,23 +225,23 @@ src/
 
 ### Public
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/healthz` | Health check |
-| POST | `/api/applications` | Submit application (multipart) |
-| GET | `/api/applications` | List all (admin only) |
-| GET | `/api/applications/:id` | Get single (admin only) |
+| Method | Endpoint                | Description                    |
+| ------ | ----------------------- | ------------------------------ |
+| GET    | `/api/healthz`          | Health check                   |
+| POST   | `/api/applications`     | Submit application (multipart) |
+| GET    | `/api/applications`     | List all (admin only)          |
+| GET    | `/api/applications/:id` | Get single (admin only)        |
 
 ### Admin (requires JWT)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/admin/login` | Admin login |
-| GET | `/api/admin/applications` | Paginated list with filters |
-| GET | `/api/admin/applications/:id` | Get application details |
-| PATCH | `/api/admin/applications/:id/status` | Update status |
-| GET | `/api/admin/stats` | Statistics |
-| GET | `/api/admin/applications/:id/resume` | Download resume |
+| Method | Endpoint                             | Description                 |
+| ------ | ------------------------------------ | --------------------------- |
+| POST   | `/api/admin/login`                   | Admin login                 |
+| GET    | `/api/admin/applications`            | Paginated list with filters |
+| GET    | `/api/admin/applications/:id`        | Get application details     |
+| PATCH  | `/api/admin/applications/:id/status` | Update status               |
+| GET    | `/api/admin/stats`                   | Statistics                  |
+| GET    | `/api/admin/applications/:id/resume` | Download resume             |
 
 ## Email Templates
 
@@ -257,17 +263,18 @@ Located in `artifacts/api-server/src/services/emailService.ts`:
 
 ### Recommended Free Tier Stack
 
-| Service | Provider | Free Tier |
-|---------|----------|-----------|
-| Database | Supabase / Neon | 500MB / 0.5GB Postgres |
-| API Hosting | Render / Railway / Fly.io | 750 hrs/mo / $5 credit / 3 shared VMs |
-| Frontend | Vercel / Netlify / Cloudflare Pages | Unlimited personal |
-| Email | Resend | 3,000 emails/month |
-| Storage | Cloudflare R2 | 10 GB/month |
+| Service     | Provider                            | Free Tier                             |
+| ----------- | ----------------------------------- | ------------------------------------- |
+| Database    | Supabase / Neon                     | 500MB / 0.5GB Postgres                |
+| API Hosting | Render / Railway / Fly.io           | 750 hrs/mo / $5 credit / 3 shared VMs |
+| Frontend    | Vercel / Netlify / Cloudflare Pages | Unlimited personal                    |
+| Email       | Resend                              | 3,000 emails/month                    |
+| Storage     | Cloudflare R2                       | 10 GB/month                           |
 
 ### Environment Variables for Production
 
 Add to your hosting platform:
+
 - All variables from `.env` example
 - `NODE_ENV=production`
 - `FRONTEND_URL=https://yourdomain.com`
@@ -297,7 +304,7 @@ pnpm run db:push      # Push schema changes
 pnpm run db:studio    # Open Drizzle Studio
 
 # Frontend
-cd artifacts/bluepeak-systems
+cd artifacts/swiftjob-systems
 pnpm run dev          # Dev server
 pnpm run build        # Production build
 pnpm run serve        # Preview build

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 96" role="img" aria-labelledby="title desc">
+  <title id="title">SwiftJob mark</title>
+  <desc id="desc">A swift rising path representing people moving quickly into the right work.</desc>
+  <rect width="112" height="96" rx="16" fill="#10251d"/>
+  <path d="M17 70 38 31l13 23 12-17 27 33" fill="none" stroke="#d7edcf" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m63 39 22-7-7 21" fill="none" stroke="#9acb8f" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M20 77h18M74 77h18" fill="none" stroke="#9acb8f" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+  <circle cx="51" cy="65" r="6" fill="#9acb8f"/>
+</svg>

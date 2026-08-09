@@ -1,4 +1,4 @@
--- BluePeak Systems - referral system
+-- SwiftJob - referral system
 -- Adds tables for managing referrals (leads), editable referral page content,
 -- and admin settings for daily send limits.
 
@@ -38,7 +38,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Seed default page + email content (admin can edit these anytime).
 INSERT INTO referral_content (key, body) VALUES
   ('heroTitle', 'You''ve been referred'),
-  ('heroSubtitle', 'A private opportunity from BluePeak Systems'),
+  ('heroSubtitle', 'A private opportunity from SwiftJob'),
   ('intro', 'Hi {name}, you''ve been referred by someone on our team. We received your referral and you''ve been selected to review this opportunity. Please read through everything below, then take your next step.'),
   ('aboutRoleTitle', 'About the role'),
   ('aboutRoleBody', 'We run this role remotely and on your own schedule, from your own laptop. This is a {position} role.'),
@@ -56,7 +56,7 @@ INSERT INTO referral_content (key, body) VALUES
   ('securityNote', 'This invitation is private to you. Only use links shared through this page or in your invitation email.'),
   ('emailSubject', 'You''ve been referred for a {position} role'),
   ('emailGreeting', 'Hi {name},'),
-  ('emailBody', 'Someone from BluePeak Systems referred you, and we''d love for you to review this opportunity. We open a limited number of spots each week, and you''ve been selected to review this one.'),
+  ('emailBody', 'Someone from SwiftJob referred you, and we''d love for you to review this opportunity. We open a limited number of spots each week, and you''ve been selected to review this one.'),
   ('emailCtaLabel', 'Open my invitation'),
   ('emailClosing', 'We''ve put everything you need on the page below — the role, how it works, and what''s next. When you''re ready, just follow the steps inside.')
 ON CONFLICT (key) DO NOTHING;

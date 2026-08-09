@@ -1,4 +1,4 @@
--- BluePeak Systems - Neon database schema
+-- SwiftJob - Neon database schema
 -- Run this against your Neon database to create all tables.
 -- Compatible with the Drizzle schema in workers-api/src/schema.ts
 

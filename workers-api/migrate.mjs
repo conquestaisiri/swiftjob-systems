@@ -12,20 +12,29 @@ if (!DATABASE_URL) {
 }
 
 const fileArg = process.argv[2];
-const defaultFile = new URL("./migrations/001_init.sql", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1");
+const defaultFile = new URL(
+  "./migrations/001_init.sql",
+  import.meta.url,
+).pathname.replace(/^\/([A-Za-z]:)/, "$1");
 const file = fileArg ? resolve(fileArg) : defaultFile;
 
-const sql = readFileSync(file, "utf8");
+const sql = readFileSync(file, "utf8")
+  .split("\n")
+  .map((line) => line.trim())
+  .filter((line) => line.length > 0 && !line.startsWith("--"))
+  .join("\n");
 
 const sqlClient = neon(DATABASE_URL);
 const statements = sql
   .split(";")
   .map((s) => s.trim())
-  .map((s) => s
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0 && !line.startsWith("--"))
-    .join("\n"))
+  .map((s) =>
+    s
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && !line.startsWith("--"))
+      .join("\n"),
+  )
   .filter((s) => s.length > 0);
 
 console.log(`Running ${statements.length} statements from ${file}`);

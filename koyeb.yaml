@@ -2,7 +2,7 @@ version: 1
 services:
   - name: api
     git:
-      repository: https://github.com/conquestaisiri/bluepeak-systems
+      repository: https://github.com/conquestaisiri/swiftjob-systems
       branch: main
     build:
       type: dockerfile

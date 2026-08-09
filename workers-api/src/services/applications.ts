@@ -3,10 +3,20 @@ import { storageService } from "./storage";
 import { emailService } from "./email";
 import type { ApplicationStatus, CreateApplicationInput } from "../schema";
 
-type StoredApplication = Awaited<ReturnType<typeof applicationRepository.create>>;
+type StoredApplication = Awaited<
+  ReturnType<typeof applicationRepository.create>
+>;
 
 export const applicationService = {
-  async create(input: CreateApplicationInput, resumeFile?: { buffer: ArrayBuffer; originalname: string; mimetype: string; size: number }) {
+  async create(
+    input: CreateApplicationInput,
+    resumeFile?: {
+      buffer: ArrayBuffer;
+      originalname: string;
+      mimetype: string;
+      size: number;
+    },
+  ) {
     let resumePath: string | null = null;
     let resumeFilename: string | null = null;
 
@@ -45,7 +55,7 @@ export const applicationService = {
         expectedSalary: application.expectedSalary,
         earliestStartDate: application.earliestStartDate,
         skills: application.skills,
-      })
+      }),
     );
 
     await this.trySend("applicant confirmation", () =>
@@ -55,13 +65,13 @@ export const applicationService = {
         position: application.position,
         applicationId: application.id,
         referenceCode: application.referenceCode,
-      })
+      }),
     );
 
     if (!notification) {
       console.error(
         { applicationId: application.id },
-        "Application created but the HR notification email could not be delivered. Check Resend domain verification and HR_EMAIL."
+        "Application created but the HR notification email could not be delivered. Check Resend domain verification and HR_EMAIL.",
       );
     }
   },
@@ -95,15 +105,38 @@ export const applicationService = {
       meetLink?: string | null;
       interviewInstructions?: string | null;
       meetingKey?: string | null;
+      backgroundUrl?: string | null;
+      roomLink?: string | null;
+      nextStepDelay?: number | null;
       notifyCandidate?: boolean;
-    }
+    },
   ) {
     const application = await applicationRepository.findById(id);
     if (!application) return null;
 
-    const { notes, meetLink, interviewInstructions, meetingKey, notifyCandidate = true } = options ?? {};
+    const {
+      notes,
+      meetLink,
+      interviewInstructions,
+      meetingKey,
+      backgroundUrl,
+      roomLink,
+      nextStepDelay,
+      notifyCandidate = true,
+    } = options ?? {};
 
-    const updated = await applicationRepository.updateStatus(id, status, meetLink, interviewInstructions, meetingKey);
+    const updated = await applicationRepository.updateStatus(
+      id,
+      status,
+      meetLink,
+      interviewInstructions,
+      meetingKey,
+      {
+        backgroundUrl,
+        roomLink,
+        nextStepDelay,
+      },
+    );
     if (!updated) return null;
 
     if (notifyCandidate) {
@@ -116,9 +149,12 @@ export const applicationService = {
           applicationId: application.id,
           referenceCode: application.referenceCode,
           notes,
-          interviewInstructions: status === "Shortlisted" && interviewInstructions ? interviewInstructions : undefined,
+          interviewInstructions:
+            status === "Shortlisted" && interviewInstructions
+              ? interviewInstructions
+              : undefined,
           isShortlistUpdate: status === "Shortlisted",
-        })
+        }),
       );
     }
 

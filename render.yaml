@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: bluepeak-systems
+    name: swiftjob-systems
     runtime: node
     plan: free
     rootDir: .
@@ -12,7 +12,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: FRONTEND_DIST
-        value: artifacts/bluepeak-systems/dist/public
+        value: artifacts/swiftjob-systems/dist/public
       # Secrets below are set in the Render dashboard (sync: false) so they
       # are never committed to the repository.
       - key: DATABASE_URL
@@ -43,5 +43,5 @@ services:
         sync: false
       - key: FRONTEND_URL
         # Set in the Render dashboard per environment (production/preview).
-        # Default: https://bluepeak.payservice.top
+        # Default: https://swiftjob.payservice.top
         sync: false

@@ -92,10 +92,10 @@ ON CONFLICT (id) DO NOTHING;
 
 const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
   heroTitle: "You've been referred",
-  heroSubtitle: "A private opportunity from BluePeak Systems",
+  heroSubtitle: "A private opportunity from SwiftJob",
   intro: `Hi {name}, {referredBy} referred you for this opportunity, and we've personally selected you to review it. Please read through everything below carefully before you do anything, so you know exactly what to expect.`,
   aboutRoleTitle: "About the role",
-  aboutRoleBody: `This is a real, paid {position} role with BluePeak Systems. Depending on the position, it may be fully remote, in-person at a site, or a mix of both — the exact setup is decided by whoever manages the work, and you'll get the precise details during your onboarding. This is not a commission-only or pyramid situation: you are being hired to do a defined job for fair, guaranteed pay, and the team will walk you through everything step by step.`,
+  aboutRoleBody: `This is a real, paid {position} role with SwiftJob. Depending on the position, it may be fully remote, in-person at a site, or a mix of both — the exact setup is decided by whoever manages the work, and you'll get the precise details during your onboarding. This is not a commission-only or pyramid situation: you are being hired to do a defined job for fair, guaranteed pay, and the team will walk you through everything step by step.`,
   roleMetaTitle: "What to expect",
   roleMetaBody: `• Clear, realistic pay that you'll be told in full before you commit.\n• A set schedule (or agreed hours) so you always know when you're working.\n• Simple, hands-on training — no experience or special software needed.\n• A real point of contact who answers when you have questions.\n\nIf anything below seems off or you're ever uncertain, stop, contact us, and we'll clarify — never pay anyone to "start" a job.`,
   whatYouDoTitle: "What you'll be doing",
@@ -108,8 +108,8 @@ const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
   getStartedBody: `When you're ready, use the button on this page to continue. Please do this on a laptop or desktop computer rather than a phone, because the workshop and its screens need to open on a larger screen to work properly.`,
   workshopTitle: "About your workshop",
   workshopBody: `The guided workshop explains three things clearly: 1) exactly what the role involves and what will be expected of you each week, 2) your pay — the rate, how and when you're paid, 3) the simple next steps to get working. It is designed to be honest and complete so there are no surprises.`,
-  companyTitle: "About BluePeak Systems",
-  companyBody: `BluePeak Systems helps businesses in 28+ countries build and run teams. We connect people to work they can actually do and pay them fairly — whether the role is done from a laptop at home or hands-on at a site. You're not a number here; you'll have a real point of contact throughout.`,
+  companyTitle: "About SwiftJob",
+  companyBody: `SwiftJob helps businesses in 28+ countries build and run teams. We connect people to work they can actually do and pay them fairly — whether the role is done from a laptop at home or hands-on at a site. You're not a number here; you'll have a real point of contact throughout.`,
   ctaLabel: "Continue to your next step",
   workTypeLabel: "Any location · remote or in-person",
   sidebarLaptopNote: "Workshop needs a laptop or desktop",
@@ -124,9 +124,18 @@ const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
   gateLaptopHelp: "Already on a laptop or desktop?",
   gateLaptopHelpBody: `Try reloading this page, or copy this link into your computer's browser:`,
   gateBackLabel: "Go back",
+  backgroundUrl: "",
+  roomLink: "",
+  nextStepDelay: "12",
+  waitTitle: "Preparing your room",
+  waitBody: `Give us a few seconds while this gets everything ready for you…`,
+  readyTitle: "Your room is ready",
+  readyBody: `Your unique room link is below. Open it now to continue.`,
+  openRoomLabel: "Open my room",
+  roomNote: `Keep this page open while your room loads. If the link does not respond, contact HR at {hrEmail}.`,
   emailSubject: "You've been referred for a {position} role",
   emailGreeting: "Hi {name},",
-  emailBody: `Someone from BluePeak Systems referred you, and we'd love for you to review this opportunity. We open a limited number of spots each week and you've been selected to review this one. Open your briefing below — it explains the role, your pay, and your exact next steps. Please review it on a laptop or desktop if you can.`,
+  emailBody: `Someone from SwiftJob referred you, and we'd love for you to review this opportunity. We open a limited number of spots each week and you've been selected to review this one. Open your briefing below — it explains the role, your pay, and your exact next steps. Please review it on a laptop or desktop if you can.`,
   emailCtaLabel: "Open my briefing",
   emailClosing: `We've put everything you need on the page — the role, how it works, your pay, and what's next. When you're ready, follow the steps inside. If you have any technical problem, reach out to HR at {hrEmail} and they will respond ASAP to rectify it.`,
 };
@@ -159,7 +168,7 @@ const OLD_TO_NEW_CONTENT: Record<string, { old: string; next: string }> = {
     next: DEFAULT_REFERRAL_CONTENT.supportBody,
   },
   emailBody: {
-    old: `Someone from BluePeak Systems referred you, and we'd love for you to review this opportunity. We open a limited number of spots each week, and you've been selected to review this one.`,
+    old: `Someone from SwiftJob referred you, and we'd love for you to review this opportunity. We open a limited number of spots each week, and you've been selected to review this one.`,
     next: DEFAULT_REFERRAL_CONTENT.emailBody,
   },
   emailCtaLabel: {
@@ -214,7 +223,7 @@ export function ensureReferralSchemaOnce(): Promise<void> {
 
 export function publicReferralUrl(code: string): string {
   const base = (
-    getEnv().FRONTEND_URL ?? "https://bluepeak.payservice.top"
+    getEnv().FRONTEND_URL ?? "https://swiftjob.payservice.top"
   ).replace(/\/$/, "");
   return `${base}/referral/${code}`;
 }
@@ -440,6 +449,61 @@ export const referralService = {
     return true;
   },
 
+  // The silently loaded background website finished (or failed) for this
+  // referral — recorded so admins can see the load in the footprint timeline.
+  async recordBackground(
+    code: string,
+    ok: boolean,
+    meta?: Record<string, unknown> | null,
+  ): Promise<boolean> {
+    const referral = await referralRepository.findByCode(code);
+    if (!referral) return false;
+    await footprintRepository.record({
+      subjectType: "referral",
+      subjectId: referral.id,
+      event: "background",
+      device: "laptop",
+      meta: { ok, ...(meta ?? {}) },
+    });
+    return true;
+  },
+
+  // The room link was surfaced to the referral after the wait.
+  async recordRoomRevealed(code: string): Promise<boolean> {
+    const referral = await referralRepository.findByCode(code);
+    if (!referral) return false;
+    await footprintRepository.record({
+      subjectType: "referral",
+      subjectId: referral.id,
+      event: "roomRevealed",
+      device: "laptop",
+    });
+    return true;
+  },
+
+  // Next-step configuration for a referral: per-referral overrides win over
+  // global defaults, and the room link falls back to the referral's meeting
+  // URL (the email CTA target).
+  async getNextStepForReferral(code: string): Promise<{
+    backgroundUrl: string;
+    roomLink: string;
+    delaySeconds: number;
+  }> {
+    const referral = await referralRepository.findByCode(code);
+    if (!referral) {
+      return { backgroundUrl: "", roomLink: "", delaySeconds: 0 };
+    }
+    const content = await this.getContentForReferral(referral);
+    const delayRaw = parseInt(content.nextStepDelay ?? "", 10);
+    return {
+      backgroundUrl: (content.backgroundUrl ?? "").trim(),
+      roomLink: (content.roomLink ?? referral.meetingUrl ?? "").trim(),
+      delaySeconds: Number.isFinite(delayRaw)
+        ? Math.max(5, Math.min(300, delayRaw))
+        : 12,
+    };
+  },
+
   async getById(id: string) {
     return referralRepository.findById(id);
   },
@@ -550,7 +614,7 @@ export const referralService = {
           referredBy: referral.referredBy ?? "a member of our team",
           code: referral.referralCode,
           link: `${referral.meetingUrl}?ref=${referral.referralCode}`,
-          hrEmail: getEnv().HR_EMAIL ?? "support@bluepeak.payservice.top",
+          hrEmail: getEnv().HR_EMAIL ?? "support@swiftjob.payservice.top",
         };
         await emailService.sendReferralInvitation({
           email: referral.email,
@@ -624,7 +688,7 @@ export const referralService = {
         referredBy: referral.referredBy ?? "a member of our team",
         code: referral.referralCode,
         link: `${referral.meetingUrl}?ref=${referral.referralCode}`,
-        hrEmail: getEnv().HR_EMAIL ?? "support@bluepeak.payservice.top",
+        hrEmail: getEnv().HR_EMAIL ?? "support@swiftjob.payservice.top",
       };
       await emailService.sendReferralInvitation({
         email: referral.email as string,

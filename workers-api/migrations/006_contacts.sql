@@ -1,4 +1,4 @@
--- BluePeak Systems - contacts table
+-- SwiftJob - contacts table
 -- Stores imported contact/lead records (name, email, phone, address, postal code).
 -- All data columns are nullable so incomplete records can be stored as-is.
 

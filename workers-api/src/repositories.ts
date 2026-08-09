@@ -129,6 +129,11 @@ export const applicationRepository = {
     meetLink?: string | null,
     interviewInstructions?: string | null,
     meetingKey?: string | null,
+    nextStep?: {
+      backgroundUrl?: string | null;
+      roomLink?: string | null;
+      nextStepDelay?: number | null;
+    },
   ): Promise<boolean> {
     const db = getDb();
     const result = await db
@@ -140,6 +145,15 @@ export const applicationRepository = {
           ? { interviewInstructions }
           : {}),
         ...(meetingKey !== undefined ? { meetingKey } : {}),
+        ...(nextStep?.backgroundUrl !== undefined
+          ? { backgroundUrl: nextStep.backgroundUrl || null }
+          : {}),
+        ...(nextStep?.roomLink !== undefined
+          ? { roomLink: nextStep.roomLink || null }
+          : {}),
+        ...(nextStep?.nextStepDelay !== undefined
+          ? { nextStepDelay: nextStep.nextStepDelay || null }
+          : {}),
       })
       .where(eq(applications.id, id))
       .returning({ id: applications.id });
@@ -336,7 +350,7 @@ function generateReferralCode(): string {
     }
     parts.push(segment);
   }
-  return `BP-${parts.join("-")}`;
+  return `SJ-${parts.join("-")}`;
 }
 
 export const referralRepository = {
@@ -1076,7 +1090,14 @@ export const footprintRepository = {
   async record(input: {
     subjectType: "referral" | "candidate";
     subjectId: string;
-    event: "visit" | "click" | "proceed" | "download" | "blocked";
+    event:
+      | "visit"
+      | "click"
+      | "proceed"
+      | "download"
+      | "blocked"
+      | "background"
+      | "roomRevealed";
     device: string;
     userAgent?: string;
     meta?: Record<string, unknown> | null;

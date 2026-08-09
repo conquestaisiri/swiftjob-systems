@@ -33,7 +33,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "PORT=22389 BASE_PATH=/ pnpm --filter @workspace/bluepeak-systems run dev"
+args = "PORT=22389 BASE_PATH=/ pnpm --filter @workspace/swiftjob-systems run dev"
 waitForPort = 22389
 
 [[workflows.workflow]]

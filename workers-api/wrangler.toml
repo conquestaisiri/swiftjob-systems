@@ -1,12 +1,12 @@
-name = "bluepeak-workers-api"
+name = "swiftjob-workers-api"
 main = "src/index.ts"
 compatibility_date = "2024-08-01"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
 NODE_ENV = "production"
-FRONTEND_URL = "https://bluepeak.payservice.top"
+FRONTEND_URL = "https://swiftjob.payservice.top"
 
 [[r2_buckets]]
 binding = "R2_BUCKET"
-bucket_name = "bluepeaksystems"
+bucket_name = "swiftjobsystems"

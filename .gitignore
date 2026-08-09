@@ -61,8 +61,3 @@ Thumbs.db
 
 # nested zip-extraction leftover
 /Blue-peak-Systems-zip/
-
-# playwright mcp temp artifacts
-.playwright-mcp/
-# local preview screenshots
-/*.png

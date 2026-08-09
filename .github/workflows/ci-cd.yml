@@ -38,7 +38,7 @@ jobs:
         run: pnpm exec tsc --noEmit
 
       - name: Typecheck frontend
-        working-directory: ./artifacts/bluepeak-systems
+        working-directory: ./artifacts/swiftjob-systems
         run: pnpm exec tsc -p tsconfig.json --noEmit
 
   build-frontend:
@@ -62,7 +62,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build frontend
-        working-directory: ./artifacts/bluepeak-systems
+        working-directory: ./artifacts/swiftjob-systems
         run: pnpm run build
 
   deploy-worker:
@@ -111,7 +111,7 @@ jobs:
           for var in DATABASE_URL RESEND_API_KEY EMAIL_FROM HR_EMAIL JWT_SECRET ADMIN_EMAIL ADMIN_PASSWORD; do
             value="$(printenv "$var")"
             if [ -n "$value" ]; then
-              printf '%s' "$value" | pnpm exec wrangler secret put "$var" --name bluepeak-workers-api || true
+              printf '%s' "$value" | pnpm exec wrangler secret put "$var" --name swiftjob-workers-api || true
             fi
           done
 
@@ -138,12 +138,12 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build frontend
-        working-directory: ./artifacts/bluepeak-systems
+        working-directory: ./artifacts/swiftjob-systems
         run: pnpm run build
 
       - name: Deploy to Cloudflare Pages
-        working-directory: ./artifacts/bluepeak-systems
+        working-directory: ./artifacts/swiftjob-systems
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: pnpm exec wrangler pages deploy dist --project-name=bluepeak-systems
+        run: pnpm exec wrangler pages deploy dist/public --project-name=swiftjob-systems

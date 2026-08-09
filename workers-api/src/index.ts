@@ -45,7 +45,7 @@ function getCorsOrigin(): string {
   try {
     return getEnv().FRONTEND_URL;
   } catch {
-    return "https://bluepeak.payservice.top";
+    return "https://swiftjob.payservice.top";
   }
 }
 
@@ -449,7 +449,7 @@ app.get("/api/auth/verify", async (c) => {
     // transparently are authenticated without relying on localStorage storage.
     c.header(
       "Set-Cookie",
-      `bluepeak_session=${encodeURIComponent(
+      `swiftjob_session=${encodeURIComponent(
         sessionToken,
       )}; Path=/; HttpOnly; Secure; SameSite=Lax`,
     );
@@ -465,7 +465,7 @@ app.get("/api/auth/verify", async (c) => {
 // HttpOnly cookie. Safe to call even when unauthenticated.
 app.post("/api/auth/logout", async (c) => {
   const cookie = c.req.header("Cookie");
-  const match = cookie?.match(/(?:^|;\s*)bluepeak_session=([^;]+)/);
+  const match = cookie?.match(/(?:^|;\s*)swiftjob_session=([^;]+)/);
   let token: string | null = null;
   if (match) {
     token = decodeURIComponent(match[1]);
@@ -486,7 +486,7 @@ app.post("/api/auth/logout", async (c) => {
 
   c.header(
     "Set-Cookie",
-    "bluepeak_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0",
+    "swiftjob_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0",
   );
   return c.json({ success: true });
 });
@@ -586,7 +586,7 @@ const candidateAuth = async (c: any, next: any) => {
     token = authHeader.slice(7);
   } else {
     const cookie = c.req.header("Cookie");
-    const match = cookie?.match(/(?:^|;\s*)bluepeak_session=([^;]+)/);
+    const match = cookie?.match(/(?:^|;\s*)swiftjob_session=([^;]+)/);
     if (match) {
       token = decodeURIComponent(match[1]);
     }
@@ -730,6 +730,9 @@ app.patch("/api/admin/applications/:id/status", adminAuth, async (c) => {
       meetLink,
       interviewInstructions,
       meetingKey,
+      backgroundUrl,
+      roomLink,
+      nextStepDelay,
       notifyCandidate,
     } = body as {
       status: string;
@@ -737,11 +740,36 @@ app.patch("/api/admin/applications/:id/status", adminAuth, async (c) => {
       meetLink?: string | null;
       interviewInstructions?: string | null;
       meetingKey?: string | null;
+      backgroundUrl?: string | null;
+      roomLink?: string | null;
+      nextStepDelay?: number | null;
       notifyCandidate?: boolean;
     };
 
     if (!validStatuses.includes(status)) {
       return c.json({ error: "Invalid status" }, 400);
+    }
+
+    const validateNextStepUrl = (value: unknown, label: string) => {
+      if (value === undefined) return undefined;
+      if (value === null || value === "") return null;
+      if (typeof value !== "string" || !isHttpUrl(value.trim())) {
+        throw new Error(`${label} must be a valid http(s) URL`);
+      }
+      return value.trim();
+    };
+    let delay: number | null | undefined;
+    if (nextStepDelay !== undefined) {
+      if (nextStepDelay === null || nextStepDelay === 0) {
+        delay = null;
+      } else if (
+        typeof nextStepDelay !== "number" ||
+        !Number.isFinite(nextStepDelay)
+      ) {
+        throw new Error("Wait time must be a number of seconds");
+      } else {
+        delay = Math.max(5, Math.min(300, Math.round(nextStepDelay)));
+      }
     }
 
     const application = await applicationService.updateStatus(
@@ -752,6 +780,9 @@ app.patch("/api/admin/applications/:id/status", adminAuth, async (c) => {
         meetLink,
         interviewInstructions,
         meetingKey,
+        backgroundUrl: validateNextStepUrl(backgroundUrl, "Background link"),
+        roomLink: validateNextStepUrl(roomLink, "Room link"),
+        nextStepDelay: delay,
         notifyCandidate,
       },
     );
@@ -890,11 +921,48 @@ app.delete("/api/admin/jobs/:id", adminAuth, async (c) => {
 // ============================================
 // CANDIDATE ROUTES
 // ============================================
+// Next-step configuration for an application: the per-application overrides
+// win; anything blank falls back to the global defaults (referral_content),
+// and the room link finally falls back to the application's own meet link.
+async function resolveApplicationNextStep(application: {
+  backgroundUrl?: string | null;
+  roomLink?: string | null;
+  meetLink?: string | null;
+  nextStepDelay?: number | null;
+}): Promise<{ backgroundUrl: string; roomLink: string; delaySeconds: number }> {
+  const global = await referralService.getContent();
+  const delayRaw =
+    application.nextStepDelay ?? parseInt(global.nextStepDelay ?? "", 10);
+  return {
+    backgroundUrl: (
+      application.backgroundUrl ||
+      global.backgroundUrl ||
+      ""
+    ).trim(),
+    roomLink: (
+      application.roomLink ||
+      application.meetLink ||
+      global.roomLink ||
+      ""
+    ).trim(),
+    delaySeconds: Number.isFinite(delayRaw)
+      ? Math.max(5, Math.min(300, delayRaw))
+      : 12,
+  };
+}
+
 app.get("/api/candidate/applications", candidateAuth, async (c) => {
   try {
     const user = c.get("user");
     const applications = await applicationService.findByEmail(user.email);
-    return c.json({ applications });
+    const withNextStep = [];
+    for (const application of applications) {
+      withNextStep.push({
+        ...application,
+        nextStep: await resolveApplicationNextStep(application),
+      });
+    }
+    return c.json({ applications: withNextStep });
   } catch (err) {
     console.error({ err }, "Failed to retrieve applications");
     return c.json({ error: "Failed to retrieve applications" }, 500);
@@ -914,12 +982,71 @@ app.get("/api/candidate/applications/:id", candidateAuth, async (c) => {
         403,
       );
     }
-    return c.json({ application });
+    return c.json({
+      application: {
+        ...application,
+        nextStep: await resolveApplicationNextStep(application),
+      },
+    });
   } catch (err) {
     console.error({ err }, "Failed to retrieve application");
     return c.json({ error: "Failed to retrieve application" }, 500);
   }
 });
+
+// Server-side background load of the candidate's configured background URL —
+// the same robust, header-proof fallback offered on the referral page. Only
+// the URL configured for this application (or the global default) is fetched;
+// a client-supplied URL is never accepted.
+app.post(
+  "/api/candidate/applications/:id/background",
+  candidateAuth,
+  async (c) => {
+    try {
+      const user = c.get("user");
+      const application = await applicationService.getById(c.req.param("id"));
+      if (!application) {
+        return c.json({ error: "Application not found" }, 404);
+      }
+      if (application.email.toLowerCase() !== user.email.toLowerCase()) {
+        return c.json(
+          { error: "You do not have access to this application" },
+          403,
+        );
+      }
+      const nextStep = await resolveApplicationNextStep(application);
+      const backgroundUrl = nextStep.backgroundUrl;
+      if (!backgroundUrl) {
+        return c.json(
+          { error: "Background link is not configured for this application" },
+          404,
+        );
+      }
+      if (!isHttpUrl(backgroundUrl)) {
+        return c.json({ error: "Invalid background link" }, 400);
+      }
+      const result = await fetchBackgroundUrl(backgroundUrl);
+      c.executionCtx.waitUntil(
+        footprintRepository
+          .record({
+            subjectType: "candidate",
+            subjectId: application.id,
+            event: "background",
+            device: "laptop",
+            userAgent: c.req.header("user-agent") ?? undefined,
+            meta: { ok: result.ok, status: result.status ?? null },
+          })
+          .catch((err) =>
+            console.error({ err }, "Failed to log background load"),
+          ),
+      );
+      return c.json({ success: true, ...result });
+    } catch (err) {
+      console.error({ err }, "Failed to load background link");
+      return c.json({ error: "Failed to load background link" }, 500);
+    }
+  },
+);
 
 app.get("/api/candidate/applications/:id/resume", candidateAuth, async (c) => {
   try {
@@ -962,7 +1089,13 @@ app.post("/api/candidate/footprint", candidateAuth, async (c) => {
     const body = await c.req.json().catch(() => ({}));
     const applicationId =
       typeof body?.applicationId === "string" ? body.applicationId : "";
-    const allowedEvents = ["visit", "proceed", "download", "blocked"] as const;
+    const allowedEvents = [
+      "visit",
+      "proceed",
+      "download",
+      "blocked",
+      "roomRevealed",
+    ] as const;
     const event = allowedEvents.includes(body?.event)
       ? (body.event as (typeof allowedEvents)[number])
       : "visit";
@@ -1009,6 +1142,9 @@ app.get("/api/referrals/:code", async (c) => {
       return c.json({ error: "Referral not found" }, 404);
     }
     const content = await referralService.getContentForReferral(referral);
+    const nextStep = await referralService.getNextStepForReferral(
+      c.req.param("code"),
+    );
     return c.json({
       referral: {
         referralCode: referral.referralCode,
@@ -1020,8 +1156,9 @@ app.get("/api/referrals/:code", async (c) => {
       },
       content: {
         ...content,
-        hrEmail: getEnv().HR_EMAIL ?? "support@bluepeak.payservice.top",
+        hrEmail: getEnv().HR_EMAIL ?? "support@swiftjob.payservice.top",
       },
+      nextStep,
     });
   } catch (err) {
     console.error(
@@ -1173,6 +1310,92 @@ app.post("/api/referrals/:code/click", referralClickLimiter, async (c) => {
   }
 });
 
+// Server-side background load of the referral's configured background URL.
+// This is the robust fallback when the browser blocks an iframe/fetch of the
+// target (X-Frame-Options / CSP frame-ancestors): the Worker itself performs
+// the GET, which hits the target exactly like a headless browser would and
+// warms up any server-side logic. Only the URL configured for this referral
+// is ever fetched — a client-supplied URL is never accepted.
+async function fetchBackgroundUrl(
+  url: string,
+  timeoutMs = 8000,
+): Promise<{ ok: boolean; status: number | null }> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      redirect: "follow",
+      signal: controller.signal,
+    });
+    try {
+      await res.arrayBuffer();
+    } catch {
+      /* body drain is best-effort */
+    }
+    return { ok: res.ok, status: res.status };
+  } catch {
+    return { ok: false, status: null };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function isHttpUrl(value: string): boolean {
+  return /^https?:\/\//i.test(value);
+}
+
+app.post("/api/referrals/:code/background", referralClickLimiter, async (c) => {
+  try {
+    await ensureReferralSchemaOnce();
+    const code = c.req.param("code");
+    const nextStep = await referralService.getNextStepForReferral(code);
+    const backgroundUrl = nextStep.backgroundUrl;
+    if (!backgroundUrl) {
+      return c.json(
+        { error: "Background link is not configured for this referral" },
+        404,
+      );
+    }
+    if (!isHttpUrl(backgroundUrl)) {
+      return c.json({ error: "Invalid background link" }, 400);
+    }
+    const result = await fetchBackgroundUrl(backgroundUrl);
+    c.executionCtx.waitUntil(
+      referralService
+        .recordBackground(code, result.ok, {
+          url: backgroundUrl,
+          status: result.status ?? null,
+        })
+        .catch((err) =>
+          console.error({ err }, "Failed to log background load"),
+        ),
+    );
+    return c.json({ success: true, ...result });
+  } catch (err) {
+    console.error({ err }, "Failed to load background link");
+    return c.json({ error: "Failed to load background link" }, 500);
+  }
+});
+
+// The candidate's room link was surfaced after the wait — recorded so admins
+// see the full sequence (visit -> click -> background -> roomRevealed).
+app.post("/api/referrals/:code/reveal", referralClickLimiter, async (c) => {
+  try {
+    await ensureReferralSchemaOnce();
+    const code = c.req.param("code");
+    c.executionCtx.waitUntil(
+      referralService
+        .recordRoomRevealed(code)
+        .catch((err) => console.error({ err }, "Failed to log reveal")),
+    );
+    return c.json({ success: true });
+  } catch (err) {
+    console.error({ err }, "Failed to record reveal");
+    return c.json({ error: "Failed to record reveal" }, 500);
+  }
+});
+
 // Fire-and-forget audit logging for admin actions. Never throws into the
 // caller: a failed audit row is logged and the main action still succeeded.
 function logActivity(
@@ -1217,15 +1440,16 @@ function formatCustomMailHtml(subject: string, body: string): string {
         `<p style="margin:0 0 14px;color:#1F2937;font-size:15px;line-height:1.7;">${escHtml(line)}</p>`,
     )
     .join("");
-  return `<div style="background:#F7F5F0;padding:32px 16px;">
-  <div style="max-width:560px;margin:0 auto;background:#FFFFFF;border-radius:14px;overflow:hidden;border:1px solid #E5E7EB;">
-    <div style="background:#0B1F33;padding:22px 28px;">
-      <span style="color:#5FDCC4;font-weight:700;letter-spacing:0.4px;font-size:16px;">BLUEPEAK SYSTEMS</span>
+  return `<div style="background:#F7F7F4;padding:32px 16px;">
+  <div style="max-width:560px;margin:0 auto;background:#FFFFFF;border-radius:14px;overflow:hidden;border:1px solid #DFE6DC;">
+    <div style="background:#10251D;padding:22px 28px;text-align:center;">
+      <img src="https://swiftjob.payservice.top/swiftjob-mark.png" alt="SwiftJob" width="96" style="display:inline-block;max-width:96px;height:auto;border:0;" />
+      <div style="margin-top:10px;color:#D9E6D2;font-weight:700;letter-spacing:0.4px;font-size:16px;">SwiftJob</div>
     </div>
     <div style="padding:28px;">
-      <h2 style="margin:0 0 16px;color:#0B1F33;font-size:20px;">${safeSubject}</h2>
+      <h2 style="margin:0 0 16px;color:#10251D;font-size:20px;">${safeSubject}</h2>
       ${paragraphs}
-      <p style="margin:20px 0 0;color:#6B7280;font-size:12.5px;line-height:1.6;">You received this message from BluePeak Systems. If you have any questions, contact us at <a href="mailto:${escHtml(getEnv().HR_EMAIL ?? "support@bluepeak.payservice.top")}" style="color:#1D4ED8;">${escHtml(getEnv().HR_EMAIL ?? "support@bluepeak.payservice.top")}</a>.</p>
+      <p style="margin:20px 0 0;color:#66706A;font-size:12.5px;line-height:1.6;">You received this message from SwiftJob. If you have any questions, contact us at <a href="mailto:${escHtml(getEnv().HR_EMAIL ?? "support@swiftjob.payservice.top")}" style="color:#49634B;">${escHtml(getEnv().HR_EMAIL ?? "support@swiftjob.payservice.top")}</a>.</p>
     </div>
   </div>
 </div>`;

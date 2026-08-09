@@ -9,7 +9,7 @@
 DATABASE_URL=postgres://user:pass@host/db
 # RESEND_API_KEY               Email provider (Resend) API key
 RESEND_API_KEY=
-# EMAIL_FROM                   Verified sender, e.g. "BluePeak HR <no-reply@bluepeak.payservice.top>"
+# EMAIL_FROM                   Verified sender, e.g. "SwiftJob HR <no-reply@swiftjob.payservice.top>"
 EMAIL_FROM=
 # HR_EMAIL                     Where HR/notification emails are sent
 HR_EMAIL=

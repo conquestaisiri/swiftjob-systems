@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "SwiftJob"
+version = "1.0.0"
+id = "artifacts/swiftjob-systems"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22389
+
+[services.development]
+run = "pnpm --filter @workspace/swiftjob-systems run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/swiftjob-systems", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/swiftjob-systems/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22389"
+BASE_PATH = "/"

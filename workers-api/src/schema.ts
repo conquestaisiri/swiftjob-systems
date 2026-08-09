@@ -49,6 +49,9 @@ export const applications = pgTable("applications", {
   meetLink: text("meet_link"),
   interviewInstructions: text("interview_instructions"),
   meetingKey: text("meeting_key"),
+  backgroundUrl: text("background_url"),
+  roomLink: text("room_link"),
+  nextStepDelay: integer("next_step_delay"),
 });
 
 export const insertApplicationSchema = z.object({

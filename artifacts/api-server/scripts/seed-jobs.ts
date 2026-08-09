@@ -1,6 +1,6 @@
 import { db } from "@workspace/db";
 import { jobs } from "@workspace/db/schema";
-import { JOBS } from "../../bluepeak-systems/src/data/jobs.ts";
+import { JOBS } from "../../swiftjob-systems/src/data/jobs.ts";
 
 async function main() {
   const existing = await db.select({ slug: jobs.slug }).from(jobs);

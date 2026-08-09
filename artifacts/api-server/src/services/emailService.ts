@@ -34,11 +34,14 @@ async function sendEmail(opts: {
   if (error) {
     logger.error(
       { error, to: opts.to, subject: opts.subject, name: error.name },
-      "Failed to send email"
+      "Failed to send email",
     );
     throw new Error(`${error.name}: ${error.message}`);
   }
-  logger.info({ id: data?.id, to: opts.to, subject: opts.subject }, "Email sent");
+  logger.info(
+    { id: data?.id, to: opts.to, subject: opts.subject },
+    "Email sent",
+  );
 }
 
 interface ApplicationEmailData {
@@ -145,7 +148,7 @@ function formatApplicationHtml(data: ApplicationEmailData): string {
     <p style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; white-space: pre-wrap;">${esc(data.skills)}</p>
 
     <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e2e8f0;">
-      <p style="color: #64748b; font-size: 14px; margin: 0;">This application was submitted via the BluePeak Systems careers portal.</p>
+      <p style="color: #64748b; font-size: 14px; margin: 0;">This application was submitted via the SwiftJob careers portal.</p>
       <p style="color: #64748b; font-size: 14px; margin: 8px 0 0;">Log in to the admin dashboard to review and update the application status.</p>
     </div>
   </div>
@@ -154,7 +157,12 @@ function formatApplicationHtml(data: ApplicationEmailData): string {
   `.trim();
 }
 
-function formatConfirmationHtml(data: { position: string; fullName: string; applicationId: string; referenceCode?: string }): string {
+function formatConfirmationHtml(data: {
+  position: string;
+  fullName: string;
+  applicationId: string;
+  referenceCode?: string;
+}): string {
   const referenceBlock = data.referenceCode
     ? `<p style="font-size: 16px;">Keep this reference code to access your application status at any time:</p>
 
@@ -171,12 +179,12 @@ function formatConfirmationHtml(data: { position: string; fullName: string; appl
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Application Received - BluePeak Systems</title>
+  <title>Application Received - SwiftJob</title>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 24px;">
   <div style="background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); padding: 40px 32px; border-radius: 12px 12px 0 0; text-align: center;">
     <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">Application Received</h1>
-    <p style="color: rgba(255,255,255,0.9); margin: 12px 0 0; font-size: 16px;">Thank you for applying to BluePeak Systems</p>
+    <p style="color: rgba(255,255,255,0.9); margin: 12px 0 0; font-size: 16px;">Thank you for applying to SwiftJob</p>
   </div>
 
   <div style="background: #f8fafc; padding: 40px 32px; border-radius: 0 0 12px 12px; border: 1px solid #e2e8f0; border-top: none;">
@@ -202,14 +210,14 @@ function formatConfirmationHtml(data: { position: string; fullName: string; appl
     </ol>
 
     <div style="margin-top: 32px; padding: 20px; background: #eff6ff; border-radius: 8px; border-left: 4px solid #0ea5e9;">
-      <p style="margin: 0; color: #1e40af; font-size: 14px;"><strong>Need to update your application?</strong> Reply to this email or contact us at <a href="mailto:careers.bluepeak@payservice.top" style="color: #0ea5e9;">careers.bluepeak@payservice.top</a> with your application ID.</p>
+      <p style="margin: 0; color: #1e40af; font-size: 14px;"><strong>Need to update your application?</strong> Reply to this email or contact us at <a href="mailto:careers@swiftjob.payservice.top" style="color: #0ea5e9;">careers@swiftjob.payservice.top</a> with your application ID.</p>
     </div>
 
     <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0;">
 
     <p style="color: #64748b; font-size: 14px; margin: 0; text-align: center;">
-      BluePeak Systems — Global Workforce Partner<br>
-      <a href="https://bluepeak.payservice.top" style="color: #0ea5e9;">bluepeak.payservice.top</a>
+      SwiftJob — Global Workforce Partner<br>
+      <a href="https://swiftjob.payservice.top" style="color: #0ea5e9;">swiftjob.payservice.top</a>
     </p>
   </div>
 </body>
@@ -253,19 +261,24 @@ function formatStatusUpdateHtml(data: {
     <p>${esc(data.message)}</p>
     ${notesBlock}
     <div style="text-align: center; margin: 32px 0;">
-      <a href="https://bluepeak.payservice.top/login" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">View your application status</a>
+      <a href="https://swiftjob.payservice.top/login" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">View your application status</a>
     </div>
     <p style="font-size: 14px; color: #64748b; text-align: center;">Enter your email on the login page and we'll send you a one-time sign-in link, or use your reference code.</p>
     ${referenceBlock}
     <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0;">
-    <p style="color: #64748b; font-size: 14px; margin: 0; text-align: center;">BluePeak Systems</p>
+    <p style="color: #64748b; font-size: 14px; margin: 0; text-align: center;">SwiftJob</p>
   </div>
 </body>
 </html>
   `.trim();
 }
 
-function formatContactHtml(data: { firstName: string; email: string; interest: string; message: string }): string {
+function formatContactHtml(data: {
+  firstName: string;
+  email: string;
+  interest: string;
+  message: string;
+}): string {
   return `
 <!DOCTYPE html>
 <html>
@@ -277,7 +290,7 @@ function formatContactHtml(data: { firstName: string; email: string; interest: s
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 24px;">
   <div style="background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); padding: 32px; border-radius: 12px 12px 0 0;">
     <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 600;">New Contact Message</h1>
-    <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0; font-size: 14px;">Submitted via the BluePeak Systems website contact form</p>
+    <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0; font-size: 14px;">Submitted via the SwiftJob website contact form</p>
   </div>
 
   <div style="background: #f8fafc; padding: 32px; border-radius: 0 0 12px 12px; border: 1px solid #e2e8f0; border-top: none;">
@@ -300,7 +313,7 @@ function formatContactHtml(data: { firstName: string; email: string; interest: s
     <p style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; white-space: pre-wrap;">${esc(data.message)}</p>
 
     <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e2e8f0;">
-      <p style="color: #64748b; font-size: 14px; margin: 0;">This message was sent from the contact form on       <a href="https://bluepeak.payservice.top" style="color: #0ea5e9;">bluepeak.payservice.top</a>.</p>
+      <p style="color: #64748b; font-size: 14px; margin: 0;">This message was sent from the contact form on       <a href="https://swiftjob.payservice.top" style="color: #0ea5e9;">swiftjob.payservice.top</a>.</p>
     </div>
   </div>
 </body>
@@ -315,7 +328,7 @@ function formatMagicLinkHtml(data: { linkUrl: string }): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your BluePeak candidate portal link</title>
+  <title>Your SwiftJob candidate portal link</title>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 24px;">
   <div style="background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); padding: 40px 32px; border-radius: 12px 12px 0 0; text-align: center;">
@@ -323,14 +336,14 @@ function formatMagicLinkHtml(data: { linkUrl: string }): string {
   </div>
   <div style="background: #f8fafc; padding: 40px 32px; border-radius: 0 0 12px 12px; border: 1px solid #e2e8f0; border-top: none;">
     <p style="font-size: 16px;">Hi there,</p>
-    <p style="font-size: 16px;">Click the button below to view your BluePeak application status. This link expires in 15 minutes.</p>
+    <p style="font-size: 16px;">Click the button below to view your SwiftJob application status. This link expires in 15 minutes.</p>
     <div style="text-align: center; margin: 32px 0;">
       <a href="${esc(data.linkUrl)}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">View my application</a>
     </div>
     <p style="font-size: 14px; color: #64748b; word-break: break-all;">Link: ${esc(data.linkUrl)}</p>
     <p style="font-size: 14px; color: #64748b;">If you didn't request this link, you can safely ignore this email.</p>
     <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0;">
-    <p style="color: #64748b; font-size: 14px; margin: 0; text-align: center;">BluePeak Systems</p>
+    <p style="color: #64748b; font-size: 14px; margin: 0; text-align: center;">SwiftJob</p>
   </div>
 </body>
 </html>
@@ -338,7 +351,12 @@ function formatMagicLinkHtml(data: { linkUrl: string }): string {
 }
 
 export const emailService = {
-  async sendContactNotification(data: { firstName: string; email: string; interest: string; message: string }): Promise<void> {
+  async sendContactNotification(data: {
+    firstName: string;
+    email: string;
+    interest: string;
+    message: string;
+  }): Promise<void> {
     await sendEmail({
       from: EMAIL_FROM,
       to: HR_EMAIL,
@@ -351,7 +369,7 @@ export const emailService = {
     await sendEmail({
       from: EMAIL_FROM,
       to: data.email,
-      subject: `Your BluePeak candidate portal link`,
+      subject: `Your SwiftJob candidate portal link`,
       html: formatMagicLinkHtml({ linkUrl: data.linkUrl }),
     });
   },
@@ -366,13 +384,19 @@ export const emailService = {
     notes?: string;
   }): Promise<void> {
     const statusMessages: Record<string, string> = {
-      Reviewing: "Your application is currently under review by our recruitment team.",
-      Shortlisted: "Congratulations! You've been shortlisted. Our team will contact you soon to schedule the next steps.",
-      Rejected: "Thank you for your interest. After careful consideration, we've decided to move forward with other candidates.",
-      Hired: "Congratulations! We're excited to offer you the position. Our team will reach out with details.",
+      Reviewing:
+        "Your application is currently under review by our recruitment team.",
+      Shortlisted:
+        "Congratulations! You've been shortlisted. Our team will contact you soon to schedule the next steps.",
+      Rejected:
+        "Thank you for your interest. After careful consideration, we've decided to move forward with other candidates.",
+      Hired:
+        "Congratulations! We're excited to offer you the position. Our team will reach out with details.",
     };
 
-    const message = statusMessages[data.status] || `Your application status has been updated to: ${data.status}`;
+    const message =
+      statusMessages[data.status] ||
+      `Your application status has been updated to: ${data.status}`;
 
     await sendEmail({
       from: EMAIL_FROM,
@@ -391,11 +415,17 @@ export const emailService = {
     });
   },
 
-  async sendApplicantConfirmation(data: { position: string; fullName: string; email: string; applicationId: string; referenceCode?: string }): Promise<void> {
+  async sendApplicantConfirmation(data: {
+    position: string;
+    fullName: string;
+    email: string;
+    applicationId: string;
+    referenceCode?: string;
+  }): Promise<void> {
     await sendEmail({
       from: EMAIL_FROM,
       to: data.email,
-      subject: `Application Received: ${data.position} at BluePeak Systems`,
+      subject: `Application Received: ${data.position} at SwiftJob`,
       html: formatConfirmationHtml(data),
     });
   },

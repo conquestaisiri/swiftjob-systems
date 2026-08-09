@@ -1,35 +1,35 @@
-﻿import { Resend } from "resend";
+import { Resend } from "resend";
 import { getEnv } from "../config";
 
 // ============================================
 // Brand & shared email layout
 // ============================================
 const BRAND = {
-  navy: "#0B1F33",
-  navyDeep: "#081526",
-  teal: "#0E8372",
-  tealLight: "#E4F4F1",
-  mint: "#5FDCC4",
-  paper: "#F7F5F0",
-  paperDark: "#EFEDE6",
-  text: "#1F2937",
-  muted: "#6B7280",
-  border: "#E5E7EB",
+  navy: "#10251D",
+  navyDeep: "#0B1A14",
+  teal: "#49634B",
+  tealLight: "#E8EFE4",
+  mint: "#D9E6D2",
+  paper: "#F7F7F4",
+  paperDark: "#EEF2EB",
+  text: "#253029",
+  muted: "#66706A",
+  border: "#DFE6DC",
   white: "#FFFFFF",
   amber: "#B45309",
   amberBg: "#FEF3C7",
-  green: "#0F766E",
-  greenBg: "#ECFDF5",
+  green: "#49634B",
+  greenBg: "#EEF5EB",
   red: "#B91C1C",
   redBg: "#FEE2E2",
-  blue: "#1D4ED8",
-  blueBg: "#DBEAFE",
-  purple: "#6D28D9",
-  purpleBg: "#EDE9FE",
+  blue: "#49634B",
+  blueBg: "#E8EFE4",
+  purple: "#49634B",
+  purpleBg: "#E8EFE4",
 };
 
-const LOGO_URL = "https://bluepeak.payservice.top/logo.png";
-const FALLBACK_BASE_URL = "https://bluepeak.payservice.top";
+const LOGO_URL = "https://swiftjob.payservice.top/swiftjob-mark.png";
+const FALLBACK_BASE_URL = "https://swiftjob.payservice.top";
 
 function getBaseUrl(): string {
   const url = (getEnv().FRONTEND_URL ?? "").trim().replace(/\/$/, "");
@@ -147,7 +147,7 @@ function layout(opts: LayoutOptions): string {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; background:${BRAND.white}; border-radius: 14px; overflow: hidden; border: 1px solid ${BRAND.border};">
           <tr>
             <td style="background:${BRAND.paperDark}; padding: 20px 32px; text-align: center; border-bottom: 3px solid ${BRAND.teal};">
-              <img src="${LOGO_URL}" alt="BluePeak Systems" width="120" style="max-width: 120px; height: auto; border: 0; display: inline-block;" />
+              <img src="${LOGO_URL}" alt="SwiftJob" width="112" style="max-width: 112px; height: auto; border: 0; display: inline-block;" />
             </td>
           </tr>
           <tr>
@@ -163,9 +163,9 @@ function layout(opts: LayoutOptions): string {
           </tr>
           <tr>
             <td style="background:${BRAND.navy}; padding: 24px 32px; text-align: center;">
-              <p style="margin: 0 0 4px; color: ${BRAND.white}; font-size: 14px; font-weight: 600;">BluePeak Systems</p>
+              <p style="margin: 0 0 4px; color: ${BRAND.white}; font-size: 14px; font-weight: 600;">SwiftJob</p>
               <p style="margin: 0 0 12px; color: ${BRAND.mint}; font-size: 12px;">Talent for any role — remote or on-site</p>
-              <a href="${getBaseUrl()}" style="color: ${BRAND.mint}; font-size: 12px; text-decoration: underline;">bluepeak.payservice.top</a>
+              <a href="${getBaseUrl()}" style="color: ${BRAND.mint}; font-size: 12px; text-decoration: underline;">SwiftJob website</a>
             </td>
           </tr>
         </table>
@@ -228,8 +228,8 @@ function footerNote(): string {
   return `
     <hr style="border: none; border-top: 1px solid ${BRAND.border}; margin: 28px 0;">
     <p style="color: ${BRAND.muted}; font-size: 12px; margin: 0; text-align: center;">
-      This is an automated message from BluePeak Systems. You're receiving it because you either applied for a role or requested a sign-in link.<br>
-      Questions? Reply to this email or write to <a href="mailto:careers.bluepeak@payservice.top" style="color: ${BRAND.teal};">careers.bluepeak@payservice.top</a>.
+      This is an automated message from SwiftJob. You're receiving it because you either applied for a role or requested a sign-in link.<br>
+      Questions? Reply to this email or write to <a href="mailto:careers@swiftjob.payservice.top" style="color: ${BRAND.teal};">careers@swiftjob.payservice.top</a>.
     </p>`;
 }
 
@@ -358,7 +358,7 @@ function formatApplicationHtml(data: ApplicationEmailData): string {
     ]);
 
   const content = `
-    <p style="margin: 0 0 8px; font-size: 15px;">A new application has been submitted through the BluePeak careers portal.</p>
+    <p style="margin: 0 0 8px; font-size: 15px;">A new application has been submitted through the SwiftJob careers portal.</p>
 
     ${callout("info", "Position", `<strong style="font-size: 15px;">${esc(data.position)}</strong>`)}
     ${infoTable(rows)}
@@ -404,7 +404,7 @@ function formatConfirmationHtml(data: {
 
   const content = `
     <p style="margin: 0 0 12px; font-size: 15px;">Hi <strong>${esc(data.fullName)}</strong>,</p>
-    <p style="margin: 0 0 12px; font-size: 15px;">Thank you for applying to the <strong>${esc(data.position)}</strong> position at BluePeak Systems. We've received your application successfully.</p>
+    <p style="margin: 0 0 12px; font-size: 15px;">Thank you for applying to the <strong>${esc(data.position)}</strong> position at SwiftJob. We've received your application successfully.</p>
 
     ${sectionTitle("Your application")}
     ${infoTable([
@@ -448,7 +448,7 @@ function formatConfirmationHtml(data: {
   return layout({
     preheader: `We've received your application for ${data.position}`,
     headerTitle: "Application Received",
-    headerSubtitle: "Thank you for applying to BluePeak Systems",
+    headerSubtitle: "Thank you for applying to SwiftJob",
     content,
   });
 }
@@ -493,7 +493,7 @@ const STATUS_DETAILS: Record<string, StatusDetail> = {
     color: "#0F766E",
     message: "Congratulations — we're delighted to offer you the position!",
     meaning:
-      "You're now part of the BluePeak Systems team. We're excited to have you onboard.",
+      "You're now part of the SwiftJob team. We're excited to have you onboard.",
     nextSteps:
       "Our team will reach out shortly with your offer details, start date, and onboarding steps. Watch your inbox and be ready to provide any requested documents.",
   },
@@ -545,7 +545,7 @@ function formatStatusUpdateHtml(data: {
         "warning",
         "Stay safe — official communication only",
         `
-        BluePeak Systems will <strong>only</strong> ever contact you from official BluePeak email addresses and through your secure candidate portal. We will never ask you for money, payment, or sensitive personal information. If you receive anything suspicious, do not click links — just ignore it.
+        SwiftJob will <strong>only</strong> ever contact you from official SwiftJob email addresses and through your secure candidate portal. We will never ask you for money, payment, or sensitive personal information. If you receive anything suspicious, do not click links — just ignore it.
       `,
       )
     : "";
@@ -594,7 +594,7 @@ function formatContactHtml(data: {
   message: string;
 }): string {
   const content = `
-    <p style="margin: 0 0 12px; font-size: 15px;">A new message was submitted through the contact form on the BluePeak website.</p>
+    <p style="margin: 0 0 12px; font-size: 15px;">A new message was submitted through the contact form on the SwiftJob website.</p>
 
     ${infoTable([
       ["Name", esc(data.firstName)],
@@ -620,7 +620,7 @@ function formatContactHtml(data: {
   return layout({
     preheader: `New contact message from ${data.firstName}`,
     headerTitle: "New Contact Message",
-    headerSubtitle: "Submitted via the BluePeak website",
+    headerSubtitle: "Submitted via the SwiftJob website",
     content,
   });
 }
@@ -637,7 +637,7 @@ function formatMagicLinkHtml(data: {
     : "Hi there,";
   const content = `
     <p style="margin: 0 0 12px; font-size: 15px;">${greeting}</p>
-    <p style="margin: 0 0 12px; font-size: 15px;">You requested a secure sign-in link for your BluePeak candidate portal. Click the button below to sign in and view your applications.</p>
+    <p style="margin: 0 0 12px; font-size: 15px;">You requested a secure sign-in link for your SwiftJob candidate portal. Click the button below to sign in and view your applications.</p>
 
     ${primaryButton(data.linkUrl, "Sign in to my portal")}
 
@@ -664,9 +664,9 @@ function formatMagicLinkHtml(data: {
   `;
 
   return layout({
-    preheader: "Your secure sign-in link for the BluePeak candidate portal",
+    preheader: "Your secure sign-in link for the SwiftJob candidate portal",
     headerTitle: "Your Sign-In Link",
-    headerSubtitle: "BluePeak candidate portal",
+    headerSubtitle: "SwiftJob candidate portal",
     content,
   });
 }
@@ -699,12 +699,12 @@ function formatReferralInvitationHtml(data: {
 
     <hr style="border: none; border-top: 1px solid ${BRAND.border}; margin: 24px 0;">
     <p style="font-size: 13px; color: ${BRAND.muted}; margin: 0;">
-      This briefing is private to you. If you have any questions or run into any technical problem, contact <a href="mailto:${getHrEmail() || "support@bluepeak.payservice.top"}" style="color: ${BRAND.teal};">${getHrEmail() || "support@bluepeak.payservice.top"}</a> and they will respond ASAP to rectify it.
+      This briefing is private to you. If you have any questions or run into any technical problem, contact <a href="mailto:${getHrEmail() || "support@swiftjob.payservice.top"}" style="color: ${BRAND.teal};">${getHrEmail() || "support@swiftjob.payservice.top"}</a> and they will respond ASAP to rectify it.
     </p>
   `;
 
   return layout({
-    preheader: `Your referral briefing from BluePeak Systems`,
+    preheader: `Your referral briefing from SwiftJob`,
     headerTitle: "You''ve been referred",
     headerSubtitle: data.position,
     content,
@@ -747,7 +747,7 @@ export const emailService = {
     await sendEmail({
       from: getFromAddress(),
       to: data.email,
-      subject: `Sign in to your BluePeak candidate portal`,
+      subject: `Sign in to your SwiftJob candidate portal`,
       html: formatMagicLinkHtml({
         linkUrl: data.linkUrl,
         fullName: data.fullName,
@@ -798,7 +798,7 @@ export const emailService = {
     await sendEmail({
       from: getFromAddress(),
       to: data.email,
-      subject: `Application Received: ${data.position} at BluePeak Systems`,
+      subject: `Application Received: ${data.position} at SwiftJob`,
       html: formatConfirmationHtml(data),
     });
   },

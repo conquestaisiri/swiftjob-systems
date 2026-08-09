@@ -1,4 +1,4 @@
--- BluePeak Systems - referral system schema drift fix
+-- SwiftJob - referral system schema drift fix
 -- Brings the referrals table up to date with the Drizzle schema in
 -- workers-api/src/schema.ts and adds the referral_clicks table that was
 -- previously only created at runtime. This makes fresh deployments from
