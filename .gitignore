@@ -70,5 +70,7 @@ Thumbs.db
 .playwright-mcp/
 artifacts/swiftjob-systems/public/_worker.js
 
-# Foreign nested repo snapshot — kept on disk, not tracked
+# Foreign nested repo snapshot / local archives - kept on disk, not tracked
 extracted/
+*.zip
+test-email.json
