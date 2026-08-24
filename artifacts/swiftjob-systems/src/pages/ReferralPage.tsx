@@ -456,7 +456,7 @@ export function ReferralPage() {
                     <Briefcase size={13} />
                     <span>
                       {content.workTypeLabel ||
-                        "Any location · remote or in-person"}
+                        "100% remote · work from anywhere"}
                     </span>
                   </div>
                   <div>

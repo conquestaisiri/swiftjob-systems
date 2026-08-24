@@ -460,17 +460,18 @@ export function JobPage() {
               <section className="job-section">
                 <h2>About SwiftJob</h2>
                 <p>
-                  SwiftJob is a workforce partner. We find and vet people for
-                  desk jobs, remote roles, and hands-on on-site work, then
-                  manage the employment side—contracts, payroll, compliance, and
-                  ongoing support—so our clients can focus on the work.
+                  SwiftJob is a remote-first staffing and BPO partner. We find
+                  and vet professionals for support, admin, technical, and
+                  back-office roles, then manage the employment side—contracts,
+                  payroll, compliance, and ongoing support—so our clients can
+                  focus on the work.
                 </p>
                 <p>
-                  We build teams across {countriesDisplay}+ countries and serve
-                  businesses in technology, financial services, e-commerce,
-                  healthcare, logistics, retail, and more. When you work with
-                  us, we aim to be a partner for the long term—not just a
-                  one-off placement.
+                  We build remote teams across {countriesDisplay}+ countries and
+                  serve businesses in technology, financial services,
+                  e-commerce, healthcare, logistics, retail, and more. When you
+                  work with us, we aim to be a partner for the long term—not
+                  just a one-off placement.
                 </p>
               </section>
 

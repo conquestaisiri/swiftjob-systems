@@ -95,11 +95,11 @@ const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
   heroSubtitle: "A private opportunity from SwiftJob",
   intro: `Hi {name}, {referredBy} referred you for this opportunity, and we've personally selected you to review it. Please read through everything below carefully before you do anything, so you know exactly what to expect.`,
   aboutRoleTitle: "About the role",
-  aboutRoleBody: `This is a real, paid {position} role with SwiftJob. Depending on the position, it may be fully remote, in-person at a site, or a mix of both - the exact setup is decided by whoever manages the work, and you'll get the precise details during your onboarding. This is not a commission-only or pyramid situation: you are being hired to do a defined job for fair, guaranteed pay, and the team will walk you through everything step by step.`,
+  aboutRoleBody: `This is a real, paid {position} role with SwiftJob, and it is fully remote. You will work from your own laptop, on a schedule agreed during onboarding, with a team that supports you day to day. This is not a commission-only or pyramid situation: you are being hired to do a defined job for fair, guaranteed pay, and the team will walk you through everything step by step.`,
   roleMetaTitle: "What to expect",
   roleMetaBody: `• Clear, realistic pay that you'll be told in full before you commit.\n• A set schedule (or agreed hours) so you always know when you're working.\n• Simple, hands-on training — no experience or special software needed.\n• A real point of contact who answers when you have questions.\n\nIf anything below seems off or you're ever uncertain, stop, contact us, and we'll clarify — never pay anyone to "start" a job.`,
   whatYouDoTitle: "What you'll be doing",
-  whatYouDoBody: `You'll join a small team handling the day-to-day work for this role. Some roles are done on a laptop (support, admin, marketing, finance); others are hands-on at a location (packing, cleaning, retail, facilities, field work). Either way you'll get full training and support - you don't need to bring any special software, tools, or experience to get started.`,
+  whatYouDoBody: `You'll join a small remote team handling the day-to-day work for this role — things like customer support, admin, data, marketing, or finance, depending on the position. Everything is done on your laptop from wherever you work best. You'll get full training and support - you don't need to bring any special software, tools, or experience to get started.`,
   payTitle: "Pay & earnings",
   payBody: `Pay is clear, agreed in advance, and predictable. You'll be given your exact rate, how and how often you get paid, and what to do if you have trouble receiving a payment during your onboarding. We do not ask for payments, fees, or "hold" money at any point.`,
   howWorksTitle: "How it works",
@@ -109,9 +109,9 @@ const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
   workshopTitle: "About your workshop",
   workshopBody: `The guided workshop explains three things clearly: 1) exactly what the role involves and what will be expected of you each week, 2) your pay - the rate, how and when you're paid, 3) the simple next steps to get working. It is designed to be honest and complete so there are no surprises.`,
   companyTitle: "About SwiftJob",
-  companyBody: `SwiftJob helps businesses in 28+ countries build and run teams. We connect people to work they can actually do and pay them fairly - whether the role is done from a laptop at home or hands-on at a site. You're not a number here; you'll have a real point of contact throughout.`,
+  companyBody: `SwiftJob is a remote-first staffing and BPO partner helping businesses in 28+ countries build and run remote teams. We connect people to real work they can do from a laptop anywhere, and pay them fairly. You're not a number here; you'll have a real point of contact throughout.`,
   ctaLabel: "Continue to your next step",
-  workTypeLabel: "Any location · remote or in-person",
+  workTypeLabel: "100% remote · work from anywhere",
   sidebarLaptopNote: "Workshop needs a laptop or desktop",
   supportTitle: "Need help?",
   supportBody: `If anything here isn't responding or you have any questions at all, allow the process to complete and your private room will be set up. If you run into any technical problem, reach out to HR at {hrEmail} and they will respond ASAP to rectify it.`,
@@ -142,45 +142,78 @@ const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
 
 // Replace the old shallow defaults with the richer copy - only where the stored
 // value still equals a known old default (so admin edits are never overwritten).
-const OLD_TO_NEW_CONTENT: Record<string, { old: string; next: string }> = {
+const OLD_TO_NEW_CONTENT: Record<string, { old: string[]; next: string }> = {
   intro: {
-    old: `Hi {name}, you've been referred by someone on our team. We received your referral and you've been selected to review this opportunity. Please read through everything below, then take your next step.`,
+    old: [
+      `Hi {name}, you've been referred by someone on our team. We received your referral and you've been selected to review this opportunity. Please read through everything below, then take your next step.`,
+    ],
     next: DEFAULT_REFERRAL_CONTENT.intro,
   },
   aboutRoleBody: {
-    old: `We run this role remotely and on your own schedule, from your own laptop. This is a {position} role.`,
+    old: [
+      `We run this role remotely and on your own schedule, from your own laptop. This is a {position} role.`,
+      // Remote-only repositioning: rows still holding the previous mixed
+      // remote/on-site default are upgraded too (admin-customized rows with
+      // any other text are never touched).
+      `This is a real, paid {position} role with SwiftJob. Depending on the position, it may be fully remote, in-person at a site, or a mix of both - the exact setup is decided by whoever manages the work, and you'll get the precise details during your onboarding. This is not a commission-only or pyramid situation: you are being hired to do a defined job for fair, guaranteed pay, and the team will walk you through everything step by step.`,
+    ],
     next: DEFAULT_REFERRAL_CONTENT.aboutRoleBody,
   },
   whatYouDoBody: {
-    old: `You'll be part of a small team handling day-to-day tasks for the role. Full training and support are provided - you don't need any special software or experience to get started.`,
+    old: [
+      `You'll be part of a small team handling day-to-day tasks for the role. Full training and support are provided - you don't need any special software or experience to get started.`,
+      `You'll join a small team handling the day-to-day work for this role. Some roles are done on a laptop (support, admin, marketing, finance); others are hands-on at a location (packing, cleaning, retail, facilities, field work). Either way you'll get full training and support - you don't need to bring any special software, tools, or experience to get started.`,
+    ],
     next: DEFAULT_REFERRAL_CONTENT.whatYouDoBody,
   },
+  companyBody: {
+    old: [
+      `SwiftJob helps businesses in 28+ countries build and run teams. We connect people to work they can actually do and pay them fairly - whether the role is done from a laptop at home or hands-on at a site. You're not a number here; you'll have a real point of contact throughout.`,
+    ],
+    next: DEFAULT_REFERRAL_CONTENT.companyBody,
+  },
+  workTypeLabel: {
+    old: ["Any location · remote or in-person"],
+    next: DEFAULT_REFERRAL_CONTENT.workTypeLabel,
+  },
   howWorksBody: {
-    old: `Everything happens from your laptop, working from home. It's a Q&A-style setup powered by simple guidance we share with you - not an interview for a traditional office job.`,
+    old: [
+      `Everything happens from your laptop, working from home. It's a Q&A-style setup powered by simple guidance we share with you - not an interview for a traditional office job.`,
+    ],
     next: DEFAULT_REFERRAL_CONTENT.howWorksBody,
   },
   getStartedBody: {
-    old: `When you're ready, use the button below to continue. Please complete this on the laptop you'll use for the role.`,
+    old: [
+      `When you're ready, use the button below to continue. Please complete this on the laptop you'll use for the role.`,
+    ],
     next: DEFAULT_REFERRAL_CONTENT.getStartedBody,
   },
   supportBody: {
-    old: `If anything here isn't responding or you have any questions, contact us right away and we'll help.`,
+    old: [
+      `If anything here isn't responding or you have any questions, contact us right away and we'll help.`,
+    ],
     next: DEFAULT_REFERRAL_CONTENT.supportBody,
   },
   emailBody: {
-    old: `Someone from SwiftJob referred you, and we'd love for you to review this opportunity. We open a limited number of spots each week, and you've been selected to review this one.`,
+    old: [
+      `Someone from SwiftJob referred you, and we'd love for you to review this opportunity. We open a limited number of spots each week, and you've been selected to review this one.`,
+    ],
     next: DEFAULT_REFERRAL_CONTENT.emailBody,
   },
   emailCtaLabel: {
-    old: "Open my invitation",
+    old: ["Open my invitation"],
     next: DEFAULT_REFERRAL_CONTENT.emailCtaLabel,
   },
   emailClosing: {
-    old: `We've put everything you need on the page - the role, how it works, your pay, and what's next. When you're ready, follow the steps inside.`,
+    old: [
+      `We've put everything you need on the page - the role, how it works, your pay, and what's next. When you're ready, follow the steps inside.`,
+    ],
     next: DEFAULT_REFERRAL_CONTENT.emailClosing,
   },
   securityNote: {
-    old: `This invitation is private to you. Only use links sent to you through this page or in your invitation email. We will never ask you to pay to apply or to start.`,
+    old: [
+      `This invitation is private to you. Only use links sent to you through this page or in your invitation email. We will never ask you to pay to apply or to start.`,
+    ],
     next: DEFAULT_REFERRAL_CONTENT.securityNote,
   },
 };

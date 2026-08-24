@@ -725,16 +725,23 @@ export const referralRepository = {
   },
 
   async upgradeContentAll(
-    map: Record<string, { old: string; next: string }>,
+    map: Record<string, { old: string[]; next: string }>,
   ): Promise<void> {
     const db = getDb();
     for (const [key, { old, next }] of Object.entries(map)) {
-      await db
-        .update(referralContent)
-        .set({ body: next, updatedAt: new Date() })
-        .where(
-          and(eq(referralContent.key, key), eq(referralContent.body, old)),
-        );
+      // A key may list several known old defaults (e.g. copy repositioning);
+      // each is upgraded to `next` only when the stored value matches exactly.
+      for (const oldVariant of old) {
+        await db
+          .update(referralContent)
+          .set({ body: next, updatedAt: new Date() })
+          .where(
+            and(
+              eq(referralContent.key, key),
+              eq(referralContent.body, oldVariant),
+            ),
+          );
+      }
     }
   },
 

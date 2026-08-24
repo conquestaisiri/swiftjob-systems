@@ -4936,42 +4936,8 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 12px 24px rgba(21, 24, 23, 0.14);
 }
-.hero-editorial {
-  background: var(--bp-paper);
-  min-height: auto;
-  padding: 44px 0 0;
-}
-.hero-editorial-inner {
-  max-width: 1190px;
-}
-.hero-topline,
-.hero-credibility {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  color: var(--bp-ink-muted);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-.hero-topline {
-  border-bottom: 1px solid var(--bp-line);
-  padding-bottom: 16px;
-}
-.hero-topline .eyebrow {
-  color: var(--bp-blue-dark);
-}
-.hero-topline .eyebrow-line {
-  background: var(--bp-blue);
-}
 .hero-index {
   font-variant-numeric: tabular-nums;
-}
-.hero-collage {
-  position: relative;
-  height: 390px;
-  margin: 38px -6vw 0;
 }
 .hero-image {
   position: absolute;
@@ -4991,54 +4957,6 @@ body {
 .hero-image:hover img {
   transform: scale(1.04);
 }
-.hero-image-office {
-  width: 24%;
-  height: 235px;
-  left: 4%;
-  top: 32px;
-}
-.hero-image-warehouse {
-  width: 27%;
-  height: 280px;
-  left: 28%;
-  top: 0;
-}
-.hero-image-facilities {
-  width: 22%;
-  height: 238px;
-  left: 56%;
-  top: 32px;
-}
-.hero-image-team {
-  width: 24%;
-  height: 270px;
-  right: 3%;
-  top: 8px;
-}
-.hero-collage-note {
-  position: absolute;
-  left: 43%;
-  bottom: 0;
-  background: var(--bp-lime);
-  padding: 15px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  font-size: 11px;
-  line-height: 1.2;
-  box-shadow: 0 10px 24px rgba(21, 24, 23, 0.12);
-}
-.hero-collage-note strong {
-  font-size: 14px;
-  letter-spacing: -0.02em;
-}
-.hero-editorial-copy {
-  display: grid;
-  grid-template-columns: 1.18fr 0.82fr;
-  gap: 80px;
-  align-items: end;
-  padding: 48px 7% 38px;
-}
 .hero-title {
   color: var(--bp-ink);
   font-size: clamp(3.6rem, 7vw, 6.8rem);
@@ -5049,31 +4967,6 @@ body {
 .hero-title em {
   color: var(--bp-blue);
   font-style: normal;
-}
-.hero-editorial-aside {
-  max-width: 365px;
-  padding-bottom: 4px;
-}
-.hero-editorial-aside p {
-  color: var(--bp-ink-muted);
-  font-size: 15px;
-  line-height: 1.6;
-  margin: 0 0 24px;
-}
-.hero-editorial-aside .hero-buttons {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-.hero-credibility {
-  border-top: 1px solid var(--bp-line);
-  padding: 16px 7% 18px;
-  letter-spacing: 0.06em;
-}
-.hero-credibility span:first-child {
-  color: var(--bp-ink);
-  font-weight: 700;
 }
 .trust-strip {
   background: var(--bp-ink);
@@ -5302,49 +5195,6 @@ h2 {
   .nav-bar {
     min-height: 64px;
   }
-  .hero-editorial {
-    padding-top: 24px;
-  }
-  .hero-topline {
-    padding-inline: 0;
-  }
-  .hero-collage {
-    height: 360px;
-    margin: 24px 0 0;
-  }
-  .hero-image-office {
-    width: 46%;
-    height: 190px;
-    left: 0;
-    top: 24px;
-  }
-  .hero-image-warehouse {
-    width: 50%;
-    height: 220px;
-    left: 50%;
-    top: 0;
-  }
-  .hero-image-facilities {
-    width: 45%;
-    height: 180px;
-    left: 7%;
-    top: 195px;
-  }
-  .hero-image-team {
-    width: 45%;
-    height: 175px;
-    right: 0;
-    top: 215px;
-  }
-  .hero-collage-note {
-    left: 35%;
-    bottom: 16px;
-    padding: 10px 12px;
-  }
-  .hero-editorial-copy {
-    display: block;
-    padding: 38px 0 30px;
-  }
   .hero-title {
     font-size: clamp(3rem, 14vw, 4.8rem);
     line-height: 0.91;
@@ -5355,30 +5205,6 @@ h2 {
     display: block;
     font-size: 0.86em;
     line-height: 0.94;
-  }
-  .hero-editorial-aside {
-    max-width: none;
-    margin-top: 26px;
-  }
-  .hero-editorial-aside p {
-    font-size: 14px;
-  }
-  .hero-editorial-aside .hero-buttons {
-    gap: 14px;
-  }
-  .hero-editorial-aside .button {
-    width: 100%;
-    justify-content: center;
-  }
-  .hero-credibility {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding-inline: 0;
-    gap: 10px;
-    line-height: 1.35;
-  }
-  .hero-credibility span:last-child {
-    grid-column: 1 / -1;
   }
   .trust-items {
     display: grid;

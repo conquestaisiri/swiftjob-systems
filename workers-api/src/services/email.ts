@@ -180,7 +180,7 @@ function layout(opts: LayoutOptions): string {
           <tr>
             <td style="background:${BRAND.navy}; padding: 24px 32px; text-align: center;">
               <p style="margin: 0 0 4px; color: ${BRAND.white}; font-size: 14px; font-weight: 600;">SwiftJob</p>
-              <p style="margin: 0 0 12px; color: ${BRAND.mint}; font-size: 12px;">Talent for any role — remote or on-site</p>
+              <p style="margin: 0 0 12px; color: ${BRAND.mint}; font-size: 12px;">100% remote roles · work from anywhere</p>
               <a href="${getBaseUrl()}" style="color: ${BRAND.mint}; font-size: 12px; text-decoration: underline;">SwiftJob website</a>
             </td>
           </tr>

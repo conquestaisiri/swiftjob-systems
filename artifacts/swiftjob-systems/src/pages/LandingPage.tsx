@@ -18,40 +18,40 @@ import { SiteWidgets } from "@/components/site/SiteWidgets";
 
 const categories = [
   {
-    title: "Operations & logistics",
-    copy: "People who keep orders moving, sites organized, and customers looked after.",
-    image: "/work-warehouse-real.jpg",
-    meta: "Warehouse · Packing · Fulfilment",
+    title: "Customer Experience",
+    copy: "Support agents, chat and email specialists, and success teams that keep your customers looked after across time zones.",
+    image: "/work-office.jpg",
+    meta: "Support · Chat · Email · Voice",
   },
   {
-    title: "Facilities & field work",
-    copy: "Dependable hands for the work that happens on-site, in-person, and every day.",
-    image: "/work-facilities-real.jpg",
-    meta: "Cleaning · Maintenance · Retail",
+    title: "Admin & Virtual Assistance",
+    copy: "Virtual assistants, coordinators, and data specialists who keep schedules, inboxes, records, and day-to-day operations running smoothly.",
+    image: "/work-professional-real.jpg",
+    meta: "VA · Data Entry · Scheduling",
   },
   {
-    title: "Professional teams",
-    copy: "Thoughtful specialists for the work that needs planning, judgment, and expertise.",
+    title: "Tech, Data & Growth",
+    copy: "IT support, developers, analysts, and marketing specialists — vetted professionals who plug straight into your tools and workflows.",
     image: "/work-team-real.jpg",
-    meta: "Finance · Support · Administration",
+    meta: "IT Support · Data · Marketing",
   },
 ];
 
 const steps = [
   [
     "01",
-    "Start with the work",
-    "Tell us what needs to get done, where it happens, and what good looks like.",
+    "Tell us the role",
+    "Share what the work involves, the hours and time zones, and what a great hire looks like.",
   ],
   [
     "02",
-    "Meet the right people",
-    "We search, screen, and share a focused shortlist with the context you need.",
+    "Meet a vetted shortlist",
+    "We source, screen, and skills-check remote candidates, then share a focused shortlist with context on each person.",
   ],
   [
     "03",
-    "Keep work moving",
-    "We stay close through onboarding, payroll, compliance, and the working relationship.",
+    "Onboard and stay supported",
+    "We handle contracts, payroll, and compliance — and stay close through onboarding and beyond.",
   ],
 ];
 
@@ -163,7 +163,7 @@ export function LandingPage() {
         <section className="landing-v2-hero">
           <div className="landing-v2-hero-copy">
             <span className="landing-v2-eyebrow">
-              <i /> A workforce partner for real work
+              <i /> Remote staffing, done properly
             </span>
             <h1>
               Good people.
@@ -175,8 +175,10 @@ export function LandingPage() {
               matched.
             </h1>
             <p>
-              SwiftJob connects organizations with capable people for
-              professional, operational, technical, and hands-on roles.
+              SwiftJob is a remote-first staffing and BPO partner. We connect
+              organizations with vetted professionals for customer support,
+              admin, technical, and back-office roles — 100% remote, across time
+              zones.
             </p>
             <div className="landing-v2-hero-actions">
               <a
@@ -202,20 +204,20 @@ export function LandingPage() {
             </figure>
             <figure className="landing-v2-photo landing-v2-photo-b">
               <img
-                src="/work-warehouse.jpg"
-                alt="A warehouse prepared for fulfilment work"
+                src="/work-professional-real.jpg"
+                alt="A remote professional on a video call"
               />
             </figure>
             <figure className="landing-v2-photo landing-v2-photo-c">
               <img
-                src="/work-facilities.jpg"
-                alt="A facilities worker completing on-site work"
+                src="/work-team-real.jpg"
+                alt="A distributed team collaborating online"
               />
             </figure>
             <div className="landing-v2-art-card">
               <span>One partner</span>
-              <strong>for every kind of work.</strong>
-              <small>Remote · Hybrid · On-site</small>
+              <strong>for every remote role.</strong>
+              <small>100% Remote · Global talent</small>
             </div>
           </div>
         </section>
@@ -225,10 +227,10 @@ export function LandingPage() {
           <div>
             <h2>Every organization has work that matters.</h2>
             <p>
-              We help you find the people who can do it well. That might be
-              someone keeping a warehouse moving, a team member supporting
-              customers, a technician on-site, or a specialist working behind
-              the scenes.
+              We help you staff it remotely. That might be a support team that
+              covers your customers around the clock, an assistant keeping
+              operations organized, or a specialist behind the scenes — sourced,
+              vetted, and managed by us.
             </p>
             <a href="#process" className="landing-v2-text-link">
               How we help <ArrowRight size={16} />
@@ -250,8 +252,8 @@ export function LandingPage() {
             </div>
             <p>
               We do not force every role into the same mould. We take the time
-              to understand the work, the environment, and the people who will
-              thrive in it.
+              to understand the work, the working hours, and the people who will
+              thrive in it — then match accordingly.
             </p>
           </div>
           <div className="landing-v2-category-grid">
@@ -353,7 +355,13 @@ export function LandingPage() {
           <div className="landing-v2-role-list">
             {(jobs.length
               ? jobs
-              : [{ slug: "careers", title: "Explore current opportunities" }]
+              : [
+                  {
+                    slug: "careers",
+                    department: "100% remote",
+                    title: "Browse all open remote roles",
+                  },
+                ]
             ).map((job) => (
               <Link
                 href={
@@ -362,7 +370,7 @@ export function LandingPage() {
                 className="landing-v2-role"
                 key={job.slug}
               >
-                <span>{job.department || "Open opportunity"}</span>
+                <span>{job.department}</span>
                 <strong>{job.title}</strong>
                 <ArrowUpRight size={17} />
               </Link>
@@ -409,9 +417,9 @@ export function LandingPage() {
               <span>3</span>
               <h3>Complete your assessment</h3>
               <p>
-                Computer-based roles include a short assessment: a quick system
-                check, then questions matched to the job. It takes about 20
-                minutes and auto-saves as you go.
+                Most roles include a short skills check: a quick system check,
+                then questions matched to the job. It takes about 5–10 minutes
+                and auto-saves as you go.
               </p>
             </article>
             <article>

@@ -49,7 +49,7 @@ export function SiteFooter() {
         <span>
           (c) {new Date().getFullYear()} SwiftJob. All rights reserved.
         </span>
-        <span>Remote / Hybrid / On-site</span>
+        <span>100% Remote · Global team</span>
         <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">
           LinkedIn <ArrowUpRight size={13} />
         </a>

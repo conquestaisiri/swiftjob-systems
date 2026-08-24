@@ -24,7 +24,8 @@ interface AdminJob extends Job {
 }
 
 const EMPLOYMENT_TYPES = ["Full-time", "Part-time", "Contract"];
-const WORK_ARRANGEMENTS = ["Remote", "Hybrid", "On-site"];
+// SwiftJob is remote-only — admins cannot publish hybrid/on-site roles.
+const WORK_ARRANGEMENTS = ["Remote"];
 const EXPERIENCE_LEVELS = ["Entry-Level", "Mid-Level", "Senior"];
 
 const LIST_FIELDS = [

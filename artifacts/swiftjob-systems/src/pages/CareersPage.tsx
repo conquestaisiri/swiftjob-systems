@@ -181,8 +181,8 @@ export function CareersPage() {
 
   return (
     <SiteLayout
-      title="Careers — SwiftJob"
-      description="Explore open positions at SwiftJob — remote, hybrid, and on-site. Roles across operations, support, sales, marketing, finance, warehousing, hospitality, and more."
+      title="Remote Careers — SwiftJob"
+      description="Explore open remote positions at SwiftJob. 100% work-from-home roles across customer support, virtual assistance, data, IT, finance, and marketing — with real companies and fair pay."
     >
       {/* Hero */}
       <section className="careers-hero section-dark">
@@ -197,13 +197,12 @@ export function CareersPage() {
           <h1 className="careers-hero-title reveal">
             Browse our
             <br />
-            <em>open roles.</em>
+            <em>remote roles.</em>
           </h1>
           <p className="careers-hero-sub reveal">
-            Every position below is real and open, with a clear description and
-            a simple way to apply — whether the work happens from home, in an
-            office, or out on-site. If you see a good fit, apply—it takes a few
-            minutes.
+            Every position below is a real, open, 100% remote job with a clear
+            description and a simple way to apply. Work from home on a laptop,
+            with training and support from day one.
           </p>
           <div className="careers-hero-stats reveal">
             <span>
@@ -211,7 +210,7 @@ export function CareersPage() {
             </span>
             <span className="stat-sep">·</span>
             <span>
-              <strong>Remote</strong> + on-site
+              <strong>100%</strong> remote
             </span>
             <span className="stat-sep">·</span>
             <span>
@@ -221,22 +220,25 @@ export function CareersPage() {
         </div>
         <div
           className="careers-hero-people"
-          aria-label="People working across different roles"
+          aria-label="Remote professionals at work"
         >
           <figure>
-            <img src="/work-office.jpg" alt="Professional team member" />
+            <img src="/work-office.jpg" alt="Remote professional working" />
           </figure>
           <figure>
             <img
-              src="/work-warehouse.jpg"
-              alt="Warehouse and logistics team member"
+              src="/work-professional-real.jpg"
+              alt="Team member on a video call"
             />
           </figure>
           <figure>
-            <img src="/work-facilities.jpg" alt="Facilities team member" />
+            <img
+              src="/work-team-real.jpg"
+              alt="Distributed team collaborating online"
+            />
           </figure>
           <span className="careers-hero-people-note">
-            Different roles.
+            Remote roles.
             <br />
             <strong>One standard of care.</strong>
           </span>

@@ -23,11 +23,12 @@ export function SiteLayout({ children, title, description }: SiteLayoutProps) {
   const [location] = useLocation();
 
   useEffect(() => {
-    document.title =
-      title ?? "SwiftJob | Talent for any role — remote, hybrid, or on-site";
+    const resolvedTitle =
+      title ?? "SwiftJob | Remote jobs with a global BPO team";
     const desc =
       description ??
-      "SwiftJob finds, vets, and manages high-quality people for growing organizations — remote, hybrid, on-site, and hands-on field roles across any department. Browse open positions or tell us what you need.";
+      "SwiftJob is a remote-first staffing and BPO partner. We find, vet, and manage remote professionals in support, admin, tech, and back-office roles. Browse open positions or tell us what you need.";
+    document.title = resolvedTitle;
     let meta = document.querySelector('meta[name="description"]');
     if (!meta) {
       meta = document.createElement("meta");
