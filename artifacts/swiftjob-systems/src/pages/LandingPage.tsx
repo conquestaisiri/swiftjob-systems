@@ -15,7 +15,6 @@ import {
 import { fetchJobs } from "@/lib/jobsApi";
 import { ClientMarquee } from "@/components/site/ClientMarquee";
 import { SiteFooter } from "@/components/site/SiteFooter";
-import { SiteWidgets } from "@/components/site/SiteWidgets";
 
 const categories = [
   {
@@ -525,7 +524,6 @@ export function LandingPage() {
         </section>
       </main>
       <SiteFooter />
-      <SiteWidgets />
     </div>
   );
 }

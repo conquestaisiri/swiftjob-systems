@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" role="img" aria-label="A person working from home at a desk with a laptop">
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="560" viewBox="0 0 800 560" role="img" aria-label="A person working from home at a desk with a laptop">
   <!-- wall -->
   <rect width="800" height="560" fill="#f2f4ef"/>
   <rect x="0" y="430" width="800" height="130" fill="#e6e9e2"/>
