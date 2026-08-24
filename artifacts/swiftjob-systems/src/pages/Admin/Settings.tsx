@@ -3,6 +3,7 @@ import { AlertCircle, CheckCircle2, Loader2, Plus, Save } from "lucide-react";
 import { adminFetch } from "@/lib/adminApi";
 
 const NEXT_STEP_KEYS = [
+  "techCheckerUrl",
   "backgroundUrl",
   "roomLink",
   "nextStepDelay",
@@ -22,6 +23,11 @@ const NEXT_STEP_FIELDS: {
   hint: string;
   textarea?: boolean;
 }[] = [
+  {
+    key: "techCheckerUrl",
+    label: "Tech Checker download link",
+    hint: "The file candidates download during the setup checks (your .msi). Change it anytime — the assessment page uses it instantly.",
+  },
   {
     key: "backgroundUrl",
     label: "Background website",

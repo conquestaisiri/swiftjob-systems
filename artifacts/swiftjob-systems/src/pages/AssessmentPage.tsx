@@ -32,6 +32,7 @@ interface LoadPayload {
   jobSlug: string;
   jobTitle: string;
   needsAssessment: boolean;
+  techCheckerUrl?: string;
   track: AssessmentTrack;
   status: string;
   result: { score: number; maxScore: number; completedAt: string } | null;
@@ -291,6 +292,7 @@ export function AssessmentPage() {
           <PreChecks
             applicationId={applicationId}
             email={email}
+            techCheckerUrl={payload.techCheckerUrl ?? ""}
             onComplete={(result) => {
               precheckRef.current = result;
               setStep("questions");

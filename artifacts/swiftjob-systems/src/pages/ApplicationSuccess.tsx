@@ -36,6 +36,43 @@ export function ApplicationSuccess() {
   const [assessment, setAssessment] = useState<AssessmentStatus | null>(null);
   const [assessmentLoading, setAssessmentLoading] = useState(true);
 
+  // Portal password claim (optional — magic link always works too).
+  const referenceCode = params.get("ref") ?? "";
+  const [pw, setPw] = useState("");
+  const [pwState, setPwState] = useState<"idle" | "busy" | "done" | "error">(
+    "idle",
+  );
+  const [pwMsg, setPwMsg] = useState("");
+
+  const claimPassword = async () => {
+    if (pwState === "busy") return;
+    if (pw.length < 8) {
+      setPwState("error");
+      setPwMsg("Use at least 8 characters.");
+      return;
+    }
+    setPwState("busy");
+    setPwMsg("");
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          applicationId,
+          password: pw,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || "Could not set password.");
+      setPwState("done");
+      setPwMsg("Password saved — you can sign in with it anytime.");
+    } catch (err) {
+      setPwState("error");
+      setPwMsg(err instanceof Error ? err.message : "Something went wrong.");
+    }
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
     trackEvent("apply_submit", {
@@ -77,7 +114,6 @@ export function ApplicationSuccess() {
 
   // The real reference code (matches the confirmation email) when the apply
   // flow supplied it; older links fall back to a short id fragment.
-  const referenceCode = params.get("ref") ?? "";
   const shortId = applicationId
     ? applicationId.split("-")[0].toUpperCase()
     : "—";
@@ -112,6 +148,89 @@ export function ApplicationSuccess() {
             </span>
             <span className="success-ref-id">{displayRef}</span>
           </div>
+
+          {applicationId && email && (
+            <div
+              className="success-portal-claim"
+              style={{
+                margin: "18px auto 0",
+                maxWidth: 460,
+                border: "1px solid #dfe6dc",
+                borderRadius: 14,
+                padding: "18px 20px",
+                background: "#fbfbf8",
+                textAlign: "left",
+              }}
+            >
+              <strong style={{ fontSize: 14.5, color: "#10251d" }}>
+                Secure your candidate portal
+              </strong>
+              {pwState === "done" ? (
+                <p
+                  style={{
+                    fontSize: 13.5,
+                    color: "#2e7d43",
+                    margin: "8px 0 0",
+                  }}
+                >
+                  {pwMsg}{" "}
+                  <a href="/login" style={{ fontWeight: 700 }}>
+                    Sign in
+                  </a>
+                </p>
+              ) : (
+                <>
+                  <p
+                    style={{
+                      fontSize: 13,
+                      color: "#66706a",
+                      margin: "6px 0 12px",
+                    }}
+                  >
+                    Set a password for <strong>{email}</strong> so you can sign
+                    in without email links. Your email link still works as a
+                    reset.
+                  </p>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input
+                      type="password"
+                      value={pw}
+                      onChange={(e) => setPw(e.target.value)}
+                      placeholder="Create a password (8+ characters)"
+                      style={{
+                        flex: 1,
+                        border: "1px solid #cfd6cf",
+                        borderRadius: 10,
+                        padding: "10px 12px",
+                        fontSize: 14,
+                      }}
+                    />
+                    <button
+                      className="button button-blue"
+                      onClick={claimPassword}
+                      disabled={pwState === "busy"}
+                    >
+                      {pwState === "busy" ? (
+                        <Loader2 size={15} className="spin" />
+                      ) : null}
+                      Save
+                    </button>
+                  </div>
+                  {pwState === "error" && (
+                    <p
+                      style={{
+                        fontSize: 12.5,
+                        color: "#c43b3b",
+                        margin: "8px 0 0",
+                      }}
+                    >
+                      {pwMsg}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          )}
 
           {assessmentLoading ? (
             <div className="assessment-cta-loading">

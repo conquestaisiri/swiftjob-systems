@@ -9019,3 +9019,10 @@ h2 {
 .careers-faq-item { border: 1px solid #e5e8e4; border-radius: 14px; padding: 18px 20px; background: #fbfbf8; }
 .careers-faq-item strong { display: block; font-size: 15px; margin-bottom: 7px; color: #10251d; }
 .careers-faq-item p { font-size: 13.5px; line-height: 1.65; color: #4b544e; }
+
+
+/* auth mode switch */
+.auth-mode-row { display: flex; gap: 8px; margin: 0 auto 18px; width: fit-content; background: #eef1ec; border-radius: 999px; padding: 4px; }
+.auth-mode-btn { display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; padding: 8px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 600; color: #4b544e; cursor: pointer; }
+.auth-mode-btn.active { background: #10251d; color: #fff; }
+.auth-linklike { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: #1d4ed8; cursor: pointer; text-decoration: underline; }

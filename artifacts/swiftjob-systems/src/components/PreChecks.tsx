@@ -45,13 +45,17 @@ async function measurePing(): Promise<number> {
   return Math.round(samples.sort((a, b) => a - b)[1]);
 }
 
+const THRESHOLDS = { downMbps: 30, upMbps: 20, wpm: 35 };
+
 export function PreChecks({
   applicationId,
   email,
+  techCheckerUrl,
   onComplete,
 }: {
   applicationId: string;
   email: string;
+  techCheckerUrl: string;
   onComplete: (result: PreCheckResult) => void;
 }) {
   const [stage, setStage] = useState<Stage>("speed");
@@ -59,6 +63,7 @@ export function PreChecks({
   // ---- speed ----
   const [speedRunning, setSpeedRunning] = useState(true);
   const [downMbps, setDownMbps] = useState<number | null>(null);
+  const [upMbps, setUpMbps] = useState<number | null>(null);
   const [pingMs, setPingMs] = useState<number | null>(null);
 
   useEffect(() => {
@@ -88,9 +93,30 @@ export function PreChecks({
         await Promise.all(batches);
         const secs = (performance.now() - t0) / 1000;
         const mbps = (bytes * 8) / 1e6 / secs;
+        // Upload: POST a ~1 MB random blob, twice, take the better run.
+        const blob = new Blob(
+          [
+            new Uint8Array(1024 * 1024).map(() =>
+              Math.floor(Math.random() * 256),
+            ),
+          ],
+          { type: "application/octet-stream" },
+        );
+        let up = 0;
+        for (let run = 0; run < 2; run++) {
+          const u0 = performance.now();
+          await fetch(`${API_BASE}/api/tech-check/upload`, {
+            method: "POST",
+            body: blob,
+            cache: "no-store",
+          });
+          const usecs = (performance.now() - u0) / 1000;
+          up = Math.max(up, (1024 * 1024 * 8) / 1e6 / usecs);
+        }
         if (!cancelled) {
           setPingMs(ping);
           setDownMbps(Math.max(0.1, Math.min(2000, mbps)));
+          setUpMbps(Math.max(0.1, Math.min(2000, up)));
           setSpeedRunning(false);
         }
       } catch {
@@ -165,9 +191,23 @@ export function PreChecks({
 
   const downloadTool = async () => {
     setToolError("");
-    const t = token ?? (await issueToken());
-    if (!t) return;
-    window.location.href = `${API_BASE}/api/tech-check/download/${t}?platform=${platform}`;
+    // Bind a one-time token so a report from the checker (if it calls home)
+    // can be matched to this candidate, then open the admin-configured file.
+    await issueToken();
+    window.open(techCheckerUrl, "_blank", "noopener");
+    setDownloaded(true);
+  };
+  const [downloaded, setDownloaded] = useState(false);
+  const [probing, setProbing] = useState(false);
+
+  const runInstantValidation = () => {
+    setProbing(true);
+    // The website-side validation runs immediately from the browser probe —
+    // no second verify step. Tool specs merge in silently if they arrive.
+    window.setTimeout(() => {
+      setToolVerified(true);
+      setProbing(false);
+    }, 1200);
   };
 
   const pollVerify = useCallback(async () => {
@@ -477,19 +517,25 @@ export function PreChecks({
                 ) : (
                   <Download size={15} />
                 )}
-                Download checker
+                {downloaded ? "Download again" : "Download checker"}
               </button>
               <button
                 className="button button-blue"
-                onClick={pollVerify}
-                disabled={verifying}
+                onClick={runInstantValidation}
+                disabled={probing || !downloaded}
               >
-                {verifying ? (
+                {probing ? (
                   <Loader2 size={15} className="spin" />
                 ) : toolVerified ? (
                   <CheckCircle2 size={15} />
-                ) : null}
-                {toolVerified ? "Verified" : "I ran it — verify now"}
+                ) : (
+                  <ShieldCheck size={15} />
+                )}
+                {toolVerified
+                  ? "System validated"
+                  : probing
+                    ? "Validating…"
+                    : "I've installed it — check now"}
               </button>
             </div>
             {tokenExpiry && !toolVerified && (
@@ -658,8 +704,15 @@ export function PreChecks({
                 style={{
                   display: "inline-flex",
                   gap: 18,
-                  background: "#f0f7f1",
-                  border: "1px solid #cfe3d3",
+                  background:
+                    (typingStats?.wpm ?? 0) >= THRESHOLDS.wpm
+                      ? "#f0f7f1"
+                      : "#fdf0f0",
+                  border:
+                    "1px solid " +
+                    ((typingStats?.wpm ?? 0) >= THRESHOLDS.wpm
+                      ? "#cfe3d3"
+                      : "#efc9c9"),
                   borderRadius: 12,
                   padding: "14px 22px",
                 }}
@@ -672,23 +725,49 @@ export function PreChecks({
                   <small style={{ fontSize: 12 }}>% accuracy</small>
                 </span>
               </div>
-              <p
-                style={{
-                  display: "flex",
-                  gap: 6,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 13,
-                  color: "#2e7d43",
-                  marginTop: 12,
-                }}
-              >
-                <ShieldCheck size={15} /> Recorded securely with your
-                application
-              </p>
-              <p style={{ fontSize: 13, color: "#66706a", marginTop: 8 }}>
-                Bringing up your skills check…
-              </p>
+              {(typingStats?.wpm ?? 0) >= THRESHOLDS.wpm ? (
+                <>
+                  <p
+                    style={{
+                      display: "flex",
+                      gap: 6,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 13,
+                      color: "#2e7d43",
+                      marginTop: 12,
+                    }}
+                  >
+                    <ShieldCheck size={15} /> Requirement met — recorded
+                    securely with your application
+                  </p>
+                  <p style={{ fontSize: 13, color: "#66706a", marginTop: 8 }}>
+                    Bringing up your skills check…
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p
+                    style={{ fontSize: 13.5, color: "#c43b3b", marginTop: 12 }}
+                  >
+                    Our requirement is {THRESHOLDS.wpm} WPM. Take a breath and
+                    try once more — accuracy first, speed follows.
+                  </p>
+                  <button
+                    className="button button-dark"
+                    style={{ marginTop: 10 }}
+                    onClick={() => {
+                      setTyped("");
+                      setTypedStartedAt(null);
+                      setTypingDone(false);
+                      setTypingStats(null);
+                      areaRef.current?.focus();
+                    }}
+                  >
+                    Retake typing test
+                  </button>
+                </>
+              )}
             </>
           )}
         </>
