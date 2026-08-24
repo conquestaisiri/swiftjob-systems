@@ -27,6 +27,8 @@ export function SiteFooter() {
           <a href="/#process">How it works</a>
           <Link href="/careers">Careers</Link>
           <a href="/#contact">Contact</a>
+          <Link href="/terms">Terms</Link>
+          <Link href="/privacy">Privacy</Link>
         </div>
 
         <div className="site-footer-column">

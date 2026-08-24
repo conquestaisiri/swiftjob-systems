@@ -21,7 +21,7 @@ const categories = [
   {
     title: "Customer Experience",
     copy: "Support agents, chat and email specialists, and success teams that keep your customers looked after across time zones.",
-    image: "/work-office.jpg",
+    image: "/wfh-call.svg",
     meta: "Support · Chat · Email · Voice",
   },
   {
@@ -199,8 +199,8 @@ export function LandingPage() {
             </div>
             <figure className="landing-v2-photo landing-v2-photo-a">
               <img
-                src="/work-office.jpg"
-                alt="A team collaborating around a table"
+                src="/wfh-desk.svg"
+                alt="A professional working from a home desk"
               />
             </figure>
             <figure className="landing-v2-photo landing-v2-photo-b">

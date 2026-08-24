@@ -157,8 +157,8 @@ export function CandidateLogin() {
 
               <p className="auth-note">
                 By continuing, you agree to our{" "}
-                <a href="/#contact">Terms of Service</a> and{" "}
-                <a href="/#contact">Privacy Policy</a>. We&apos;ll only use your
+                <Link href="/terms">Terms of Service</Link> and{" "}
+                <Link href="/privacy">Privacy Policy</Link>. We&apos;ll only use your
                 email to send the sign-in link and application updates.
               </p>
             </form>

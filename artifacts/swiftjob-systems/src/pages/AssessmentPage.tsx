@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ClipboardCheck,
   Clock,
@@ -14,6 +14,10 @@ import {
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { trackEvent } from "@/lib/tracking";
 import { analyzeDevice, deviceMeta } from "@/lib/deviceGuard";
+import {
+  PreChecks,
+  type PreCheckResult,
+} from "@/components/PreChecks";
 import {
   TRACKS,
   scoreResponses,
@@ -33,7 +37,14 @@ interface LoadPayload {
   result: { score: number; maxScore: number; completedAt: string } | null;
 }
 
-type Step = "loading" | "intro" | "questions" | "submitting" | "done" | "error";
+type Step =
+  | "loading"
+  | "intro"
+  | "checks"
+  | "questions"
+  | "submitting"
+  | "done"
+  | "error";
 
 export function AssessmentPage() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -44,6 +55,7 @@ export function AssessmentPage() {
   const [payload, setPayload] = useState<LoadPayload | null>(null);
   const [loadError, setLoadError] = useState("");
   const [step, setStep] = useState<Step>("loading");
+  const precheckRef = useRef<PreCheckResult | null>(null);
   const [answers, setAnswers] = useState<Record<string, number | undefined>>(
     {},
   );
@@ -133,7 +145,7 @@ export function AssessmentPage() {
       // Ignore corrupt storage.
     }
     setAnswers(stored);
-    setStep("questions");
+    setStep(precheckRef.current ? "questions" : "checks");
   };
 
   const handleSubmit = async () => {
@@ -154,7 +166,11 @@ export function AssessmentPage() {
           body: JSON.stringify({
             email,
             jobSlug: payload.jobSlug,
-            systemCheck: { sentAt: new Date().toISOString(), ...deviceMeta() },
+            systemCheck: {
+            sentAt: new Date().toISOString(),
+            ...deviceMeta(),
+            ...(precheckRef.current ?? {}),
+          },
             responses,
             score,
             maxScore,
@@ -263,6 +279,23 @@ export function AssessmentPage() {
               </a>
             </div>
           </div>
+        </div>
+      </SiteLayout>
+    );
+  }
+
+  if (step === "checks") {
+    return (
+      <SiteLayout title={`${config?.title ?? "Skills check"} — SwiftJob`} description="Quick setup checks as part of your application.">
+        <div className="assessment-shell">
+          <PreChecks
+            applicationId={applicationId}
+            email={email}
+            onComplete={(result) => {
+              precheckRef.current = result;
+              setStep("questions");
+            }}
+          />
         </div>
       </SiteLayout>
     );

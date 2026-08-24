@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" role="img" aria-label="A person working from home at a desk with a laptop">
+  <!-- wall -->
+  <rect width="800" height="560" fill="#f2f4ef"/>
+  <rect x="0" y="430" width="800" height="130" fill="#e6e9e2"/>
+  <!-- window -->
+  <g>
+    <rect x="70" y="70" width="200" height="240" rx="10" fill="#cfe3f7"/>
+    <circle cx="135" cy="135" r="30" fill="#ffd66b"/>
+    <path d="M85 250 q40 -55 90 -18 q25 18 60 8 l0 62 -150 0 z" fill="#a8cba9"/>
+    <rect x="165" y="70" width="12" height="240" fill="#ffffff"/>
+    <rect x="70" y="182" width="200" height="10" fill="#ffffff"/>
+    <rect x="62" y="58" width="216" height="260" rx="12" fill="none" stroke="#d8ded4" stroke-width="10"/>
+  </g>
+  <!-- framed certificate -->
+  <g>
+    <rect x="330" y="86" width="120" height="92" rx="6" fill="#ffffff" stroke="#dfe3dc" stroke-width="6"/>
+    <rect x="348" y="108" width="84" height="8" rx="4" fill="#c8d2c6"/>
+    <rect x="348" y="126" width="60" height="8" rx="4" fill="#e1e7df"/>
+    <circle cx="428" cy="152" r="12" fill="#d4e94e"/>
+  </g>
+  <!-- hanging plant -->
+  <g>
+    <line x1="580" y1="0" x2="580" y2="90" stroke="#b9c2b5" stroke-width="4"/>
+    <path d="M548 96 q32 -26 64 0 q-14 34 -32 34 q-18 0 -32 -34 z" fill="#7fae83"/>
+    <path d="M562 128 q-16 44 6 78" stroke="#5f9467" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M600 128 q20 38 -2 74" stroke="#5f9467" stroke-width="7" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- desk -->
+  <rect x="120" y="380" width="560" height="18" rx="6" fill="#10251d"/>
+  <rect x="150" y="398" width="16" height="122" fill="#10251d"/>
+  <rect x="636" y="398" width="16" height="122" fill="#10251d"/>
+  <!-- laptop -->
+  <g>
+    <rect x="330" y="286" width="180" height="94" rx="8" fill="#22382f"/>
+    <rect x="340" y="296" width="160" height="74" rx="4" fill="#dff3e1"/>
+    <rect x="352" y="308" width="70" height="8" rx="4" fill="#9fc7a5"/>
+    <rect x="352" y="324" width="110" height="8" rx="4" fill="#bcdcbd"/>
+    <rect x="352" y="340" width="88" height="8" rx="4" fill="#bcdcbd"/>
+    <rect x="312" y="372" width="216" height="12" rx="6" fill="#10251d"/>
+  </g>
+  <!-- video tiles on screen hint -->
+  <g>
+    <circle cx="376" cy="322" r="11" fill="#7fae83"/>
+    <circle cx="410" cy="322" r="11" fill="#e9c46a"/>
+    <circle cx="444" cy="322" r="11" fill="#8fb8de"/>
+    <rect x="366" y="338" width="118" height="6" rx="3" fill="#ffffff" opacity=".8"/>
+  </g>
+  <!-- coffee mug -->
+  <g>
+    <rect x="560" y="344" width="34" height="38" rx="6" fill="#e98f6b"/>
+    <path d="M594 352 h10 a9 9 0 0 1 0 20 h-10" fill="none" stroke="#e98f6b" stroke-width="7"/>
+    <rect x="568" y="330" width="4" height="14" fill="#ffffff" opacity=".65"/>
+  </g>
+  <!-- notebook + pen -->
+  <g>
+    <rect x="238" y="350" width="72" height="30" rx="5" fill="#ffffff" stroke="#dfe3dc" stroke-width="4"/>
+    <line x1="250" y1="360" x2="300" y2="360" stroke="#d7ddd4" stroke-width="5" stroke-linecap="round"/>
+    <line x1="250" y1="370" x2="284" y2="370" stroke="#d7ddd4" stroke-width="5" stroke-linecap="round"/>
+    <rect x="318" y="352" width="52" height="6" rx="3" transform="rotate(-18 318 352)" fill="#d4e94e"/>
+  </g>
+  <!-- chair back hint -->
+  <path d="M676 470 q-6 -96 44 -104 q50 8 44 104 z" fill="#cdd6cb"/>
+</svg>

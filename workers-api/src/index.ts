@@ -18,6 +18,13 @@ import {
 } from "./services/assessments";
 import { gradeAssessment } from "./services/assessmentAnswerKey";
 import {
+  ensureTechCheckSchemaOnce,
+  techCheckService,
+  buildWindowsTool,
+  buildMacTool,
+  type TechPlatform,
+} from "./services/techcheck";
+import {
   referralService,
   publicReferralUrl,
   ensureReferralSchemaOnce,
@@ -548,6 +555,131 @@ app.post("/api/assessments/:applicationId", async (c) => {
   } catch (err) {
     console.error({ err }, "Failed to save assessment");
     return c.json({ error: "Failed to save assessment" }, 500);
+  }
+});
+
+// ============================================
+// TECH CHECK (one-time downloadable system checker)
+// ============================================
+function detectToolPlatform(userAgent: string): TechPlatform {
+  return /Macintosh|Mac OS X/i.test(userAgent) ? "macos" : "windows";
+}
+
+async function verifyTechCheckOwnership(
+  applicationId: string,
+  email: string,
+): Promise<boolean> {
+  const application = await applicationRepository.findById(applicationId);
+  if (!application) return false;
+  return (
+    (application.email ?? "").trim().toLowerCase() ===
+    email.trim().toLowerCase()
+  );
+}
+
+app.get("/api/tech-check/token", async (c) => {
+  try {
+    await ensureAssessmentSchemaOnce();
+    const applicationId = c.req.query("applicationId") ?? "";
+    const email = c.req.query("email") ?? "";
+    if (!(await verifyTechCheckOwnership(applicationId, email))) {
+      return c.json(
+        { ok: false, error: "We couldn't verify this application." },
+        404,
+      );
+    }
+    const { token, expiresAt } =
+      await techCheckService.issueToken(applicationId);
+    const platform = detectToolPlatform(c.req.header("user-agent") || "");
+    return c.json({ ok: true, token, expiresAt, platform });
+  } catch (err) {
+    console.error({ err }, "Failed to issue tech check token");
+    return c.json({ error: "Failed to issue tech check token" }, 500);
+  }
+});
+
+app.get("/api/tech-check/download/:token", async (c) => {
+  try {
+    await ensureTechCheckSchemaOnce();
+    const status = await techCheckService.getStatus(c.req.param("token"));
+    if (!status || !status.valid || status.used) {
+      return c.json(
+        {
+          error:
+            "This checker link is no longer valid. Request a fresh one from the application page.",
+        },
+        410,
+      );
+    }
+    const platform: TechPlatform =
+      c.req.query("platform") === "macos" ? "macos" : "windows";
+    const origin = new URL(c.req.url).origin;
+    const body =
+      platform === "macos"
+        ? buildMacTool(origin, c.req.param("token"))
+        : buildWindowsTool(origin, c.req.param("token"));
+    const filename =
+      platform === "macos"
+        ? "SwiftJob-SystemChecker.command"
+        : "SwiftJob-SystemChecker.bat";
+    return new Response(body, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch (err) {
+    console.error({ err }, "Failed to build tech check tool");
+    return c.json({ error: "Failed to build tech check tool" }, 500);
+  }
+});
+
+app.post("/api/tech-check/report/:token", async (c) => {
+  try {
+    const body = await parseJson(c);
+    if (body === null || !body || typeof body !== "object") {
+      return c.json({ error: "Invalid report" }, 400);
+    }
+    // Keep the payload small and flat — only spec-like primitives survive.
+    const specs: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(body as Record<string, unknown>)) {
+      if (Object.keys(specs).length >= 24) break;
+      if (typeof v === "string" && v.length <= 200) specs[k] = v;
+      else if (typeof v === "number" && Number.isFinite(v)) specs[k] = v;
+    }
+    const consumed = await techCheckService.consumeWithReport(
+      c.req.param("token"),
+      specs,
+    );
+    if (!consumed) {
+      return c.json(
+        { error: "This checker has already been used or has expired." },
+        410,
+      );
+    }
+    return c.json({ ok: true });
+  } catch (err) {
+    console.error({ err }, "Failed to record tech check report");
+    return c.json({ error: "Failed to record report" }, 500);
+  }
+});
+
+app.get("/api/tech-check/status/:token", async (c) => {
+  try {
+    const status = await techCheckService.getStatus(c.req.param("token"));
+    if (!status) return c.json({ ok: false, error: "Unknown token" }, 404);
+    return c.json({
+      ok: true,
+      used: status.used,
+      valid: status.valid,
+      expired: status.expired,
+      specs: status.used ? status.specs : null,
+    });
+  } catch (err) {
+    console.error({ err }, "Failed to read tech check status");
+    return c.json({ error: "Failed to read status" }, 500);
   }
 });
 

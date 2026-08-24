@@ -8995,3 +8995,27 @@ h2 {
     gap: 28px 44px;
   }
 }
+
+
+/* ============================================
+   LEGAL PAGES
+   ============================================ */
+.legal-shell { padding: 56px 0 80px; }
+.legal-container { max-width: 780px; }
+.legal-title { font-size: clamp(1.9rem, 4vw, 2.6rem); letter-spacing: -0.02em; margin: 14px 0 6px; }
+.legal-updated { color: #66706a; font-size: 13px; margin-bottom: 30px; }
+.legal-h2 { font-size: 1.15rem; margin: 30px 0 10px; color: #10251d; }
+.legal-p { font-size: 15px; line-height: 1.75; color: #37413b; margin-bottom: 12px; }
+.legal-ul { margin: 0 0 14px 20px; display: grid; gap: 9px; }
+.legal-ul li { font-size: 14.5px; line-height: 1.65; color: #37413b; }
+.legal-contact { margin-top: 38px; padding-top: 18px; border-top: 1px solid #e5e8e4; font-size: 14px; color: #37413b; }
+
+
+/* ============================================
+   CAREERS FAQ
+   ============================================ */
+.careers-faq { padding: 64px 0 30px; background: #fff; }
+.careers-faq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+.careers-faq-item { border: 1px solid #e5e8e4; border-radius: 14px; padding: 18px 20px; background: #fbfbf8; }
+.careers-faq-item strong { display: block; font-size: 15px; margin-bottom: 7px; color: #10251d; }
+.careers-faq-item p { font-size: 13.5px; line-height: 1.65; color: #4b544e; }

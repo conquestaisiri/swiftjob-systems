@@ -223,7 +223,7 @@ export function CareersPage() {
           aria-label="Remote professionals at work"
         >
           <figure>
-            <img src="/work-office.jpg" alt="Remote professional working" />
+            <img src="/wfh-desk.svg" alt="Working from a home desk" />
           </figure>
           <figure>
             <img
@@ -458,6 +458,58 @@ export function CareersPage() {
           )}
         </div>
       </div>
+
+      {/* Candidate FAQ */}
+      <section className="careers-faq">
+        <div className="container" style={{ maxWidth: 860 }}>
+          <div className="section-kicker" style={{ marginBottom: 14 }}>
+            <span className="eyebrow-line" />
+            BEFORE YOU APPLY
+          </div>
+          <h2
+            style={{
+              fontSize: "1.6rem",
+              letterSpacing: "-0.02em",
+              marginBottom: 22,
+            }}
+          >
+            Straight answers to fair questions.
+          </h2>
+          <div className="careers-faq-grid">
+            {[
+              [
+                "Is this really free?",
+                "Yes — applying, skills checks, onboarding, everything. SwiftJob is paid by the companies we staff, never by candidates. We will never ask you for money at any stage.",
+              ],
+              [
+                "Are these jobs actually remote?",
+                "Every listing is 100% remote. You work from your own laptop, wherever you are, with hours agreed before you start.",
+              ],
+              [
+                "What is the skills check?",
+                "A short optional check (5–10 minutes) in your browser: a quick connection and computer setup confirmation, a one-minute typing sample for some roles, and a few questions matched to the job. No pass mark — it helps us understand how you work.",
+              ],
+              [
+                "How will I hear back?",
+                "Your candidate portal shows your status in real time. Our team also emails you directly at each step — typically within 3–5 business days.",
+              ],
+              [
+                "What do I need?",
+                "A reliable laptop or desktop, a stable internet connection, and the ability to work the hours listed. Everything else is provided and explained during onboarding.",
+              ],
+              [
+                "Is my data safe?",
+                "We never sell your information. Résumés live in access-controlled storage, sign-in links expire in 15 minutes, and you can request deletion anytime. Full details in our privacy policy.",
+              ],
+            ].map(([q, a]) => (
+              <div className="careers-faq-item" key={q}>
+                <strong>{q}</strong>
+                <p>{a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* CTA Banner */}
       <section className="careers-cta-band section-dark">

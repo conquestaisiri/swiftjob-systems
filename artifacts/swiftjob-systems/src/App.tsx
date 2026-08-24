@@ -11,6 +11,7 @@ import { CandidateVerify } from "@/pages/CandidateVerify";
 import { CandidateApplications } from "@/pages/CandidateApplications";
 import { ReferralPage } from "@/pages/ReferralPage";
 import { CampaignLanding } from "@/pages/CampaignLanding";
+import { PrivacyPolicy, TermsOfService } from "@/pages/Legal";
 import { LandingPage } from "@/pages/LandingPage";
 import NotFound from "@/pages/not-found";
 import { AdminLayout } from "@/pages/Admin/AdminLayout";
@@ -45,6 +46,8 @@ function App() {
               component={ApplicationSuccess}
             />
             <Route path="/assessment" component={AssessmentPage} />
+            <Route path="/privacy" component={PrivacyPolicy} />
+            <Route path="/terms" component={TermsOfService} />
             <Route path="/careers/:slug" component={JobPage} />
             <Route path="/careers" component={CareersPage} />
             <Route path="/referral/:code" component={ReferralPage} />
