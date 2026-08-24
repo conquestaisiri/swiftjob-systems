@@ -94,6 +94,19 @@ export function MailAdmin({ token }: { token: string }) {
       setError("Maximum 100 recipients per send.");
       return;
     }
+    // Custom mode needs a real subject and body — without this the server
+    // accepts the request but fails every recipient silently.
+    if (mode === "custom") {
+      const problems: string[] = [];
+      if (!subject.trim()) problems.push("a subject");
+      if (!body.trim()) problems.push("a message body");
+      if (problems.length) {
+        setError(
+          `Custom messages need ${problems.join(" and ")} before sending.`,
+        );
+        return;
+      }
+    }
     setSending(true);
     try {
       const res = await fetch(`${API_BASE}/api/admin/mail/send`, {
@@ -283,7 +296,18 @@ export function MailAdmin({ token }: { token: string }) {
         {result && (
           <div className="admin-panel mail-result">
             <h3 className="admin-panel-title">
-              <CheckCircle2 size={16} /> Delivery result
+              {result.failed.length === 0 ? (
+                <>
+                  <CheckCircle2 size={16} /> Delivery result
+                </>
+              ) : (
+                <>
+                  <AlertCircle size={16} /> Delivery result —{" "}
+                  {result.sent === 0
+                    ? "nothing was sent"
+                    : "partially delivered"}
+                </>
+              )}
             </h3>
             <p>
               <strong>{result.sent}</strong> delivered ·{" "}

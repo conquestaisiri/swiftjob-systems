@@ -1,20 +1,87 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { CheckCircle, Mail, ArrowUpRight, ArrowLeft } from "lucide-react";
+import {
+  CheckCircle,
+  Mail,
+  ArrowUpRight,
+  ArrowLeft,
+  ClipboardCheck,
+  ArrowRight,
+  Loader2,
+} from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
+import { trackEvent } from "@/lib/tracking";
+import { CAREERS_EMAIL } from "@/lib/contact";
+
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+
+interface AssessmentStatus {
+  ok: boolean;
+  applicationId: string;
+  jobSlug: string;
+  jobTitle: string;
+  needsAssessment: boolean;
+  track: string;
+  status: string;
+  result: { score: number; maxScore: number; completedAt: string } | null;
+}
 
 export function ApplicationSuccess() {
   const params = new URLSearchParams(window.location.search);
   const applicationId = params.get("id") ?? "";
   const position = params.get("position") ?? "the position";
+  const jobSlug = params.get("job") ?? "";
+  const email = params.get("email") ?? "";
+
+  const [assessment, setAssessment] = useState<AssessmentStatus | null>(null);
+  const [assessmentLoading, setAssessmentLoading] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    trackEvent("apply_submit", {
+      position,
+      campaign: params.get("campaign") ?? undefined,
+    });
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    if (!applicationId || !email) {
+      setAssessmentLoading(false);
+      return;
+    }
+    const qs = new URLSearchParams({ email });
+    if (jobSlug) qs.set("job", jobSlug);
+    fetch(
+      `${API_BASE}/api/assessments/${encodeURIComponent(applicationId)}?${qs}`,
+    )
+      .then(async (res) => {
+        const json = await res.json();
+        if (!cancelled) {
+          if (res.ok && json.ok) {
+            setAssessment(json);
+          }
+          setAssessmentLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setAssessmentLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [applicationId, email, jobSlug]);
+
+  const showAssessmentCta =
+    assessment?.needsAssessment && assessment.status !== "completed";
+
+  // The real reference code (matches the confirmation email) when the apply
+  // flow supplied it; older links fall back to a short id fragment.
+  const referenceCode = params.get("ref") ?? "";
   const shortId = applicationId
     ? applicationId.split("-")[0].toUpperCase()
     : "—";
+  const displayRef = referenceCode || shortId;
 
   return (
     <SiteLayout
@@ -43,8 +110,36 @@ export function ApplicationSuccess() {
             <span className="success-ref-label">
               Your Application Reference
             </span>
-            <span className="success-ref-id">{shortId}</span>
+            <span className="success-ref-id">{displayRef}</span>
           </div>
+
+          {assessmentLoading ? (
+            <div className="assessment-cta-loading">
+              <Loader2 size={16} className="spin" /> Checking your next steps…
+            </div>
+          ) : (
+            showAssessmentCta && (
+              <div className="assessment-cta-card">
+                <div className="assessment-cta-icon">
+                  <ClipboardCheck size={22} strokeWidth={1.6} />
+                </div>
+                <div className="assessment-cta-copy">
+                  <strong>Quick skills check (optional)</strong>
+                  <p>
+                    Give your application a boost — a short{" "}
+                    {assessment.jobTitle} skills check takes about 5–8 minutes.
+                    No pass mark, no time limit.
+                  </p>
+                </div>
+                <Link
+                  className="button button-blue button-small"
+                  href={`/assessment?id=${encodeURIComponent(applicationId)}&email=${encodeURIComponent(email)}&job=${encodeURIComponent(jobSlug)}`}
+                >
+                  Start now <ArrowRight size={14} />
+                </Link>
+              </div>
+            )
+          )}
 
           <div className="success-what-next">
             <h2>What happens next?</h2>
@@ -91,11 +186,8 @@ export function ApplicationSuccess() {
                 recruitment team — including your reference number and the
                 position you applied for.
               </p>
-              <a
-                href="mailto:careers@swiftjob.payservice.top"
-                className="success-email"
-              >
-                careers@swiftjob.payservice.top <ArrowUpRight size={14} />
+              <a href={`mailto:${CAREERS_EMAIL}`} className="success-email">
+                {CAREERS_EMAIL} <ArrowUpRight size={14} />
               </a>
             </div>
           </div>

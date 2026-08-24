@@ -13,6 +13,8 @@ RESEND_API_KEY=
 EMAIL_FROM=
 # HR_EMAIL                     Where HR/notification emails are sent
 HR_EMAIL=
+# SUPPORT_EMAIL                Support address shown in emails & referral pages (defaults to HR_EMAIL)
+SUPPORT_EMAIL=
 # JWT_SECRET                   >= 32 chars, random. Signs admin &candidate tokens.
 JWT_SECRET=
 # ADMIN_EMAIL               Admin login email

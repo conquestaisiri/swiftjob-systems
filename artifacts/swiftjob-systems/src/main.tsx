@@ -1,7 +1,10 @@
-import { createRoot } from 'react-dom/client';
+import { createRoot } from "react-dom/client";
 
-import App from './App';
+import App from "./App";
+import { initTracking } from "./lib/tracking";
 
-import './index.css';
+import "./index.css";
 
-createRoot(document.getElementById('root')!).render(<App />);
+initTracking();
+
+createRoot(document.getElementById("root")!).render(<App />);

@@ -9,6 +9,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
+import { useTurnstile } from "@/lib/turnstile";
 
 export function CandidateLogin() {
   const [email, setEmail] = useState("");
@@ -16,11 +17,17 @@ export function CandidateLogin() {
     "idle" | "submitting" | "success" | "error"
   >("idle");
   const [message, setMessage] = useState("");
+  const turnstile = useTurnstile();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setMessage("Please enter a valid email address.");
+      setState("error");
+      return;
+    }
+    if (turnstile.enabled && !turnstile.token) {
+      setMessage("Please complete the security check first.");
       setState("error");
       return;
     }
@@ -32,7 +39,10 @@ export function CandidateLogin() {
       const res = await fetch("/api/auth/magic-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          turnstileToken: turnstile.token,
+        }),
       });
 
       const data = await res.json();
@@ -47,6 +57,7 @@ export function CandidateLogin() {
           ? err.message
           : "Something went wrong. Please try again.",
       );
+      turnstile.reset();
     }
   };
 
@@ -118,10 +129,19 @@ export function CandidateLogin() {
                 </div>
               </div>
 
+              {turnstile.enabled && (
+                <div className="turnstile-row">
+                  <div ref={turnstile.ref} className="turnstile-widget" />
+                </div>
+              )}
+
               <button
                 type="submit"
                 className="button button-blue auth-submit"
-                disabled={state === "submitting"}
+                disabled={
+                  state === "submitting" ||
+                  (turnstile.enabled && !turnstile.token)
+                }
               >
                 {state === "submitting" ? (
                   <>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+﻿import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   Pencil,
   Trash2,
@@ -289,6 +289,7 @@ function ContentEditor({
   onClose,
   scope,
   onReset,
+  seedReady = true,
 }: {
   content: ContentMap;
   onSave: (content: ContentMap, opts: { applyToAll: boolean }) => Promise<void>;
@@ -296,6 +297,9 @@ function ContentEditor({
   scope?: { type: "all" } | { type: "selected"; count: number };
   /** Reverts the selected referrals to the app-wide defaults (clears overrides). */
   onReset?: () => Promise<void>;
+  /** False while the per-referral seed is still being fetched — saving before
+   *  it lands would diff against the wrong baseline and clobber overrides. */
+  seedReady?: boolean;
 }) {
   const [draft, setDraft] = useState<ContentMap>(content);
   const [activeTab, setActiveTab] = useState<ContentTab>("Page");
@@ -321,6 +325,7 @@ function ContentEditor({
   const isSelected = scope?.type === "selected";
 
   const save = async () => {
+    if (!seedReady) return; // never diff against a not-yet-loaded baseline
     setError("");
     setSaving(true);
     try {
@@ -333,13 +338,7 @@ function ContentEditor({
 
   const reset = async () => {
     if (!onReset) return;
-    if (
-      !window.confirm(
-        "Revert the selected referrals back to the app-wide defaults? This clears their per-referral custom page, email and next-step settings.",
-      )
-    ) {
-      return;
-    }
+    // The parent handler owns the single confirmation dialog — no double ask.
     setError("");
     setResetting(true);
     try {
@@ -404,8 +403,10 @@ function ContentEditor({
                 </span>
               </label>
               <p>
-                Leave checked to update every referral to these values, or
-                uncheck to apply only to the {scope.count} selected.
+                Checked: your edits are ALSO written onto every existing
+                referral as overrides. Leave unchecked (default) to apply only
+                to the {scope.count} selected — everyone else keeps following
+                the global defaults.
               </p>
             </div>
           )}
@@ -491,22 +492,26 @@ function ContentEditor({
             </button>
             <button
               type="button"
-              disabled={saving}
+              disabled={saving || !seedReady}
               onClick={save}
               className="button button-blue"
             >
               {saving ? (
                 <Loader2 size={16} className="animate-spin" />
+              ) : !seedReady ? (
+                <Loader2 size={16} className="animate-spin" />
               ) : (
                 <CheckCircle2 size={16} />
               )}
-              {saving
-                ? " Saving…"
-                : isSelected && applyToAll
-                  ? " Save & apply to all"
-                  : isSelected
-                    ? " Save & apply to selected"
-                    : " Save content"}
+              {!seedReady
+                ? " Loading current content…"
+                : saving
+                  ? " Saving…"
+                  : isSelected && applyToAll
+                    ? " Save & apply to all"
+                    : isSelected
+                      ? " Save & apply to selected"
+                      : " Save content"}
             </button>
           </div>
         </div>
@@ -777,6 +782,9 @@ export function ReferralsAdmin({ token }: { token: string }) {
     { type: "all" } | { type: "selected"; ids: string[] } | null
   >(null);
   const [content, setContent] = useState<ContentMap>({});
+  // Seed for the per-referral editor: the merged (global + overrides) content of
+  // the first selected referral, so admins edit what the referral actually sees.
+  const [editorSeed, setEditorSeed] = useState<ContentMap | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [sending, setSending] = useState(false);
   const [batchCount, setBatchCount] = useState<string>("");
@@ -948,6 +956,37 @@ export function ReferralsAdmin({ token }: { token: string }) {
     setEditing(null);
   };
 
+  const openContentEditor = useCallback(
+    async (ids: string[]) => {
+      setContentOpen({ type: "selected", ids });
+      setEditorSeed(null);
+      // Seed the per-referral editor with the first referral's merged content so
+      // the admin edits what that referral actually sees (its own overrides
+      // layered over the global defaults), rather than the global defaults alone.
+      const firstId = ids[0];
+      if (!firstId) return;
+      try {
+        const res = await fetch(
+          `${API_BASE}/api/admin/referrals/${encodeURIComponent(firstId)}/content`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        if (isUnauthorized(res)) {
+          handleAdminUnauthorized();
+          return;
+        }
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.content && typeof data.content === "object") {
+            setEditorSeed(data.content);
+          }
+        }
+      } catch {
+        /* fall back to the global defaults as the seed */
+      }
+    },
+    [token],
+  );
+
   const saveContent = async (
     updated: ContentMap,
     opts: { applyToAll: boolean },
@@ -955,53 +994,71 @@ export function ReferralsAdmin({ token }: { token: string }) {
     const isBulk = contentOpen?.type === "selected";
     const ids = isBulk ? (contentOpen?.ids ?? []) : [];
 
-    if (isBulk && !opts.applyToAll && ids.length > 0) {
-      // Apply to the selected referrals only (as per-referral overrides).
-      const res = await fetch(`${API_BASE}/api/admin/referrals/content/apply`, {
-        method: "POST",
+    if (!isBulk) {
+      // Default (all) scope — update the global live defaults wholesale.
+      const res = await fetch(`${API_BASE}/api/admin/referrals/content`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ content: updated, ids, applyToAll: false }),
+        body: JSON.stringify({ content: updated }),
       });
       const data = await res.json();
-      if (!res.ok)
-        throw new Error(data.error || "Failed to apply content to selection");
+      if (!res.ok) throw new Error(data.error || "Failed to save content");
+      setContent(data.content);
       setContentOpen(null);
+      setEditorSeed(null);
+      return;
+    }
+
+    // Only persist fields the admin actually changed for this referral; the
+    // global defaults (or any other per-referral overrides) stay untouched so
+    // future global edits still apply.
+    const changed: ContentMap = {};
+    for (const [key, value] of Object.entries(updated)) {
+      if (key === "hrEmail") continue;
+      if ((editorSeed?.[key] ?? "") !== (value ?? "")) {
+        changed[key] = value;
+      }
+    }
+    // Nothing changed relative to what the referral already sees — skip the
+    // request entirely instead of writing an empty override set.
+    if (Object.keys(changed).length === 0) {
+      window.alert(
+        "No changes detected — the content already matches what this referral sees. Nothing was applied.",
+      );
+      setContentOpen(null);
+      setEditorSeed(null);
       setSelected(new Set());
       return;
     }
 
-    if (isBulk && opts.applyToAll && ids.length > 0) {
-      const res = await fetch(`${API_BASE}/api/admin/referrals/content/apply`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ content: updated, ids, applyToAll: true }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to apply content");
-      setContentOpen(null);
-      setSelected(new Set());
-      return;
-    }
-
-    // Default (all) scope — update the global live defaults.
-    const res = await fetch(`${API_BASE}/api/admin/referrals/content`, {
-      method: "PUT",
+    // Apply the changed keys to the selected referrals (as per-referral
+    // overrides), optionally layering them onto every referral as well.
+    const res = await fetch(`${API_BASE}/api/admin/referrals/content/apply`, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ content: updated }),
+      body: JSON.stringify({
+        content: changed,
+        ids,
+        applyToAll: opts.applyToAll,
+      }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Failed to save content");
-    setContent(data.content);
+    if (!res.ok)
+      throw new Error(
+        data.error ||
+          (opts.applyToAll
+            ? "Failed to apply content"
+            : "Failed to apply content to selection"),
+      );
     setContentOpen(null);
+    setEditorSeed(null);
+    setSelected(new Set());
   };
 
   const revertSelectedToDefaults = async (ids: string[] = [...selected]) => {
@@ -1046,6 +1103,16 @@ export function ReferralsAdmin({ token }: { token: string }) {
         max,
       ),
     );
+    // Be honest up front: the daily limit silently truncates the selection.
+    const notAttempted = ids.length - toSend.length;
+    if (
+      notAttempted > 0 &&
+      !window.confirm(
+        `Daily limit allows only ${toSend.length} of your ${ids.length} selected referrals today. Send the first ${toSend.length} now? The remaining ${notAttempted} will NOT be attempted.`,
+      )
+    ) {
+      return;
+    }
     setSending(true);
     try {
       const res = await fetch(`${API_BASE}/api/admin/referrals/send`, {
@@ -1061,7 +1128,7 @@ export function ReferralsAdmin({ token }: { token: string }) {
       setStatus(data.status);
       const failed = Array.isArray(data.failed) ? data.failed : [];
       alert(
-        `Sent ${data.sent} of ${toSend.length} selected.${failed.length ? `\n${failed.length} could not be sent.` : ""}`,
+        `Sent ${data.sent} of ${toSend.length} attempted.${failed.length ? `\n${failed.length} could not be sent (see failures in the list).` : ""}${notAttempted ? `\n${notAttempted} selected were NOT attempted — daily limit already reached. Re-select them tomorrow.` : ""}`,
       );
       setSelected(new Set());
       await load();
@@ -1210,16 +1277,11 @@ export function ReferralsAdmin({ token }: { token: string }) {
         <div className="admin-selection-bar">
           <span>
             <strong>{selected.size}</strong> selected
-            {status ? ` Â· up to ${status.remaining} can be sent today` : ""}
+            {status ? ` · up to ${status.remaining} can be sent today` : ""}
           </span>
           <div className="selection-bar-actions">
             <button
-              onClick={() =>
-                setContentOpen({
-                  type: "selected",
-                  ids: [...selected],
-                })
-              }
+              onClick={() => openContentEditor([...selected])}
               className="button button-outline button-sm"
             >
               <Eye size={15} /> Edit page &amp; email
@@ -1242,7 +1304,8 @@ export function ReferralsAdmin({ token }: { token: string }) {
               max={status?.remaining ?? undefined}
               value={batchCount}
               onChange={(e) => setBatchCount(e.target.value)}
-              placeholder="Count"
+              placeholder="Send first N"
+              title="Optional: only send the first N selected referrals (capped by today's remaining limit)"
               className="filter-input batch-count-input"
               aria-label="Number of referrals to send in this batch"
             />
@@ -1454,9 +1517,7 @@ export function ReferralsAdmin({ token }: { token: string }) {
                       </button>
                       <button
                         className="action-btn"
-                        onClick={() =>
-                          setContentOpen({ type: "selected", ids: [row.id] })
-                        }
+                        onClick={() => openContentEditor([row.id])}
                         title="Edit this referral's page & email"
                       >
                         <Eye size={16} />
@@ -1606,13 +1667,19 @@ export function ReferralsAdmin({ token }: { token: string }) {
 
       {contentOpen && (
         <ContentEditor
-          content={content}
+          content={editorSeed ?? content}
           onSave={saveContent}
-          onClose={() => setContentOpen(null)}
+          onClose={() => {
+            setContentOpen(null);
+            setEditorSeed(null);
+          }}
           scope={
             contentOpen.type === "selected"
               ? { type: "selected", count: contentOpen.ids.length }
               : { type: "all" }
+          }
+          seedReady={
+            contentOpen.type === "selected" ? editorSeed !== null : true
           }
           onReset={
             contentOpen.type === "selected"

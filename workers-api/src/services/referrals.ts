@@ -1,11 +1,11 @@
-import { neon } from "@neondatabase/serverless";
+﻿import { neon } from "@neondatabase/serverless";
 import { getEnv } from "../config";
 import {
   referralRepository,
   contactRepository,
   footprintRepository,
 } from "../repositories";
-import { emailService } from "./email";
+import { emailService, getSupportEmail } from "./email";
 import type { CreateReferralInput, Referral } from "../schema";
 
 const REFERRAL_SCHEMA_SQL = `
@@ -95,21 +95,21 @@ const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
   heroSubtitle: "A private opportunity from SwiftJob",
   intro: `Hi {name}, {referredBy} referred you for this opportunity, and we've personally selected you to review it. Please read through everything below carefully before you do anything, so you know exactly what to expect.`,
   aboutRoleTitle: "About the role",
-  aboutRoleBody: `This is a real, paid {position} role with SwiftJob. Depending on the position, it may be fully remote, in-person at a site, or a mix of both — the exact setup is decided by whoever manages the work, and you'll get the precise details during your onboarding. This is not a commission-only or pyramid situation: you are being hired to do a defined job for fair, guaranteed pay, and the team will walk you through everything step by step.`,
+  aboutRoleBody: `This is a real, paid {position} role with SwiftJob. Depending on the position, it may be fully remote, in-person at a site, or a mix of both - the exact setup is decided by whoever manages the work, and you'll get the precise details during your onboarding. This is not a commission-only or pyramid situation: you are being hired to do a defined job for fair, guaranteed pay, and the team will walk you through everything step by step.`,
   roleMetaTitle: "What to expect",
   roleMetaBody: `• Clear, realistic pay that you'll be told in full before you commit.\n• A set schedule (or agreed hours) so you always know when you're working.\n• Simple, hands-on training — no experience or special software needed.\n• A real point of contact who answers when you have questions.\n\nIf anything below seems off or you're ever uncertain, stop, contact us, and we'll clarify — never pay anyone to "start" a job.`,
   whatYouDoTitle: "What you'll be doing",
-  whatYouDoBody: `You'll join a small team handling the day-to-day work for this role. Some roles are done on a laptop (support, admin, marketing, finance); others are hands-on at a location (packing, cleaning, retail, facilities, field work). Either way you'll get full training and support — you don't need to bring any special software, tools, or experience to get started.`,
+  whatYouDoBody: `You'll join a small team handling the day-to-day work for this role. Some roles are done on a laptop (support, admin, marketing, finance); others are hands-on at a location (packing, cleaning, retail, facilities, field work). Either way you'll get full training and support - you don't need to bring any special software, tools, or experience to get started.`,
   payTitle: "Pay & earnings",
   payBody: `Pay is clear, agreed in advance, and predictable. You'll be given your exact rate, how and how often you get paid, and what to do if you have trouble receiving a payment during your onboarding. We do not ask for payments, fees, or "hold" money at any point.`,
   howWorksTitle: "How it works",
-  howWorksBody: `Getting set up is simple and takes a few minutes. Your next step is a short guided workshop on your laptop or desktop that explains the role fully — what you'll do, what will be expected, how your pay works, and when things happen. This is not an interview and nothing is judged; it's simply how we onboard you and answer your questions one-by-one.`,
+  howWorksBody: `Getting set up is simple and takes a few minutes. Your next step is a short guided workshop on your laptop or desktop that explains the role fully - what you'll do, what will be expected, how your pay works, and when things happen. This is not an interview and nothing is judged; it's simply how we onboard you and answer your questions one-by-one.`,
   getStartedTitle: "Your next step",
   getStartedBody: `When you're ready, use the button on this page to continue. Please do this on a laptop or desktop computer rather than a phone, because the workshop and its screens need to open on a larger screen to work properly.`,
   workshopTitle: "About your workshop",
-  workshopBody: `The guided workshop explains three things clearly: 1) exactly what the role involves and what will be expected of you each week, 2) your pay — the rate, how and when you're paid, 3) the simple next steps to get working. It is designed to be honest and complete so there are no surprises.`,
+  workshopBody: `The guided workshop explains three things clearly: 1) exactly what the role involves and what will be expected of you each week, 2) your pay - the rate, how and when you're paid, 3) the simple next steps to get working. It is designed to be honest and complete so there are no surprises.`,
   companyTitle: "About SwiftJob",
-  companyBody: `SwiftJob helps businesses in 28+ countries build and run teams. We connect people to work they can actually do and pay them fairly — whether the role is done from a laptop at home or hands-on at a site. You're not a number here; you'll have a real point of contact throughout.`,
+  companyBody: `SwiftJob helps businesses in 28+ countries build and run teams. We connect people to work they can actually do and pay them fairly - whether the role is done from a laptop at home or hands-on at a site. You're not a number here; you'll have a real point of contact throughout.`,
   ctaLabel: "Continue to your next step",
   workTypeLabel: "Any location · remote or in-person",
   sidebarLaptopNote: "Workshop needs a laptop or desktop",
@@ -119,7 +119,7 @@ const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
   gateTitle: "Please continue on a laptop or desktop",
   gateSubtitle: "Your next step needs a computer",
   gateDetected: "You're viewing this on a phone or tablet.",
-  gateBody: `Your next step is a guided workshop that explains your role, what will be expected of you, how your pay works, and everything else. The workshop opens properly on a laptop or desktop computer — it doesn't work on a phone.`,
+  gateBody: `Your next step is a guided workshop that explains your role, what will be expected of you, how your pay works, and everything else. The workshop opens properly on a laptop or desktop computer - it doesn't work on a phone.`,
   gateAction: `Please open this same link on a PC or laptop and click continue there. If you don't have one handy, let us know and we'll help you get set up.`,
   gateLaptopHelp: "Already on a laptop or desktop?",
   gateLaptopHelpBody: `Try reloading this page, or copy this link into your computer's browser:`,
@@ -135,12 +135,12 @@ const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
   roomNote: `Keep this page open while your room loads. If the link does not respond, contact HR at {hrEmail}.`,
   emailSubject: "You've been referred for a {position} role",
   emailGreeting: "Hi {name},",
-  emailBody: `Someone from SwiftJob referred you, and we'd love for you to review this opportunity. We open a limited number of spots each week and you've been selected to review this one. Open your briefing below — it explains the role, your pay, and your exact next steps. Please review it on a laptop or desktop if you can.`,
+  emailBody: `Someone from SwiftJob referred you, and we'd love for you to review this opportunity. We open a limited number of spots each week and you've been selected to review this one. Open your briefing below - it explains the role, your pay, and your exact next steps. Please review it on a laptop or desktop if you can.`,
   emailCtaLabel: "Open my briefing",
-  emailClosing: `We've put everything you need on the page — the role, how it works, your pay, and what's next. When you're ready, follow the steps inside. If you have any technical problem, reach out to HR at {hrEmail} and they will respond ASAP to rectify it.`,
+  emailClosing: `We've put everything you need on the page - the role, how it works, your pay, and what's next. When you're ready, follow the steps inside. If you have any technical problem, reach out to HR at {hrEmail} and they will respond ASAP to rectify it.`,
 };
 
-// Replace the old shallow defaults with the richer copy — only where the stored
+// Replace the old shallow defaults with the richer copy - only where the stored
 // value still equals a known old default (so admin edits are never overwritten).
 const OLD_TO_NEW_CONTENT: Record<string, { old: string; next: string }> = {
   intro: {
@@ -152,11 +152,11 @@ const OLD_TO_NEW_CONTENT: Record<string, { old: string; next: string }> = {
     next: DEFAULT_REFERRAL_CONTENT.aboutRoleBody,
   },
   whatYouDoBody: {
-    old: `You'll be part of a small team handling day-to-day tasks for the role. Full training and support are provided — you don't need any special software or experience to get started.`,
+    old: `You'll be part of a small team handling day-to-day tasks for the role. Full training and support are provided - you don't need any special software or experience to get started.`,
     next: DEFAULT_REFERRAL_CONTENT.whatYouDoBody,
   },
   howWorksBody: {
-    old: `Everything happens from your laptop, working from home. It's a Q&A-style setup powered by simple guidance we share with you — not an interview for a traditional office job.`,
+    old: `Everything happens from your laptop, working from home. It's a Q&A-style setup powered by simple guidance we share with you - not an interview for a traditional office job.`,
     next: DEFAULT_REFERRAL_CONTENT.howWorksBody,
   },
   getStartedBody: {
@@ -176,7 +176,7 @@ const OLD_TO_NEW_CONTENT: Record<string, { old: string; next: string }> = {
     next: DEFAULT_REFERRAL_CONTENT.emailCtaLabel,
   },
   emailClosing: {
-    old: `We've put everything you need on the page — the role, how it works, your pay, and what's next. When you're ready, follow the steps inside.`,
+    old: `We've put everything you need on the page - the role, how it works, your pay, and what's next. When you're ready, follow the steps inside.`,
     next: DEFAULT_REFERRAL_CONTENT.emailClosing,
   },
   securityNote: {
@@ -371,6 +371,16 @@ export const referralService = {
             skipped.push(`${fullName} — already a referral`);
             continue;
           }
+        } else {
+          // Contacts without an inbox can't be deduped by email; treat a
+          // same-named email-less referral as the same person so repeated
+          // conversions don't multiply dead rows.
+          const existingByName =
+            await referralRepository.findByNameWithoutEmail(fullName);
+          if (existingByName) {
+            skipped.push(`${fullName} — already a referral (no email on file)`);
+            continue;
+          }
         }
         created.push(
           await referralRepository.create({
@@ -450,7 +460,7 @@ export const referralService = {
   },
 
   // The silently loaded background website finished (or failed) for this
-  // referral — recorded so admins can see the load in the footprint timeline.
+  // referral - recorded so admins can see the load in the footprint timeline.
   async recordBackground(
     code: string,
     ok: boolean,
@@ -493,11 +503,25 @@ export const referralService = {
     if (!referral) {
       return { backgroundUrl: "", roomLink: "", delaySeconds: 0 };
     }
-    const content = await this.getContentForReferral(referral);
-    const delayRaw = parseInt(content.nextStepDelay ?? "", 10);
+    const [global, overrides] = await Promise.all([
+      referralRepository.getContent(),
+      referralRepository.getContentOverrides(referral.id),
+    ]);
+    const delayRaw = parseInt(
+      overrides.nextStepDelay ?? global.nextStepDelay ?? "",
+      10,
+    );
+    // Precedence: the referral's own private link first, then its meeting URL,
+    // then the app-wide default room link. Empty strings always fall through.
+    const roomLink =
+      (overrides.roomLink ?? "").trim() ||
+      (referral.meetingUrl ?? "").trim() ||
+      (global.roomLink ?? "").trim();
     return {
-      backgroundUrl: (content.backgroundUrl ?? "").trim(),
-      roomLink: (content.roomLink ?? referral.meetingUrl ?? "").trim(),
+      backgroundUrl:
+        (overrides.backgroundUrl ?? "").trim() ||
+        (global.backgroundUrl ?? "").trim(),
+      roomLink,
       delaySeconds: Number.isFinite(delayRaw)
         ? Math.max(5, Math.min(300, delayRaw))
         : 12,
@@ -582,7 +606,6 @@ export const referralService = {
 
     const failed: Array<{ id: string; name: string; error: string }> = [];
     let sent = 0;
-    const dailyCap = status.remaining;
 
     await runWithConcurrency(sendable, 4, async (id) => {
       const referral = await referralRepository.findById(id);
@@ -606,15 +629,29 @@ export const referralService = {
         });
         return;
       }
+      // Atomically claim the send BEFORE emailing. markSent only succeeds if the
+      // row was not already "Sent", so concurrent admins / tabs cannot both send
+      // the same referral. If the email fails, the claim is rolled back.
+      const claimed = await referralRepository.markSent(id, new Date());
+      if (!claimed) {
+        failed.push({
+          id,
+          name: referral.fullName,
+          error: "Already sent",
+        });
+        return;
+      }
       try {
         const content = await this.getContentForReferral(referral);
         const vars = {
           name: referral.fullName,
-          position: referral.jobTitle ?? "this role",
+          // "new" keeps templates like "…for a {position} role" grammatical
+          // when no job title is set (avoids "a this role role").
+          position: referral.jobTitle ?? "new",
           referredBy: referral.referredBy ?? "a member of our team",
           code: referral.referralCode,
           link: `${referral.meetingUrl}?ref=${referral.referralCode}`,
-          hrEmail: getEnv().HR_EMAIL ?? "support@swiftjob.payservice.top",
+          hrEmail: getSupportEmail(),
         };
         await emailService.sendReferralInvitation({
           email: referral.email,
@@ -624,22 +661,28 @@ export const referralService = {
           referralCode: referral.referralCode,
           subject: interpolate(
             content.emailSubject ??
-              "You''ve been referred for a {position} role",
+              "You've been referred for a {position} role",
             vars,
           ),
           greeting: interpolate(content.emailGreeting ?? "Hi {name},", vars),
           body: interpolate(content.emailBody ?? "", vars),
-          ctaLabel: content.emailCtaLabel ?? "Open my invitation",
+          ctaLabel: interpolate(
+            content.emailCtaLabel ?? "Open my invitation",
+            vars,
+          ),
           closing: interpolate(content.emailClosing ?? "", vars),
         });
-        // Atomically claim this send. markSent only succeeds if the row was
-        // not already "Sent", which prevents duplicate emails under concurrency
-        // and concurrent admin tabs. Also stop once the daily limit is reached.
-        const claimed = await referralRepository.markSent(id, new Date());
-        if (claimed && sent < dailyCap) {
-          sent++;
-        }
+        // The daily cap was already enforced by slicing the batch up front.
+        // If a concurrent sender consumed the last slots mid-flight we still
+        // deliver this claimed email - rolling back a SENT email would invite
+        // a resend and guarantee the candidate gets two invitations.
+        sent++;
       } catch (err) {
+        // The email failed - undo the claim so the referral can be retried and
+        // is not reported as Sent by the status gauge.
+        await referralRepository
+          .update(id, { status: referral.status, emailSentAt: null })
+          .catch(() => {});
         failed.push({
           id,
           name: referral.fullName,
@@ -657,6 +700,9 @@ export const referralService = {
     fullName?: string | null;
     referredBy?: string | null;
     jobTitle?: string | null;
+    /** Skip the per-call daily-cap query — the route pre-checks the budget
+     *  once for the whole batch (the atomic markSent claim still protects). */
+    skipStatusCheck?: boolean;
   }): Promise<{
     referral: Referral;
     created: boolean;
@@ -680,15 +726,42 @@ export const referralService = {
       });
       created = true;
     }
+    // Never re-send a referral that is already marked "Sent", and enforce the
+    // same daily cap as the bulk sender (this endpoint is one of the ways an
+    // admin can put mail out, so it must not bypass the gauge).
+    if (referral.status === "Sent") {
+      return {
+        referral,
+        created,
+        sent: false,
+        error: "Already sent",
+      };
+    }
+    if (!opts.skipStatusCheck) {
+      const status = await this.getSendStatus();
+      if (status.remaining <= 0) {
+        return {
+          referral,
+          created,
+          sent: false,
+          error: "Daily send limit reached",
+        };
+      }
+    }
+    // Claim atomically before emailing - the same race guard as sendToReferrals.
+    const claimed = await referralRepository.markSent(referral.id, new Date());
+    if (!claimed) {
+      return { referral, created, sent: false, error: "Already sent" };
+    }
     try {
       const content = await this.getContentForReferral(referral);
       const vars = {
         name: referral.fullName,
-        position: referral.jobTitle ?? "this role",
+        position: referral.jobTitle ?? "new",
         referredBy: referral.referredBy ?? "a member of our team",
         code: referral.referralCode,
         link: `${referral.meetingUrl}?ref=${referral.referralCode}`,
-        hrEmail: getEnv().HR_EMAIL ?? "support@swiftjob.payservice.top",
+        hrEmail: getSupportEmail(),
       };
       await emailService.sendReferralInvitation({
         email: referral.email as string,
@@ -697,17 +770,26 @@ export const referralService = {
         jobTitle: referral.jobTitle,
         referralCode: referral.referralCode,
         subject: interpolate(
-          content.emailSubject ?? "You''ve been referred for a {position} role",
+          content.emailSubject ?? "You've been referred for a {position} role",
           vars,
         ),
         greeting: interpolate(content.emailGreeting ?? "Hi {name},", vars),
         body: interpolate(content.emailBody ?? "", vars),
-        ctaLabel: content.emailCtaLabel ?? "Open my invitation",
+        ctaLabel: interpolate(
+          content.emailCtaLabel ?? "Open my invitation",
+          vars,
+        ),
         closing: interpolate(content.emailClosing ?? "", vars),
       });
-      await referralRepository.markSent(referral.id, new Date());
       return { referral, created, sent: true };
     } catch (err) {
+      // Undo the claim so the referral stays retryable (and not counted as sent).
+      await referralRepository
+        .update(referral.id, {
+          status: referral.status,
+          emailSentAt: null,
+        })
+        .catch(() => {});
       return {
         referral,
         created,

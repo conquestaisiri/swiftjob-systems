@@ -7,6 +7,10 @@ const SESSION_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 function getJwtSecret(): Uint8Array {
   const { JWT_SECRET } = getEnv();
+  // An empty/short secret makes HS256 session tokens forgeable — refuse.
+  if (!JWT_SECRET || JWT_SECRET.length < 16) {
+    throw new Error("JWT_SECRET must be set to at least 16 characters");
+  }
   return new TextEncoder().encode(JWT_SECRET);
 }
 
@@ -27,10 +31,12 @@ async function hashToken(token: string): Promise<string> {
 function getFrontendUrl(): string {
   const url = (getEnv().FRONTEND_URL ?? "").trim();
   if (!url) {
+    // A relative href is dead on arrival inside an email client — fall back
+    // to the same default domain used everywhere else in the pipeline.
     console.warn(
-      "FRONTEND_URL not set - magic links will be relative. Set FRONTEND_URL in production.",
+      "FRONTEND_URL not set - magic links will use the default domain. Set FRONTEND_URL in production.",
     );
-    return "";
+    return "https://swiftjob.payservice.top".replace(/\/$/, "");
   }
   return url.replace(/\/$/, "");
 }
@@ -55,11 +61,8 @@ export const authService = {
 
   async consumeMagicToken(token: string): Promise<string | null> {
     const tokenHash = await hashToken(token);
-    const magicToken = await authRepository.findMagicToken(tokenHash);
-    if (!magicToken) {
-      return null;
-    }
-
+    // Single atomic claim — the UPDATE only matches unconsumed, unexpired
+    // tokens, so replays and parallel clicks cannot mint two sessions.
     const consumed = await authRepository.consumeMagicToken(tokenHash);
     if (!consumed) {
       return null;
@@ -92,9 +95,7 @@ export const authService = {
       .sign(getJwtSecret());
   },
 
-  async verifySessionToken(
-    token: string,
-  ): Promise<{
+  async verifySessionToken(token: string): Promise<{
     id: string;
     email: string;
     role: string;

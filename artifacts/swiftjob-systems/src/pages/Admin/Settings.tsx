@@ -12,6 +12,8 @@ const NEXT_STEP_KEYS = [
   "readyBody",
   "openRoomLabel",
   "roomNote",
+  "employedSoFarDisplay",
+  "countriesDisplay",
 ] as const;
 
 const NEXT_STEP_FIELDS: {
@@ -67,6 +69,16 @@ const NEXT_STEP_FIELDS: {
     label: "Room footnote",
     hint: "Small note under the room link. Supports {hrEmail}.",
     textarea: true,
+  },
+  {
+    key: "employedSoFarDisplay",
+    label: '"People employed so far" number',
+    hint: 'Shown on the home page beside live system stats. Your claim to own — e.g. "212+". Leave blank to hide the card.',
+  },
+  {
+    key: "countriesDisplay",
+    label: '"Countries hired from" number',
+    hint: "Shown on the home page. Your claim to own — leave blank to fall back to the live count.",
   },
 ];
 
@@ -132,8 +144,14 @@ export function Settings() {
         method: "PUT",
         body: JSON.stringify({ limit: Math.round(parsed) }),
       });
-      const data = await res.json();
-      setSendStatus(data.status ?? null);
+      if (!res.ok) throw new Error("Failed to save limit");
+      // The PUT returns { settings } — refetch the send status so the gauge
+      // reflects the new limit immediately instead of blanking out.
+      const statusRes = await adminFetch("/api/admin/referrals/status");
+      if (statusRes.ok) {
+        const statusData = await statusRes.json();
+        setSendStatus(statusData.status ?? null);
+      }
       setSavedNotice("Daily send limit saved.");
       window.setTimeout(() => setSavedNotice(""), 2500);
     } catch (err) {
@@ -146,6 +164,17 @@ export function Settings() {
   const saveContent = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    // The server silently clamps the wait to 5–300s — validate here so the
+    // admin isn't shown a value the system will ignore.
+    const delayRaw = (content.nextStepDelay ?? "").trim();
+    if (delayRaw) {
+      const d = Number(delayRaw);
+      if (!Number.isInteger(d) || d < 5 || d > 300) {
+        setError("Wait time must be a whole number between 5 and 300 seconds.");
+        setSavingContent(false);
+        return;
+      }
+    }
     setSavingContent(true);
     try {
       const res = await adminFetch("/api/admin/referrals/content", {

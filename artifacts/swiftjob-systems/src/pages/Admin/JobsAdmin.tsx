@@ -463,9 +463,10 @@ export function JobsAdmin({ token }: { token: string }) {
   };
 
   const deleteJob = async (job: AdminJob) => {
+    if (busy) return; // double-click guard: second click would 404 and lie
     if (
       !window.confirm(
-        `Delete the "${job.title}" position? This cannot be undone.`,
+        `Delete the "${job.title}" position? This cannot be undone. Campaigns linking to it will lose their destination.`,
       )
     )
       return;
@@ -620,6 +621,7 @@ export function JobsAdmin({ token }: { token: string }) {
                         <Pencil size={16} />
                       </button>
                       <button
+                        disabled={Boolean(busy)}
                         onClick={() => deleteJob(job)}
                         className="action-btn action-btn-danger"
                         title="Delete job"

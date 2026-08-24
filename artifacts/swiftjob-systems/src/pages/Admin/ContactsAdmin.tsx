@@ -183,8 +183,9 @@ export function ContactsAdmin({ token }: { token: string }) {
   };
 
   const addToReferrals = async (ids: string[], all: boolean) => {
+    // "All" ignores search filters server-side — the whole database converts.
     const what = all
-      ? `ALL ${total} contacts`
+      ? `ALL contacts in the database (search filters are ignored)`
       : `${ids.length} selected contact${ids.length === 1 ? "" : "s"}`;
     if (
       !window.confirm(
@@ -192,16 +193,19 @@ export function ContactsAdmin({ token }: { token: string }) {
       )
     )
       return;
-    const referredBy =
-      window.prompt(
-        "Referrer name (shown on each private page), optional",
-        "",
-      ) || undefined;
-    if (referredBy !== undefined && referredBy === null) return;
-    const jobTitle =
-      window.prompt("Job title (shown on each private page), optional", "") ||
-      undefined;
-    if (jobTitle !== undefined && jobTitle === null) return;
+    // Cancel (null) must abort the conversion — only empty OK maps to undefined.
+    const referredByRaw = window.prompt(
+      "Referrer name (shown on each private page), optional",
+      "",
+    );
+    if (referredByRaw === null) return;
+    const referredBy = referredByRaw.trim() || undefined;
+    const jobTitleRaw = window.prompt(
+      "Job title (shown on each private page), optional",
+      "",
+    );
+    if (jobTitleRaw === null) return;
+    const jobTitle = jobTitleRaw.trim() || undefined;
     setBusyAction(all ? "addAll" : "add");
     setError("");
     try {
@@ -514,7 +518,8 @@ export function ContactsAdmin({ token }: { token: string }) {
                           {contact.footprint.clicks > 0 && (
                             <span className="footprint-line">
                               <span className="footprint-badge footprint-badge-clicked">
-                                C clicked
+                                {contact.footprint.clicks} click
+                                {contact.footprint.clicks === 1 ? "" : "s"}
                                 {contact.footprint.lastClickDevice &&
                                   ` · ${contact.footprint.lastClickDevice}`}
                               </span>

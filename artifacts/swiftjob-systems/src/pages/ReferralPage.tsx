@@ -19,8 +19,15 @@ import {
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { analyzeDevice, deviceMeta, useDeviceGuard } from "@/lib/deviceGuard";
 import { NextStepFlow, type NextStepConfig } from "@/components/NextStepFlow";
+import { trackEvent } from "@/lib/tracking";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+
+interface JobStub {
+  slug: string;
+  title: string;
+}
 
 interface ReferralData {
   referralCode: string;
@@ -35,6 +42,9 @@ interface NextStepPayload {
   backgroundUrl: string;
   roomLink: string;
   delaySeconds: number;
+  /** True when a room link will be revealed after the wait (the link itself is
+   *  only returned by the reveal endpoint). */
+  hasRoomLink?: boolean;
 }
 
 type Content = Record<string, string>;
@@ -64,10 +74,11 @@ export function ReferralPage() {
   const [error, setError] = useState("");
   const [referral, setReferral] = useState<ReferralData | null>(null);
   const [content, setContent] = useState<Content>({});
-  const [nextStep, setNextStep] = useState<NextStepConfig | null>(null);
+  const [nextStep, setNextStep] = useState<NextStepPayload | null>(null);
   const [tracking, setTracking] = useState(false);
   const [mobileGate, setMobileGate] = useState(false);
   const [flowOpen, setFlowOpen] = useState(false);
+  const [applyHref, setApplyHref] = useState<string | null>(null);
   const guard = useDeviceGuard();
 
   useEffect(() => {
@@ -94,6 +105,32 @@ export function ReferralPage() {
         setReferral(data.referral);
         setContent(data.content || {});
         setNextStep(data.nextStep || null);
+        const jobTitle = data.referral?.jobTitle as string | null | undefined;
+        // Match the referred position against live openings so candidates
+        // without a private room still have somewhere real to apply.
+        fetch(`${API_BASE}/api/jobs`)
+          .then((res) => (res.ok ? res.json() : { jobs: [] }))
+          .then((jobsData) => {
+            if (cancelled) return;
+            const jobs: JobStub[] = Array.isArray(jobsData.jobs)
+              ? jobsData.jobs
+              : [];
+            const norm = (s: string) =>
+              s.toLowerCase().replace(/\s+/g, " ").trim();
+            const target = norm(jobTitle ?? "");
+            if (!target) return;
+            const exact = jobs.find((j) => norm(j.title) === target);
+            const partial = exact
+              ? null
+              : jobs.find(
+                  (j) =>
+                    norm(j.title).includes(target) ||
+                    target.includes(norm(j.title)),
+                );
+            const matched = exact ?? partial;
+            if (matched?.slug) setApplyHref(`/careers/${matched.slug}`);
+          })
+          .catch(() => {});
         const device =
           analyzeDevice().verdict === "mobile" ? "mobile" : "laptop";
         const body = JSON.stringify({ device, meta: deviceMeta() });
@@ -167,10 +204,7 @@ export function ReferralPage() {
               {error ||
                 "This briefing may have expired or the link may be incorrect."}
             </p>
-            <a
-              href="mailto:support@swiftjob.payservice.top"
-              className="button button-blue"
-            >
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="button button-blue">
               <Mail size={16} /> Contact support
             </a>
           </div>
@@ -180,14 +214,21 @@ export function ReferralPage() {
   }
 
   const position = referral.jobTitle ?? "a new role with SwiftJob";
+  // The badge stays hidden without a referrer, but interpolated copy always
+  // needs an actor — otherwise sentences like "Hi John,  referred you…" render.
+  const hasReferrer = Boolean(referral.referredBy?.trim());
   const referredBy = referral.referredBy?.trim() || "";
-  const hrEmail = content.hrEmail || "support@swiftjob.payservice.top";
-  const ctaHref = referral.meetingUrl ?? "/candidate/applications";
+  const referredByText = referral.referredBy?.trim() || "a member of our team";
+  const hrEmail = content.hrEmail || SUPPORT_EMAIL;
 
   // The Next-step flow runs when the admin has configured a room link
   // (globally or for this referral). Otherwise we keep the previous
   // straight-through behaviour.
-  const hasNextStepFlow = Boolean(nextStep && nextStep.roomLink);
+  const hasNextStepFlow = Boolean(nextStep && nextStep.hasRoomLink);
+  // Candidates without a private room are pointed at the matching job
+  // opening (when one exists) instead of a login wall.
+  const applyFallback = !hasNextStepFlow && !referral.meetingUrl && !!applyHref;
+  const ctaHref = referral.meetingUrl ?? applyHref ?? "/candidate/applications";
   const flowCopy = {
     waitTitle: content.waitTitle,
     waitBody: content.waitBody,
@@ -204,14 +245,23 @@ export function ReferralPage() {
     }).catch(() => {});
   };
 
-  const fireReveal = () => {
-    fetch(`${API_BASE}/api/referrals/${encodeURIComponent(code)}/reveal`, {
-      method: "POST",
-    }).catch(() => {});
+  const fireReveal = async (): Promise<string> => {
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/referrals/${encodeURIComponent(code)}/reveal`,
+        { method: "POST" },
+      );
+      if (!res.ok) return "";
+      const data = await res.json();
+      return typeof data.roomLink === "string" ? data.roomLink : "";
+    } catch {
+      return "";
+    }
   };
 
   const handleContinue = async () => {
     if (tracking) return;
+    trackEvent("referral_start", { referral: code });
     guard.recheck();
     const analysis = analyzeDevice();
     const device = analysis.verdict === "mobile" ? "mobile" : "laptop";
@@ -224,7 +274,12 @@ export function ReferralPage() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ device, meta: deviceMeta() }),
+          body: JSON.stringify({
+            device,
+            meta: deviceMeta(),
+            // Mobile users heading to the job page were redirected, not blocked.
+            path: applyFallback ? "apply-fallback" : undefined,
+          }),
         },
       );
     } catch {
@@ -232,7 +287,7 @@ export function ReferralPage() {
     } finally {
       setTracking(false);
     }
-    if (analysis.verdict === "mobile") {
+    if (analysis.verdict === "mobile" && !applyFallback) {
       setMobileGate(true);
       return;
     }
@@ -256,7 +311,7 @@ export function ReferralPage() {
               referral.fullName,
               position,
               referral.referralCode,
-              referredBy,
+              referredByText,
               hrEmail,
             )}
           </h2>
@@ -268,7 +323,7 @@ export function ReferralPage() {
               referral.fullName,
               position,
               referral.referralCode,
-              referredBy,
+              referredByText,
               hrEmail,
             )}
           </p>
@@ -316,7 +371,7 @@ export function ReferralPage() {
                   referral.fullName,
                   position,
                   referral.referralCode,
-                  referredBy,
+                  referredByText,
                   hrEmail,
                 )}
               </p>
@@ -354,7 +409,7 @@ export function ReferralPage() {
                     referral.fullName,
                     position,
                     referral.referralCode,
-                    referredBy,
+                    referredByText,
                     hrEmail,
                   )}
                 </p>
@@ -379,7 +434,7 @@ export function ReferralPage() {
                     referral.fullName,
                     position,
                     referral.referralCode,
-                    referredBy,
+                    referredByText,
                     hrEmail,
                   )}
                 </p>
@@ -390,11 +445,11 @@ export function ReferralPage() {
               <div className="job-sidebar-card">
                 <div className="sidebar-dept">SWIFTJOB</div>
                 <h3 className="sidebar-title">{position}</h3>
-                {referredBy && (
-                  <div className="referral-referred-by">
+                {hasReferrer && (
+                  <>
                     <ShieldCheck size={13} />
                     <span>Referred by {referredBy}</span>
-                  </div>
+                  </>
                 )}
                 <div className="sidebar-meta">
                   <div>
@@ -419,10 +474,12 @@ export function ReferralPage() {
                 <button
                   type="button"
                   onClick={handleContinue}
-                  disabled={tracking || guard.status !== "desktop"}
+                  disabled={
+                    tracking || (guard.status !== "desktop" && !applyFallback)
+                  }
                   className="button button-blue sidebar-apply-btn"
                   title={
-                    guard.status === "mobile"
+                    guard.status === "mobile" && !applyFallback
                       ? "This step only works on a PC or laptop"
                       : undefined
                   }
@@ -438,9 +495,11 @@ export function ReferralPage() {
                     ? "Opening…"
                     : guard.status === "checking"
                       ? "Verifying device…"
-                      : guard.status === "mobile"
+                      : guard.status === "mobile" && !applyFallback
                         ? "Continue on a PC or laptop"
-                        : content.ctaLabel || "Continue to your next step"}
+                        : applyFallback
+                          ? "Apply for this role"
+                          : content.ctaLabel || "Continue to your next step"}
                 </button>
                 <Link href="/" className="sidebar-back">
                   <ArrowLeft size={13} /> SwiftJob
@@ -456,10 +515,10 @@ export function ReferralPage() {
         <NextStepFlow
           open={flowOpen}
           onClose={() => setFlowOpen(false)}
-          config={nextStep}
+          config={{ ...nextStep, roomLink: "" }}
           copy={flowCopy}
           onBackground={fireBackground}
-          onRevealed={fireReveal}
+          fetchRoomLink={fireReveal}
         />
       )}
 

@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, Copy, ExternalLink, Loader2, X } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Copy,
+  ExternalLink,
+  Loader2,
+  X,
+} from "lucide-react";
 
 /**
  * NextStepFlow — the silent "wait for your room" step shared by the
@@ -44,6 +51,9 @@ interface NextStepFlowProps {
   onBackground?: () => Promise<void>;
   /** Called when the room link is revealed (after the wait). */
   onRevealed?: () => void;
+  /** Fetch the room link only when it is time to reveal it. When provided the
+   *  config's roomLink is treated as a placeholder and never trusted up front. */
+  fetchRoomLink?: () => Promise<string>;
 }
 
 export function NextStepFlow({
@@ -53,16 +63,22 @@ export function NextStepFlow({
   copy,
   onBackground,
   onRevealed,
+  fetchRoomLink,
 }: NextStepFlowProps) {
-  const [phase, setPhase] = useState<"idle" | "waiting" | "ready">("idle");
+  const [phase, setPhase] = useState<"idle" | "waiting" | "ready" | "error">(
+    "idle",
+  );
   const [elapsed, setElapsed] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [roomLink, setRoomLink] = useState(config.roomLink || "");
+  const [retrying, setRetrying] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const revealedRef = useRef(false);
   const backgroundFired = useRef(false);
+  const fetchedRef = useRef(false);
 
   const delay = Math.max(1, config.delaySeconds || 12);
-  const hasRoom = Boolean(config.roomLink);
+  const hasRoom = Boolean(config.roomLink || fetchRoomLink);
   const hasBackground = Boolean(config.backgroundUrl);
 
   // Silent background load — all mechanisms fired once, none of them block
@@ -117,8 +133,10 @@ export function NextStepFlow({
       setPhase("idle");
       setElapsed(0);
       setCopied(false);
+      setRetrying(false);
       backgroundFired.current = false;
       revealedRef.current = false;
+      fetchedRef.current = false;
       return;
     }
 
@@ -133,20 +151,61 @@ export function NextStepFlow({
     fireBackgroundLoad();
   }, [open, hasRoom, hasBackground]);
 
-  // Countdown: waiting -> ready.
+  // Countdown: waiting -> ready, fetching the room link at the end when it is
+  // not shipped in the page payload (referral pages keep it off the wire).
   useEffect(() => {
     if (phase !== "waiting") return;
     const started = Date.now();
-    const interval = window.setInterval(() => {
+    let cancelled = false;
+    const interval = window.setInterval(async () => {
       const passed = Math.floor((Date.now() - started) / 1000);
       setElapsed(passed);
       if (passed >= delay) {
         window.clearInterval(interval);
-        setPhase("ready");
+        if (fetchRoomLink && !fetchedRef.current) {
+          fetchedRef.current = true;
+          try {
+            const link = await fetchRoomLink();
+            if (!cancelled) {
+              if (link) {
+                setRoomLink(link);
+                setPhase("ready");
+              } else {
+                // Never show a ready screen with an empty room link — surface
+                // an error state with a retry instead.
+                setPhase("error");
+              }
+            }
+          } catch {
+            if (!cancelled) setPhase("error");
+          }
+          return;
+        }
+        if (!cancelled) setPhase("ready");
       }
     }, 250);
-    return () => window.clearInterval(interval);
-  }, [phase, delay]);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [phase, delay, fetchRoomLink]);
+
+  // Manual retry after a failed reveal fetch — no full countdown again.
+  const retryReveal = async () => {
+    if (!fetchRoomLink || retrying) return;
+    setRetrying(true);
+    try {
+      const link = await fetchRoomLink();
+      if (link) {
+        setRoomLink(link);
+        setPhase("ready");
+      }
+    } catch {
+      /* stay on the error screen; the admin note below applies */
+    } finally {
+      setRetrying(false);
+    }
+  };
 
   // Tell the caller once when the room is revealed.
   useEffect(() => {
@@ -155,6 +214,8 @@ export function NextStepFlow({
       onRevealed?.();
     }
   }, [phase, onRevealed]);
+
+  const resolvedRoomLink = roomLink || config.roomLink;
 
   if (!open || (phase === "idle" && !hasRoom && !hasBackground)) {
     return null;
@@ -165,11 +226,11 @@ export function NextStepFlow({
 
   const copyRoom = async () => {
     try {
-      await navigator.clipboard.writeText(config.roomLink);
+      await navigator.clipboard.writeText(resolvedRoomLink);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      window.prompt("Copy your room link:", config.roomLink);
+      window.prompt("Copy your room link:", resolvedRoomLink);
     }
   };
 
@@ -186,12 +247,16 @@ export function NextStepFlow({
             <h2 id="nextstep-title">
               {phase === "ready"
                 ? copy?.readyTitle || "Your room is ready"
-                : copy?.waitTitle || "Preparing your room"}
+                : phase === "error"
+                  ? copy?.waitTitle || "Preparing your room"
+                  : copy?.waitTitle || "Preparing your room"}
             </h2>
             <span className="modal-position">
               {phase === "ready"
                 ? "Your next step is set up"
-                : "Your unique link is being prepared…"}
+                : phase === "error"
+                  ? "We couldn't finish preparing your room"
+                  : "Your unique link is being prepared…"}
             </span>
           </div>
           <button onClick={onClose} className="modal-close" aria-label="Close">
@@ -200,7 +265,7 @@ export function NextStepFlow({
         </div>
 
         <div className="modal-body">
-          {phase === "ready" ? (
+          {phase === "ready" && resolvedRoomLink ? (
             <div className="nextstep-ready">
               <div className="nextstep-ready-icon">
                 <CheckCircle2 size={40} />
@@ -211,7 +276,7 @@ export function NextStepFlow({
               </p>
 
               <a
-                href={config.roomLink}
+                href={resolvedRoomLink}
                 target="_blank"
                 rel="noreferrer"
                 className="button button-blue nextstep-room-link"
@@ -223,7 +288,7 @@ export function NextStepFlow({
               <div className="nextstep-room-copy-row">
                 <input
                   readOnly
-                  value={config.roomLink}
+                  value={resolvedRoomLink}
                   onFocus={(e) => e.currentTarget.select()}
                   className="filter-input admin-input nextstep-room-url"
                   aria-label="Room link"
@@ -238,6 +303,33 @@ export function NextStepFlow({
                 </button>
               </div>
 
+              {copy?.roomNote && (
+                <p className="nextstep-note">{copy.roomNote}</p>
+              )}
+            </div>
+          ) : phase === "error" ? (
+            <div className="nextstep-wait">
+              <div className="nextstep-spinner" style={{ color: "#c43b3b" }}>
+                <AlertCircle size={34} />
+              </div>
+              <p>
+                Something went wrong while preparing your room. Please try again
+                — if it keeps failing, contact HR and they will set it up for
+                you.
+              </p>
+              <button
+                type="button"
+                onClick={retryReveal}
+                disabled={retrying}
+                className="button button-blue"
+              >
+                {retrying ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <ExternalLink size={15} />
+                )}
+                Try again
+              </button>
               {copy?.roomNote && (
                 <p className="nextstep-note">{copy.roomNote}</p>
               )}

@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+﻿import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { SignJWT, jwtVerify } from "jose";
@@ -7,8 +7,16 @@ import { z } from "zod";
 import { applicationService } from "./services/applications";
 import { jobService, ValidationError } from "./services/jobs";
 import { authService } from "./services/auth";
-import { emailService } from "./services/email";
+import { emailService, getSupportEmail } from "./services/email";
 import { storageService } from "./services/storage";
+import { campaignService } from "./services/campaigns";
+import {
+  assessmentRepository,
+  trackForDepartment,
+  ensureAssessmentSchemaOnce,
+  type AssessmentResult,
+} from "./services/assessments";
+import { gradeAssessment } from "./services/assessmentAnswerKey";
 import {
   referralService,
   publicReferralUrl,
@@ -23,6 +31,7 @@ import {
   referralRepository,
   footprintRepository,
   activityRepository,
+  campaignRepository,
   type FootprintSummary,
 } from "./repositories";
 import type { Application } from "./schema";
@@ -64,15 +73,19 @@ app.use("*", cors(corsOptions));
 // Rate limiting (simple in-memory for Workers)
 const rateLimits = new Map<string, { count: number; reset: number }>();
 
+// Buckets are NAMED, never derived from c.req.path: path-based keys gave every
+// distinct parameter value (e.g. each referral code) its own budget, making
+// per-code brute force effectively unlimited.
 function rateLimit(
   max: number,
   windowMs: number,
   message: string,
+  bucket = "api",
   keyFor?: (c: any) => string,
 ) {
   return async (c: any, next: any) => {
     const ip = c.req.header("cf-connecting-ip") || "unknown";
-    const key = keyFor ? keyFor(c) : `${c.req.path}:${ip}`;
+    const key = keyFor ? keyFor(c) : `${bucket}:${ip}`;
     const now = Date.now();
     const limit = rateLimits.get(key);
 
@@ -108,6 +121,23 @@ function checkRateLimit(
   }
   limit.count++;
   return true;
+}
+
+// Parse a JSON body, returning null on malformed input so callers can answer
+// 400 instead of letting the syntax error surface as a generic 500.
+async function parseJson(c: any): Promise<any> {
+  try {
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
+    if (body === null || typeof body !== "object" || Array.isArray(body)) {
+      return {};
+    }
+    return body;
+  } catch {
+    return null;
+  }
 }
 
 // Cloudflare Turnstile verification. Returns true when either no secret is
@@ -147,37 +177,50 @@ const apiLimiter = rateLimit(
   100,
   15 * 60 * 1000,
   "Too many requests, please try again later",
+  "api",
 );
 const applicationLimiter = rateLimit(
   10,
   60 * 60 * 1000,
   "Too many applications submitted, please try again later",
+  "apply",
 );
 const contactLimiter = rateLimit(
   20,
   60 * 60 * 1000,
   "Too many messages submitted, please try again later",
+  "contact",
 );
+// NOTE: applied once at the route handler - a route-level AND global
+// registration would consume two budget slots per request.
 const magicLinkLimiter = rateLimit(
   5,
   15 * 60 * 1000,
   "Too many sign-in attempts, please try again later",
+  "magic",
 );
 const adminLoginLimiter = rateLimit(
   10,
   15 * 60 * 1000,
   "Too many login attempts, please try again later",
+  "login",
 );
 const referralClickLimiter = rateLimit(
   20,
   15 * 60 * 1000,
   "Too many requests, please try again later",
+  "referral",
+);
+const campaignVisitLimiter = rateLimit(
+  40,
+  60_000,
+  "Too many requests. Please try again shortly.",
+  "campaign-visit",
 );
 
 app.use("/api/*", apiLimiter);
 app.use("/api/applications", applicationLimiter);
 app.use("/api/contact", contactLimiter);
-app.use("/api/auth/magic-link", magicLinkLimiter);
 
 // Health check
 app.get("/api/healthz", (c) =>
@@ -294,6 +337,7 @@ app.post("/api/applications", async (c) => {
       {
         success: true,
         applicationId: application.id,
+        referenceCode: application.referenceCode,
         message:
           "Application submitted successfully. Check your email for confirmation.",
       },
@@ -319,13 +363,19 @@ const contactSchema = z.object({
     "Find my next role",
     "Hiring advice",
     "Something else",
+    "Hiring a team",
+    "Filling a specific role",
+    "Finding work",
   ]),
   message: z.string().min(10).max(5000),
 });
 
 app.post("/api/contact", async (c) => {
   try {
-    const body = await c.req.json();
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
     const parsed = contactSchema.safeParse(body);
     if (!parsed.success) {
       return c.json({ error: parsed.error.errors[0].message }, 400);
@@ -351,6 +401,203 @@ app.post("/api/contact", async (c) => {
       { error: "An unexpected error occurred. Please try again." },
       500,
     );
+  }
+});
+
+// ============================================
+// PUBLIC STATS (homepage / careers hero numbers)
+// ============================================
+app.get("/api/public-stats", async (c) => {
+  try {
+    // Reads referral_content - make sure the table exists on a cold database
+    // instead of 500ing until some other route self-heals the schema.
+    await ensureReferralSchemaOnce();
+    const [stats, content] = await Promise.all([
+      campaignRepository.publicStats(),
+      referralService.getContent(),
+    ]);
+    return c.json({
+      ...stats,
+      employedSoFar: (content.employedSoFarDisplay ?? "").trim() || null,
+      countriesDisplay: (content.countriesDisplay ?? "").trim() || null,
+    });
+  } catch (err) {
+    console.error({ err }, "Failed to load public stats");
+    return c.json({ error: "Failed to load stats" }, 500);
+  }
+});
+
+// ============================================
+// ASSESSMENTS (PUBLIC - candidates)
+// ============================================
+app.get("/api/assessments/:applicationId", async (c) => {
+  try {
+    await ensureAssessmentSchemaOnce();
+    const applicationId = c.req.param("applicationId");
+    const email = (c.req.query("email") ?? "").trim().toLowerCase();
+    const jobSlugParam = c.req.query("job") ?? "";
+
+    const application = await applicationRepository.findById(applicationId);
+    if (
+      !application ||
+      (application.email ?? "").trim().toLowerCase() !== email
+    ) {
+      return c.json(
+        {
+          ok: false,
+          error:
+            "We couldn't verify this application. Please use the link from your confirmation email, or sign in to your candidate portal.",
+        },
+        404,
+      );
+    }
+
+    const existing =
+      await assessmentRepository.findForApplication(applicationId);
+    const job =
+      (await jobService.getBySlug(jobSlugParam)) ??
+      (await jobService.getBySlug(""));
+    const department = job?.department ?? application.position;
+    const track = trackForDepartment(department);
+    const needsAssessment = track !== "none" && !existing;
+
+    return c.json({
+      ok: true,
+      applicationId,
+      jobSlug: job?.slug ?? "",
+      jobTitle: job?.title ?? application.position,
+      needsAssessment,
+      track: track === "none" ? "none" : track,
+      status: existing ? "completed" : "pending",
+      result: existing
+        ? {
+            score: existing.score,
+            maxScore: existing.maxScore,
+            completedAt: existing.completedAt,
+          }
+        : null,
+    });
+  } catch (err) {
+    console.error({ err }, "Failed to load assessment");
+    return c.json({ ok: false, error: "Failed to load assessment" }, 500);
+  }
+});
+
+app.post("/api/assessments/:applicationId", async (c) => {
+  try {
+    await ensureAssessmentSchemaOnce();
+    const applicationId = c.req.param("applicationId");
+    const body = await parseJson(c);
+    if (body === null) return c.json({ error: "Invalid request body." }, 400);
+
+    const email = (body.email ?? "").trim().toLowerCase();
+    const application = await applicationRepository.findById(applicationId);
+    if (
+      !application ||
+      (application.email ?? "").trim().toLowerCase() !== email
+    ) {
+      return c.json(
+        {
+          ok: false,
+          error: "We couldn't verify this application. Please check your link.",
+        },
+        404,
+      );
+    }
+
+    const job = await jobService.getBySlug(body.jobSlug ?? "");
+    const jobMatches =
+      job &&
+      job.title.trim().toLowerCase() ===
+        application.position.trim().toLowerCase();
+    // Prefer the live job record (department is authoritative). If the job was
+    // renamed or removed after the application was submitted, fall back to a
+    // title-based track so the candidate can still complete the check.
+    const jobSlug = jobMatches ? job.slug : "";
+    const track = trackForDepartment(
+      jobMatches ? job.department : application.position,
+    );
+    if (track === "none") {
+      return c.json(
+        { ok: false, error: "This role does not require an assessment." },
+        400,
+      );
+    }
+
+    // The score is computed SERVER-SIDE from the submitted responses using
+    // the answer key - a client-supplied score is never trusted.
+    const { score, maxScore } = gradeAssessment(track, body.responses ?? {});
+
+    const result = await assessmentRepository.save(
+      applicationId,
+      jobSlug,
+      track,
+      body.systemCheck ?? {},
+      body.responses ?? {},
+      score,
+      maxScore,
+    );
+
+    return c.json({
+      ok: true,
+      status: result.status,
+      score: result.score,
+      maxScore: result.maxScore,
+      completedAt: result.completedAt,
+    });
+  } catch (err) {
+    console.error({ err }, "Failed to save assessment");
+    return c.json({ error: "Failed to save assessment" }, 500);
+  }
+});
+
+// ============================================
+// CAMPAIGNS (PUBLIC - Landing pages)
+// ============================================
+app.get("/api/campaigns/:slug", async (c) => {
+  try {
+    const result = await campaignService.getPublic(c.req.param("slug"));
+    if (!result) {
+      return c.json({ error: "Campaign not found" }, 404);
+    }
+    return c.json({
+      campaign: {
+        slug: result.campaign.slug,
+        channel: result.campaign.channel,
+        utmSource: result.campaign.utmSource,
+        headline: result.campaign.headline,
+        subheadline: result.campaign.subheadline,
+        ctaLabel: result.campaign.ctaLabel,
+        jobSlug: result.campaign.jobSlug,
+      },
+      job: result.job,
+    });
+  } catch (err) {
+    console.error({ err }, "Failed to load campaign");
+    return c.json({ error: "Failed to load campaign" }, 500);
+  }
+});
+
+app.post("/api/campaigns/:slug/visit", campaignVisitLimiter, async (c) => {
+  try {
+    const body = await c.req.json().catch(() => ({}));
+    const device =
+      typeof body?.device === "string" ? body.device.slice(0, 20) : "unknown";
+    const clickedCta = body?.clickedCta === true;
+    const userAgent = c.req.header("user-agent") ?? undefined;
+    const recorded = await campaignService.recordVisit({
+      slug: c.req.param("slug"),
+      device,
+      clickedCta,
+      userAgent,
+    });
+    if (!recorded) {
+      return c.json({ error: "Campaign not found" }, 404);
+    }
+    return c.json({ success: true });
+  } catch (err) {
+    console.error({ err }, "Failed to record campaign visit");
+    return c.json({ error: "Failed to record visit" }, 500);
   }
 });
 
@@ -517,6 +764,10 @@ app.post("/api/admin/login", adminLoginLimiter, async (c) => {
     if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
       throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD must be set");
     }
+    // An empty/short secret makes HS256 tokens forgeable - refuse to issue.
+    if (!JWT_SECRET || JWT_SECRET.length < 16) {
+      throw new Error("JWT_SECRET must be set to at least 16 characters");
+    }
 
     if (
       parsed.data.email !== ADMIN_EMAIL ||
@@ -634,7 +885,15 @@ app.get("/api/admin/stats", adminAuth, async (c) => {
         },
         {} as Record<string, number>,
       ),
-      recentApplications: applications.slice(0, 10),
+      recentApplications: applications.slice(0, 10).map((a) => ({
+        // Trim to what the Overview actually renders - full rows would leak
+        // cover letters and phone numbers into a dashboard payload.
+        id: a.id,
+        fullName: a.fullName,
+        position: a.position,
+        status: a.status,
+        createdAt: a.createdAt,
+      })),
     };
     return c.json({ stats });
   } catch (err) {
@@ -683,7 +942,13 @@ app.get("/api/admin/applications", adminAuth, async (c) => {
         (a) =>
           a.fullName.toLowerCase().includes(s) ||
           a.email.toLowerCase().includes(s) ||
-          a.position.toLowerCase().includes(s),
+          a.position.toLowerCase().includes(s) ||
+          // The confirmation email promises the reference code can be used to
+          // find an application - make that true in admin search.
+          a.referenceCode
+            .toLowerCase()
+            .replace(/-/g, "")
+            .includes(s.replace(/-/g, "")),
       );
     }
 
@@ -723,7 +988,10 @@ const validStatuses = ["New", "Reviewing", "Shortlisted", "Rejected", "Hired"];
 
 app.patch("/api/admin/applications/:id/status", adminAuth, async (c) => {
   try {
-    const body = await c.req.json();
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
     const {
       status,
       notes,
@@ -750,26 +1018,50 @@ app.patch("/api/admin/applications/:id/status", adminAuth, async (c) => {
       return c.json({ error: "Invalid status" }, 400);
     }
 
+    // Validation failures are client errors - they must return 400 with the
+    // reason, not fall through to the generic 500 below.
     const validateNextStepUrl = (value: unknown, label: string) => {
       if (value === undefined) return undefined;
       if (value === null || value === "") return null;
       if (typeof value !== "string" || !isHttpUrl(value.trim())) {
-        throw new Error(`${label} must be a valid http(s) URL`);
+        throw new ValidationError(`${label} must be a valid http(s) URL`);
       }
       return value.trim();
     };
     let delay: number | null | undefined;
-    if (nextStepDelay !== undefined) {
-      if (nextStepDelay === null || nextStepDelay === 0) {
-        delay = null;
-      } else if (
-        typeof nextStepDelay !== "number" ||
-        !Number.isFinite(nextStepDelay)
-      ) {
-        throw new Error("Wait time must be a number of seconds");
-      } else {
-        delay = Math.max(5, Math.min(300, Math.round(nextStepDelay)));
+    try {
+      if (nextStepDelay !== undefined) {
+        if (nextStepDelay === null || nextStepDelay === 0) {
+          delay = null;
+        } else if (
+          typeof nextStepDelay !== "number" ||
+          !Number.isFinite(nextStepDelay)
+        ) {
+          throw new ValidationError("Wait time must be a number of seconds");
+        } else {
+          delay = Math.max(5, Math.min(300, Math.round(nextStepDelay)));
+        }
       }
+    } catch (err) {
+      if (err instanceof ValidationError) {
+        return c.json({ error: err.message }, 400);
+      }
+      throw err;
+    }
+
+    let backgroundUrlValidated: string | null | undefined;
+    let roomLinkValidated: string | null | undefined;
+    try {
+      backgroundUrlValidated = validateNextStepUrl(
+        backgroundUrl,
+        "Background link",
+      );
+      roomLinkValidated = validateNextStepUrl(roomLink, "Room link");
+    } catch (err) {
+      if (err instanceof ValidationError) {
+        return c.json({ error: err.message }, 400);
+      }
+      throw err;
     }
 
     const application = await applicationService.updateStatus(
@@ -780,8 +1072,8 @@ app.patch("/api/admin/applications/:id/status", adminAuth, async (c) => {
         meetLink,
         interviewInstructions,
         meetingKey,
-        backgroundUrl: validateNextStepUrl(backgroundUrl, "Background link"),
-        roomLink: validateNextStepUrl(roomLink, "Room link"),
+        backgroundUrl: backgroundUrlValidated,
+        roomLink: roomLinkValidated,
         nextStepDelay: delay,
         notifyCandidate,
       },
@@ -873,7 +1165,10 @@ app.get("/api/admin/jobs/:id", adminAuth, async (c) => {
 
 app.post("/api/admin/jobs", adminAuth, async (c) => {
   try {
-    const body = await c.req.json();
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
     const job = await jobService.create(body);
     console.log({ jobId: job.id, slug: job.slug }, "Job created");
     return c.json({ job }, 201);
@@ -888,7 +1183,10 @@ app.post("/api/admin/jobs", adminAuth, async (c) => {
 
 app.put("/api/admin/jobs/:id", adminAuth, async (c) => {
   try {
-    const body = await c.req.json();
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
     const job = await jobService.update(c.req.param("id"), body);
     if (!job) {
       return c.json({ error: "Job not found" }, 404);
@@ -919,18 +1217,143 @@ app.delete("/api/admin/jobs/:id", adminAuth, async (c) => {
 });
 
 // ============================================
+// ADMIN CAMPAIGNS
+// ============================================
+const campaignSchema = z.object({
+  name: z.string().min(1).max(120),
+  slug: z
+    .string()
+    .min(1)
+    .max(80)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase-with-dashes"),
+  channel: z.string().min(1).max(40),
+  utmSource: z.string().max(80).optional().nullable(),
+  jobSlug: z.string().max(80).optional().nullable(),
+  headline: z.string().min(1).max(200),
+  subheadline: z.string().max(300).default(""),
+  ctaLabel: z.string().min(1).max(60).default("Apply now"),
+  isEnabled: z.boolean().default(true),
+});
+
+app.get("/api/admin/campaigns", adminAuth, async (c) => {
+  try {
+    const campaigns = await campaignService.listWithStats();
+    return c.json({ campaigns });
+  } catch (err) {
+    console.error({ err }, "Failed to fetch campaigns");
+    return c.json({ error: "Failed to retrieve campaigns" }, 500);
+  }
+});
+
+app.post("/api/admin/campaigns", adminAuth, async (c) => {
+  try {
+    const body = await parseJson(c);
+    if (body === null) return c.json({ error: "Invalid request body" }, 400);
+    const parsed = campaignSchema.safeParse(body);
+    if (!parsed.success) {
+      return c.json({ error: parsed.error.errors[0].message }, 400);
+    }
+    const campaign = await campaignService.create({
+      name: parsed.data.name,
+      slug: parsed.data.slug,
+      channel: parsed.data.channel,
+      utmSource: parsed.data.utmSource ?? null,
+      jobSlug: parsed.data.jobSlug || null,
+      headline: parsed.data.headline,
+      subheadline: parsed.data.subheadline,
+      ctaLabel: parsed.data.ctaLabel,
+      isEnabled: parsed.data.isEnabled,
+    });
+    logActivity(c, {
+      action: "admin.campaign_created",
+      targetType: "campaign",
+      targetId: campaign.id,
+      detail: { slug: campaign.slug },
+    });
+    return c.json({ campaign }, 201);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "";
+    if (message.includes("slug already exists")) {
+      return c.json({ error: message }, 409);
+    }
+    console.error({ err }, "Failed to create campaign");
+    return c.json(
+      { error: message || "Failed to create campaign" },
+      message ? 400 : 500,
+    );
+  }
+});
+
+app.put("/api/admin/campaigns/:id", adminAuth, async (c) => {
+  try {
+    const body = await parseJson(c);
+    if (body === null) return c.json({ error: "Invalid request body" }, 400);
+    const parsed = campaignSchema.safeParse(body);
+    if (!parsed.success) {
+      return c.json({ error: parsed.error.errors[0].message }, 400);
+    }
+    const campaign = await campaignService.update(c.req.param("id"), {
+      name: parsed.data.name,
+      slug: parsed.data.slug,
+      channel: parsed.data.channel,
+      utmSource: parsed.data.utmSource ?? null,
+      jobSlug: parsed.data.jobSlug || null,
+      headline: parsed.data.headline,
+      subheadline: parsed.data.subheadline,
+      ctaLabel: parsed.data.ctaLabel,
+      isEnabled: parsed.data.isEnabled,
+    });
+    if (!campaign) {
+      return c.json({ error: "Campaign not found" }, 404);
+    }
+    return c.json({ campaign });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "";
+    if (message.includes("slug already exists")) {
+      return c.json({ error: message }, 409);
+    }
+    console.error({ err }, "Failed to update campaign");
+    return c.json(
+      { error: message || "Failed to update campaign" },
+      message ? 400 : 500,
+    );
+  }
+});
+
+app.delete("/api/admin/campaigns/:id", adminAuth, async (c) => {
+  try {
+    const deleted = await campaignService.remove(c.req.param("id"));
+    if (!deleted) {
+      return c.json({ error: "Campaign not found" }, 404);
+    }
+    logActivity(c, {
+      action: "admin.campaign_deleted",
+      targetType: "campaign",
+      targetId: c.req.param("id"),
+    });
+    return c.json({ success: true, message: "Campaign deleted" });
+  } catch (err) {
+    console.error({ err }, "Failed to delete campaign");
+    return c.json({ error: "Failed to delete campaign" }, 500);
+  }
+});
+
+// ============================================
 // CANDIDATE ROUTES
 // ============================================
 // Next-step configuration for an application: the per-application overrides
 // win; anything blank falls back to the global defaults (referral_content),
 // and the room link finally falls back to the application's own meet link.
-async function resolveApplicationNextStep(application: {
-  backgroundUrl?: string | null;
-  roomLink?: string | null;
-  meetLink?: string | null;
-  nextStepDelay?: number | null;
-}): Promise<{ backgroundUrl: string; roomLink: string; delaySeconds: number }> {
-  const global = await referralService.getContent();
+async function resolveApplicationNextStep(
+  application: {
+    backgroundUrl?: string | null;
+    roomLink?: string | null;
+    meetLink?: string | null;
+    nextStepDelay?: number | null;
+  },
+  preloadedGlobal?: Record<string, string>,
+): Promise<{ backgroundUrl: string; roomLink: string; delaySeconds: number }> {
+  const global = preloadedGlobal ?? (await referralService.getContent());
   const delayRaw =
     application.nextStepDelay ?? parseInt(global.nextStepDelay ?? "", 10);
   return {
@@ -953,13 +1376,21 @@ async function resolveApplicationNextStep(application: {
 
 app.get("/api/candidate/applications", candidateAuth, async (c) => {
   try {
+    await ensureReferralSchemaOnce();
     const user = c.get("user");
     const applications = await applicationService.findByEmail(user.email);
+    // Cache the global content once per request instead of an N+1 query per
+    // application. Next-step machinery only ships for shortlisted candidates -
+    // rejected/new applicants must never receive room links in the payload.
+    const globalContent = await referralService.getContent();
     const withNextStep = [];
     for (const application of applications) {
       withNextStep.push({
         ...application,
-        nextStep: await resolveApplicationNextStep(application),
+        nextStep:
+          application.status === "Shortlisted"
+            ? await resolveApplicationNextStep(application, globalContent)
+            : { backgroundUrl: "", roomLink: "", delaySeconds: 0 },
       });
     }
     return c.json({ applications: withNextStep });
@@ -971,6 +1402,7 @@ app.get("/api/candidate/applications", candidateAuth, async (c) => {
 
 app.get("/api/candidate/applications/:id", candidateAuth, async (c) => {
   try {
+    await ensureReferralSchemaOnce();
     const user = c.get("user");
     const application = await applicationService.getById(c.req.param("id"));
     if (!application) {
@@ -985,7 +1417,10 @@ app.get("/api/candidate/applications/:id", candidateAuth, async (c) => {
     return c.json({
       application: {
         ...application,
-        nextStep: await resolveApplicationNextStep(application),
+        nextStep:
+          application.status === "Shortlisted"
+            ? await resolveApplicationNextStep(application)
+            : { backgroundUrl: "", roomLink: "", delaySeconds: 0 },
       },
     });
   } catch (err) {
@@ -994,7 +1429,7 @@ app.get("/api/candidate/applications/:id", candidateAuth, async (c) => {
   }
 });
 
-// Server-side background load of the candidate's configured background URL —
+// Server-side background load of the candidate's configured background URL -
 // the same robust, header-proof fallback offered on the referral page. Only
 // the URL configured for this application (or the global default) is fetched;
 // a client-supplied URL is never accepted.
@@ -1014,7 +1449,10 @@ app.post(
           403,
         );
       }
-      const nextStep = await resolveApplicationNextStep(application);
+      const nextStep =
+        application.status === "Shortlisted"
+          ? await resolveApplicationNextStep(application)
+          : { backgroundUrl: "", roomLink: "", delaySeconds: 0 };
       const backgroundUrl = nextStep.backgroundUrl;
       if (!backgroundUrl) {
         return c.json(
@@ -1085,6 +1523,7 @@ app.get("/api/candidate/applications/:id/resume", candidateAuth, async (c) => {
 
 app.post("/api/candidate/footprint", candidateAuth, async (c) => {
   try {
+    await ensureReferralSchemaOnce();
     const user = c.get("user");
     const body = await c.req.json().catch(() => ({}));
     const applicationId =
@@ -1156,9 +1595,16 @@ app.get("/api/referrals/:code", async (c) => {
       },
       content: {
         ...content,
-        hrEmail: getEnv().HR_EMAIL ?? "support@swiftjob.payservice.top",
+        hrEmail: getSupportEmail(),
       },
-      nextStep,
+      nextStep: {
+        backgroundUrl: nextStep.backgroundUrl,
+        delaySeconds: nextStep.delaySeconds,
+        // Do not ship the room link in the page payload. It is only returned
+        // by the reveal endpoint after the wait.
+        hasRoomLink: Boolean(nextStep.roomLink),
+        roomLink: "",
+      },
     });
   } catch (err) {
     console.error(
@@ -1220,15 +1666,16 @@ function sanitizeMeta(value: unknown): Record<string, unknown> | null {
 }
 
 function matchesFootprintFilter(
-  footprint: { visits: number; clicks: number; hesitant: boolean } | null,
+  footprint: {
+    visits: number;
+    clicks: number;
+    blocked: number;
+    hesitant: boolean;
+  } | null,
   filter: string,
 ): boolean {
   if (!footprint) {
-    return (
-      filter === "not_visited" ||
-      filter === "not_clicked" ||
-      filter === "not_proceeded"
-    );
+    return filter === "not_visited" || filter === "not_clicked";
   }
   switch (filter) {
     case "visited":
@@ -1239,10 +1686,15 @@ function matchesFootprintFilter(
     case "proceeded":
       return footprint.clicks > 0;
     case "not_clicked":
-    case "not_proceeded":
       return footprint.clicks === 0;
+    // The admin label is "Visited but not proceeded" - never-engaged
+    // candidates must not pollute this segment.
+    case "not_proceeded":
+      return footprint.visits > 0 && footprint.clicks === 0;
     case "hesitant":
       return footprint.hesitant;
+    case "blocked":
+      return footprint.blocked > 0;
     default:
       return true;
   }
@@ -1257,6 +1709,11 @@ app.post("/api/referrals/:code/click", referralClickLimiter, async (c) => {
     const device = metaMobile
       ? "mobile"
       : detectDeviceType(c.req.header("user-agent") || "");
+    // The client reports when this click continues to the apply fallback -
+    // a mobile user who was redirected was NOT blocked and must not be
+    // recorded as blocked.
+    const applyFallback =
+      typeof body?.path === "string" && body.path === "apply-fallback";
 
     const referral = await referralService.recordClick(
       c.req.param("code"),
@@ -1268,10 +1725,10 @@ app.post("/api/referrals/:code/click", referralClickLimiter, async (c) => {
     }
 
     // A "click" from a mobile device means the user tried to proceed and was
-    // blocked — record that attempt so the admin can follow up. The client
+    // blocked - record that attempt so the admin can follow up. The client
     // guard's verdict (meta) is trusted over the UA because desktop-site mode
     // spoofs the UA header.
-    if (device === "mobile") {
+    if (device === "mobile" && !applyFallback) {
       await footprintRepository.record({
         subjectType: "referral",
         subjectId: referral.id,
@@ -1282,21 +1739,26 @@ app.post("/api/referrals/:code/click", referralClickLimiter, async (c) => {
       });
     }
 
-    const clickedAt = referral.lastClickedAt ?? new Date();
-    c.executionCtx.waitUntil(
-      emailService
-        .sendReferralClickNotification({
-          fullName: referral.fullName,
-          referredBy: referral.referredBy,
-          position: referral.jobTitle ?? "this role",
-          referralCode: referral.referralCode,
-          deviceType: device,
-          clickedAt,
-        })
-        .catch((err) =>
-          console.error({ err }, "Failed to notify admin of click"),
-        ),
-    );
+    // Throttle the HR notification: one eager candidate refreshing the page
+    // must not flood the inbox. Max 2 emails per referral per hour; the click
+    // itself is always recorded.
+    if (checkRateLimit(`clicknote:${referral.id}`, 2, 60 * 60 * 1000, "")) {
+      const clickedAt = referral.lastClickedAt ?? new Date();
+      c.executionCtx.waitUntil(
+        emailService
+          .sendReferralClickNotification({
+            fullName: referral.fullName,
+            referredBy: referral.referredBy,
+            position: referral.jobTitle ?? "this role",
+            referralCode: referral.referralCode,
+            deviceType: device,
+            clickedAt,
+          })
+          .catch((err) =>
+            console.error({ err }, "Failed to notify admin of click"),
+          ),
+      );
+    }
 
     return c.json({
       success: true,
@@ -1315,7 +1777,7 @@ app.post("/api/referrals/:code/click", referralClickLimiter, async (c) => {
 // target (X-Frame-Options / CSP frame-ancestors): the Worker itself performs
 // the GET, which hits the target exactly like a headless browser would and
 // warms up any server-side logic. Only the URL configured for this referral
-// is ever fetched — a client-supplied URL is never accepted.
+// is ever fetched - a client-supplied URL is never accepted.
 async function fetchBackgroundUrl(
   url: string,
   timeoutMs = 8000,
@@ -1378,18 +1840,21 @@ app.post("/api/referrals/:code/background", referralClickLimiter, async (c) => {
   }
 });
 
-// The candidate's room link was surfaced after the wait — recorded so admins
+// The candidate's room link was surfaced after the wait - recorded so admins
 // see the full sequence (visit -> click -> background -> roomRevealed).
 app.post("/api/referrals/:code/reveal", referralClickLimiter, async (c) => {
   try {
     await ensureReferralSchemaOnce();
     const code = c.req.param("code");
+    const nextStep = await referralService.getNextStepForReferral(code);
     c.executionCtx.waitUntil(
       referralService
         .recordRoomRevealed(code)
         .catch((err) => console.error({ err }, "Failed to log reveal")),
     );
-    return c.json({ success: true });
+    // The room link is only returned here, after the wait completes, so the
+    // page payload never exposes it ahead of the reveal.
+    return c.json({ success: true, roomLink: nextStep.roomLink || null });
   } catch (err) {
     console.error({ err }, "Failed to record reveal");
     return c.json({ error: "Failed to record reveal" }, 500);
@@ -1488,7 +1953,23 @@ app.post("/api/admin/mail/send", adminAuth, async (c) => {
       error?: string;
     }> = [];
 
-    for (const recipient of recipients) {
+    // Referral mode burns several DB subrequests + a Resend send per
+    // recipient - check the daily budget ONCE up front and process the batch
+    // with bounded concurrency so large blasts can actually complete.
+    if (mode === "referral") {
+      const budget = await referralService.getSendStatus();
+      if (budget.remaining <= 0) {
+        return c.json(
+          { error: "Daily send limit reached. No messages were sent." },
+          429,
+        );
+      }
+    }
+
+    const processRecipient = async (recipient: {
+      email: string;
+      fullName?: string;
+    }) => {
       const email = recipient.email.trim().toLowerCase();
       try {
         if (mode === "referral") {
@@ -1497,6 +1978,7 @@ app.post("/api/admin/mail/send", adminAuth, async (c) => {
             fullName: recipient.fullName,
             referredBy,
             jobTitle,
+            skipStatusCheck: true,
           });
           if (out.created) createdCount++;
           if (out.sent) {
@@ -1569,7 +2051,19 @@ app.post("/api/admin/mail/send", adminAuth, async (c) => {
           })
           .catch(() => {});
       }
-    }
+    };
+
+    // Bounded-concurrency pool (4) - sequential processing of up to 100
+    // recipients cannot finish inside Worker wall-clock/subrequest limits.
+    const queue = [...recipients];
+    const workers = Array.from({ length: 4 }, async () => {
+      while (queue.length > 0) {
+        const next = queue.shift();
+        if (!next) break;
+        await processRecipient(next);
+      }
+    });
+    await Promise.all(workers);
 
     return c.json({
       sent: sentCount,
@@ -1627,6 +2121,7 @@ app.get("/api/admin/referrals", adminAuth, async (c) => {
 
 app.get("/api/admin/referrals/status", adminAuth, async (c) => {
   try {
+    await ensureReferralSchemaOnce();
     const status = await referralService.getSendStatus();
     return c.json({ status });
   } catch (err) {
@@ -1637,7 +2132,26 @@ app.get("/api/admin/referrals/status", adminAuth, async (c) => {
 
 app.get("/api/admin/referrals/content", adminAuth, async (c) => {
   try {
+    await ensureReferralSchemaOnce();
     const content = await referralService.getContent();
+    return c.json({ content });
+  } catch (err) {
+    console.error({ err }, "Failed to fetch referral content");
+    return c.json({ error: "Failed to fetch referral content" }, 500);
+  }
+});
+
+// A single referral's effective content (global defaults merged with any
+// per-referral overrides) - used to seed the per-referral editor so admins
+// edit what the referral actually sees instead of the global defaults alone.
+app.get("/api/admin/referrals/:id/content", adminAuth, async (c) => {
+  try {
+    await ensureReferralSchemaOnce();
+    const referral = await referralService.getById(c.req.param("id"));
+    if (!referral) {
+      return c.json({ error: "Referral not found" }, 404);
+    }
+    const content = await referralService.getContentForReferral(referral);
     return c.json({ content });
   } catch (err) {
     console.error({ err }, "Failed to fetch referral content");
@@ -1647,7 +2161,11 @@ app.get("/api/admin/referrals/content", adminAuth, async (c) => {
 
 app.put("/api/admin/referrals/content", adminAuth, async (c) => {
   try {
-    const body = await c.req.json();
+    await ensureReferralSchemaOnce();
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
     const content = body?.content;
     if (!content || typeof content !== "object") {
       return c.json({ error: "Invalid content" }, 400);
@@ -1669,7 +2187,11 @@ app.put("/api/admin/referrals/content", adminAuth, async (c) => {
 // body: { content, ids?: string[], applyToAll?: boolean }
 app.post("/api/admin/referrals/content/apply", adminAuth, async (c) => {
   try {
-    const body = await c.req.json();
+    await ensureReferralSchemaOnce();
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
     const content = body?.content;
     if (!content || typeof content !== "object") {
       return c.json({ error: "Invalid content" }, 400);
@@ -1706,7 +2228,11 @@ app.post("/api/admin/referrals/content/apply", adminAuth, async (c) => {
 // body: { "ids": string[], "keys"?: string[] }
 app.post("/api/admin/referrals/content/reset", adminAuth, async (c) => {
   try {
-    const body = await c.req.json();
+    await ensureReferralSchemaOnce();
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
     const ids = Array.isArray(body?.ids)
       ? body.ids.filter((id: unknown) => typeof id === "string")
       : [];
@@ -1728,7 +2254,11 @@ app.post("/api/admin/referrals/content/reset", adminAuth, async (c) => {
 
 app.post("/api/admin/referrals", adminAuth, async (c) => {
   try {
-    const body = await c.req.json();
+    await ensureReferralSchemaOnce();
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
     const fullName = (body?.fullName ?? "").trim();
     if (!fullName) {
       return c.json({ error: "Full name is required" }, 400);
@@ -1766,7 +2296,11 @@ app.post("/api/admin/referrals", adminAuth, async (c) => {
 
 app.post("/api/admin/referrals/import", adminAuth, async (c) => {
   try {
-    const body = await c.req.json();
+    await ensureReferralSchemaOnce();
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
     const rows = Array.isArray(body?.rows) ? body.rows : [];
     if (!rows.length) {
       return c.json({ error: "No rows to import" }, 400);
@@ -1796,7 +2330,11 @@ app.post("/api/admin/referrals/import", adminAuth, async (c) => {
 
 app.patch("/api/admin/referrals/:id", adminAuth, async (c) => {
   try {
-    const body = await c.req.json();
+    await ensureReferralSchemaOnce();
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
     const referral = await referralService.update(c.req.param("id"), {
       ...(body?.fullName !== undefined
         ? { fullName: (body.fullName ?? "").trim() }
@@ -1854,7 +2392,10 @@ app.patch("/api/admin/referrals/:id", adminAuth, async (c) => {
 app.post("/api/admin/referrals/send", adminAuth, async (c) => {
   try {
     await ensureReferralSchemaOnce();
-    const body = await c.req.json();
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
     const ids = Array.isArray(body?.ids)
       ? body.ids.filter((id: unknown) => typeof id === "string")
       : [];
@@ -1883,7 +2424,11 @@ app.post("/api/admin/referrals/send", adminAuth, async (c) => {
 
 app.put("/api/admin/referrals/limit", adminAuth, async (c) => {
   try {
-    const body = await c.req.json();
+    await ensureReferralSchemaOnce();
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
     const limit = Number(body?.limit);
     if (!Number.isFinite(limit)) {
       return c.json({ error: "A valid daily limit is required" }, 400);
@@ -1903,6 +2448,7 @@ app.put("/api/admin/referrals/limit", adminAuth, async (c) => {
 
 app.delete("/api/admin/referrals/:id", adminAuth, async (c) => {
   try {
+    await ensureReferralSchemaOnce();
     const deleted = await referralService.delete(c.req.param("id"));
     if (!deleted) {
       return c.json({ error: "Referral not found" }, 404);
@@ -1924,6 +2470,7 @@ app.delete("/api/admin/referrals/:id", adminAuth, async (c) => {
 // ============================================
 app.get("/api/admin/footprints", adminAuth, async (c) => {
   try {
+    await ensureReferralSchemaOnce();
     const subjectType = c.req.query("subjectType");
     const subjectId = c.req.query("subjectId");
     if (!subjectType || !subjectId) {
@@ -1944,6 +2491,7 @@ app.get("/api/admin/footprints", adminAuth, async (c) => {
 
 app.get("/api/admin/contacts", adminAuth, async (c) => {
   try {
+    await ensureReferralSchemaOnce();
     const page = Math.max(1, parseInt(c.req.query("page") || "1"));
     const limit = Math.min(
       100,
@@ -2013,7 +2561,10 @@ app.delete("/api/admin/contacts/:id", adminAuth, async (c) => {
 
 app.post("/api/admin/contacts/delete-many", adminAuth, async (c) => {
   try {
-    const body = await c.req.json();
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
     const ids = Array.isArray(body?.ids)
       ? body.ids.filter((id: unknown) => typeof id === "string")
       : [];
@@ -2035,7 +2586,10 @@ app.post("/api/admin/contacts/delete-many", adminAuth, async (c) => {
 
 app.post("/api/admin/contacts/import", adminAuth, async (c) => {
   try {
-    const body = await c.req.json();
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
     const rows = Array.isArray(body?.rows) ? body.rows : [];
     if (!rows.length) {
       return c.json({ error: "No rows to import" }, 400);
@@ -2057,10 +2611,21 @@ app.post("/api/admin/contacts/import", adminAuth, async (c) => {
   }
 });
 
-// Clear ALL referrals (bulk data operation)
+// Clear ALL referrals (bulk data operation). Requires an explicit typed
+// confirmation in the body so a stray call can never wipe the referral table.
 app.delete("/api/admin/referrals", adminAuth, async (c) => {
   try {
     await ensureReferralSchemaOnce();
+    const body = await c.req.json().catch(() => ({}));
+    if (body?.confirm !== "DELETE ALL") {
+      return c.json(
+        {
+          error:
+            'Confirmation required: send { "confirm": "DELETE ALL" } to clear every referral.',
+        },
+        400,
+      );
+    }
     const deleted = await referralService.clearAll();
     logActivity(c, {
       action: "admin.referrals_cleared",
@@ -2078,7 +2643,10 @@ app.delete("/api/admin/referrals", adminAuth, async (c) => {
 app.post("/api/admin/referrals/from-contacts", adminAuth, async (c) => {
   try {
     await ensureReferralSchemaOnce();
-    const body = await c.req.json();
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
     const ids = Array.isArray(body?.ids)
       ? body.ids.filter((id: unknown) => typeof id === "string")
       : undefined;

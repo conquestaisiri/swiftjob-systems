@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+﻿import { FormEvent, useEffect, useState } from "react";
 import { Link } from "wouter";
 import {
   ArrowRight,
@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { fetchJobs } from "@/lib/jobsApi";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { SiteWidgets } from "@/components/site/SiteWidgets";
 
 const categories = [
   {
@@ -78,7 +79,9 @@ export function LandingPage() {
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
+    // Capture before awaiting — event.currentTarget is null after the await.
+    const formEl = event.currentTarget;
+    const data = new FormData(formEl);
     setFormState("busy");
     setFormMessage("");
     try {
@@ -96,7 +99,7 @@ export function LandingPage() {
         throw new Error("We could not send your message. Please try again.");
       setFormState("success");
       setFormMessage("Thanks. We will be in touch shortly.");
-      event.currentTarget.reset();
+      formEl.reset();
     } catch (error) {
       setFormState("error");
       setFormMessage(
@@ -214,24 +217,6 @@ export function LandingPage() {
               <strong>for every kind of work.</strong>
               <small>Remote · Hybrid · On-site</small>
             </div>
-          </div>
-        </section>
-
-        <section className="landing-v2-proof">
-          <div>
-            <Globe2 size={17} />
-            <span>Global reach</span>
-            <strong>28+ countries</strong>
-          </div>
-          <div>
-            <ShieldCheck size={17} />
-            <span>Clear process</span>
-            <strong>Vetted people, honest updates</strong>
-          </div>
-          <div>
-            <PackageCheck size={17} />
-            <span>Practical support</span>
-            <strong>From first brief to first day</strong>
           </div>
         </section>
 
@@ -385,6 +370,74 @@ export function LandingPage() {
           </div>
         </section>
 
+        <section className="landing-v2-portal">
+          <div className="landing-v2-section-heading">
+            <div>
+              <span className="landing-v2-eyebrow">
+                <i /> For candidates
+              </span>
+              <h2>
+                Your portal,
+                <br />
+                <em>step by step.</em>
+              </h2>
+            </div>
+            <p>
+              Everything happens from your email address — the one you use when
+              you apply. Here is exactly how you get in, what you will see, and
+              what you should have ready.
+            </p>
+          </div>
+          <div className="landing-v2-portal-steps">
+            <article>
+              <span>1</span>
+              <h3>Apply with your email</h3>
+              <p>
+                Submit your application on the role page. Use an email address
+                you check every day — it becomes the key to your portal.
+              </p>
+            </article>
+            <article>
+              <span>2</span>
+              <h3>Open the magic link</h3>
+              <p>
+                We send a secure sign-in link to that email (valid 15 minutes).
+                One tap and you are in — no passwords to remember or reset.
+              </p>
+            </article>
+            <article>
+              <span>3</span>
+              <h3>Complete your assessment</h3>
+              <p>
+                Computer-based roles include a short assessment: a quick system
+                check, then questions matched to the job. It takes about 20
+                minutes and auto-saves as you go.
+              </p>
+            </article>
+            <article>
+              <span>4</span>
+              <h3>Track your application</h3>
+              <p>
+                Your portal shows your application status, assessment result,
+                and updates from the team. Keep your application reference
+                number — you will need it for questions.
+              </p>
+            </article>
+          </div>
+          <div className="landing-v2-portal-actions">
+            <Link
+              href="/login"
+              className="landing-v2-button landing-v2-button-light"
+            >
+              Open candidate portal <ArrowUpRight size={16} />
+            </Link>
+            <span>
+              Applied already? Check your inbox for the magic link, or use the
+              referral link we emailed you.
+            </span>
+          </div>
+        </section>
+
         <section className="landing-v2-contact" id="contact">
           <div className="landing-v2-contact-copy">
             <span className="landing-v2-eyebrow">
@@ -420,7 +473,7 @@ export function LandingPage() {
             </label>
             <label>
               What can we help with?
-              <select name="interest" defaultValue="">
+              <select name="interest" defaultValue="" required>
                 <option value="" disabled>
                   Select one
                 </option>
@@ -461,6 +514,7 @@ export function LandingPage() {
         </section>
       </main>
       <SiteFooter />
+      <SiteWidgets />
     </div>
   );
 }

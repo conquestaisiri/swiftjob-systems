@@ -11,6 +11,8 @@ import {
   contacts,
   footprints,
   activities,
+  campaigns,
+  campaignVisits,
 } from "./schema";
 import {
   eq,
@@ -26,6 +28,7 @@ import {
   sql,
   inArray,
   isNotNull,
+  isNull,
   exists,
   count as drizzleCount,
 } from "drizzle-orm";
@@ -47,17 +50,28 @@ import type {
   Footprint,
   Activity,
   CreateActivityInput,
+  Campaign,
+  CreateCampaignInput,
 } from "./schema";
 import type { SQL } from "drizzle-orm";
 
 const CHARSET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+// Cryptographically secure random character from CHARSET. These codes guard
+// private briefing pages, so Math.random() (predictable, state-recoverable)
+// must never be used.
+function randomCharsetChar(): string {
+  const bytes = new Uint32Array(1);
+  crypto.getRandomValues(bytes);
+  return CHARSET[bytes[0] % CHARSET.length];
+}
 
 function generateReferenceCode(): string {
   const parts = [];
   for (let i = 0; i < 3; i++) {
     let segment = "";
     for (let j = 0; j < 4; j++) {
-      segment += CHARSET[Math.floor(Math.random() * CHARSET.length)];
+      segment += randomCharsetChar();
     }
     parts.push(segment);
   }
@@ -89,10 +103,12 @@ export const applicationRepository = {
 
   async findByEmail(email: string): Promise<Application[]> {
     const db = getDb();
+    // Case-insensitive: apply-form input is stored verbatim, magic-link login
+    // lowercases. Without this, John@Example.com signs in to an empty portal.
     return db
       .select()
       .from(applications)
-      .where(eq(applications.email, email))
+      .where(sql`lower(${applications.email}) = ${email.toLowerCase().trim()}`)
       .orderBy(desc(applications.createdAt));
   },
 
@@ -264,10 +280,18 @@ export const authRepository = {
   ): Promise<typeof magicTokens.$inferSelect | undefined> {
     const db = getDb();
     const now = new Date();
+    // Atomic single-use claim: only an unconsumed, unexpired token converts.
+    // Parallel replays of the same link lose this race safely.
     const [result] = await db
       .update(magicTokens)
       .set({ consumedAt: new Date() })
-      .where(and(eq(magicTokens.token, token), gt(magicTokens.expiresAt, now)))
+      .where(
+        and(
+          eq(magicTokens.token, token),
+          gt(magicTokens.expiresAt, now),
+          isNull(magicTokens.consumedAt),
+        ),
+      )
       .returning();
     return result;
   },
@@ -346,7 +370,7 @@ function generateReferralCode(): string {
   for (let i = 0; i < 2; i++) {
     let segment = "";
     for (let j = 0; j < 4; j++) {
-      segment += CHARSET[Math.floor(Math.random() * CHARSET.length)];
+      segment += randomCharsetChar();
     }
     parts.push(segment);
   }
@@ -410,6 +434,23 @@ export const referralRepository = {
       .select()
       .from(referrals)
       .where(eq(referrals.email, email.toLowerCase().trim()))
+      .limit(1);
+    return result;
+  },
+
+  // Dedup helper for contacts without an email address: a same-named referral
+  // with no email is treated as the same person, so repeated conversions of an
+  // inbox-less contact do not multiply rows.
+  async findByNameWithoutEmail(
+    fullName: string,
+  ): Promise<Referral | undefined> {
+    const db = getDb();
+    const [result] = await db
+      .select()
+      .from(referrals)
+      .where(
+        and(eq(referrals.fullName, fullName), sql`${referrals.email} IS NULL`),
+      )
       .limit(1);
     return result;
   },
@@ -1314,5 +1355,164 @@ export const activityRepository = {
       .from(activities)
       .where(whereClause);
     return rows[0]?.n ?? 0;
+  },
+};
+
+export type CampaignWithStats = Campaign & {
+  visits: number;
+  ctaClicks: number;
+  applications: number;
+  lastVisitAt: Date | null;
+};
+
+export const campaignRepository = {
+  async listWithStats(): Promise<CampaignWithStats[]> {
+    const db = getDb();
+    const rows = await db
+      .select()
+      .from(campaigns)
+      .orderBy(desc(campaigns.createdAt));
+
+    const visitRows = await db
+      .select({
+        campaignId: campaignVisits.campaignId,
+        visits: sql<number>`count(*)::int`,
+        ctaClicks: sql<number>`COALESCE(sum(clicked_cta::int), 0)::int`,
+        lastVisitAt: sql<Date | null>`max(visited_at)`,
+      })
+      .from(campaignVisits)
+      .groupBy(campaignVisits.campaignId);
+
+    const appRows = await db
+      .select({
+        campaignSlug: applications.campaignSlug,
+        n: sql<number>`count(*)::int`,
+      })
+      .from(applications)
+      .where(isNotNull(applications.campaignSlug))
+      .groupBy(applications.campaignSlug);
+
+    const visitsByCampaign = new Map(visitRows.map((r) => [r.campaignId, r]));
+    const appsBySlug = new Map(appRows.map((r) => [r.campaignSlug, r.n]));
+
+    return rows.map((campaign) => {
+      const v = visitsByCampaign.get(campaign.id);
+      return {
+        ...campaign,
+        visits: v?.visits ?? 0,
+        ctaClicks: v?.ctaClicks ?? 0,
+        applications: appsBySlug.get(campaign.slug) ?? 0,
+        lastVisitAt: v?.lastVisitAt ?? null,
+      };
+    });
+  },
+
+  async findPublicBySlug(slug: string): Promise<Campaign | undefined> {
+    const db = getDb();
+    const [result] = await db
+      .select()
+      .from(campaigns)
+      .where(and(eq(campaigns.slug, slug), eq(campaigns.isEnabled, true)))
+      .limit(1);
+    return result;
+  },
+
+  async findBySlug(slug: string): Promise<Campaign | undefined> {
+    const db = getDb();
+    const [result] = await db
+      .select()
+      .from(campaigns)
+      .where(eq(campaigns.slug, slug))
+      .limit(1);
+    return result;
+  },
+
+  async create(input: CreateCampaignInput): Promise<Campaign> {
+    const db = getDb();
+    const [result] = await db.insert(campaigns).values(input).returning();
+    return result;
+  },
+
+  async update(
+    id: string,
+    patch: Partial<CreateCampaignInput>,
+  ): Promise<Campaign | undefined> {
+    const db = getDb();
+    const [result] = await db
+      .update(campaigns)
+      .set({ ...patch, updatedAt: new Date() })
+      .where(eq(campaigns.id, id))
+      .returning();
+    return result;
+  },
+
+  async remove(id: string): Promise<boolean> {
+    const db = getDb();
+    const result = await db
+      .delete(campaigns)
+      .where(eq(campaigns.id, id))
+      .returning({ id: campaigns.id });
+    return result.length > 0;
+  },
+
+  async recordVisit(input: {
+    campaignId: string;
+    device: string;
+    clickedCta: boolean;
+    userAgent?: string;
+  }): Promise<void> {
+    const db = getDb();
+    await db.insert(campaignVisits).values({
+      campaignId: input.campaignId,
+      device: input.device,
+      clickedCta: input.clickedCta,
+      userAgent: input.userAgent ?? null,
+    });
+  },
+
+  async publicStats(): Promise<{
+    openJobs: number;
+    applicationsProcessed: number;
+    countriesReached: number;
+  }> {
+    const db = getDb();
+    const [jobsRow] = await db
+      .select({ n: drizzleCount() })
+      .from(jobs)
+      .where(eq(jobs.isActive, true));
+    const [appsRow] = await db.select({ n: drizzleCount() }).from(applications);
+    const [refsRow] = await db
+      .select({
+        n: drizzleCount(),
+      })
+      .from(referrals)
+      .where(isNotNull(referrals.country));
+
+    const countryRows = await db
+      .select({ country: applications.country })
+      .from(applications)
+      .where(isNotNull(applications.country))
+      .groupBy(applications.country);
+    const refCountryRows = await db
+      .select({ country: referrals.country })
+      .from(referrals)
+      .where(isNotNull(referrals.country))
+      .groupBy(referrals.country);
+
+    const countries = new Set<string>();
+    for (const r of countryRows) {
+      const country = (r.country ?? "").trim().toLowerCase();
+      if (country) countries.add(country);
+    }
+    for (const r of refCountryRows) {
+      const country = (r.country ?? "").trim().toLowerCase();
+      if (country) countries.add(country);
+    }
+
+    return {
+      openJobs: jobsRow?.n ?? 0,
+      applicationsProcessed: (appsRow?.n ?? 0) + (refsRow?.n ?? 0),
+      countriesReached: countries.size,
+    };
   },
 };

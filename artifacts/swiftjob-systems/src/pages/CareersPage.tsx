@@ -21,16 +21,22 @@ import {
   type Job,
 } from "@/data/jobs";
 import { fetchJobs } from "@/lib/jobsApi";
+import { fetchPublicStats } from "@/lib/campaignApi";
+import { parseDateOnly } from "@/lib/utils";
+import { CAREERS_EMAIL } from "@/lib/contact";
 
 const JOBS_PER_PAGE = 9;
 
 function formatDate(iso: string) {
-  const d = new Date(iso);
+  // postedDate is date-only; parse at LOCAL midnight so timezones don't turn
+  // "today" into "yesterday" (same treatment as the job detail sidebar).
+  const d = parseDateOnly(iso);
   const now = new Date();
+  now.setHours(0, 0, 0, 0);
   const diffDays = Math.floor(
     (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24),
   );
-  if (diffDays === 0) return "Today";
+  if (diffDays <= 0) return "Today";
   if (diffDays === 1) return "Yesterday";
   if (diffDays < 7) return `${diffDays} days ago`;
   if (diffDays < 14) return "1 week ago";
@@ -97,6 +103,7 @@ export function CareersPage() {
   const [workArrangement, setWorkArrangement] = useState("");
   const [visibleCount, setVisibleCount] = useState(JOBS_PER_PAGE);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [countriesDisplay, setCountriesDisplay] = useState<string>("28");
 
   useEffect(() => {
     let cancelled = false;
@@ -115,6 +122,11 @@ export function CareersPage() {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+    // Admin-editable stat copy (Settings → "Countries hired from" number).
+    fetchPublicStats().then((stats) => {
+      if (cancelled || !stats?.countriesDisplay) return;
+      setCountriesDisplay(stats.countriesDisplay);
+    });
     return () => {
       cancelled = true;
     };
@@ -203,15 +215,31 @@ export function CareersPage() {
             </span>
             <span className="stat-sep">·</span>
             <span>
-              <strong>28</strong> countries
+              <strong>{countriesDisplay}</strong> countries
             </span>
           </div>
         </div>
-        <div className="careers-hero-people" aria-label="People working across different roles">
-          <figure><img src="/work-office.jpg" alt="Professional team member" /></figure>
-          <figure><img src="/work-warehouse.jpg" alt="Warehouse and logistics team member" /></figure>
-          <figure><img src="/work-facilities.jpg" alt="Facilities team member" /></figure>
-          <span className="careers-hero-people-note">Different roles.<br /><strong>One standard of care.</strong></span>
+        <div
+          className="careers-hero-people"
+          aria-label="People working across different roles"
+        >
+          <figure>
+            <img src="/work-office.jpg" alt="Professional team member" />
+          </figure>
+          <figure>
+            <img
+              src="/work-warehouse.jpg"
+              alt="Warehouse and logistics team member"
+            />
+          </figure>
+          <figure>
+            <img src="/work-facilities.jpg" alt="Facilities team member" />
+          </figure>
+          <span className="careers-hero-people-note">
+            Different roles.
+            <br />
+            <strong>One standard of care.</strong>
+          </span>
         </div>
       </section>
 
@@ -375,17 +403,32 @@ export function CareersPage() {
               </div>
 
               {filtered.length === 0 ? (
-                <div className="no-results">
-                  <Search size={40} />
-                  <h3>No positions match your criteria</h3>
-                  <p>
-                    Try adjusting your search or filters to find what you're
-                    looking for.
-                  </p>
-                  <button className="button button-blue" onClick={clearFilters}>
-                    Clear all filters
-                  </button>
-                </div>
+                jobs.length === 0 ? (
+                  // No jobs at all — don't blame filters that aren't applied.
+                  <div className="no-results">
+                    <Search size={40} />
+                    <h3>No open positions right now</h3>
+                    <p>
+                      We're not hiring for any roles at this exact moment. Check
+                      back soon — new positions are posted regularly.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="no-results">
+                    <Search size={40} />
+                    <h3>No positions match your criteria</h3>
+                    <p>
+                      Try adjusting your search or filters to find what you're
+                      looking for.
+                    </p>
+                    <button
+                      className="button button-blue"
+                      onClick={clearFilters}
+                    >
+                      Clear all filters
+                    </button>
+                  </div>
+                )
               ) : (
                 <>
                   <div className="jobs-grid">
@@ -428,19 +471,13 @@ export function CareersPage() {
             <p className="careers-cta-sub">
               We keep a pool of strong candidates and match them to roles as
               they open. Email your CV to{" "}
-              <a
-                href="mailto:careers@swiftjob.payservice.top"
-                className="cta-email"
-              >
-                careers@swiftjob.payservice.top
+              <a href={`mailto:${CAREERS_EMAIL}`} className="cta-email">
+                {CAREERS_EMAIL}
               </a>{" "}
               and we will reach out when something fits.
             </p>
           </div>
-          <a
-            href="mailto:careers@swiftjob.payservice.top"
-            className="button button-mint"
-          >
+          <a href={`mailto:${CAREERS_EMAIL}`} className="button button-mint">
             Get in touch <ArrowUpRight size={17} />
           </a>
         </div>

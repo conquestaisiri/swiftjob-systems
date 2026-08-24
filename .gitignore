@@ -61,3 +61,14 @@ Thumbs.db
 
 # nested zip-extraction leftover
 /Blue-peak-Systems-zip/
+
+# project secrets stored per project name
+.secrets/
+
+# local Cloudflare tooling state
+.wrangler/
+.playwright-mcp/
+artifacts/swiftjob-systems/public/_worker.js
+
+# Foreign nested repo snapshot — kept on disk, not tracked
+extracted/

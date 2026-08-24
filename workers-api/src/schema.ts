@@ -52,6 +52,7 @@ export const applications = pgTable("applications", {
   backgroundUrl: text("background_url"),
   roomLink: text("room_link"),
   nextStepDelay: integer("next_step_delay"),
+  campaignSlug: text("campaign_slug"),
 });
 
 export const insertApplicationSchema = z.object({
@@ -73,6 +74,7 @@ export const insertApplicationSchema = z.object({
   skills: z.string().min(1),
   relevantExperience: z.string().min(1),
   coverLetter: z.string().min(1),
+  campaignSlug: z.string().max(80).optional().nullable(),
 });
 
 export type Application = typeof applications.$inferSelect;
@@ -238,6 +240,42 @@ export const contacts = pgTable("contacts", {
 
 export type Contact = typeof contacts.$inferSelect;
 export type CreateContactInput = typeof contacts.$inferInsert;
+
+export const campaigns = pgTable("campaigns", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  channel: text("channel").notNull().default("organic"),
+  utmSource: text("utm_source"),
+  jobSlug: text("job_slug"),
+  headline: text("headline").notNull(),
+  subheadline: text("subheadline").notNull().default(""),
+  ctaLabel: text("cta_label").notNull().default("Apply now"),
+  isEnabled: boolean("is_enabled").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const campaignVisits = pgTable("campaign_visits", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  campaignId: uuid("campaign_id")
+    .notNull()
+    .references(() => campaigns.id, { onDelete: "cascade" }),
+  device: text("device").notNull().default("unknown"),
+  clickedCta: boolean("clicked_cta").notNull().default(false),
+  userAgent: text("user_agent"),
+  visitedAt: timestamp("visited_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export type Campaign = typeof campaigns.$inferSelect;
+export type CreateCampaignInput = typeof campaigns.$inferInsert;
+export type CampaignVisit = typeof campaignVisits.$inferSelect;
 
 export const footprints = pgTable("footprints", {
   id: uuid("id").primaryKey().defaultRandom(),

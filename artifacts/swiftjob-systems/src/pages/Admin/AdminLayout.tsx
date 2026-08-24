@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Link2,
   LogOut,
+  Megaphone,
   Send,
   Settings,
 } from "lucide-react";
@@ -20,6 +21,7 @@ export type AdminView =
   | "contacts"
   | "jobs"
   | "mail"
+  | "campaigns"
   | "activity"
   | "settings";
 
@@ -65,6 +67,17 @@ const NAV_GROUPS: {
         icon: ContactRound,
       },
       { view: "jobs", label: "Jobs", href: "/admin/jobs", icon: Briefcase },
+    ],
+  },
+  {
+    label: "Growth",
+    items: [
+      {
+        view: "campaigns",
+        label: "Campaigns",
+        href: "/admin/campaigns",
+        icon: Megaphone,
+      },
     ],
   },
   {

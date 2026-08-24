@@ -25,6 +25,7 @@ import { format } from "date-fns";
 import { parseDateOnly } from "@/lib/utils";
 import { API_BASE } from "@/lib/adminApi";
 import { handleAdminUnauthorized } from "@/lib/adminAuth";
+import { TRACKS, type AssessmentTrack } from "@/lib/assessmentTracks";
 
 const STATUS_COLORS: Record<string, string> = {
   New: "#6366f1",
@@ -32,6 +33,12 @@ const STATUS_COLORS: Record<string, string> = {
   Shortlisted: "#10b981",
   Rejected: "#ef4444",
   Hired: "#22c55e",
+};
+
+const ASSESSMENT_STATUS_COLORS: Record<string, string> = {
+  completed: "#10b981",
+  in_progress: "#f59e0b",
+  new: "#94a3b8",
 };
 
 const STATUS_OPTIONS = ["New", "Reviewing", "Shortlisted", "Rejected", "Hired"];
@@ -79,6 +86,24 @@ interface Application {
   roomLink: string | null;
   nextStepDelay: number | null;
   footprint?: FootprintSummary | null;
+  assessment?: AssessmentSummary | null;
+}
+
+interface AssessmentSummary {
+  id: string;
+  applicationId: string;
+  jobSlug: string;
+  track: string;
+  status: string;
+  score: number | null;
+  maxScore: number | null;
+  completedAt: string | null;
+  createdAt: string;
+}
+
+interface AssessmentDetail extends AssessmentSummary {
+  systemCheck: Record<string, unknown>;
+  responses: { mcq: Record<string, number>; scenario: string } | null;
 }
 
 interface FootprintSummary {
@@ -198,8 +223,10 @@ export function Applications({ token }: ApplicationsProps) {
         if (!res.ok)
           throw new Error(data.error || "Failed to load applications");
         setApplications(data.applications ?? []);
-        setTotal(data.total ?? 0);
-        setTotalPages(data.totalPages ?? 1);
+        // The API nests totals under `pagination` — read from there so the
+        // header count and pager actually work.
+        setTotal(data.pagination?.total ?? data.total ?? 0);
+        setTotalPages(data.pagination?.totalPages ?? data.totalPages ?? 1);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load applications",
@@ -420,6 +447,7 @@ export function Applications({ token }: ApplicationsProps) {
                   <th>Applied</th>
                   <th>Status</th>
                   <th>Footprint</th>
+                  <th>Skills Check</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -524,6 +552,37 @@ export function Applications({ token }: ApplicationsProps) {
                       )}
                     </td>
                     <td>
+                      {app.assessment ? (
+                        <div className="assessment-cell">
+                          <span
+                            className={`assessment-badge assessment-badge-${app.assessment.status}`}
+                          >
+                            {app.assessment.status === "completed"
+                              ? `✓ ${app.assessment.score ?? "–"}/${
+                                  app.assessment.maxScore ?? "–"
+                                }`
+                              : app.assessment.status === "in_progress"
+                                ? "In progress"
+                                : "Not started"}
+                          </span>
+                          {app.assessment.track !== "none" && (
+                            <span className="assessment-track-label">
+                              {TRACKS[
+                                app.assessment.track as Exclude<
+                                  AssessmentTrack,
+                                  "none"
+                                >
+                              ]?.title ?? app.assessment.track}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="assessment-badge assessment-badge-none">
+                          —
+                        </span>
+                      )}
+                    </td>
+                    <td>
                       <div className="action-buttons">
                         <button
                           onClick={() => setSelectedApp(app)}
@@ -548,7 +607,19 @@ export function Applications({ token }: ApplicationsProps) {
                             if (next === "Shortlisted") {
                               requestShortlist(app);
                               e.target.value = app.status;
+                            } else if (next === app.status) {
+                              /* no change */
                             } else {
+                              // Status changes email the candidate by default.
+                              // A stray click must not fire a live rejection.
+                              const warn =
+                                next === "Rejected"
+                                  ? `Set this application to Rejected and EMAIL the candidate a rejection notice?`
+                                  : `Change status to "${next}" and EMAIL the candidate an update?`;
+                              if (!window.confirm(warn)) {
+                                e.target.value = app.status;
+                                return;
+                              }
                               handleStatusChange(app.id, next);
                             }
                           }}
@@ -746,10 +817,46 @@ function ApplicationModal({
   onDelete: () => void;
   token: string;
 }) {
-  const [activeTab, setActiveTab] = useState<"overview" | "details" | "resume">(
-    "overview",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "details" | "resume" | "assessment"
+  >("overview");
   const [downloading, setDownloading] = useState(false);
+  const [assessmentDetail, setAssessmentDetail] =
+    useState<AssessmentDetail | null>(null);
+  const [assessmentLoading, setAssessmentLoading] = useState(false);
+  const [assessmentError, setAssessmentError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    setAssessmentLoading(true);
+    setAssessmentError("");
+    setAssessmentDetail(null);
+    fetch(`${API_BASE}/api/admin/applications/${application.id}/assessment`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (res) => {
+        if (res.status === 401) {
+          handleAdminUnauthorized();
+          return;
+        }
+        const data = await res.json();
+        if (!res.ok)
+          throw new Error(data.error || "Failed to load skills check");
+        if (!cancelled) setAssessmentDetail(data.assessment ?? null);
+      })
+      .catch((err) => {
+        if (!cancelled)
+          setAssessmentError(
+            err instanceof Error ? err.message : "Failed to load skills check",
+          );
+      })
+      .finally(() => {
+        if (!cancelled) setAssessmentLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [application.id, token]);
 
   const handleDownloadResume = async () => {
     if (!application.resumePath) return;
@@ -807,6 +914,12 @@ function ApplicationModal({
             onClick={() => setActiveTab("resume")}
           >
             Resume & Files
+          </button>
+          <button
+            className={activeTab === "assessment" ? "active" : ""}
+            onClick={() => setActiveTab("assessment")}
+          >
+            Skills Check
           </button>
         </div>
 
@@ -941,6 +1054,32 @@ function ApplicationModal({
               )}
             </div>
           )}
+
+          {activeTab === "assessment" && (
+            <div className="modal-section">
+              {assessmentLoading ? (
+                <div className="admin-loading" style={{ padding: 30 }}>
+                  <Loader2 size={28} className="animate-spin" />
+                  <p>Loading skills check...</p>
+                </div>
+              ) : assessmentError ? (
+                <div className="admin-alert">
+                  <AlertCircle size={18} />
+                  <span>{assessmentError}</span>
+                </div>
+              ) : !assessmentDetail ? (
+                <div className="no-resume">
+                  <FileText size={48} className="text-slate-300" />
+                  <h4>No skills check submitted</h4>
+                  <p className="text-slate-500">
+                    The candidate has not completed their skills check yet.
+                  </p>
+                </div>
+              ) : (
+                <AssessmentDetailView detail={assessmentDetail} />
+              )}
+            </div>
+          )}
         </div>
 
         <div className="modal-footer">
@@ -976,6 +1115,101 @@ function ApplicationModal({
           </span>
         </div>
       </div>
+    </div>
+  );
+}
+
+function AssessmentDetailView({ detail }: { detail: AssessmentDetail }) {
+  const config =
+    detail.track === "none"
+      ? undefined
+      : TRACKS[detail.track as Exclude<AssessmentTrack, "none">];
+  const pct =
+    detail.maxScore && detail.score !== null
+      ? Math.round((detail.score / detail.maxScore) * 100)
+      : null;
+
+  return (
+    <div className="assessment-detail">
+      <div className="assessment-detail-head">
+        <div>
+          <h4>{config?.title ?? "Skills Check"}</h4>
+          {config?.blurb && <p className="text-slate-500">{config.blurb}</p>}
+        </div>
+        <div className="assessment-score-box">
+          <span className="assessment-score-value">
+            {detail.score ?? "–"}/{detail.maxScore ?? "–"}
+          </span>
+          {pct !== null && <span className="assessment-score-pct">{pct}%</span>}
+        </div>
+      </div>
+      <p className="assessment-meta">
+        {detail.status === "completed" && detail.completedAt
+          ? `Completed ${new Date(detail.completedAt).toLocaleString()}`
+          : `Status: ${detail.status.replace("_", " ")}`}
+        {detail.jobSlug ? ` · ${detail.jobSlug}` : ""}
+      </p>
+
+      {config && detail.responses ? (
+        <>
+          <h5>Multiple choice</h5>
+          {config.questions.map((q) => {
+            const picked = detail.responses?.mcq[q.id];
+            return (
+              <div className="assessment-question" key={q.id}>
+                <p className="assessment-q-prompt">{q.prompt}</p>
+                <div className="assessment-options">
+                  {q.options.map((opt, i) => {
+                    const isCorrect = i === q.correctIndex;
+                    const isPicked = picked === i;
+                    return (
+                      <div
+                        key={i}
+                        className={`assessment-option${isCorrect ? " is-correct" : ""}${
+                          isPicked ? " is-picked" : ""
+                        }`}
+                      >
+                        <span className="assessment-option-mark">
+                          {isCorrect ? "✓" : isPicked ? "✗" : "○"}
+                        </span>
+                        <span>{opt}</span>
+                        {isPicked && (
+                          <span className="assessment-picked-label">
+                            Candidate's answer
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                {picked === undefined && (
+                  <span className="assessment-unanswered">
+                    No answer recorded
+                  </span>
+                )}
+              </div>
+            );
+          })}
+
+          <h5>Scenario</h5>
+          <div className="assessment-question">
+            <p className="assessment-q-prompt">{config.scenario.prompt}</p>
+            <div className="assessment-scenario-answer">
+              {detail.responses?.scenario ? (
+                detail.responses.scenario
+              ) : (
+                <span className="assessment-unanswered">
+                  No scenario answer recorded
+                </span>
+              )}
+            </div>
+          </div>
+        </>
+      ) : (
+        <p className="text-slate-500">
+          No answer details were recorded for this skills check.
+        </p>
+      )}
     </div>
   );
 }

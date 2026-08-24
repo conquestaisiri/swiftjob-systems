@@ -28,12 +28,28 @@ const BRAND = {
   purpleBg: "#E8EFE4",
 };
 
-const LOGO_URL = "https://swiftjob.payservice.top/swiftjob-mark.png";
+const LOGO_PATH = "/swiftjob-mark.png";
 const FALLBACK_BASE_URL = "https://swiftjob.payservice.top";
+// Last-resort contact address, used only when neither SUPPORT_EMAIL nor
+// HR_EMAIL is configured.
+const FALLBACK_SUPPORT_EMAIL = "support@swiftjob.payservice.top";
 
 function getBaseUrl(): string {
   const url = (getEnv().FRONTEND_URL ?? "").trim().replace(/\/$/, "");
   return url || FALLBACK_BASE_URL;
+}
+
+/** Support address shown to candidates/recipients (SUPPORT_EMAIL > HR_EMAIL). */
+export function getSupportEmail(): string {
+  return (
+    (getEnv().SUPPORT_EMAIL ?? "").trim() ||
+    getHrEmail() ||
+    FALLBACK_SUPPORT_EMAIL
+  );
+}
+
+function getLogoUrl(): string {
+  return `${getBaseUrl()}${LOGO_PATH}`;
 }
 
 function esc(value: unknown): string {
@@ -147,7 +163,7 @@ function layout(opts: LayoutOptions): string {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; background:${BRAND.white}; border-radius: 14px; overflow: hidden; border: 1px solid ${BRAND.border};">
           <tr>
             <td style="background:${BRAND.paperDark}; padding: 20px 32px; text-align: center; border-bottom: 3px solid ${BRAND.teal};">
-              <img src="${LOGO_URL}" alt="SwiftJob" width="112" style="max-width: 112px; height: auto; border: 0; display: inline-block;" />
+              <img src="${getLogoUrl()}" alt="SwiftJob" width="112" style="max-width: 112px; height: auto; border: 0; display: inline-block;" />
             </td>
           </tr>
           <tr>
@@ -229,7 +245,7 @@ function footerNote(): string {
     <hr style="border: none; border-top: 1px solid ${BRAND.border}; margin: 28px 0;">
     <p style="color: ${BRAND.muted}; font-size: 12px; margin: 0; text-align: center;">
       This is an automated message from SwiftJob. You're receiving it because you either applied for a role or requested a sign-in link.<br>
-      Questions? Reply to this email or write to <a href="mailto:careers@swiftjob.payservice.top" style="color: ${BRAND.teal};">careers@swiftjob.payservice.top</a>.
+      Questions? Reply to this email or write to <a href="mailto:${getSupportEmail()}" style="color: ${BRAND.teal};">${getSupportEmail()}</a>.
     </p>`;
 }
 
@@ -399,7 +415,7 @@ function formatConfirmationHtml(data: {
       <div style="background: ${BRAND.paper}; border: 2px dashed ${BRAND.teal}; border-radius: 8px; padding: 16px; text-align: center; margin: 16px 0;">
         <code style="font-size: 20px; font-weight: 700; color: ${BRAND.teal}; letter-spacing: 2px;">${esc(data.referenceCode)}</code>
       </div>
-      <p style="font-size: 13px; color: ${BRAND.muted}; margin: 0;">Keep this code handy — you can use it on the sign-in page to access your application status at any time.</p>`
+      <p style="font-size: 13px; color: ${BRAND.muted}; margin: 0;">Keep this code handy — quote it whenever you contact us and we'll find your application straight away.</p>`
     : "";
 
   const content = `
@@ -421,7 +437,7 @@ function formatConfirmationHtml(data: {
       "info",
       "What happens next",
       `
-      Our recruitment team reviews applications within <strong>5–7 business days</strong>. If your profile matches the role, we'll contact you to arrange the next steps.
+      Our recruitment team reviews applications within <strong>3–5 business days</strong>. If your profile matches the role, we'll contact you to arrange the next steps.
     `,
     )}
 
@@ -441,8 +457,6 @@ function formatConfirmationHtml(data: {
       Nothing right now. We'll email you as soon as your status changes. To keep things moving, make sure your contact details stay up to date and keep an eye on your inbox (including spam/junk).
     `,
     )}
-
-    ${footerNote()}
   `;
 
   return layout({
@@ -471,7 +485,7 @@ const STATUS_DETAILS: Record<string, StatusDetail> = {
     meaning:
       "We've confirmed your application looks promising and are taking a closer look at your experience and skills against the role.",
     nextSteps:
-      "You don't need to do anything right now. We typically complete the review within 5–7 business days. We'll email you the moment your status changes.",
+      "You don't need to do anything right now. We typically complete the review within 3–5 business days. We'll email you the moment your status changes.",
   },
   Shortlisted: {
     color: "#6D28D9",
@@ -508,6 +522,8 @@ function formatStatusUpdateHtml(data: {
   referenceCode?: string;
   notes?: string;
   interviewInstructions?: string;
+  meetLink?: string | null;
+  meetingKey?: string | null;
   isShortlistUpdate?: boolean;
 }): string {
   const detail = STATUS_DETAILS[data.status];
@@ -528,16 +544,34 @@ function formatStatusUpdateHtml(data: {
 
   const nextSteps = detail
     ? callout("info", "What happens next", detail.nextSteps)
-    : callout("info", "What happens next", data.message);
+    : callout("info", "What happens next", esc(data.message));
 
+  // The shortlist briefing block makes good on the admin UI's promise: the
+  // private room link, room key, and instructions are delivered in the email.
+  const briefingParts: string[] = [];
+  if (data.meetLink) {
+    briefingParts.push(primaryButton(data.meetLink, "Open my private room"));
+  }
+  if (data.meetingKey) {
+    briefingParts.push(
+      `<p style="font-size: 14px; margin: 10px 0 0;"><strong>Room key:</strong> <code style="background: ${BRAND.paper}; padding: 3px 8px; border-radius: 4px; font-size: 14px;">${esc(data.meetingKey)}</code></p>`,
+    );
+  }
+  if (data.interviewInstructions) {
+    briefingParts.push(
+      `<p style="font-size: 14px; margin: 12px 0 0; white-space: pre-wrap;">${esc(data.interviewInstructions)}</p>`,
+    );
+  }
   const shortlistBlock = data.isShortlistUpdate
-    ? callout(
+    ? `${callout(
         "success",
         "Your briefing is ready",
         `
-        You've been shortlisted for <strong>${esc(data.position)}</strong>. Sign in to your secure candidate portal now — your personal briefing and the instructions for the next stage are waiting for you there.
+        You've been shortlisted for <strong>${esc(data.position)}</strong>. Everything you need for the next stage is below${
+          briefingParts.length ? "" : " and in your secure candidate portal"
+        }.
       `,
-      )
+      )}${briefingParts.join("\n")}`
     : "";
 
   const securityBlock = data.isShortlistUpdate
@@ -572,8 +606,6 @@ function formatStatusUpdateHtml(data: {
     <p style="font-size: 14px; margin: 0 0 12px;">Sign in to your candidate portal to see your full application, status history, and any instructions we've shared with you.</p>
     ${primaryButton(`${getBaseUrl()}/login`, "Open my candidate portal")}
     ${referenceBlock}
-
-    ${footerNote()}
   `;
 
   return layout({
@@ -688,24 +720,24 @@ function formatReferralInvitationHtml(data: {
 }): string {
   const body =
     data.content.emailBody ??
-    "You''ve been referred and we''d love for you to review this opportunity.";
+    "You've been referred and we'd love for you to review this opportunity.";
   const content = `
     <p style="margin: 0 0 12px; font-size: 15px;">${esc(data.content.emailGreeting ?? `Hi ${data.fullName},`)}</p>
     <p style="margin: 0 0 4px; font-size: 15px; white-space: pre-wrap;">${esc(body)}</p>
 
     ${primaryButton(data.referralUrl, data.content.emailCtaLabel ?? "Open my briefing")}
 
-    <p style="font-size: 14px; margin: 0 0 12px; white-space: pre-wrap;">${esc(data.content.emailClosing ?? "When you''re ready, just follow the steps inside.")}</p>
+    <p style="font-size: 14px; margin: 0 0 12px; white-space: pre-wrap;">${esc(data.content.emailClosing ?? "When you're ready, just follow the steps inside.")}</p>
 
     <hr style="border: none; border-top: 1px solid ${BRAND.border}; margin: 24px 0;">
     <p style="font-size: 13px; color: ${BRAND.muted}; margin: 0;">
-      This briefing is private to you. If you have any questions or run into any technical problem, contact <a href="mailto:${getHrEmail() || "support@swiftjob.payservice.top"}" style="color: ${BRAND.teal};">${getHrEmail() || "support@swiftjob.payservice.top"}</a> and they will respond ASAP to rectify it.
+      This briefing is private to you. If you have any questions or run into any technical problem, contact <a href="mailto:${getSupportEmail()}" style="color: ${BRAND.teal};">${getSupportEmail()}</a> and they will respond ASAP to rectify it.
     </p>
   `;
 
   return layout({
     preheader: `Your referral briefing from SwiftJob`,
-    headerTitle: "You''ve been referred",
+    headerTitle: "You've been referred",
     headerSubtitle: data.position,
     content,
   });
@@ -764,6 +796,8 @@ export const emailService = {
     referenceCode?: string;
     notes?: string;
     interviewInstructions?: string;
+    meetLink?: string | null;
+    meetingKey?: string | null;
     isShortlistUpdate?: boolean;
   }): Promise<void> {
     const detail = STATUS_DETAILS[data.status];

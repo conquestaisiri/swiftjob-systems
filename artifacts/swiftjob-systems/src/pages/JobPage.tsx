@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { fetchJobBySlug } from "@/lib/jobsApi";
+import { fetchPublicStats } from "@/lib/campaignApi";
 import type { Job } from "@/data/jobs";
 import { parseDateOnly } from "@/lib/utils";
 
@@ -206,6 +207,7 @@ export function JobPage() {
     "idle" | "submitting" | "error"
   >("idle");
   const [serverError, setServerError] = useState("");
+  const [countriesDisplay, setCountriesDisplay] = useState("28");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
@@ -227,6 +229,12 @@ export function JobPage() {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+    // Admin-editable stat copy (Settings → "Countries hired from" number).
+    fetchPublicStats().then((stats) => {
+      if (!cancelled && stats?.countriesDisplay) {
+        setCountriesDisplay(stats.countriesDisplay);
+      }
+    });
     return () => {
       cancelled = true;
     };
@@ -338,6 +346,9 @@ export function JobPage() {
     (Object.entries(form) as [string, string][]).forEach(([k, v]) =>
       data.append(k, v),
     );
+    const campaignSlug =
+      new URLSearchParams(window.location.search).get("campaign") ?? "";
+    if (campaignSlug) data.append("campaignSlug", campaignSlug);
     if (resumeFile) data.append("resume", resumeFile);
 
     try {
@@ -356,7 +367,13 @@ export function JobPage() {
       const params = new URLSearchParams({
         id: json.applicationId ?? "",
         position: job.title,
+        job: job.slug,
+        email: form.email.trim(),
       });
+      if (json.referenceCode) params.set("ref", json.referenceCode);
+      const campaignSlug =
+        new URLSearchParams(window.location.search).get("campaign") ?? "";
+      if (campaignSlug) params.set("campaign", campaignSlug);
       setLocation(`/careers/apply/success?${params.toString()}`);
     } catch {
       setServerError(
@@ -443,17 +460,17 @@ export function JobPage() {
               <section className="job-section">
                 <h2>About SwiftJob</h2>
                 <p>
-                  SwiftJob is a workforce partner. We find and vet
-                  people for desk jobs, remote roles, and hands-on on-site work,
-                  then manage the employment side—contracts, payroll,
-                  compliance, and ongoing support—so our clients can focus on
-                  the work.
+                  SwiftJob is a workforce partner. We find and vet people for
+                  desk jobs, remote roles, and hands-on on-site work, then
+                  manage the employment side—contracts, payroll, compliance, and
+                  ongoing support—so our clients can focus on the work.
                 </p>
                 <p>
-                  We build teams across 28+ countries and serve businesses in
-                  technology, financial services, e-commerce, healthcare,
-                  logistics, retail, and more. When you work with us, we aim to
-                  be a partner for the long term—not just a one-off placement.
+                  We build teams across {countriesDisplay}+ countries and serve
+                  businesses in technology, financial services, e-commerce,
+                  healthcare, logistics, retail, and more. When you work with
+                  us, we aim to be a partner for the long term—not just a
+                  one-off placement.
                 </p>
               </section>
 
@@ -579,8 +596,8 @@ export function JobPage() {
               <section className="job-section job-section-eoe">
                 <h2>Equal opportunity</h2>
                 <p>
-                  SwiftJob is an equal opportunity employer. We
-                  celebrate diversity and are committed to creating an inclusive
+                  SwiftJob is an equal opportunity employer. We celebrate
+                  diversity and are committed to creating an inclusive
                   environment for all employees and contractors. All hiring
                   decisions are made on the basis of qualifications, merit, and
                   business needs. We do not discriminate on the basis of race,

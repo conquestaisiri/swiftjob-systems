@@ -28,8 +28,10 @@ function toList(value: unknown): string[] {
     return value.map((v) => String(v).trim()).filter(Boolean);
   }
   if (typeof value === "string") {
+    // Split on newlines only — commas are legitimate inside list items
+    // ("Health, dental & vision") and must not explode into fake bullets.
     return value
-      .split(/\n|,/)
+      .split(/\n/)
       .map((v) => v.trim())
       .filter(Boolean);
   }
@@ -68,9 +70,10 @@ function normalizeInput(body: Record<string, unknown>): NormalizedJob {
   }
 
   const title = String(body.title).trim();
-  const slug = typeof body.slug === "string" && body.slug.trim()
-    ? slugify(body.slug)
-    : slugify(title);
+  const slug =
+    typeof body.slug === "string" && body.slug.trim()
+      ? slugify(body.slug)
+      : slugify(title);
 
   if (!slug) {
     throw new ValidationError("Unable to generate a slug from the title");
@@ -130,7 +133,10 @@ export const jobService = {
     return jobRepository.create(normalized as CreateJobInput);
   },
 
-  async update(id: string, body: Record<string, unknown>): Promise<Job | undefined> {
+  async update(
+    id: string,
+    body: Record<string, unknown>,
+  ): Promise<Job | undefined> {
     const existing = await jobRepository.findById(id);
     if (!existing) return undefined;
 

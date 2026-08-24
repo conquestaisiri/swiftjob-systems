@@ -52,7 +52,7 @@ export function ActivityAdmin({ token }: { token: string }) {
     setLoading(true);
     setError("");
     try {
-      const params = new URLSearchParams({ limit: "100" });
+      const params = new URLSearchParams({ limit: "200" });
       if (actionFilter) params.set("action", actionFilter);
       const res = await fetch(`${API_BASE}/api/admin/activities?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -138,6 +138,7 @@ export function ActivityAdmin({ token }: { token: string }) {
             <thead>
               <tr>
                 <th>When</th>
+                <th>Actor</th>
                 <th>Action</th>
                 <th>Recipient / Target</th>
                 <th>Status</th>
@@ -152,6 +153,7 @@ export function ActivityAdmin({ token }: { token: string }) {
                       {new Date(ev.createdAt).toLocaleString()}
                     </div>
                   </td>
+                  <td>{ev.actor}</td>
                   <td>
                     <div className="activity-action">
                       {actionLabel(ev.action)}
@@ -169,8 +171,10 @@ export function ActivityAdmin({ token }: { token: string }) {
                     <span
                       className={`status-badge ${
                         ev.status === "failed"
-                          ? "status-pending"
-                          : "status-live"
+                          ? "status-hidden"
+                          : ev.status === "pending"
+                            ? "status-pending"
+                            : "status-live"
                       }`}
                     >
                       {ev.status}

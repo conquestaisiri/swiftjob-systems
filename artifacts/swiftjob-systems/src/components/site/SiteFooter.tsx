@@ -1,5 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "wouter";
+import { CAREERS_EMAIL, SUPPORT_EMAIL } from "@/lib/contact";
 
 export function SiteFooter() {
   return (
@@ -15,11 +16,8 @@ export function SiteFooter() {
             <span>SwiftJob</span>
           </Link>
           <p>People for the work ahead - across every kind of role.</p>
-          <a
-            href="mailto:careers@swiftjob.payservice.top"
-            className="site-footer-email"
-          >
-            careers@swiftjob.payservice.top
+          <a href={`mailto:${CAREERS_EMAIL}`} className="site-footer-email">
+            {CAREERS_EMAIL}
           </a>
         </div>
 
@@ -35,7 +33,7 @@ export function SiteFooter() {
           <span className="site-footer-label">For professionals</span>
           <Link href="/careers">Browse open roles</Link>
           <Link href="/login">Candidate access</Link>
-          <a href="mailto:support@swiftjob.payservice.top">Candidate support</a>
+          <a href={`mailto:${SUPPORT_EMAIL}`}>Candidate support</a>
         </div>
 
         <div className="site-footer-column site-footer-cta-column">

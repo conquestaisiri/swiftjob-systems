@@ -94,10 +94,10 @@ export function SiteLayout({ children, title, description }: SiteLayoutProps) {
           <div className="nav-actions">
             <a
               className="nav-login"
-              href="/careers"
+              href="/login"
               data-testid="link-professionals"
             >
-              For professionals <ArrowUpRight size={14} />
+              Candidate access <ArrowUpRight size={14} />
             </a>
             <a
               className="button button-dark button-small"
@@ -125,6 +125,9 @@ export function SiteLayout({ children, title, description }: SiteLayoutProps) {
                 <ChevronRight size={17} />
               </a>
             ))}
+            <a href="/login" onClick={() => setMobileOpen(false)}>
+              Candidate access <ChevronRight size={17} />
+            </a>
             <a
               href="/#contact"
               className="button button-blue"

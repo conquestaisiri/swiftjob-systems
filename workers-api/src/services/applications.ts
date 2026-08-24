@@ -125,6 +125,12 @@ export const applicationService = {
       notifyCandidate = true,
     } = options ?? {};
 
+    // Never email a no-op (same status re-save) and never fabricate an update
+    // for "New" — a fresh application needs no "your status changed to New"
+    // notice, and STATUS_DETAILS has no copy for it.
+    const shouldNotify =
+      notifyCandidate && status !== application.status && status !== "New";
+
     const updated = await applicationRepository.updateStatus(
       id,
       status,
@@ -139,7 +145,12 @@ export const applicationService = {
     );
     if (!updated) return null;
 
-    if (notifyCandidate) {
+    // Fresh row: the email must reflect the candidate's actual briefing
+    // configuration (link/key/instructions persist across PATCHes).
+    const fresh = await applicationRepository.findById(id);
+    if (!fresh) return null;
+
+    if (shouldNotify) {
       await this.trySend("status update email", () =>
         emailService.sendStatusUpdate({
           email: application.email,
@@ -150,9 +161,12 @@ export const applicationService = {
           referenceCode: application.referenceCode,
           notes,
           interviewInstructions:
-            status === "Shortlisted" && interviewInstructions
-              ? interviewInstructions
+            status === "Shortlisted" && fresh.interviewInstructions
+              ? fresh.interviewInstructions
               : undefined,
+          meetLink: status === "Shortlisted" ? fresh.meetLink || null : null,
+          meetingKey:
+            status === "Shortlisted" ? fresh.meetingKey || null : null,
           isShortlistUpdate: status === "Shortlisted",
         }),
       );
