@@ -96,7 +96,12 @@ async function sendEmail(opts: {
   let lastError: Error | null = null;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      const { data, error } = await getResend().emails.send({ ...opts, from });
+      const { data, error } = await getResend().emails.send({
+        ...opts,
+        from,
+        // Replies go to the support inbox instead of the send-only address.
+        replyTo: getSupportEmail(),
+      });
       if (error) {
         lastError = new Error(`${error.name}: ${error.message}`);
         console.warn(
@@ -444,10 +449,9 @@ function formatConfirmationHtml(data: {
     ${sectionTitle("The hiring process")}
     ${stepList([
       `<strong>Application review</strong> — We evaluate your experience, skills, and fit for the role.`,
-      `<strong>Shortlisting</strong> — Qualified candidates are invited to a brief video screening.`,
-      `<strong>Skills assessment</strong> — A practical task relevant to the position.`,
-      `<strong>Interview</strong> — A conversation with our recruitment team and/or the hiring manager.`,
-      `<strong>Offer &amp; onboarding</strong> — Reference checks followed by a structured start.`,
+      `<strong>Skills check</strong> — A short optional check matched to the position, completed in your browser.`,
+      `<strong>Team review &amp; feedback</strong> — Our recruitment team reaches out directly with the outcome and next steps.`,
+      `<strong>Offer &amp; onboarding</strong> — Successful candidates receive a formal offer and a fully remote start.`,
     ])}
 
     ${callout(
@@ -493,7 +497,7 @@ const STATUS_DETAILS: Record<string, StatusDetail> = {
     meaning:
       "You're moving forward in the process. Your profile stood out and we'd like to get to know you better.",
     nextSteps:
-      "Sign in to your candidate portal to view your briefing and the next steps we've prepared for you. Everything you need for the next stage is available there.",
+      "Our recruitment team will be in touch shortly by email with the next steps — nothing to schedule or prepare. You can also track your application status anytime in your candidate portal.",
   },
   Rejected: {
     color: "#B91C1C",
@@ -521,9 +525,6 @@ function formatStatusUpdateHtml(data: {
   message: string;
   referenceCode?: string;
   notes?: string;
-  interviewInstructions?: string;
-  meetLink?: string | null;
-  meetingKey?: string | null;
   isShortlistUpdate?: boolean;
 }): string {
   const detail = STATUS_DETAILS[data.status];
@@ -546,32 +547,14 @@ function formatStatusUpdateHtml(data: {
     ? callout("info", "What happens next", detail.nextSteps)
     : callout("info", "What happens next", esc(data.message));
 
-  // The shortlist briefing block makes good on the admin UI's promise: the
-  // private room link, room key, and instructions are delivered in the email.
-  const briefingParts: string[] = [];
-  if (data.meetLink) {
-    briefingParts.push(primaryButton(data.meetLink, "Open my private room"));
-  }
-  if (data.meetingKey) {
-    briefingParts.push(
-      `<p style="font-size: 14px; margin: 10px 0 0;"><strong>Room key:</strong> <code style="background: ${BRAND.paper}; padding: 3px 8px; border-radius: 4px; font-size: 14px;">${esc(data.meetingKey)}</code></p>`,
-    );
-  }
-  if (data.interviewInstructions) {
-    briefingParts.push(
-      `<p style="font-size: 14px; margin: 12px 0 0; white-space: pre-wrap;">${esc(data.interviewInstructions)}</p>`,
-    );
-  }
   const shortlistBlock = data.isShortlistUpdate
-    ? `${callout(
+    ? callout(
         "success",
-        "Your briefing is ready",
+        "You've been shortlisted",
         `
-        You've been shortlisted for <strong>${esc(data.position)}</strong>. Everything you need for the next stage is below${
-          briefingParts.length ? "" : " and in your secure candidate portal"
-        }.
+        Congratulations — you've been shortlisted for <strong>${esc(data.position)}</strong>. Our recruitment team will contact you directly by email with the next steps. You can also track your application status anytime in your secure candidate portal.
       `,
-      )}${briefingParts.join("\n")}`
+      )
     : "";
 
   const securityBlock = data.isShortlistUpdate
@@ -795,9 +778,6 @@ export const emailService = {
     applicationId: string;
     referenceCode?: string;
     notes?: string;
-    interviewInstructions?: string;
-    meetLink?: string | null;
-    meetingKey?: string | null;
     isShortlistUpdate?: boolean;
   }): Promise<void> {
     const detail = STATUS_DETAILS[data.status];

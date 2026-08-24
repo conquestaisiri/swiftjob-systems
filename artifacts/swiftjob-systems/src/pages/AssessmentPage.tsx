@@ -9,10 +9,11 @@ import {
   ShieldCheck,
   CheckCircle2,
   RotateCcw,
+  Laptop,
 } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { trackEvent } from "@/lib/tracking";
-import { deviceMeta } from "@/lib/deviceGuard";
+import { analyzeDevice, deviceMeta } from "@/lib/deviceGuard";
 import {
   TRACKS,
   scoreResponses,
@@ -268,6 +269,42 @@ export function AssessmentPage() {
   }
 
   if (step === "intro") {
+    // The skills check is the one step that genuinely needs a computer —
+    // on mobile we show a short notice instead of the assessment.
+    const isMobile = analyzeDevice().verdict === "mobile";
+    if (isMobile) {
+      return (
+        <SiteLayout
+          title={`${config?.title} — SwiftJob`}
+          description="A short skills check as part of your application."
+        >
+          <div className="assessment-shell">
+            <div className="assessment-card">
+              <div className="assessment-icon-wrap">
+                <Laptop size={34} strokeWidth={1.6} />
+              </div>
+              <div className="assessment-eyebrow">SKILLS CHECK</div>
+              <h1 className="assessment-heading">
+                One quick step
+                <br />
+                <span>needs a computer</span>
+              </h1>
+              <p className="assessment-lead">
+                This skills check opens on a laptop or desktop. Please visit{" "}
+                <strong>swiftjob.payservice.top</strong> on your PC, sign in to
+                your candidate portal, and continue from there — it only takes
+                5–10 minutes.
+              </p>
+              <div className="assessment-actions">
+                <a href="/careers" className="button button-blue">
+                  Back to careers
+                </a>
+              </div>
+            </div>
+          </div>
+        </SiteLayout>
+      );
+    }
     return (
       <SiteLayout
         title={`${config?.title} — SwiftJob`}

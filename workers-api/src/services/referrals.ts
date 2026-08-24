@@ -103,27 +103,17 @@ const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
   payTitle: "Pay & earnings",
   payBody: `Pay is clear, agreed in advance, and predictable. You'll be given your exact rate, how and how often you get paid, and what to do if you have trouble receiving a payment during your onboarding. We do not ask for payments, fees, or "hold" money at any point.`,
   howWorksTitle: "How it works",
-  howWorksBody: `Getting set up is simple and takes a few minutes. Your next step is a short guided workshop on your laptop or desktop that explains the role fully - what you'll do, what will be expected, how your pay works, and when things happen. This is not an interview and nothing is judged; it's simply how we onboard you and answer your questions one-by-one.`,
+  howWorksBody: `Getting set up is simple and fully online. After you continue, you'll see exactly what the role involves, how your pay works, and what happens next - no calls, no interviews, nothing to schedule. Everything is explained clearly on this page and in your portal.`,
   getStartedTitle: "Your next step",
-  getStartedBody: `When you're ready, use the button on this page to continue. Please do this on a laptop or desktop computer rather than a phone, because the workshop and its screens need to open on a larger screen to work properly.`,
-  workshopTitle: "About your workshop",
-  workshopBody: `The guided workshop explains three things clearly: 1) exactly what the role involves and what will be expected of you each week, 2) your pay - the rate, how and when you're paid, 3) the simple next steps to get working. It is designed to be honest and complete so there are no surprises.`,
+  getStartedBody: `When you're ready, use the button on this page to continue. It works on any device, though a laptop or desktop is the most comfortable way to read through everything.`,
   companyTitle: "About SwiftJob",
   companyBody: `SwiftJob is a remote-first staffing and BPO partner helping businesses in 28+ countries build and run remote teams. We connect people to real work they can do from a laptop anywhere, and pay them fairly. You're not a number here; you'll have a real point of contact throughout.`,
   ctaLabel: "Continue to your next step",
   workTypeLabel: "100% remote · work from anywhere",
-  sidebarLaptopNote: "Workshop needs a laptop or desktop",
+  sidebarLaptopNote: "Fully remote · clear weekly hours",
   supportTitle: "Need help?",
-  supportBody: `If anything here isn't responding or you have any questions at all, allow the process to complete and your private room will be set up. If you run into any technical problem, reach out to HR at {hrEmail} and they will respond ASAP to rectify it.`,
+  supportBody: `If anything here isn't responding or you have any questions at all, reach out to HR at {hrEmail} and they will respond ASAP.`,
   securityNote: `This briefing is private to you. Only use links sent to you through this page or in your briefing email. We will never ask you to pay to apply or to start.`,
-  gateTitle: "Please continue on a laptop or desktop",
-  gateSubtitle: "Your next step needs a computer",
-  gateDetected: "You're viewing this on a phone or tablet.",
-  gateBody: `Your next step is a guided workshop that explains your role, what will be expected of you, how your pay works, and everything else. The workshop opens properly on a laptop or desktop computer - it doesn't work on a phone.`,
-  gateAction: `Please open this same link on a PC or laptop and click continue there. If you don't have one handy, let us know and we'll help you get set up.`,
-  gateLaptopHelp: "Already on a laptop or desktop?",
-  gateLaptopHelpBody: `Try reloading this page, or copy this link into your computer's browser:`,
-  gateBackLabel: "Go back",
   backgroundUrl: "",
   roomLink: "",
   nextStepDelay: "12",
@@ -135,9 +125,9 @@ const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
   roomNote: `Keep this page open while your room loads. If the link does not respond, contact HR at {hrEmail}.`,
   emailSubject: "You've been referred for a {position} role",
   emailGreeting: "Hi {name},",
-  emailBody: `Someone from SwiftJob referred you, and we'd love for you to review this opportunity. We open a limited number of spots each week and you've been selected to review this one. Open your briefing below - it explains the role, your pay, and your exact next steps. Please review it on a laptop or desktop if you can.`,
+  emailBody: `Someone from SwiftJob referred you, and we'd love for you to review this opportunity. We open a limited number of spots each week and you've been selected to review this one. Open your briefing below - it explains the role, your pay, and your exact next steps. Works on any device — a laptop or desktop is most comfortable.`,
   emailCtaLabel: "Open my briefing",
-  emailClosing: `We've put everything you need on the page - the role, how it works, your pay, and what's next. When you're ready, follow the steps inside. If you have any technical problem, reach out to HR at {hrEmail} and they will respond ASAP to rectify it.`,
+  emailClosing: `We've put everything you need on the page - the role, how it works, your pay, and what's next. When you're ready, follow the steps inside. Questions? Reach out to HR at {hrEmail}.`,
 };
 
 // Replace the old shallow defaults with the richer copy - only where the stored
@@ -179,24 +169,30 @@ const OLD_TO_NEW_CONTENT: Record<string, { old: string[]; next: string }> = {
   howWorksBody: {
     old: [
       `Everything happens from your laptop, working from home. It's a Q&A-style setup powered by simple guidance we share with you - not an interview for a traditional office job.`,
+      // Workshop removal variant.
+      `Getting set up is simple and takes a few minutes. Your next step is a short guided workshop on your laptop or desktop that explains the role fully - what you'll do, what will be expected, how your pay works, and when things happen. This is not an interview and nothing is judged; it's simply how we onboard you and answer your questions one-by-one.`,
     ],
     next: DEFAULT_REFERRAL_CONTENT.howWorksBody,
   },
   getStartedBody: {
     old: [
       `When you're ready, use the button below to continue. Please complete this on the laptop you'll use for the role.`,
+      // Workshop removal: upgrade rows holding the laptop-only workshop copy.
+      `When you're ready, use the button on this page to continue. Please do this on a laptop or desktop computer rather than a phone, because the workshop and its screens need to open on a larger screen to work properly.`,
     ],
     next: DEFAULT_REFERRAL_CONTENT.getStartedBody,
   },
   supportBody: {
     old: [
       `If anything here isn't responding or you have any questions, contact us right away and we'll help.`,
+      `If anything here isn't responding or you have any questions at all, allow the process to complete and your private room will be set up. If you run into any technical problem, reach out to HR at {hrEmail} and they will respond ASAP to rectify it.`,
     ],
     next: DEFAULT_REFERRAL_CONTENT.supportBody,
   },
   emailBody: {
     old: [
       `Someone from SwiftJob referred you, and we'd love for you to review this opportunity. We open a limited number of spots each week, and you've been selected to review this one.`,
+      `Someone from SwiftJob referred you, and we'd love for you to review this opportunity. We open a limited number of spots each week and you've been selected to review this one. Open your briefing below - it explains the role, your pay, and your exact next steps. Please review it on a laptop or desktop if you can.`,
     ],
     next: DEFAULT_REFERRAL_CONTENT.emailBody,
   },
@@ -207,8 +203,13 @@ const OLD_TO_NEW_CONTENT: Record<string, { old: string[]; next: string }> = {
   emailClosing: {
     old: [
       `We've put everything you need on the page - the role, how it works, your pay, and what's next. When you're ready, follow the steps inside.`,
+      `We've put everything you need on the page - the role, how it works, your pay, and what's next. When you're ready, follow the steps inside. If you have any technical problem, reach out to HR at {hrEmail} and they will respond ASAP to rectify it.`,
     ],
     next: DEFAULT_REFERRAL_CONTENT.emailClosing,
+  },
+  sidebarLaptopNote: {
+    old: ["Workshop needs a laptop or desktop"],
+    next: DEFAULT_REFERRAL_CONTENT.sidebarLaptopNote,
   },
   securityNote: {
     old: [
@@ -758,6 +759,31 @@ export const referralService = {
         jobTitle: opts.jobTitle?.trim() || null,
       });
       created = true;
+    } else {
+      // The admin typed these values into the Mail tab for THIS send — never
+      // silently discard them because a row already exists. Fill blank fields
+      // outright; overwrite name only when the admin explicitly provided one.
+      const patch: Record<string, string | null> = {};
+      const providedName = opts.fullName?.trim();
+      if (providedName && providedName !== referral.fullName) {
+        patch.fullName = providedName;
+      }
+      if (
+        opts.referredBy?.trim() &&
+        opts.referredBy.trim() !== (referral.referredBy ?? "")
+      ) {
+        patch.referredBy = opts.referredBy.trim();
+      }
+      if (
+        opts.jobTitle?.trim() &&
+        opts.jobTitle.trim() !== (referral.jobTitle ?? "")
+      ) {
+        patch.jobTitle = opts.jobTitle.trim();
+      }
+      if (Object.keys(patch).length > 0) {
+        const updated = await referralRepository.update(referral.id, patch);
+        if (updated) referral = updated;
+      }
     }
     // Never re-send a referral that is already marked "Sent", and enforce the
     // same daily cap as the bulk sender (this endpoint is one of the ways an

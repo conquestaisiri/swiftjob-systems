@@ -8899,3 +8899,99 @@ h2 {
     margin-right: 0;
   }
 }
+
+/* ============================================
+   CLIENT MARQUEE — continuous trust strip
+   ============================================ */
+.client-marquee {
+  border-top: 1px solid rgba(21, 24, 23, 0.08);
+  border-bottom: 1px solid rgba(21, 24, 23, 0.08);
+  background: #fbfbf8;
+  padding: 26px 0;
+  overflow: hidden;
+}
+.client-marquee-inner {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+.client-marquee-label {
+  flex-shrink: 0;
+  padding-left: 5%;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #66706a;
+  white-space: nowrap;
+}
+.client-marquee-viewport {
+  overflow: hidden;
+  width: 100%;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+}
+.client-marquee-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 64px;
+  padding-right: 64px;
+  white-space: nowrap;
+  animation: client-scroll 38s linear infinite;
+  will-change: transform;
+}
+.client-marquee-viewport:hover .client-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes client-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.client-mark {
+  display: inline-flex;
+  align-items: center;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #3d4a42;
+  opacity: 0.62;
+  transition: opacity 0.2s ease;
+  user-select: none;
+}
+.client-mark:nth-child(odd) {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+.client-mark:hover {
+  opacity: 1;
+}
+.client-mark img {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+@media (prefers-reduced-motion: reduce) {
+  .client-marquee-track {
+    animation: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 28px 44px;
+  }
+}

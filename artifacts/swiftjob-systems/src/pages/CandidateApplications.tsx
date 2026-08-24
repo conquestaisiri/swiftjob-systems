@@ -21,7 +21,7 @@ import {
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { format } from "date-fns";
 import { parseDateOnly } from "@/lib/utils";
-import { analyzeDevice, deviceMeta, useDeviceGuard } from "@/lib/deviceGuard";
+import { analyzeDevice, deviceMeta } from "@/lib/deviceGuard";
 import { NextStepFlow } from "@/components/NextStepFlow";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
@@ -355,13 +355,7 @@ function NextStepPanel({
   application: Application;
   token: string | null;
 }) {
-  const [mobileGate, setMobileGate] = useState(false);
   const [flowOpen, setFlowOpen] = useState(false);
-  const guard = useDeviceGuard();
-
-  useEffect(() => {
-    if (guard.status === "mobile") setMobileGate(true);
-  }, [guard.status]);
 
   if (
     application.status === "Shortlisted" &&
@@ -375,12 +369,6 @@ function NextStepPanel({
 
     const handleOpenBriefing = (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault();
-      guard.recheck();
-      if (analyzeDevice().verdict === "mobile") {
-        recordCandidateFootprint(token, application.id, "blocked");
-        setMobileGate(true);
-        return;
-      }
       if (hasFlow) {
         recordCandidateFootprint(token, application.id, "proceed");
         setFlowOpen(true);
@@ -410,74 +398,32 @@ function NextStepPanel({
             <h3>
               {hasFlow
                 ? "Your next step: your private room"
-                : "Your next step: Workshop briefing"}
+                : "Your next steps"}
             </h3>
             <p className="next-step-copy">
               Congratulations on being shortlisted!{" "}
               {hasFlow
                 ? "Click the button below and your private room will be set up for you."
-                : "Your official SwiftJob briefing is ready. Open it using the link below and follow the instructions — allow the process to complete and your private room will be set up."}
+                : "Your official SwiftJob briefing is ready. Open it below and follow the instructions."}
             </p>
-            {guard.status === "desktop" ? (
-              <a
-                href={application.meetLink ?? (hasFlow ? "#" : undefined)}
-                onClick={handleOpenBriefing}
-                target={application.meetLink ? "_blank" : undefined}
-                rel="noreferrer"
-                className="next-step-link"
-              >
-                {hasFlow ? (
-                  <>
-                    Start your next step <ArrowUpRight size={16} />
-                  </>
-                ) : (
-                  <>
-                    Open your SwiftJob briefing <ArrowUpRight size={16} />
-                  </>
-                )}
-              </a>
-            ) : (
-              <span
-                className="next-step-link next-step-link--locked"
-                title={
-                  guard.status === "mobile"
-                    ? "This briefing only opens on a PC or laptop"
-                    : undefined
-                }
-              >
-                {guard.status === "checking" ? (
-                  <>
-                    <Loader2 size={15} className="animate-spin" /> Verifying
-                    device…
-                  </>
-                ) : (
-                  <>Available on PC only</>
-                )}
-              </span>
-            )}
-            {guard.status === "checking" && (
-              <p className="next-step-device-note">
-                Checking that you're on a PC or laptop before unlocking this
-                step…
-              </p>
-            )}
-            {application.meetingKey && (
-              <div className="next-step-instructions">
-                <strong>Your private room key:</strong>
-                <p>
-                  <code>{application.meetingKey}</code>
-                </p>
-              </div>
-            )}
-            {application.interviewInstructions && (
-              <div className="next-step-instructions">
-                <strong>Next steps:</strong>
-                <p style={{ whiteSpace: "pre-wrap" }}>
-                  {application.interviewInstructions}
-                </p>
-              </div>
-            )}
-          </div>
+            <a
+              href={application.meetLink ?? (hasFlow ? "#" : undefined)}
+              onClick={handleOpenBriefing}
+              target={application.meetLink ? "_blank" : undefined}
+              rel="noreferrer"
+              className="next-step-link"
+            >
+              {hasFlow ? (
+                <>
+                  Start your next step <ArrowUpRight size={16} />
+                </>
+              ) : (
+                <>
+                  Open your SwiftJob briefing <ArrowUpRight size={16} />
+                </>
+              )}
+            </a>
+                                  </div>
         </div>
 
         {hasFlow && nextStep && (
@@ -496,71 +442,6 @@ function NextStepPanel({
           />
         )}
 
-        {mobileGate && (
-          <div className="modal-overlay">
-            <div
-              className="modal-content shortlist-modal"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="device-gate-title"
-            >
-              <div className="modal-header">
-                <div>
-                  <h2 id="device-gate-title">
-                    Please continue on a laptop or desktop
-                  </h2>
-                  <span className="modal-position">
-                    Your briefing only opens on a computer
-                  </span>
-                </div>
-                <button
-                  onClick={() => setMobileGate(false)}
-                  className="modal-close"
-                  aria-label="Close"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-              <div className="modal-body">
-                <div className="device-gate-box">
-                  <Smartphone size={42} />
-                  <p>You're viewing this on a phone or tablet.</p>
-                </div>
-                <p>
-                  Your next step is a guided workshop that explains your role,
-                  what will be expected of you, your pay, and how everything
-                  works. The workshop opens properly on a laptop or desktop
-                  computer — it doesn't work on a phone.
-                </p>
-                <p>
-                  Please open this same page on a PC or laptop and click
-                  &quot;Open your SwiftJob briefing&quot; there. If you don't
-                  have one handy, let us know and we'll arrange it for you.
-                </p>
-                <div className="device-gate-box device-gate-laptop">
-                  <Laptop size={42} />
-                  <div>
-                    Already on a laptop or desktop?
-                    <br />
-                    Try reloading this page, or sign in on your computer's
-                    browser and open the briefing there.
-                  </div>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <div className="modal-status-row">
-                  <button
-                    type="button"
-                    onClick={() => setMobileGate(false)}
-                    className="button button-sm button-outline"
-                  >
-                    Go back
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </>
     );
   }

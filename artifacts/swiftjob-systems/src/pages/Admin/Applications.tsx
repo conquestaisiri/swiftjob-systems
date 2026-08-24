@@ -43,18 +43,6 @@ const ASSESSMENT_STATUS_COLORS: Record<string, string> = {
 
 const STATUS_OPTIONS = ["New", "Reviewing", "Shortlisted", "Rejected", "Hired"];
 
-const STANDARD_INSTRUCTIONS = (position: string) =>
-  `Congratulations! Your application for ${position} has been shortlisted.
-
-Our HR team will walk you through the next step and answer any questions you have about the role, the team, and what happens after onboarding.
-
-To get started:
-1. Open the private room link below on a PC or laptop.
-2. Enter your private room key when prompted.
-3. Follow the briefing inside the room.
-
-If you have any trouble, reply to this email and our HR team will help you right away.`;
-
 interface Application {
   id: string;
   createdAt: string;
@@ -1222,21 +1210,12 @@ function ShortlistModal({
   application: Application;
   onClose: () => void;
   onConfirm: (opts: {
-    meetLink: string;
-    meetingKey: string;
-    interviewInstructions: string;
     backgroundUrl: string;
     nextStepDelay: number | null;
     notifyCandidate: boolean;
   }) => void;
 }) {
   const isEdit = application.status === "Shortlisted";
-  const [meetLink, setMeetLink] = useState(application.meetLink ?? "");
-  const [meetingKey, setMeetingKey] = useState(application.meetingKey ?? "");
-  const [interviewInstructions, setInterviewInstructions] = useState(
-    application.interviewInstructions ??
-      STANDARD_INSTRUCTIONS(application.position),
-  );
   const [backgroundUrl, setBackgroundUrl] = useState(
     application.backgroundUrl ?? "",
   );
@@ -1250,18 +1229,6 @@ function ShortlistModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    const trimmed = meetLink.trim();
-    if (!trimmed) {
-      setError(
-        "The private room link is required to shortlist this candidate.",
-      );
-      return;
-    }
-    if (!/^https?:\/\//i.test(trimmed)) {
-      setError("Please enter a valid link starting with http:// or https://");
-      return;
-    }
 
     const bg = backgroundUrl.trim();
     if (bg && !/^https?:\/\//i.test(bg)) {
@@ -1281,18 +1248,11 @@ function ShortlistModal({
 
     setSubmitting(true);
     onConfirm({
-      meetLink: trimmed,
-      meetingKey: meetingKey.trim(),
-      interviewInstructions:
-        interviewInstructions.trim() ||
-        STANDARD_INSTRUCTIONS(application.position),
       backgroundUrl: bg,
       nextStepDelay: delay,
       notifyCandidate,
     });
   };
-
-  const hasInstructions = interviewInstructions.trim().length > 0;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -1322,41 +1282,6 @@ function ShortlistModal({
                 <span>{error}</span>
               </div>
             )}
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Private room link <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="url"
-                value={meetLink}
-                onChange={(e) => setMeetLink(e.target.value)}
-                placeholder="https://meet.example.com/room/abc"
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-              <p className="text-xs text-slate-400 mt-1">
-                The unique, private link only this candidate should open.
-              </p>
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Private room key{" "}
-                <span className="text-slate-400">(optional)</span>
-              </label>
-              <input
-                type="text"
-                value={meetingKey}
-                onChange={(e) => setMeetingKey(e.target.value)}
-                placeholder="e.g. SJ-4821-ROOM"
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <p className="text-xs text-slate-400 mt-1">
-                The private code the candidate enters when they open the link.
-                Shown only on their portal.
-              </p>
-            </div>
 
             <div className="mb-4 p-4 border border-slate-200 rounded-lg bg-slate-50">
               <div className="flex items-center justify-between mb-3">
@@ -1401,31 +1326,6 @@ function ShortlistModal({
               </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Instructions for this candidate
-              </label>
-              <textarea
-                value={interviewInstructions}
-                onChange={(e) => setInterviewInstructions(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[120px]"
-                placeholder="Write the briefing the candidate should follow…"
-              />
-              <div className="mt-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setInterviewInstructions(
-                      STANDARD_INSTRUCTIONS(application.position),
-                    )
-                  }
-                  className="button button-sm button-outline"
-                >
-                  <KeyRound size={14} /> Reset to standard message
-                </button>
-              </div>
-            </div>
-
             <label className="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-slate-50">
               <input
                 type="checkbox"
@@ -1439,52 +1339,11 @@ function ShortlistModal({
                 </span>
                 <span className="block text-xs text-slate-500 mt-0.5">
                   {isEdit
-                    ? "Sends the updated instructions to the candidate's email."
-                    : "Sends the private room link and instructions to the candidate."}
+                    ? "Sends the candidate an email update about their status."
+                    : "Sends the candidate an email letting them know they've been shortlisted."}
                 </span>
               </span>
             </label>
-
-            {hasInstructions && (
-              <div className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                <div className="flex items-center gap-2 mb-3">
-                  <Link2 size={15} className="text-slate-500" />
-                  <span className="text-sm font-semibold text-slate-700">
-                    Candidate portal preview
-                  </span>
-                </div>
-
-                <div
-                  className="next-step-panel next-step-panel--shortlist"
-                  style={{ marginBottom: 8 }}
-                >
-                  <div className="next-step-icon">
-                    <Link2 size={16} />
-                  </div>
-                  <div className="next-step-body">
-                    <h3>Your private room</h3>
-                    <p className="next-step-copy">
-                      Once your room is ready you'll see the link below. Open it
-                      on a PC or laptop.
-                    </p>
-                    <span className="next-step-link">{meetLink}</span>
-                    {meetingKey.trim() && (
-                      <p
-                        className="next-step-device-note"
-                        style={{ marginTop: 8 }}
-                      >
-                        Room key: <strong>{meetingKey.trim()}</strong>
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <p className="text-xs text-slate-400">
-                  This preview matches what the candidate sees in their portal
-                  before the room link is revealed.
-                </p>
-              </div>
-            )}
           </div>
 
           <div className="modal-footer">

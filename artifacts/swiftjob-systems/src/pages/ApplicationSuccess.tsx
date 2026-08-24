@@ -152,18 +152,18 @@ export function ApplicationSuccess() {
                 ],
                 [
                   "02",
-                  "Initial screening",
-                  "Shortlisted candidates are invited to complete a short video introduction or written task at their convenience.",
+                  "Skills check",
+                  "Complete the short optional skills check above — it takes 5–10 minutes and helps your application stand out.",
                 ],
                 [
                   "03",
-                  "Workshop briefing",
-                  "Candidates who progress are invited to a guided workshop with our recruitment team to complete their setup.",
+                  "Feedback from our team",
+                  "If your profile matches, we reach out directly by email with next steps — no calls to schedule, no interviews to prepare for.",
                 ],
                 [
                   "04",
-                  "Decision & offer",
-                  "Successful candidates receive a formal offer and are guided through a structured onboarding process.",
+                  "Offer & onboarding",
+                  "Successful candidates receive a formal offer and are guided through a fully remote onboarding process.",
                 ],
               ].map(([num, title, copy]) => (
                 <div className="success-step" key={num}>

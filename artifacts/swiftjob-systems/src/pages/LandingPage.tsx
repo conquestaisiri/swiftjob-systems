@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { fetchJobs } from "@/lib/jobsApi";
+import { ClientMarquee } from "@/components/site/ClientMarquee";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteWidgets } from "@/components/site/SiteWidgets";
 
@@ -237,6 +238,8 @@ export function LandingPage() {
             </a>
           </div>
         </section>
+
+        <ClientMarquee />
 
         <section className="landing-v2-section landing-v2-categories" id="work">
           <div className="landing-v2-section-heading">

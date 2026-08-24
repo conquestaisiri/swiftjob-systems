@@ -11,13 +11,9 @@ import {
   AlertCircle,
   ShieldCheck,
   Mail,
-  Laptop,
-  Smartphone,
-  MousePointerClick,
-  X,
 } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { analyzeDevice, deviceMeta, useDeviceGuard } from "@/lib/deviceGuard";
+import { analyzeDevice, deviceMeta } from "@/lib/deviceGuard";
 import { NextStepFlow, type NextStepConfig } from "@/components/NextStepFlow";
 import { trackEvent } from "@/lib/tracking";
 import { SUPPORT_EMAIL } from "@/lib/contact";
@@ -76,14 +72,8 @@ export function ReferralPage() {
   const [content, setContent] = useState<Content>({});
   const [nextStep, setNextStep] = useState<NextStepPayload | null>(null);
   const [tracking, setTracking] = useState(false);
-  const [mobileGate, setMobileGate] = useState(false);
   const [flowOpen, setFlowOpen] = useState(false);
   const [applyHref, setApplyHref] = useState<string | null>(null);
-  const guard = useDeviceGuard();
-
-  useEffect(() => {
-    if (guard.status === "mobile") setMobileGate(true);
-  }, [guard.status]);
 
   useEffect(() => {
     if (!code) {
@@ -262,11 +252,10 @@ export function ReferralPage() {
   const handleContinue = async () => {
     if (tracking) return;
     trackEvent("referral_start", { referral: code });
-    guard.recheck();
     const analysis = analyzeDevice();
     const device = analysis.verdict === "mobile" ? "mobile" : "laptop";
     // Fire tracking (beacon) to the backend regardless of device so the admin
-    // is notified of who/when/device. Mobile never proceeds.
+    // is notified of who/when/device. All devices proceed.
     try {
       setTracking(true);
       await fetch(
@@ -286,10 +275,6 @@ export function ReferralPage() {
       /* tracking is best-effort */
     } finally {
       setTracking(false);
-    }
-    if (analysis.verdict === "mobile" && !applyFallback) {
-      setMobileGate(true);
-      return;
     }
     if (hasNextStepFlow) {
       setFlowOpen(true);
@@ -463,7 +448,7 @@ export function ReferralPage() {
                     <Clock size={13} />
                     <span>
                       {content.sidebarLaptopNote ||
-                        "Watch your workshop on a laptop or desktop"}
+                        "Fully remote · clear weekly hours"}
                     </span>
                   </div>
                   <div>
@@ -474,32 +459,19 @@ export function ReferralPage() {
                 <button
                   type="button"
                   onClick={handleContinue}
-                  disabled={
-                    tracking || (guard.status !== "desktop" && !applyFallback)
-                  }
+                  disabled={tracking}
                   className="button button-blue sidebar-apply-btn"
-                  title={
-                    guard.status === "mobile" && !applyFallback
-                      ? "This step only works on a PC or laptop"
-                      : undefined
-                  }
                 >
                   {tracking ? (
-                    <Loader2 size={15} className="spin" />
-                  ) : guard.status === "checking" ? (
                     <Loader2 size={15} className="spin" />
                   ) : (
                     <ArrowUpRight size={15} />
                   )}
                   {tracking
                     ? "Opening…"
-                    : guard.status === "checking"
-                      ? "Verifying device…"
-                      : guard.status === "mobile" && !applyFallback
-                        ? "Continue on a PC or laptop"
-                        : applyFallback
-                          ? "Apply for this role"
-                          : content.ctaLabel || "Continue to your next step"}
+                    : applyFallback
+                      ? "Apply for this role"
+                      : content.ctaLabel || "Continue to your next step"}
                 </button>
                 <Link href="/" className="sidebar-back">
                   <ArrowLeft size={13} /> SwiftJob
@@ -522,77 +494,6 @@ export function ReferralPage() {
         />
       )}
 
-      {/* Mobile device gate — the workshop/next step only runs on a PC/laptop */}
-      {mobileGate && (
-        <div className="modal-overlay">
-          <div
-            className="modal-content shortlist-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="device-gate-title"
-          >
-            <div className="modal-header">
-              <div>
-                <h2 id="device-gate-title">
-                  {content.gateTitle ||
-                    "Please continue on a laptop or desktop"}
-                </h2>
-                <span className="modal-position">
-                  {content.gateSubtitle || "Your next step needs a computer"}
-                </span>
-              </div>
-              <button
-                onClick={() => setMobileGate(false)}
-                className="modal-close"
-                aria-label="Close"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="device-gate-box">
-                <Smartphone size={42} />
-                <p>
-                  {content.gateDetected ||
-                    "You're viewing this on a phone or tablet."}
-                </p>
-              </div>
-              <p>
-                {content.gateBody ||
-                  "Your next step is a guided workshop that explains your role, what will be expected of you, your pay, and how everything works. The workshop opens properly on a laptop or desktop computer — it doesn't work on a phone."}
-              </p>
-              <p>
-                {content.gateAction ||
-                  "Please open this same link on a PC or laptop and click continue there. If you don't have one handy, let us know and we'll arrange it for you."}
-              </p>
-              <div className="device-gate-box device-gate-laptop">
-                <Laptop size={42} />
-                <div>
-                  {content.gateLaptopHelp || "Already on a laptop or desktop?"}
-                  <br />
-                  {content.gateLaptopHelpBody ||
-                    "Try reloading this page, or copy this link into your computer's browser:"}
-                  <div className="device-gate-url">
-                    <MousePointerClick size={14} />
-                    <code>{window.location.href}</code>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="modal-footer">
-              <div className="modal-status-row">
-                <button
-                  type="button"
-                  onClick={() => setMobileGate(false)}
-                  className="button button-sm button-outline"
-                >
-                  {content.gateBackLabel || "Go back"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </SiteLayout>
   );
 }

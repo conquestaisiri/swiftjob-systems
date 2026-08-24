@@ -145,11 +145,6 @@ export const applicationService = {
     );
     if (!updated) return null;
 
-    // Fresh row: the email must reflect the candidate's actual briefing
-    // configuration (link/key/instructions persist across PATCHes).
-    const fresh = await applicationRepository.findById(id);
-    if (!fresh) return null;
-
     if (shouldNotify) {
       await this.trySend("status update email", () =>
         emailService.sendStatusUpdate({
@@ -160,13 +155,6 @@ export const applicationService = {
           applicationId: application.id,
           referenceCode: application.referenceCode,
           notes,
-          interviewInstructions:
-            status === "Shortlisted" && fresh.interviewInstructions
-              ? fresh.interviewInstructions
-              : undefined,
-          meetLink: status === "Shortlisted" ? fresh.meetLink || null : null,
-          meetingKey:
-            status === "Shortlisted" ? fresh.meetingKey || null : null,
           isShortlistUpdate: status === "Shortlisted",
         }),
       );
