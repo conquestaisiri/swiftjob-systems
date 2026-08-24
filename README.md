@@ -1,338 +1,180 @@
-# SwiftJob - Global Workforce Platform
+# SwiftJob — Global Workforce Platform
 
-A full-stack monorepo for a global workforce platform connecting businesses with remote professionals.
+> **One-line:** Careers portal + applicant pipeline + admin + email automation. TypeScript monorepo (Express + React 19 + Cloudflare Workers + R2).
 
-## Architecture
+![Status](https://img.shields.io/badge/status-active-brightgreen) ![Stack](https://img.shields.io/badge/stack-TypeScript%20%E2%80%A2%20React%2019%20%E2%80%A2%20Workers-blue) ![License](https://img.shields.io/badge/license-MIT-blue)
+
+---
+
+## What problem does this solve?
+
+Hiring globally means **collecting structured applications, storing resumes safely, keeping HR and candidates in sync, and never losing an application**. Spreadsheets + email break at 50 applicants. SwiftJob replaces that with a typed pipeline.
+
+**Who is it for?** A 10–500 person company hiring remote professionals across departments (14 job families in this instance) that needs a self-hosted, auditable alternative to Lever/Greenhouse.
+
+**What can it do today?**
+- 14 jobs with filtering, search, pagination (`lib/db.jobs`, `artifacts/api-server`)
+- Application form: 19 required fields + resume upload (PDF/DOC/DOCX ≤10MB) → R2 presigned URL
+- Admin dashboard: paginated table, search/filter, status dropdown (New → Reviewing → Shortlisted → Rejected/Hired), detail modal + resume download, stats overview
+- Email: applicant confirmation + HR notification + status-change emails via Resend
+- Auth: JWT admin, rate-limit, Helmet, CORS, Zod validation
+- Type safety: OpenAPI 3.1 → Orval → Zod → React Query (end-to-end)
+
+---
+
+## Screenshot / Demo
+
+> **Add after deployment — 1–3 images tell the story before any install.**
+> Expected captures:
+> - `assets/screenshots/01-careers.png` — job listing grid with filters
+> - `assets/screenshots/02-apply.png` — 19-field form + resume upload
+> - `assets/screenshots/03-admin.png` — admin table + status dropdown
+
+**Live demo:** `https://swiftjob.payservice.top` (Workers) + `https://swiftjob-systems...` (Vercel) — link here after deploy. Until then: `pnpm dev` screenshots.
+
+---
+
+## Architecture — real code
 
 ```
-├── lib/                          # Shared libraries
-│   ├── api-spec/                 # OpenAPI 3.1 spec + Orval config
-│   ├── api-zod/                  # Zod schemas generated from OpenAPI
-│   ├── api-client-react/         # React Query hooks + typed fetch client
-│   └── db/                       # Drizzle ORM schema (PostgreSQL)
-│
-├── artifacts/                    # Applications
-│   ├── api-server/               # Express API (Node.js + TypeScript)
-│   ├── swiftjob-systems/         # React 19 + Vite + Tailwind 4 frontend
-│   └── mockup-sandbox/           # Design system preview
-│
-├── scripts/                      # Utility scripts
-└── .github/workflows/            # CI/CD pipelines
+                         SwiftJob Monorepo
+                               │
+        ┌──────────────────────┼──────────────────────┐
+        │                      │                      │
+     lib/*                 artifacts/*           workers-api
+        │                      │                 (Hono on Cloudflare)
+        │              ┌───────┴────────┐              │
+        │         api-server (Express)  swiftjob-systems│
+        │              │           (React 19 + Vite)────┘
+        │         ┌────┴────┐               │
+   api-spec    services  repositories       TanStack Query
+ (openapi.yaml)  │          │            (api-client-react)
+        │     email  application/job
+   Orval │    storage  Drizzle ORM
+        ↓      │          │
+     api-zod ←┘      PostgreSQL (Neon/Supabase)
+        │                │
+     api-client-react ───┘
+              │
+           R2 Bucket (resumes) + Resend (emails)
 ```
+
+**Code truth:**
+- `lib/api-spec/openapi.yaml` — single source of truth (title `Api`, path `/api/healthz`)
+- `lib/api-spec/orval.config.ts` → generates `lib/api-zod` (Zod) + `lib/api-client-react` (React Query hooks, `custom-fetch.ts`)
+- `lib/db/src/schema/` — `jobs.ts` (pgTable `jobs`, 20+ columns, arrays for responsibilities/skills/benefits) + `applications.ts` (pgEnum `application_status`, 19 fields, `reference_code` unique, `resume_path`)
+- `artifacts/api-server/src/` — `app.ts` (Express 5), `services/` (applicationService, jobService, emailService, storageService), `routes/` (jobs, applications, admin, auth, health), `middleware/` (auth, upload), `repositories/` (Drizzle)
+- `workers-api/src/` — Hono + `wrangler.toml` (`R2_BUCKET=swiftjobsystems`, `FRONTEND_URL=https://swiftjob.payservice.top`), `jose` JWT, `resend`
+- `artifacts/swiftjob-systems/src/` — Vite 7 + Wouter + Zustand? actually TanStack Query + `lib/db` types, shadcn/Radix, `xlsx` for export
+- `scripts/`, `.github/workflows/ci-cd.yml` — typecheck → build → deploy-worker (Node 24, pnpm 11)
+
+---
+
+## Key capabilities
+
+| Flow | How it works |
+|------|--------------|
+| **Apply** | Frontend validates 19 fields (Zod, `hookform/resolvers`) → presigned R2 upload → `POST /api/applications` → Drizzle insert + reference_code → Resend: applicant + HR emails |
+| **Admin** | JWT login (`middleware/auth.ts`) → `GET /api/admin/applications` (paginated, filterable) → status dropdown → `PATCH /api/admin/applications/:id/status` → Resend status email |
+| **Jobs** | `GET /api/jobs` (isActive filter, slug unique) → React Query cache → `wouter` routes |
+| **Storage** | `storageService.ts` → Cloudflare R2 (`R2_BUCKET` binding) → presigned URL for download in admin modal |
+
+---
 
 ## Tech Stack
 
-| Layer               | Technology                               |
-| ------------------- | ---------------------------------------- |
-| **Language**        | TypeScript (strict)                      |
-| **Package Manager** | pnpm 9 (workspace)                       |
-| **Database**        | PostgreSQL (Neon/Supabase) + Drizzle ORM |
-| **API**             | Express 5 + Zod validation               |
-| **Frontend**        | React 19 + Vite 7 + Tailwind 4           |
-| **State/Data**      | TanStack Query + Wouter router           |
-| **Auth**            | JWT (admin)                              |
-| **Email**           | Resend                                   |
-| **File Storage**    | Cloudflare R2 (S3-compatible)            |
-| **Logging**         | Pino                                     |
-| **CI/CD**           | GitHub Actions                           |
+| Layer | Tech (exact) |
+|-------|--------------|
+| Language | TypeScript 5.9 strict, composite `tsconfig.base.json` |
+| Package | pnpm 11 workspace (`pnpm-workspace.yaml`, `minimumReleaseAge:1440`, `catalog:`) |
+| DB | PostgreSQL (Neon) + Drizzle ORM 0.38, `drizzle-zod` |
+| API | Express 5 (artifacts) + Hono 4.6 (workers-api), Zod 3.23/4, `jose` JWT |
+| Frontend | React 19, Vite 7, Tailwind 4, shadcn/Radix 20+, Wouter 3.3, TanStack Query, React Hook Form 7.55, Recharts 2.15 |
+| Infra | Cloudflare Workers (wrangler 3.80), R2, Resend 4.0, Neon serverless 0.9 |
+| CI | GitHub Actions `ci-cd.yml` (typecheck libs → typecheck worker → typecheck frontend → build frontend → deploy worker on `main`) |
+| Node | 24 (CI), 22 recommended locally |
 
-## Features
+---
 
-- **Careers Portal**: 14 job listings with filtering, search, pagination
-- **Application Forms**: 19 required fields + resume upload (PDF/DOC/DOCX ≤10MB)
-- **Email Notifications**:
-  - Applicant confirmation email
-  - HR notification with full application details
-  - Status update emails (Reviewing → Shortlisted → Rejected/Hired)
-- **Admin Dashboard**:
-  - Paginated application table with search/filter
-  - Status management with dropdown
-  - Application detail modal with resume download
-  - Statistics overview
-- **File Storage**: Resumes stored in Cloudflare R2 with presigned URLs
-- **Type Safety**: End-to-end typed (OpenAPI → Orval → Zod → React Query)
-- **Security**: Rate limiting, Helmet, CORS, JWT auth, input validation
-
-## Quick Start
-
-### Prerequisites
-
-- Node.js 22+
-- pnpm 9+
-- PostgreSQL database (Neon, Supabase, or local)
-- Resend account (for emails)
-- Cloudflare R2 account (for file storage)
-
-### 1. Clone and Install
+## How to run
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/conquestaisiri/swiftjob-systems.git
 cd swiftjob-systems
-pnpm install
+pnpm install --frozen-lockfile
+
+# env — create per artifact (never commit)
+cp artifacts/api-server/.env.example artifacts/api-server/.env
+cp workers-api/.dev.vars.example workers-api/.dev.vars
+# fill: DATABASE_URL (Neon), RESEND_API_KEY, ADMIN_PASSWORD, R2 credentials, FRONTEND_URL
+
+# dev
+pnpm run typecheck:libs
+pnpm --filter @workspace/swiftjob-systems dev   # http://localhost:5173
+pnpm --filter @workspace/swiftjob-workers-api dev  # wrangler dev
+
+# build
+pnpm run build   # frontend → artifacts/swiftjob-systems/dist
 ```
 
-### 2. Environment Setup
+**Env vars:** `DATABASE_URL`, `RESEND_API_KEY`, `ADMIN_PASSWORD`, `R2_BUCKET`, `JWT_SECRET`, `FRONTEND_URL` — see `artifacts/api-server/.env.example` and `workers-api/.dev.vars.example`.
 
-Create `.env` files in each artifact:
+---
 
-**artifacts/api-server/.env**
-
-```env
-# Database (create free project at https://supabase.com)
-DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.co:5432/postgres"
-
-# Resend (get from https://resend.com)
-RESEND_API_KEY="re_..."
-EMAIL_FROM="SwiftJob <careers@swiftjob.payservice.top>"
-HR_EMAIL="hr@swiftjob.payservice.top"
-
-# Cloudflare R2 (get from Cloudflare Dashboard → R2)
-R2_ACCOUNT_ID="..."
-R2_ACCESS_KEY_ID="..."
-R2_SECRET_ACCESS_KEY="..."
-R2_BUCKET="swiftjobsystems"
-R2_ENDPOINT="https://<account-id>.r2.cloudflarestorage.com"
-R2_PUBLIC_URL="https://pub-<account-id>.r2.dev"
-
-# Auth
-JWT_SECRET="generate-with: openssl rand -base64 32"
-ADMIN_EMAIL="admin@swiftjob.payservice.top"
-ADMIN_PASSWORD="secure-password-here"
-
-# App
-NODE_ENV="development"
-PORT="3001"
-FRONTEND_URL="http://localhost:5173"
-```
-
-**artifacts/swiftjob-systems/.env**
-
-```env
-VITE_API_URL="http://localhost:3001/api"
-```
-
-### 3. Database Setup
-
-```bash
-# Push schema to database
-cd artifacts/api-server
-pnpm run db:push
-
-# Or use Drizzle Studio to inspect
-pnpm run db:studio
-```
-
-### 4. Development
-
-```bash
-# Terminal 1: API Server
-cd artifacts/api-server
-pnpm run dev
-
-# Terminal 2: Frontend
-cd artifacts/swiftjob-systems
-pnpm run dev
-```
-
-Visit:
-
-- Frontend: http://localhost:5173
-- API: http://localhost:3001/api/healthz
-- Admin: http://localhost:5173/admin
-
-### 5. Production Build
-
-```bash
-# Build all packages
-pnpm run build
-
-# Typecheck all
-pnpm run typecheck
-```
-
-## Project Structure Details
-
-### Shared Libraries
-
-**lib/db** - Database schema and client
-
-- `src/schema/applications.ts` - Applications table with full field definitions
-- `src/index.ts` - Drizzle client + pool export
-
-**lib/api-zod** - Zod validation schemas
-
-- Generated from OpenAPI spec via Orval
-- Used by both frontend and backend
-
-**lib/api-client-react** - React Query integration
-
-- `custom-fetch.ts` - Typed fetch with auth, base URL, error handling
-- Generated hooks in `src/generated/api.ts`
-
-### API Server (artifacts/api-server)
+## Project structure
 
 ```
-src/
-├── routes/
-│   ├── health.ts           # GET /healthz
-│   ├── applications.ts     # POST/GET /applications
-│   ├── admin.ts            # Admin CRUD + stats
-│   └── auth.ts             # Admin login
-├── services/
-│   ├── applicationService.ts  # Business logic + email orchestration
-│   ├── storageService.ts      # R2 upload/delete/presigned URLs
-│   └── emailService.ts        # Resend templates + sending
-├── repositories/
-│   └── applicationRepository.ts  # Drizzle queries
-├── middleware/
-│   ├── auth.ts            # JWT verification
-│   └── upload.ts          # Multer memory storage
-├── models/
-│   └── application.ts     # Type exports
+swiftjob-systems/
 ├── lib/
-│   └── logger.ts          # Pino logger
-├── app.ts                 # Express setup + middleware
-└── index.ts               # Entry point
+│   ├── api-spec/        # openapi.yaml + orval.config.ts (source of truth)
+│   ├── api-zod/         # generated Zod schemas
+│   ├── api-client-react/# generated React Query hooks
+│   └── db/              # Drizzle schema (jobs, applications, auth)
+├── artifacts/
+│   ├── api-server/      # Express API (app.ts, routes/, services/, repositories/, middleware/)
+│   └── swiftjob-systems/# React 19 frontend (Vite, wouter, shadcn)
+├── workers-api/         # Hono on Cloudflare Workers (R2, Resend, jose)
+├── scripts/             # utility
+└── .github/workflows/ci-cd.yml
 ```
 
-### Frontend (artifacts/swiftjob-systems)
+---
 
-```
-src/
-├── pages/
-│   ├── Home.tsx           # Landing page
-│   ├── CareersPage.tsx    # Job listings with filters
-│   ├── JobPage.tsx        # Job detail + application form
-│   ├── ApplicationSuccess.tsx  # Success page
-│   └── Admin/
-│       └── AdminDashboard.tsx  # Admin panel
-├── components/
-│   ├── site/
-│   │   └── SiteLayout.tsx # Shared layout with nav/footer
-│   └── ui/                # Radix-based UI components
-├── data/
-│   └── jobs.ts            # 14 job definitions
-├── hooks/
-│   ├── use-mobile.tsx
-│   └── use-toast.ts
-├── lib/
-│   └── utils.ts
-├── App.tsx                # Routes + providers
-└── main.tsx               # Entry point
-```
+## Engineering decisions
 
-## API Endpoints
+- **Orval + Zod + React Query** over manual fetch: OpenAPI is the contract, everything else generates — prevents drift between backend and frontend types.
+- **Drizzle over Prisma:** lighter, SQL-close, `drizzle-zod` reuses schema for validation.
+- **Two API runtimes:** Express for local/full Node, Hono for edge (Workers) — shared `lib/db` and schemas, deploy target chooses runtime. `wrangler.toml` pins `compatibility_date=2024-08-01` + `nodejs_compat`.
+- **R2 presigned URLs** over direct upload: resumes never touch API disk, admin download is presigned (expiry handled in `storageService`).
+- **pnpm `minimumReleaseAge:1440`** — supply-chain defense: delays newly published packages by 1 day.
 
-### Public
+---
 
-| Method | Endpoint                | Description                    |
-| ------ | ----------------------- | ------------------------------ |
-| GET    | `/api/healthz`          | Health check                   |
-| POST   | `/api/applications`     | Submit application (multipart) |
-| GET    | `/api/applications`     | List all (admin only)          |
-| GET    | `/api/applications/:id` | Get single (admin only)        |
+## Limitations
 
-### Admin (requires JWT)
+- No live demo link yet (infra ready, needs deploy).
+- No unit tests for `applicationService`/`jobService` — add `vitest` next.
+- 14 jobs are seed data, not CMS — admin cannot create jobs via UI (only via DB).
+- Email relies on Resend; no fallback.
+- `attached_assets/` images are committed (consider R2 or LFS if >50MB).
 
-| Method | Endpoint                             | Description                 |
-| ------ | ------------------------------------ | --------------------------- |
-| POST   | `/api/admin/login`                   | Admin login                 |
-| GET    | `/api/admin/applications`            | Paginated list with filters |
-| GET    | `/api/admin/applications/:id`        | Get application details     |
-| PATCH  | `/api/admin/applications/:id/status` | Update status               |
-| GET    | `/api/admin/stats`                   | Statistics                  |
-| GET    | `/api/admin/applications/:id/resume` | Download resume             |
+## Roadmap
 
-## Email Templates
+- [ ] Deploy: Workers API → `swiftjob.payservice.top`, frontend → Vercel (`render.yaml`/`koyeb.yaml` already present)
+- [ ] Screenshots + 30s GIF (apply → admin → email)
+- [ ] Tests: `applicationService` (Zod validation + Drizzle), resume upload edge (10MB, MIME)
+- [ ] Admin job CRUD (create/edit jobs)
+- [ ] Rate-limit per IP on `POST /applications` (currently global)
 
-Located in `artifacts/api-server/src/services/emailService.ts`:
+## Security
 
-1. **HR Notification** - Full application details in formatted HTML table
-2. **Applicant Confirmation** - Branded confirmation with next steps
-3. **Status Update** - Dynamic based on status (Reviewing/Shortlisted/Rejected/Hired)
+- `.env` + `.dev.vars` gitignored (verified). JWT via `jose`, Helmet, CORS, rate-limit.
+- Report the revoked PAT `ghp_wV3MBD...` — rotate if you reused it elsewhere.
 
-## File Upload Flow
+## Status
 
-1. Client uploads resume via multipart form
-2. Server validates (type, size) in middleware
-3. Service uploads to R2 with unique key: `resumes/{timestamp}-{uuid}.{ext}`
-4. Application record stores R2 key + original filename
-5. Admin can download via presigned URL (1-hour expiry)
-
-## Deployment
-
-### Recommended Free Tier Stack
-
-| Service     | Provider                            | Free Tier                             |
-| ----------- | ----------------------------------- | ------------------------------------- |
-| Database    | Supabase / Neon                     | 500MB / 0.5GB Postgres                |
-| API Hosting | Render / Railway / Fly.io           | 750 hrs/mo / $5 credit / 3 shared VMs |
-| Frontend    | Vercel / Netlify / Cloudflare Pages | Unlimited personal                    |
-| Email       | Resend                              | 3,000 emails/month                    |
-| Storage     | Cloudflare R2                       | 10 GB/month                           |
-
-### Environment Variables for Production
-
-Add to your hosting platform:
-
-- All variables from `.env` example
-- `NODE_ENV=production`
-- `FRONTEND_URL=https://yourdomain.com`
-
-### Database Migrations
-
-```bash
-# On deployment
-pnpm --filter @workspace/api-server run db:push
-```
-
-## Development Commands
-
-```bash
-# Install dependencies
-pnpm install
-
-# Typecheck everything
-pnpm run typecheck
-
-# Build all packages
-pnpm run build
-
-# Database operations
-cd artifacts/api-server
-pnpm run db:push      # Push schema changes
-pnpm run db:studio    # Open Drizzle Studio
-
-# Frontend
-cd artifacts/swiftjob-systems
-pnpm run dev          # Dev server
-pnpm run build        # Production build
-pnpm run serve        # Preview build
-
-# API Server
-cd artifacts/api-server
-pnpm run dev          # Dev with auto-rebuild
-pnpm run build        # esbuild bundle
-pnpm run start        # Run built server
-```
-
-## Security Considerations
-
-- **Rate Limiting**: 100 req/15min general, 10/hr on applications
-- **Helmet**: Security headers
-- **CORS**: Configured for frontend origin
-- **JWT**: 7-day expiry, HS256
-- **Validation**: Zod schemas on all inputs
-- **File Upload**: Type + size validation, memory storage (no disk)
-- **Secrets**: Never committed, use environment variables
-
-## Contributing
-
-1. Create feature branch
-2. Make changes with tests
-3. Run `pnpm run typecheck` and `pnpm run build`
-4. Submit PR
+**Active** — main showcase. CI green on `main`.
 
 ## License
 
-MIT
+MIT — see `LICENSE`.
