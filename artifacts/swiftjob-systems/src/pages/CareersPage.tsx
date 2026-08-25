@@ -223,7 +223,7 @@ export function CareersPage() {
           aria-label="Remote professionals at work"
         >
           <figure>
-            <img src="/wfh-desk.svg" alt="Working from a home desk" />
+            <img src="/wfh-desk.jpg" alt="Working from a home desk" />
           </figure>
           <figure>
             <img

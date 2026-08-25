@@ -20,7 +20,7 @@ const categories = [
   {
     title: "Customer Experience",
     copy: "Support agents, chat and email specialists, and success teams that keep your customers looked after across time zones.",
-    image: "/wfh-call.svg",
+    image: "/wfh-call.jpg",
     meta: "Support · Chat · Email · Voice",
   },
   {
@@ -198,20 +198,20 @@ export function LandingPage() {
             </div>
             <figure className="landing-v2-photo landing-v2-photo-a">
               <img
-                src="/wfh-desk.svg"
-                alt="A professional working from a home desk"
+                src="/wfh-desk.jpg"
+                alt="A professional taking a call while working from home"
               />
             </figure>
             <figure className="landing-v2-photo landing-v2-photo-b">
               <img
-                src="/work-professional-real.jpg"
-                alt="A remote professional on a video call"
+                src="/wfh-home.jpg"
+                alt="Taking a stretch break while working from home"
               />
             </figure>
             <figure className="landing-v2-photo landing-v2-photo-c">
               <img
-                src="/work-team-real.jpg"
-                alt="A distributed team collaborating online"
+                src="/wfh-team.jpg"
+                alt="A remote team laughing together over laptops"
               />
             </figure>
             <div className="landing-v2-art-card">
