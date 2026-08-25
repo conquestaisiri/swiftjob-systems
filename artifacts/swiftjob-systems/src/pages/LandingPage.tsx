@@ -276,8 +276,8 @@ export function LandingPage() {
         <section className="landing-v2-split">
           <div className="landing-v2-split-image">
             <img
-              src="/work-professional-real.jpg"
-              alt="A diverse professional team collaborating"
+              src="/team-call.jpg"
+              alt="A SwiftJob professional on a video call from her home office"
             />
           </div>
           <div className="landing-v2-split-copy">
@@ -353,6 +353,9 @@ export function LandingPage() {
             >
               Browse open roles <ArrowUpRight size={16} />
             </Link>
+          </div>
+          <div className="landing-v2-roles-image" aria-hidden="true">
+            <img src="/wfh-dev.jpg" alt="" loading="lazy" />
           </div>
           <div className="landing-v2-role-list">
             {(jobs.length
