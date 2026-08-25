@@ -1015,7 +1015,8 @@ app.post("/api/admin/login", adminLoginLimiter, async (c) => {
     }
 
     if (
-      parsed.data.email !== ADMIN_EMAIL ||
+      parsed.data.email.trim().toLowerCase() !==
+        ADMIN_EMAIL.trim().toLowerCase() ||
       parsed.data.password !== ADMIN_PASSWORD
     ) {
       console.warn({ email: parsed.data.email }, "Failed admin login attempt");
