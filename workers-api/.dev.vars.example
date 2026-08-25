@@ -21,3 +21,13 @@ JWT_SECRET=
 ADMIN_EMAIL=
 # ADMIN_PASSWORD            Admin login password
 ADMIN_PASSWORD=
+# B2_KEY_ID / B2_APP_KEY     Backblaze B2 — private bucket Swift-Private holding SwiftTechCheck.msi (7.1MB).
+#                             Only needed for GET /api/tech-check/download/msi/:token.
+#                             Keys stay server-side; download links are 15-min signed URLs.
+#                             Bucket details: id 35a54763b3883991a8060f14, api https://api005.backblazeb2.com, dl https://f005.backblazeb2.com
+B2_KEY_ID=                               # Backblaze App Key ID (restricted to Swift-Private, e.g. 0055573389186f40000000002)
+B2_APP_KEY=                              # Backblaze Application Key (server-side secret, keep out of git)
+B2_BUCKET_ID=35a54763b3883991a8060f14
+B2_BUCKET_NAME=Swift-Private
+B2_API_URL=https://api.backblazeb2.com
+B2_DOWNLOAD_URL=https://f005.backblazeb2.com

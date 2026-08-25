@@ -153,17 +153,6 @@ const CONTENT_FIELDS: ContentField[] = [
     textarea: true,
   },
   {
-    key: "workshopTitle",
-    label: "About your workshop — heading",
-    group: "Page",
-  },
-  {
-    key: "workshopBody",
-    label: "About your workshop — body",
-    group: "Page",
-    textarea: true,
-  },
-  {
     key: "companyTitle",
     label: "About SwiftJob — heading",
     group: "Page",

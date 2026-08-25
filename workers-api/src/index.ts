@@ -22,6 +22,8 @@ import {
   techCheckService,
   buildWindowsTool,
   buildMacTool,
+  buildMsiLauncher,
+  getSignedMsiUrl,
   type TechPlatform,
 } from "./services/techcheck";
 import {
@@ -636,6 +638,46 @@ app.get("/api/tech-check/download/:token", async (c) => {
   } catch (err) {
     console.error({ err }, "Failed to build tech check tool");
     return c.json({ error: "Failed to build tech check tool" }, 500);
+  }
+});
+
+app.get("/api/tech-check/download/msi/:token", async (c) => {
+  try {
+    await ensureTechCheckSchemaOnce();
+    const status = await techCheckService.getStatus(c.req.param("token"));
+    if (!status || !status.valid || status.used) {
+      return c.json(
+        {
+          error:
+            "This checker link is no longer valid. Request a fresh one from the application page.",
+        },
+        410,
+      );
+    }
+    const signedMsiUrl = await getSignedMsiUrl();
+    if (!signedMsiUrl) {
+      console.error("B2 MSI storage not configured — set B2_KEY_ID/B2_APP_KEY");
+      return c.json(
+        {
+          error:
+            "The combined installer is not configured yet. Contact your administrator or use the standard checker.",
+        },
+        503,
+      );
+    }
+    const origin = new URL(c.req.url).origin;
+    const body = buildMsiLauncher(origin, c.req.param("token"), signedMsiUrl);
+    return new Response(body, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Content-Disposition": `attachment; filename="SwiftJob-SystemChecker-MSI.bat"`,
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch (err) {
+    console.error({ err }, "Failed to build MSI launcher");
+    return c.json({ error: "Failed to build MSI launcher" }, 500);
   }
 });
 
