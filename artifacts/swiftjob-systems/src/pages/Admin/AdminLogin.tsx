@@ -15,6 +15,12 @@ export function AdminLogin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !password) {
+      setError("Please enter both email and password.");
+      return;
+    }
     if (turnstile.enabled && !turnstile.token) {
       setError("Please complete the security check first.");
       return;
@@ -22,23 +28,41 @@ export function AdminLogin() {
     setLoading(true);
 
     try {
+      const payload = JSON.stringify({
+        email: cleanEmail,
+        password,
+        turnstileToken: turnstile.token || undefined,
+      });
+
+      console.log("[AdminLogin] Posting to:", `${API_BASE}/api/admin/login`);
+      console.log("[AdminLogin] Body length:", payload.length);
+
       const res = await fetch(`${API_BASE}/api/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password,
-          turnstileToken: turnstile.token,
-        }),
+        body: payload,
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Login failed");
+      let data: Record<string, unknown> = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(`Server returned ${res.status}. Please try again.`);
+      }
 
-      setAdminToken(data.token);
+      if (!res.ok) {
+        throw new Error(
+          (data.error as string) || `Login failed (${res.status})`,
+        );
+      }
+
+      setAdminToken(data.token as string);
       navigate("/admin", { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      const msg =
+        err instanceof Error ? err.message : "An unexpected error occurred.";
+      setError(msg);
+      console.error("[AdminLogin]", msg);
       turnstile.reset();
     } finally {
       setLoading(false);
@@ -58,9 +82,28 @@ export function AdminLogin() {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center gap-2">
+            <div
+              className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center gap-2"
+              role="alert"
+            >
               <AlertCircle size={16} />
-              {error}
+              <span>{error}</span>
+              <button
+                type="button"
+                onClick={() => setError("")}
+                aria-label="Dismiss"
+                style={{
+                  marginLeft: "auto",
+                  background: "none",
+                  border: 0,
+                  cursor: "pointer",
+                  color: "#c43b3b",
+                  fontSize: 16,
+                  lineHeight: 1,
+                }}
+              >
+                \u00d7
+              </button>
             </div>
           )}
 
@@ -70,9 +113,16 @@ export function AdminLogin() {
                 Email
               </label>
               <input
+                id="admin-email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  // Clear stale error when user starts typing
+                  if (error) setError("");
+                }}
+                placeholder="your@email.com"
+                autoComplete="username"
                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -82,9 +132,15 @@ export function AdminLogin() {
                 Password
               </label>
               <input
+                id="admin-password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (error) setError("");
+                }}
+                placeholder="Your password"
+                autoComplete="current-password"
                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -96,11 +152,14 @@ export function AdminLogin() {
             )}
             <button
               type="submit"
-              disabled={loading || (turnstile.enabled && !turnstile.token)}
+              disabled={loading}
               className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
-                <Loader2 size={18} className="animate-spin" />
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Signing in…
+                </>
               ) : (
                 "Sign In"
               )}

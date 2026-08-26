@@ -8,6 +8,8 @@ import {
   ClipboardCheck,
   ArrowRight,
   Loader2,
+  ShieldCheck,
+  KeyRound,
 } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { trackEvent } from "@/lib/tracking";
@@ -36,7 +38,6 @@ export function ApplicationSuccess() {
   const [assessment, setAssessment] = useState<AssessmentStatus | null>(null);
   const [assessmentLoading, setAssessmentLoading] = useState(true);
 
-  // Portal password claim (optional — magic link always works too).
   const referenceCode = params.get("ref") ?? "";
   const [pw, setPw] = useState("");
   const [pwState, setPwState] = useState<"idle" | "busy" | "done" | "error">(
@@ -112,213 +113,162 @@ export function ApplicationSuccess() {
   const showAssessmentCta =
     assessment?.needsAssessment && assessment.status !== "completed";
 
-  // The real reference code (matches the confirmation email) when the apply
-  // flow supplied it; older links fall back to a short id fragment.
   const shortId = applicationId
     ? applicationId.split("-")[0].toUpperCase()
-    : "—";
+    : "\u2014";
   const displayRef = referenceCode || shortId;
 
   return (
     <SiteLayout
-      title="Application Received — SwiftJob"
-      description="Thank you for applying to SwiftJob. Your application has been received."
+      title="Application Received \u2014 SwiftJob"
+      description="Thank you for applying to SwiftJob."
     >
-      <div className="success-shell">
-        <div className="success-card reveal is-visible">
-          <div className="success-icon-wrap">
-            <CheckCircle size={44} strokeWidth={1.5} />
-          </div>
-
-          <div className="success-eyebrow">APPLICATION RECEIVED</div>
-          <h1 className="success-heading">
-            Thank you for applying
-            <br />
-            <span>to SwiftJob.</span>
-          </h1>
-
-          <p className="success-lead">
-            We have received your application for <strong>{position}</strong>{" "}
-            and it is now under review by our recruitment team.
-          </p>
-
-          <div className="success-ref-box">
-            <span className="success-ref-label">
-              Your Application Reference
-            </span>
-            <span className="success-ref-id">{displayRef}</span>
-          </div>
-
-          {applicationId && email && (
-            <div
-              className="success-portal-claim"
-              style={{
-                margin: "18px auto 0",
-                maxWidth: 460,
-                border: "1px solid #dfe6dc",
-                borderRadius: 14,
-                padding: "18px 20px",
-                background: "#fbfbf8",
-                textAlign: "left",
-              }}
-            >
-              <strong style={{ fontSize: 14.5, color: "#10251d" }}>
-                Secure your candidate portal
-              </strong>
-              {pwState === "done" ? (
-                <p
-                  style={{
-                    fontSize: 13.5,
-                    color: "#2e7d43",
-                    margin: "8px 0 0",
-                  }}
-                >
-                  {pwMsg}{" "}
-                  <a href="/login" style={{ fontWeight: 700 }}>
-                    Sign in
-                  </a>
-                </p>
-              ) : (
-                <>
-                  <p
-                    style={{
-                      fontSize: 13,
-                      color: "#66706a",
-                      margin: "6px 0 12px",
-                    }}
-                  >
-                    Set a password for <strong>{email}</strong> so you can sign
-                    in without email links. Your email link still works as a
-                    reset.
-                  </p>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <input
-                      type="password"
-                      value={pw}
-                      onChange={(e) => setPw(e.target.value)}
-                      placeholder="Create a password (8+ characters)"
-                      style={{
-                        flex: 1,
-                        border: "1px solid #cfd6cf",
-                        borderRadius: 10,
-                        padding: "10px 12px",
-                        fontSize: 14,
-                      }}
-                    />
-                    <button
-                      className="button button-blue"
-                      onClick={claimPassword}
-                      disabled={pwState === "busy"}
-                    >
-                      {pwState === "busy" ? (
-                        <Loader2 size={15} className="spin" />
-                      ) : null}
-                      Save
-                    </button>
-                  </div>
-                  {pwState === "error" && (
-                    <p
-                      style={{
-                        fontSize: 12.5,
-                        color: "#c43b3b",
-                        margin: "8px 0 0",
-                      }}
-                    >
-                      {pwMsg}
-                    </p>
-                  )}
-                </>
-              )}
+      <div className="success-page-full">
+        {/* Hero band */}
+        <div className="success-hero-band">
+          <div className="success-hero-inner">
+            <CheckCircle
+              size={52}
+              strokeWidth={1.4}
+              className="success-check"
+            />
+            <h1 className="success-h1">Application Received</h1>
+            <p className="success-sub">
+              Your application for <strong>{position}</strong> has been received
+              and is now under review by our recruitment team.
+            </p>
+            <div className="success-ref-pill">
+              <span className="ref-label-sm">Reference</span>
+              <code className="ref-code-sm">{displayRef}</code>
             </div>
-          )}
+          </div>
+        </div>
 
-          {assessmentLoading ? (
-            <div className="assessment-cta-loading">
-              <Loader2 size={16} className="spin" /> Checking your next steps…
-            </div>
-          ) : (
-            showAssessmentCta && (
-              <div className="assessment-cta-card">
-                <div className="assessment-cta-icon">
-                  <ClipboardCheck size={22} strokeWidth={1.6} />
+        {/* Two-column body */}
+        <div className="success-body-grid">
+          {/* Left column — main content */}
+          <main className="success-col-main">
+            {/* Password card */}
+            {applicationId && email && pwState !== "done" && (
+              <section className="card-block">
+                <div className="card-block-head">
+                  <KeyRound size={18} />
+                  <h3>Create your portal password</h3>
                 </div>
-                <div className="assessment-cta-copy">
-                  <strong>Quick skills check (optional)</strong>
+                <p className="card-block-desc">
+                  Set a password for <strong>{email}</strong> so you can sign in
+                  without email links.
+                </p>
+                {pwState === "error" && <p className="form-error">{pwMsg}</p>}
+                <div className="password-row">
+                  <input
+                    type="password"
+                    value={pw}
+                    onChange={(e) => setPw(e.target.value)}
+                    placeholder="Minimum 8 characters"
+                    autoComplete="new-password"
+                    disabled={pwState === "busy"}
+                  />
+                  <button
+                    onClick={claimPassword}
+                    disabled={pwState === "busy" || pw.length < 8}
+                  >
+                    {pwState === "busy" ? (
+                      <Loader2 size={15} className="spin" />
+                    ) : null}
+                    Save
+                  </button>
+                </div>
+              </section>
+            )}
+            {pwState === "done" && (
+              <div className="password-done-banner">
+                <ShieldCheck size={16} />
+                <span>{pwMsg}</span> <Link href="/login">Sign in</Link>
+              </div>
+            )}
+
+            {/* Skills check CTA */}
+            {showAssessmentCta && (
+              <section className="skills-cta-card">
+                <ClipboardCheck size={24} />
+                <div className="skills-cta-text">
+                  <h3>Quick skills check (optional)</h3>
                   <p>
-                    Give your application a boost — a short{" "}
-                    {assessment.jobTitle} skills check takes about 5–8 minutes.
-                    No pass mark, no time limit.
+                    Boost your application — takes about 5\u20138 minutes. No
+                    pass mark, no time limit.
                   </p>
                 </div>
                 <Link
-                  className="button button-blue button-small"
                   href={`/assessment?id=${encodeURIComponent(applicationId)}&email=${encodeURIComponent(email)}&job=${encodeURIComponent(jobSlug)}`}
                 >
                   Start now <ArrowRight size={14} />
                 </Link>
-              </div>
-            )
-          )}
+              </section>
+            )}
 
-          <div className="success-what-next">
-            <h2>What happens next?</h2>
-            <div className="success-steps">
-              {[
-                [
-                  "01",
-                  "Application review",
-                  "Our recruitment team carefully reviews every application we receive. This typically takes 3–5 business days.",
-                ],
-                [
-                  "02",
-                  "Skills check",
-                  "Complete the short optional skills check above — it takes 5–10 minutes and helps your application stand out.",
-                ],
-                [
-                  "03",
-                  "Feedback from our team",
-                  "If your profile matches, we reach out directly by email with next steps — no calls to schedule, no interviews to prepare for.",
-                ],
-                [
-                  "04",
-                  "Offer & onboarding",
-                  "Successful candidates receive a formal offer and are guided through a fully remote onboarding process.",
-                ],
-              ].map(([num, title, copy]) => (
-                <div className="success-step" key={num}>
-                  <span className="success-step-num">{num}</span>
-                  <div>
-                    <strong>{title}</strong>
-                    <p>{copy}</p>
-                  </div>
-                </div>
-              ))}
+            {/* What happens next */}
+            <section className="next-steps-section">
+              <h2>What happens next</h2>
+              <ol className="steps-list">
+                {[
+                  [
+                    "01",
+                    "Application Review",
+                    "Our team reviews every application. Typically 3\u20135 business days.",
+                  ],
+                  [
+                    "02",
+                    "Skills Check",
+                    "Complete the optional skills check above to strengthen your application.",
+                  ],
+                  [
+                    "03",
+                    "Team Review & Feedback",
+                    "If your profile matches, we reach out directly by email \u2014 no interviews.",
+                  ],
+                  [
+                    "04",
+                    "Offer & Onboarding",
+                    "Successful candidates receive a formal offer and fully remote onboarding.",
+                  ],
+                ].map(([num, title, copy]) => (
+                  <li key={num}>
+                    <span>{num}</span>
+                    <div>
+                      <strong>{title}</strong>
+                      <p>{copy}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          </main>
+
+          {/* Right sidebar */}
+          <aside className="success-col-side">
+            <div className="side-card">
+              <h4>Your Reference</h4>
+              <code className="side-ref">{displayRef}</code>
+              <p>Keep this handy for correspondence.</p>
             </div>
-          </div>
-
-          <div className="success-contact-box">
-            <Mail size={18} />
-            <div>
-              <p>
-                If you would like to help our team identify your application
-                more quickly, you are welcome to send a brief note to our
-                recruitment team — including your reference number and the
-                position you applied for.
-              </p>
-              <a href={`mailto:${CAREERS_EMAIL}`} className="success-email">
-                {CAREERS_EMAIL} <ArrowUpRight size={14} />
+            <div className="side-card">
+              <h4>Contact Recruitment</h4>
+              <a href={`mailto:${CAREERS_EMAIL}`}>
+                <Mail size={15} /> {CAREERS_EMAIL}
               </a>
             </div>
-          </div>
+          </aside>
+        </div>
 
-          <div className="success-actions">
-            <Link href="/careers" className="button button-blue">
-              <ArrowLeft size={16} /> View all positions
-            </Link>
-            <Link href="/" className="button button-dark">
-              Return to homepage <ArrowUpRight size={16} />
-            </Link>
-          </div>
+        {/* Bottom actions */}
+        <div className="success-bottom-actions">
+          <Link href="/careers" className="btn btn-secondary">
+            <ArrowLeft size={16} /> View all positions
+          </Link>
+          <Link href="/" className="btn btn-dark">
+            Return to homepage <ArrowUpRight size={16} />
+          </Link>
         </div>
       </div>
     </SiteLayout>
