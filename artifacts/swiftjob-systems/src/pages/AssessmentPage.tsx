@@ -14,10 +14,7 @@ import {
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { trackEvent } from "@/lib/tracking";
 import { analyzeDevice, deviceMeta } from "@/lib/deviceGuard";
-import {
-  PreChecks,
-  type PreCheckResult,
-} from "@/components/PreChecks";
+import { PreChecks, type PreCheckResult } from "@/components/PreChecks";
 import {
   TRACKS,
   scoreResponses,
@@ -168,10 +165,10 @@ export function AssessmentPage() {
             email,
             jobSlug: payload.jobSlug,
             systemCheck: {
-            sentAt: new Date().toISOString(),
-            ...deviceMeta(),
-            ...(precheckRef.current ?? {}),
-          },
+              sentAt: new Date().toISOString(),
+              ...deviceMeta(),
+              ...(precheckRef.current ?? {}),
+            },
             responses,
             score,
             maxScore,
@@ -287,7 +284,10 @@ export function AssessmentPage() {
 
   if (step === "checks") {
     return (
-      <SiteLayout title={`${config?.title ?? "Skills check"} — SwiftJob`} description="Quick setup checks as part of your application.">
+      <SiteLayout
+        title={`${config?.title ?? "Skills check"} — SwiftJob`}
+        description="Quick setup checks as part of your application."
+      >
         <div className="assessment-shell">
           <PreChecks
             applicationId={applicationId}
@@ -304,8 +304,6 @@ export function AssessmentPage() {
   }
 
   if (step === "intro") {
-    // The skills check is the one step that genuinely needs a computer —
-    // on mobile we show a short notice instead of the assessment.
     const isMobile = analyzeDevice().verdict === "mobile";
     if (isMobile) {
       return (
@@ -314,23 +312,34 @@ export function AssessmentPage() {
           description="A short skills check as part of your application."
         >
           <div className="assessment-shell">
-            <div className="assessment-card">
-              <div className="assessment-icon-wrap">
+            <div
+              className="assessment-card"
+              style={{ maxWidth: 560, textAlign: "center" }}
+            >
+              <div
+                className="assessment-icon-wrap"
+                style={{ margin: "0 auto 20px" }}
+              >
                 <Laptop size={34} strokeWidth={1.6} />
               </div>
               <div className="assessment-eyebrow">SKILLS CHECK</div>
-              <h1 className="assessment-heading">
+              <h1
+                className="assessment-heading"
+                style={{ textAlign: "center" }}
+              >
                 One quick step
                 <br />
                 <span>needs a computer</span>
               </h1>
-              <p className="assessment-lead">
-                This skills check opens on a laptop or desktop. Please visit{" "}
-                <strong>swiftjob.payservice.top</strong> on your PC, sign in to
-                your candidate portal, and continue from there — it only takes
-                5–10 minutes.
+              <p className="assessment-lead" style={{ textAlign: "center" }}>
+                This skills check is best completed on a laptop or desktop
+                computer. Please open this same link on your PC — it only takes
+                5–10 minutes to complete.
               </p>
-              <div className="assessment-actions">
+              <div
+                className="assessment-actions"
+                style={{ justifyContent: "center" }}
+              >
                 <a href="/careers" className="button button-blue">
                   Back to careers
                 </a>
@@ -345,41 +354,105 @@ export function AssessmentPage() {
         title={`${config?.title} — SwiftJob`}
         description="A short skills check as part of your application."
       >
-        <div className="assessment-shell">
-          <div className="assessment-card">
-            <div className="assessment-icon-wrap">
-              <ClipboardCheck size={34} strokeWidth={1.6} />
+        <div
+          className="assessment-page-full"
+          style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px 80px" }}
+        >
+          <div className="assessment-hero-band">
+            <div className="assessment-hero-content">
+              <div className="assessment-eyebrow" style={{ color: "#d4e94e" }}>
+                SKILLS CHECK
+              </div>
+              <h1
+                className="assessment-heading"
+                style={{ color: "#fff", margin: "0 0 14px" }}
+              >
+                {config?.title}
+                <span
+                  style={{
+                    color: "#d4e94e",
+                    display: "block",
+                    fontSize: "0.55em",
+                    marginTop: 8,
+                  }}
+                >
+                  {payload.jobTitle}
+                </span>
+              </h1>
+              <p
+                className="assessment-lead"
+                style={{ color: "#c8d5cc", marginBottom: 18 }}
+              >
+                {config?.blurb}
+              </p>
+              <div className="assessment-meta-row">
+                <span
+                  className="assessment-meta-chip"
+                  style={{
+                    background: "rgba(255,255,255,0.1)",
+                    borderColor: "rgba(255,255,255,0.15)",
+                    color: "#fff",
+                  }}
+                >
+                  <Clock size={14} /> {config?.duration}
+                </span>
+                <span
+                  className="assessment-meta-chip"
+                  style={{
+                    background: "rgba(255,255,255,0.1)",
+                    borderColor: "rgba(255,255,255,0.15)",
+                    color: "#fff",
+                  }}
+                >
+                  <ClipboardCheck size={14} />{" "}
+                  {config ? `${config.questions.length + 1} questions` : ""}
+                </span>
+              </div>
+              <div
+                className="assessment-note"
+                style={{
+                  background: "rgba(255,255,255,0.06)",
+                  borderColor: "rgba(255,255,255,0.12)",
+                  color: "#c8d5cc",
+                }}
+              >
+                <ShieldCheck size={18} />
+                <span>
+                  There is no pass mark and no time limit. Answer honestly — the
+                  goal is to help our team understand how you work.
+                </span>
+              </div>
+              <div className="assessment-actions" style={{ marginTop: 20 }}>
+                <button
+                  className="button button-mint"
+                  onClick={handleStart}
+                  style={{
+                    background: "#d4e94e",
+                    color: "#10251d",
+                    fontWeight: 700,
+                  }}
+                >
+                  Start assessment <ArrowRight size={16} />
+                </button>
+                <a
+                  href="/careers"
+                  className="button button-dark"
+                  style={{
+                    background: "transparent",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    color: "#fff",
+                  }}
+                >
+                  Not now
+                </a>
+              </div>
             </div>
-            <div className="assessment-eyebrow">SKILLS CHECK</div>
-            <h1 className="assessment-heading">
-              {config?.title}
-              <br />
-              <span>{payload.jobTitle}</span>
-            </h1>
-            <p className="assessment-lead">{config?.blurb}</p>
-            <div className="assessment-meta-row">
-              <span className="assessment-meta-chip">
-                <Clock size={14} /> {config?.duration}
-              </span>
-              <span className="assessment-meta-chip">
-                <ClipboardCheck size={14} />{" "}
-                {config ? `${config.questions.length + 1} short questions` : ""}
-              </span>
-            </div>
-            <div className="assessment-note">
-              <ShieldCheck size={18} />
-              <span>
-                There is no pass mark and no time limit. Answer honestly — the
-                goal is to help our team understand how you work.
-              </span>
-            </div>
-            <div className="assessment-actions">
-              <button className="button button-blue" onClick={handleStart}>
-                Start assessment <ArrowRight size={16} />
-              </button>
-              <a href="/careers" className="button button-dark">
-                Not now
-              </a>
+            <div className="assessment-hero-image">
+              <img
+                src="/wfh-dev.jpg"
+                alt="Developer working remotely at home desk with multiple monitors"
+                loading="eager"
+              />
             </div>
           </div>
         </div>

@@ -16,8 +16,14 @@ export function AdminLogin() {
     e.preventDefault();
     setError("");
 
-    const cleanEmail = email.trim();
-    if (!cleanEmail || !password) {
+    // Read from FormData as fallback for browser autofill that doesn't trigger React onChange
+    const form = e.currentTarget as HTMLFormElement;
+    const fd = new FormData(form);
+    const formEmail = (fd.get("email") as string | null)?.trim() || "";
+    const formPassword = (fd.get("password") as string | null) || "";
+    const cleanEmail = (email.trim() || formEmail).trim();
+    const cleanPassword = password || formPassword;
+    if (!cleanEmail || !cleanPassword) {
       setError("Please enter both email and password.");
       return;
     }
@@ -30,7 +36,7 @@ export function AdminLogin() {
     try {
       const payload = JSON.stringify({
         email: cleanEmail,
-        password,
+        password: cleanPassword,
         turnstileToken: turnstile.token || undefined,
       });
 
@@ -114,13 +120,14 @@ export function AdminLogin() {
               </label>
               <input
                 id="admin-email"
+                name="email"
                 type="email"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
-                  // Clear stale error when user starts typing
                   if (error) setError("");
                 }}
+                onInput={(e) => setEmail((e.target as HTMLInputElement).value)}
                 placeholder="your@email.com"
                 autoComplete="username"
                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -133,12 +140,16 @@ export function AdminLogin() {
               </label>
               <input
                 id="admin-password"
+                name="password"
                 type="password"
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
                   if (error) setError("");
                 }}
+                onInput={(e) =>
+                  setPassword((e.target as HTMLInputElement).value)
+                }
                 placeholder="Your password"
                 autoComplete="current-password"
                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"

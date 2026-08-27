@@ -124,23 +124,33 @@ export function ApplicationSuccess() {
       description="Thank you for applying to SwiftJob."
     >
       <div className="success-page-full">
-        {/* Hero band */}
+        {/* Hero band — full width with image */}
         <div className="success-hero-band">
-          <div className="success-hero-inner">
+          <div className="success-hero-content">
             <CheckCircle
-              size={52}
+              size={48}
               strokeWidth={1.4}
               className="success-check"
             />
-            <h1 className="success-h1">Application Received</h1>
+            <h1 className="success-h1">Application received</h1>
             <p className="success-sub">
-              Your application for <strong>{position}</strong> has been received
-              and is now under review by our recruitment team.
+              Thank you — your application for <strong>{position}</strong> has
+              been securely received. Our recruitment team will carefully review
+              your submission and contact you within{" "}
+              <strong>3–5 business days</strong> regarding next steps. No
+              further action is required at this time.
             </p>
             <div className="success-ref-pill">
               <span className="ref-label-sm">Reference</span>
               <code className="ref-code-sm">{displayRef}</code>
             </div>
+          </div>
+          <div className="success-hero-image">
+            <img
+              src="/wfh-desk.jpg"
+              alt="Professional working remotely from home"
+              loading="eager"
+            />
           </div>
         </div>
 
@@ -153,11 +163,12 @@ export function ApplicationSuccess() {
               <section className="card-block">
                 <div className="card-block-head">
                   <KeyRound size={18} />
-                  <h3>Create your portal password</h3>
+                  <h3>Secure your candidate portal</h3>
                 </div>
                 <p className="card-block-desc">
-                  Set a password for <strong>{email}</strong> so you can sign in
-                  without email links.
+                  Create a secure password for <strong>{email}</strong> to
+                  access your candidate portal at your convenience — your magic
+                  link will continue to work as a backup sign-in method.
                 </p>
                 {pwState === "error" && <p className="form-error">{pwMsg}</p>}
                 <div className="password-row">
