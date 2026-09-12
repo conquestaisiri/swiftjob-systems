@@ -45,7 +45,7 @@ jobs:
 
       - name: Run isolated workflow regressions
         run: |
-          pnpm --dir AUDIT/runtime install --lockfile=false
+          pnpm --dir AUDIT/runtime install --lockfile=false --ignore-workspace
           node AUDIT/runtime/auth-regression.mjs
           node AUDIT/runtime/application-regression.mjs
           node AUDIT/runtime/techcheck-regression.mjs
