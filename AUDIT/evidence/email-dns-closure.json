@@ -1,12 +1,16 @@
 {
-  "measuredAt": "2026-09-12T05:52:50.0097820Z",
-  "environment": "Cloudflare DNS API + Resend API read-only; no production email sent",
+  "measuredAt": "2026-09-12T06:19:48.1703524Z",
+  "environment": "Cloudflare DNS API + Resend API read-only; no new production email sent during this verification",
   "sendingDomain": "payservice.top",
   "replyToDomain": "swiftjob.payservice.top",
   "resend": {
     "provider": "Resend",
-    "measuredAt": "2026-09-12T05:52:48.4041000Z",
+    "measuredAt": "2026-09-12T06:19:48.1703524Z",
     "apiKeyReadStatus": 200,
+    "webhooks": {
+      "status": 200,
+      "configured": 0
+    },
     "domains": [
       {
         "id": "aafedf67-c524-4847-988d-320b381464e3",
@@ -15,7 +19,20 @@
         "region": "us-east-1"
       }
     ],
-    "emailReceipt": "NOT VERIFIED — no owner-designated mailbox was supplied; no message sent",
+    "emailReceipt": "NOT VERIFIED — no owner-designated mailbox was supplied; no new controlled message sent",
+    "historicalProviderEvents": {
+      "status": 200,
+      "messagesInspected": 8,
+      "delivered": 2,
+      "bounced": 6,
+      "deliveredSubjects": [
+        "Application Received",
+        "Referral invitation"
+      ],
+      "bouncePattern": "Five messages addressed to the configured @swiftjob.payservice.top HR/notification or candidate-link domain ended as transient/general bounces after mail-server connection failures; one synthetic test.com message bounced because its mail server was unavailable.",
+      "controlledMailboxEvidence": false,
+      "contentChecks": "All eight inspected messages contained both HTML and plain-text bodies and production SwiftJob links; no unexpected external links were found. This verifies provider payload construction, not inbox receipt."
+    },
     "domainDetail": {
       "status": 200,
       "name": "payservice.top",
@@ -42,6 +59,12 @@
   },
   "cloudflareDns": {
     "status": 200,
+    "configuredReplyToSubdomainMx": {
+      "name": "swiftjob.payservice.top",
+      "type": "MX",
+      "recordCount": 0,
+      "status": "MISSING"
+    },
     "records": [
       {
         "name": "payservice.top",
@@ -122,6 +145,7 @@
     "rootSpfPresent": true,
     "rootDmarcPresent": true,
     "resendDkimPresent": true,
-    "sendSpfPresent": true
+    "sendSpfPresent": true,
+    "replyToSubdomainMxPresent": false
   }
 }

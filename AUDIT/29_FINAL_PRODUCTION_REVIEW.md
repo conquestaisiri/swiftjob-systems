@@ -70,7 +70,7 @@ Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2
 
 ## Exact gate blockers
 
-1. A real designated mailbox has not received a controlled magic-link/application/status test, so inbox placement, Reply-To receipt and provider event handling cannot be certified. Resend account/domain status and the current Cloudflare DNS records are now verified read-only.
+1. A real designated mailbox has not received a controlled magic-link/application/status test, so inbox placement, Reply-To receipt and provider event handling cannot be certified. Read-only Resend history shows two delivered and six bounced prior messages; five bounces target the configured `swiftjob.payservice.top` HR/notification or candidate-link domain, which currently has no MX record. Sender-domain status and root authentication records are verified, but recipient routing still requires owner action.
 2. Historical Git objects contain credential-shaped database URLs. The current tree is sanitized, but provider-side classification and rotation require the owner/provider operator.
 3. Core Web Vitals and full screen-reader/dynamic-state review remain unmeasured quality work; sampled visible-text contrast passes, static security headers are deployed, and route-level code splitting is deployed.
 
@@ -88,7 +88,7 @@ This addendum supersedes earlier future-improvement wording where it conflicts w
 | 4 | **Partially verified.** Admin auth and protected API boundaries pass; live admin mutation-to-email/candidate reflection was not run. |
 | 5 | **Verified in isolation.** Magic-link issue/verify, password session replacement, logout revocation and malformed-token behavior pass; delivery remains unverified. |
 | 6 | **Verified for exercised boundaries.** Candidate ownership, admin role/claim checks, expiry and JWT algorithm pinning are regression-tested. |
-| 7 | **NOT VERIFIED.** The Resend API key, verified domain, DKIM/SPF records and DNS alignment inputs pass read-only checks; no controlled production inbox, bounce event or provider acceptance evidence exists. |
+| 7 | **NOT VERIFIED.** The Resend API key, verified domain and DKIM/SPF records pass read-only checks; historical provider events include two delivered and six bounced messages, and no controlled production inbox test exists. |
 | 8 | **Verified in source/sink.** Escaped HTML, plain text and configured production links are covered; real mail-client rendering and link inspection remain unverified. |
 | 9 | **Verified for sampled live pages.** The four historical visual findings are repaired; no new obvious logo/destination/date issue was found in the browser sweep. |
 | 10 | **No obvious sampled examples.** Full visual-state review remains outside the automated sweep. |
@@ -121,7 +121,7 @@ This addendum supersedes earlier future-improvement wording where it conflicts w
 ### Remaining hard-gate blockers
 
 1. Rotate/revoke the historical Supabase pooler/database credential for project `yfymijkhcbdubjawsngq` and confirm no remaining consumer. The old project management token is unauthorized and its hostname did not resolve during this check, but that does not prove provider-side revocation.
-2. Provide an owner-controlled test mailbox. Verify magic link, application confirmation/HR notification and status-change delivery, then inspect inbox/spam placement, Reply-To, links and provider events. Resend domain verification and Cloudflare DNS records are already confirmed read-only.
+2. Provide an owner-controlled test mailbox and repair/confirm MX routing for the configured HR/Reply-To subdomain. Verify magic link, application confirmation/HR notification and status-change delivery, then inspect inbox/spam placement, Reply-To, links and provider events. Resend sender-domain verification and root DNS authentication are confirmed read-only.
 3. Configure distributed Cloudflare limits for sensitive endpoints with a token that has the required Rate Limiting/Rulesets permission. The supplied account token can manage Pages/Workers but both supplied tokens return 403 for those zone APIs; Worker in-memory limits remain a low-volume fallback.
 4. Keep ordered migrations as the deploy contract and monitor the read-only startup schema guard.
 5. Obtain a Chrome DevTools/Lighthouse run for LCP, INP, CLS and a full screen-reader/dynamic-state review; the required Chrome DevTools MCP tools are not configured in this runtime, while sampled visible-text contrast and static security headers pass.
