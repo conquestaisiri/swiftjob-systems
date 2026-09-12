@@ -1,6 +1,6 @@
 {
-  "measuredAt": "2026-09-12T06:42:59.1564249Z",
-  "environment": "Cloudflare DNS API + public DNS resolver + Resend API read-only; no new production email sent during this verification",
+  "measuredAt": "2026-09-12T07:50:08Z",
+  "environment": "Cloudflare DNS API + public DNS resolver + Resend API; one controlled provider-delivery probe sent, no application mutation",
   "sendingDomain": "payservice.top",
   "replyToDomain": "swiftjob.payservice.top",
   "resend": {
@@ -19,7 +19,17 @@
         "region": "us-east-1"
       }
     ],
-    "emailReceipt": "NOT VERIFIED — no owner-designated mailbox was supplied; no new controlled message sent",
+    "emailReceipt": "PARTIAL — one controlled direct-recipient probe returned delivered; inbox/spam placement and Reply-To receipt remain unverified",
+    "controlledProbe": {
+      "providerMessageId": "82f5497d-b33d-42a2-a6cc-93649e1329f0",
+      "sentAt": "2026-09-12T07:50:08Z",
+      "recipientDomain": "outlook.com",
+      "fromDomain": "payservice.top",
+      "replyToDomain": "swiftjob.payservice.top",
+      "providerEvent": "delivered",
+      "applicationMutation": false,
+      "inboxInspection": "NOT VERIFIED"
+    },
     "historicalProviderEvents": {
       "status": 200,
       "messagesInspected": 8,
@@ -30,7 +40,7 @@
         "Referral invitation"
       ],
       "bouncePattern": "Five messages addressed to the configured @swiftjob.payservice.top HR/notification or candidate-link domain ended as transient/general bounces after mail-server connection failures; one synthetic test.com message bounced because its mail server was unavailable.",
-      "controlledMailboxEvidence": false,
+    "controlledMailboxEvidence": false,
       "contentChecks": "All eight inspected messages contained both HTML and plain-text bodies and production SwiftJob links; no unexpected external links were found. This verifies provider payload construction, not inbox receipt."
     },
     "domainDetail": {
