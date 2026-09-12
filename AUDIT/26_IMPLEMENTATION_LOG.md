@@ -33,3 +33,11 @@ Status: IMPLEMENTED 2026-09-12; local browser/build checks verified.
 Changes add API security headers and no-store caching, pin admin JWT algorithms and claims, normalize job booleans and dates, fix singular posting copy, add labels to public selects, replace the generic social destination with an explicit unavailable state, add a valid XML sitemap and robots reference, fix mobile admin overflow, add plain-text email alternatives, and remove silent third-party background loads. The editable external tech-check URL and combined MSI route are retired; generated checkers no longer bypass execution policy or collect hostnames. `techcheck-regression.mjs` passes both groups. The production Vite build, worker typecheck and SPA typecheck all pass.
 
 Remaining verification: connected provider delivery/receipt, DNS authentication records, and exhaustive breakpoint/accessibility/performance coverage. The repaired Worker and Pages build have been deployed and live smoke-tested; the domain migration remains intentionally unexecuted.
+
+## Batch D — production closure sprint
+
+Status: IMPLEMENTED 2026-09-12; deployed and rechecked.
+
+The historical Supabase pooler credential was classified without exposing its value; the current tree has no credential-bearing PostgreSQL URL, while provider-side validity remains UNKNOWN until the owner rotates/revokes it. Public DNS was queried without mutation and recorded. Named Worker rate-limit buckets were documented and a 15th auth regression group proves the password-attempt throttle; Cloudflare distributed rules remain blocked by token permissions. Schema migrations and the once-per-isolate DDL safety net were documented as transitional.
+
+The sitemap now reads the live public job list through `GET /api/sitemap.xml`, with the build-time file as an API-down fallback. Missing form label associations were repaired on the job application form and admin login. Route-level lazy loading reduced the initial JavaScript chunk from about 1.16 MB to 323 kB; the largest remaining lazy chunk is ContactsAdmin. Live checks cover 30 route/viewport samples, five representative accessibility pages, protected API boundaries, dynamic sitemap and browser console state. Full evidence is under `AUDIT/evidence/` and the final gate remains NOT READY pending owner/provider actions.

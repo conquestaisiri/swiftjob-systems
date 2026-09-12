@@ -38,6 +38,10 @@
       "status": "PASS"
     },
     {
+      "name": "Password login rate limit blocks repeated attempts per IP without locking another IP",
+      "status": "PASS"
+    },
+    {
       "name": "Signed tokens with invalid role, email or missing expiry rejected",
       "status": "PASS"
     },

@@ -63,106 +63,113 @@
   },
   {
     "method": "GET",
+    "path": "/api/sitemap.xml",
+    "line": 282,
+    "middleware": [],
+    "inlineHandler": true
+  },
+  {
+    "method": "GET",
     "path": "/api/jobs",
-    "line": 255,
+    "line": 308,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "GET",
     "path": "/api/jobs/:slug",
-    "line": 265,
+    "line": 318,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "POST",
     "path": "/api/applications",
-    "line": 311,
+    "line": 364,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "POST",
     "path": "/api/contact",
-    "line": 441,
+    "line": 494,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "GET",
     "path": "/api/public-stats",
-    "line": 478,
+    "line": 531,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "GET",
     "path": "/api/assessments/:applicationId",
-    "line": 501,
+    "line": 554,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "POST",
     "path": "/api/assessments/:applicationId",
-    "line": 557,
+    "line": 610,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "GET",
     "path": "/api/tech-check/token",
-    "line": 646,
+    "line": 699,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "GET",
     "path": "/api/tech-check/download/:token",
-    "line": 667,
+    "line": 720,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "GET",
     "path": "/api/tech-check/download/msi/:token",
-    "line": 705,
+    "line": 758,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "POST",
     "path": "/api/tech-check/report/:token",
-    "line": 712,
+    "line": 765,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "GET",
     "path": "/api/tech-check/status/:token",
-    "line": 742,
+    "line": 795,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "POST",
     "path": "/api/tech-check/upload",
-    "line": 761,
+    "line": 814,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "GET",
     "path": "/api/campaigns/:slug",
-    "line": 782,
+    "line": 835,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "POST",
     "path": "/api/campaigns/:slug/visit",
-    "line": 806,
+    "line": 859,
     "middleware": [
       "campaignVisitLimiter"
     ],
@@ -171,7 +178,7 @@
   {
     "method": "POST",
     "path": "/api/auth/magic-link",
-    "line": 857,
+    "line": 910,
     "middleware": [
       "magicLinkLimiter"
     ],
@@ -180,14 +187,14 @@
   {
     "method": "GET",
     "path": "/api/auth/verify",
-    "line": 909,
+    "line": 962,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "POST",
     "path": "/api/auth/register",
-    "line": 944,
+    "line": 997,
     "middleware": [
       "candidateAuth"
     ],
@@ -196,7 +203,7 @@
   {
     "method": "POST",
     "path": "/api/auth/login-password",
-    "line": 986,
+    "line": 1039,
     "middleware": [
       "candLoginLimiter"
     ],
@@ -205,14 +212,14 @@
   {
     "method": "POST",
     "path": "/api/auth/logout",
-    "line": 1010,
+    "line": 1063,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "POST",
     "path": "/api/admin/login",
-    "line": 1038,
+    "line": 1091,
     "middleware": [
       "adminLoginLimiter"
     ],
@@ -221,7 +228,7 @@
   {
     "method": "GET",
     "path": "/api/admin/stats",
-    "line": 1196,
+    "line": 1249,
     "middleware": [
       "adminAuth"
     ],
@@ -230,7 +237,7 @@
   {
     "method": "GET",
     "path": "/api/admin/applications",
-    "line": 1232,
+    "line": 1285,
     "middleware": [
       "adminAuth"
     ],
@@ -239,7 +246,7 @@
   {
     "method": "GET",
     "path": "/api/admin/applications/:id",
-    "line": 1301,
+    "line": 1354,
     "middleware": [
       "adminAuth"
     ],
@@ -248,7 +255,7 @@
   {
     "method": "PATCH",
     "path": "/api/admin/applications/:id/status",
-    "line": 1316,
+    "line": 1369,
     "middleware": [
       "adminAuth"
     ],
@@ -257,7 +264,7 @@
   {
     "method": "GET",
     "path": "/api/admin/applications/:id/resume",
-    "line": 1423,
+    "line": 1476,
     "middleware": [
       "adminAuth"
     ],
@@ -266,7 +273,7 @@
   {
     "method": "DELETE",
     "path": "/api/admin/applications/:id",
-    "line": 1451,
+    "line": 1504,
     "middleware": [
       "adminAuth"
     ],
@@ -275,7 +282,7 @@
   {
     "method": "GET",
     "path": "/api/admin/jobs",
-    "line": 1470,
+    "line": 1523,
     "middleware": [
       "adminAuth"
     ],
@@ -284,7 +291,7 @@
   {
     "method": "GET",
     "path": "/api/admin/jobs/:id",
-    "line": 1480,
+    "line": 1533,
     "middleware": [
       "adminAuth"
     ],
@@ -293,7 +300,7 @@
   {
     "method": "POST",
     "path": "/api/admin/jobs",
-    "line": 1493,
+    "line": 1546,
     "middleware": [
       "adminAuth"
     ],
@@ -302,7 +309,7 @@
   {
     "method": "PUT",
     "path": "/api/admin/jobs/:id",
-    "line": 1511,
+    "line": 1564,
     "middleware": [
       "adminAuth"
     ],
@@ -311,7 +318,7 @@
   {
     "method": "DELETE",
     "path": "/api/admin/jobs/:id",
-    "line": 1532,
+    "line": 1585,
     "middleware": [
       "adminAuth"
     ],
@@ -320,7 +327,7 @@
   {
     "method": "GET",
     "path": "/api/admin/campaigns",
-    "line": 1565,
+    "line": 1618,
     "middleware": [
       "adminAuth"
     ],
@@ -329,7 +336,7 @@
   {
     "method": "POST",
     "path": "/api/admin/campaigns",
-    "line": 1575,
+    "line": 1628,
     "middleware": [
       "adminAuth"
     ],
@@ -338,7 +345,7 @@
   {
     "method": "PUT",
     "path": "/api/admin/campaigns/:id",
-    "line": 1614,
+    "line": 1667,
     "middleware": [
       "adminAuth"
     ],
@@ -347,7 +354,7 @@
   {
     "method": "DELETE",
     "path": "/api/admin/campaigns/:id",
-    "line": 1650,
+    "line": 1703,
     "middleware": [
       "adminAuth"
     ],
@@ -356,7 +363,7 @@
   {
     "method": "GET",
     "path": "/api/candidate/applications",
-    "line": 1700,
+    "line": 1753,
     "middleware": [
       "candidateAuth"
     ],
@@ -365,7 +372,7 @@
   {
     "method": "GET",
     "path": "/api/candidate/applications/:id",
-    "line": 1721,
+    "line": 1774,
     "middleware": [
       "candidateAuth"
     ],
@@ -374,7 +381,7 @@
   {
     "method": "POST",
     "path": "/api/candidate/applications/:id/background",
-    "line": 1745,
+    "line": 1798,
     "middleware": [
       "candidateAuth"
     ],
@@ -383,7 +390,7 @@
   {
     "method": "GET",
     "path": "/api/candidate/applications/:id/resume",
-    "line": 1753,
+    "line": 1806,
     "middleware": [
       "candidateAuth"
     ],
@@ -392,7 +399,7 @@
   {
     "method": "POST",
     "path": "/api/candidate/footprint",
-    "line": 1788,
+    "line": 1841,
     "middleware": [
       "candidateAuth"
     ],
@@ -401,14 +408,14 @@
   {
     "method": "GET",
     "path": "/api/referrals/:code",
-    "line": 1840,
+    "line": 1893,
     "middleware": [],
     "inlineHandler": true
   },
   {
     "method": "POST",
     "path": "/api/referrals/:code/visit",
-    "line": 1881,
+    "line": 1934,
     "middleware": [
       "referralClickLimiter"
     ],
@@ -417,7 +424,7 @@
   {
     "method": "POST",
     "path": "/api/referrals/:code/click",
-    "line": 1967,
+    "line": 2020,
     "middleware": [
       "referralClickLimiter"
     ],
@@ -426,7 +433,7 @@
   {
     "method": "POST",
     "path": "/api/referrals/:code/background",
-    "line": 2043,
+    "line": 2096,
     "middleware": [
       "referralClickLimiter"
     ],
@@ -435,7 +442,7 @@
   {
     "method": "POST",
     "path": "/api/referrals/:code/reveal",
-    "line": 2049,
+    "line": 2102,
     "middleware": [
       "referralClickLimiter"
     ],
@@ -444,7 +451,7 @@
   {
     "method": "POST",
     "path": "/api/admin/mail/send",
-    "line": 2135,
+    "line": 2188,
     "middleware": [
       "adminAuth"
     ],
@@ -453,33 +460,6 @@
   {
     "method": "GET",
     "path": "/api/admin/activities",
-    "line": 2291,
-    "middleware": [
-      "adminAuth"
-    ],
-    "inlineHandler": true
-  },
-  {
-    "method": "GET",
-    "path": "/api/admin/referrals",
-    "line": 2312,
-    "middleware": [
-      "adminAuth"
-    ],
-    "inlineHandler": true
-  },
-  {
-    "method": "GET",
-    "path": "/api/admin/referrals/status",
-    "line": 2333,
-    "middleware": [
-      "adminAuth"
-    ],
-    "inlineHandler": true
-  },
-  {
-    "method": "GET",
-    "path": "/api/admin/referrals/content",
     "line": 2344,
     "middleware": [
       "adminAuth"
@@ -488,8 +468,35 @@
   },
   {
     "method": "GET",
+    "path": "/api/admin/referrals",
+    "line": 2365,
+    "middleware": [
+      "adminAuth"
+    ],
+    "inlineHandler": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/admin/referrals/status",
+    "line": 2386,
+    "middleware": [
+      "adminAuth"
+    ],
+    "inlineHandler": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/admin/referrals/content",
+    "line": 2397,
+    "middleware": [
+      "adminAuth"
+    ],
+    "inlineHandler": true
+  },
+  {
+    "method": "GET",
     "path": "/api/admin/referrals/:id/content",
-    "line": 2358,
+    "line": 2411,
     "middleware": [
       "adminAuth"
     ],
@@ -498,7 +505,7 @@
   {
     "method": "PUT",
     "path": "/api/admin/referrals/content",
-    "line": 2373,
+    "line": 2426,
     "middleware": [
       "adminAuth"
     ],
@@ -507,7 +514,7 @@
   {
     "method": "POST",
     "path": "/api/admin/referrals/content/apply",
-    "line": 2399,
+    "line": 2452,
     "middleware": [
       "adminAuth"
     ],
@@ -516,7 +523,7 @@
   {
     "method": "POST",
     "path": "/api/admin/referrals/content/reset",
-    "line": 2440,
+    "line": 2493,
     "middleware": [
       "adminAuth"
     ],
@@ -525,7 +532,7 @@
   {
     "method": "POST",
     "path": "/api/admin/referrals",
-    "line": 2466,
+    "line": 2519,
     "middleware": [
       "adminAuth"
     ],
@@ -534,7 +541,7 @@
   {
     "method": "POST",
     "path": "/api/admin/referrals/import",
-    "line": 2508,
+    "line": 2561,
     "middleware": [
       "adminAuth"
     ],
@@ -543,7 +550,7 @@
   {
     "method": "PATCH",
     "path": "/api/admin/referrals/:id",
-    "line": 2542,
+    "line": 2595,
     "middleware": [
       "adminAuth"
     ],
@@ -552,7 +559,7 @@
   {
     "method": "POST",
     "path": "/api/admin/referrals/send",
-    "line": 2603,
+    "line": 2656,
     "middleware": [
       "adminAuth"
     ],
@@ -561,7 +568,7 @@
   {
     "method": "PUT",
     "path": "/api/admin/referrals/limit",
-    "line": 2636,
+    "line": 2689,
     "middleware": [
       "adminAuth"
     ],
@@ -570,7 +577,7 @@
   {
     "method": "DELETE",
     "path": "/api/admin/referrals/:id",
-    "line": 2660,
+    "line": 2713,
     "middleware": [
       "adminAuth"
     ],
@@ -579,7 +586,7 @@
   {
     "method": "GET",
     "path": "/api/admin/footprints",
-    "line": 2682,
+    "line": 2735,
     "middleware": [
       "adminAuth"
     ],
@@ -588,7 +595,7 @@
   {
     "method": "GET",
     "path": "/api/admin/contacts",
-    "line": 2703,
+    "line": 2756,
     "middleware": [
       "adminAuth"
     ],
@@ -597,7 +604,7 @@
   {
     "method": "DELETE",
     "path": "/api/admin/contacts/:id",
-    "line": 2755,
+    "line": 2808,
     "middleware": [
       "adminAuth"
     ],
@@ -606,7 +613,7 @@
   {
     "method": "POST",
     "path": "/api/admin/contacts/delete-many",
-    "line": 2773,
+    "line": 2826,
     "middleware": [
       "adminAuth"
     ],
@@ -615,7 +622,7 @@
   {
     "method": "POST",
     "path": "/api/admin/contacts/import",
-    "line": 2798,
+    "line": 2851,
     "middleware": [
       "adminAuth"
     ],
@@ -624,7 +631,7 @@
   {
     "method": "DELETE",
     "path": "/api/admin/referrals",
-    "line": 2827,
+    "line": 2880,
     "middleware": [
       "adminAuth"
     ],
@@ -633,7 +640,7 @@
   {
     "method": "POST",
     "path": "/api/admin/referrals/from-contacts",
-    "line": 2854,
+    "line": 2907,
     "middleware": [
       "adminAuth"
     ],

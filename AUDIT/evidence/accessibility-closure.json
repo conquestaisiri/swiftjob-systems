@@ -1,0 +1,59 @@
+{
+  "measuredAt": "2026-09-12T01:46:06.2191807Z",
+  "environment": "Production browser DOM inspection after accessibility label repair and lazy route deployment",
+  "routes": [
+    {
+      "url": "https://swiftjob.payservice.top/",
+      "inputsChecked": 4,
+      "unlabeledInputs": 0,
+      "duplicateIds": 0,
+      "unnamedButtons": 0,
+      "imagesMissingAlt": 0
+    },
+    {
+      "url": "https://swiftjob.payservice.top/careers",
+      "inputsChecked": 1,
+      "unlabeledInputs": 0,
+      "duplicateIds": 0,
+      "unnamedButtons": 0,
+      "imagesMissingAlt": 0
+    },
+    {
+      "url": "https://swiftjob.payservice.top/careers/product-manager",
+      "inputsChecked": 19,
+      "unlabeledInputs": 0,
+      "duplicateIds": 0,
+      "unnamedButtons": 0,
+      "imagesMissingAlt": 0
+    },
+    {
+      "url": "https://swiftjob.payservice.top/login",
+      "inputsChecked": 1,
+      "unlabeledInputs": 0,
+      "duplicateIds": 0,
+      "unnamedButtons": 0,
+      "imagesMissingAlt": 0
+    },
+    {
+      "url": "https://swiftjob.payservice.top/admin/login",
+      "inputsChecked": 2,
+      "unlabeledInputs": 0,
+      "duplicateIds": 0,
+      "unnamedButtons": 0,
+      "imagesMissingAlt": 0
+    }
+  ],
+  "automatedChecks": {
+    "unlabeledFormControls": 0,
+    "duplicateIds": 0,
+    "unnamedButtons": 0,
+    "imagesMissingAlt": 0,
+    "browserConsoleErrors": 0,
+    "browserConsoleWarnings": 0
+  },
+  "limitations": [
+    "Color contrast was not measured in this browser surface.",
+    "Screen-reader semantics were not independently exercised.",
+    "Keyboard focus styling was visually observed in prior traversal; a full assistive-technology run remains outside this runtime."
+  ]
+}

@@ -20,3 +20,9 @@ Sending retries all errors up to three times with 500/1000 ms delays. The shared
 All local captures use `@example.test` recipients; the harness rejects other recipients and all unexpected outbound requests. Captured HTML is a rendering artifact, not proof of real delivery. No production test emails have been sent. Inbox/spam placement, SPF/DKIM/DMARC pass results, bounce handling and real response-address receipt remain NOT VERIFIED.
 
 Required repair verification: HTML/text parity, safe links and escaping, independent HR/candidate failure paths, retry classification/idempotency, truthful operator status, every actual product event, desktop/mobile rendering and designated real mailbox receipt.
+
+## Closure sprint status (2026-09-12)
+
+The public DNS check is recorded in `evidence/email-dns-closure.json`. The root zone has an SPF record (`include:_spf.mx.cloudflare.net`) and DMARC policy `p=none`; `swiftjob.payservice.top` has no public SPF, DMARC or MX record. A `resend._domainkey.payservice.top` record exists, but the actual `EMAIL_FROM` sender domain and Resend verification state are not available to this audit runtime, so alignment cannot be certified. No DNS records were changed.
+
+No production message was sent because an owner-designated controlled mailbox was not provided. Synthetic email sink checks still pass for the exercised application and contact paths. A real mailbox test must cover magic link, application confirmation/HR notification, and one status-change message, including inbox/spam placement, links, Reply-To and provider event state.

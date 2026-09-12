@@ -834,8 +834,9 @@ export function JobPage() {
               <div className="form-section-title">Position details</div>
               <div className="app-form-grid">
                 <div className="app-field">
-                  <label>Position applying for</label>
+                  <label htmlFor="application-position">Position applying for</label>
                   <input
+                    id="application-position"
                     type="text"
                     value={job.title}
                     readOnly
@@ -941,10 +942,11 @@ export function JobPage() {
                   )}
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-expected-salary">
                     Expected monthly salary (USD) <span className="req">*</span>
                   </label>
                   <input
+                    id="application-expected-salary"
                     type="text"
                     value={form.expectedSalary}
                     onChange={set("expectedSalary")}
@@ -958,10 +960,11 @@ export function JobPage() {
                   )}
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-earliest-start-date">
                     Earliest start date <span className="req">*</span>
                   </label>
                   <input
+                    id="application-earliest-start-date"
                     type="date"
                     value={form.earliestStartDate}
                     onChange={set("earliestStartDate")}
@@ -975,10 +978,11 @@ export function JobPage() {
                   )}
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-skills">
                     Key skills <span className="req">*</span>
                   </label>
                   <input
+                    id="application-skills"
                     type="text"
                     value={form.skills}
                     onChange={set("skills")}
@@ -996,10 +1000,11 @@ export function JobPage() {
               {/* Long-form fields */}
               <div className="form-section-title">Your background</div>
               <div className="app-field app-field-full">
-                <label>
+                <label htmlFor="application-relevant-experience">
                   Relevant experience <span className="req">*</span>
                 </label>
                 <textarea
+                  id="application-relevant-experience"
                   value={form.relevantExperience}
                   onChange={set("relevantExperience")}
                   rows={5}
@@ -1013,10 +1018,11 @@ export function JobPage() {
                 )}
               </div>
               <div className="app-field app-field-full">
-                <label>
+                <label htmlFor="application-cover-letter">
                   Cover letter <span className="req">*</span>
                 </label>
                 <textarea
+                  id="application-cover-letter"
                   value={form.coverLetter}
                   onChange={set("coverLetter")}
                   rows={6}
@@ -1033,7 +1039,7 @@ export function JobPage() {
               {/* Resume Upload */}
               <div className="form-section-title">Resume / CV</div>
               <div className="app-field app-field-full">
-                <label>
+                <label htmlFor="application-resume">
                   Upload your CV or resume <span className="req">*</span>
                 </label>
                 <div
@@ -1076,6 +1082,7 @@ export function JobPage() {
                 </div>
                 <input
                   ref={fileInputRef}
+                  id="application-resume"
                   type="file"
                   accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                   style={{ display: "none" }}

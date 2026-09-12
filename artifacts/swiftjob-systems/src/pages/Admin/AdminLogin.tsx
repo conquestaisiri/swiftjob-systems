@@ -115,7 +115,7 @@ export function AdminLogin() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label htmlFor="admin-email" className="block text-sm font-medium text-slate-700 mb-1">
                 Email
               </label>
               <input
@@ -135,7 +135,7 @@ export function AdminLogin() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label htmlFor="admin-password" className="block text-sm font-medium text-slate-700 mb-1">
                 Password
               </label>
               <input

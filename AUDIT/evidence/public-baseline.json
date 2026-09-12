@@ -2,7 +2,7 @@
   {
     "path": "/api/healthz",
     "status": 200,
-    "ms": 975,
+    "ms": 734,
     "contentType": "application/json",
     "cacheControl": "no-store",
     "securityHeaders": {
@@ -16,7 +16,7 @@
   {
     "path": "/api/jobs",
     "status": 200,
-    "ms": 953,
+    "ms": 1064,
     "contentType": "application/json",
     "cacheControl": "no-store",
     "securityHeaders": {
@@ -31,7 +31,7 @@
   {
     "path": "/api/admin/stats",
     "status": 401,
-    "ms": 153,
+    "ms": 158,
     "contentType": "application/json",
     "cacheControl": "no-store",
     "securityHeaders": {
@@ -45,7 +45,7 @@
   {
     "path": "/api/candidate/applications",
     "status": 401,
-    "ms": 549,
+    "ms": 613,
     "contentType": "application/json",
     "cacheControl": "no-store",
     "securityHeaders": {
@@ -59,7 +59,7 @@
   {
     "path": "/robots.txt",
     "status": 200,
-    "ms": 256,
+    "ms": 165,
     "contentType": "text/plain; charset=utf-8",
     "cacheControl": "public, max-age=14400, must-revalidate",
     "securityHeaders": {
@@ -74,15 +74,15 @@
   {
     "path": "/sitemap.xml",
     "status": 200,
-    "ms": 160,
-    "contentType": "application/xml",
-    "cacheControl": "public, max-age=0, must-revalidate",
+    "ms": 572,
+    "contentType": "application/xml; charset=UTF-8",
+    "cacheControl": "no-store",
     "securityHeaders": {
       "x-content-type-options": "nosniff",
       "referrer-policy": "strict-origin-when-cross-origin",
       "content-security-policy": null,
-      "strict-transport-security": null,
-      "x-frame-options": null
+      "strict-transport-security": "max-age=31536000; includeSubDomains",
+      "x-frame-options": "DENY"
     },
     "validXml": true
   }

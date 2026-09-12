@@ -58,6 +58,14 @@ try {
   assert.equal((await h.request('/api/candidate/applications',{token:passwordToken})).status,200);
   assert.equal((await h.request('/api/candidate/applications',{cookie:result.headers['set-cookie'].split(';')[0]})).status,200);
  });
+ await check('Password login rate limit blocks repeated attempts per IP without locking another IP',async()=>{
+  const headers={'cf-connecting-ip':'198.51.100.77'};
+  const statuses=[];
+  for(let i=0;i<10;i++) statuses.push((await h.request('/api/auth/login-password',{method:'POST',headers,body:{email:'unknown@example.test',password}})).status);
+  assert.deepEqual(statuses,Array(10).fill(401));
+  assert.equal((await h.request('/api/auth/login-password',{method:'POST',headers,body:{email:'unknown@example.test',password}})).status,429);
+  assert.equal((await h.request('/api/auth/login-password',{method:'POST',headers:{'cf-connecting-ip':'198.51.100.78'},body:{email:'unknown@example.test',password}})).status,401);
+ });
  await check('Signed tokens with invalid role, email or missing expiry rejected',async()=>{
   const original=decodeJwt(passwordToken);const secret=new TextEncoder().encode(h.env.JWT_SECRET);
   const {exp,...withoutExpiry}=original;

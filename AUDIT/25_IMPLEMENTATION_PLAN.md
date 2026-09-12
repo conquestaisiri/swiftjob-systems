@@ -15,7 +15,7 @@ Follow the owner's full-system program, including the four earlier inspection fi
 | 2 | Deduplicated findings with severity, causes, dependencies, verification requirements; repair batches | COMPLETE |
 | 3 | Controlled repairs; objective, files, risk and tests recorded per batch | COMPLETE |
 | 4 | Safe connected visitor/candidate/admin simulations; actual supported hiring-side roles; email receipt evidence | PARTIAL (isolated runtime and live boundary pass; real inbox receipt remains unverified) |
-| 5 | Regression: permissions, forms, uploads, failure states, responsive UI, email, production build | COMPLETE for exercised coverage |
+| 5 | Regression: permissions, forms, uploads, failure states, responsive UI, email, production build | COMPLETE for exercised coverage; 15 auth, 7 application, 2 checker groups plus 30 live browser samples pass |
 | 6 | Deployment, infrastructure, configuration, DNS/email authentication, domain-migration checklist | PARTIAL (deployment and live boundary pass; DNS/email authentication remains unverified; migration prepared, not executed) |
 | 7 | Fresh finished-product review, 25 final answers, evidence-based scores and explicit readiness gate | COMPLETE with NOT READY gate |
 
@@ -37,4 +37,4 @@ Follow the owner's full-system program, including the four earlier inspection fi
 - Cross-cutting: accessibility, breakpoints, truthful copy, assets, legacy branding, secrets/history, logs, migrations, CI, SEO/performance, domain dependencies.
 
 Unsupported product roles/features will be documented as not implemented, rather than invented.
-Live Cloudflare behavior is reported separately from isolated runtime evidence. The repaired Worker and Pages build are deployed to the existing domain; no domain migration has been performed. Resend delivery remains unverified beyond the synthetic sink.
+Live Cloudflare behavior is reported separately from isolated runtime evidence. The repaired Worker and Pages build are deployed to the existing domain; no domain migration has been performed. Dynamic sitemap, live protected boundaries and route-level bundle splitting are now deployed. Resend delivery, DNS alignment and historical Supabase credential rotation remain unverified beyond source/synthetic evidence.

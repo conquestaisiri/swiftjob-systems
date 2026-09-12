@@ -8,6 +8,24 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    if (url.pathname === "/sitemap.xml") {
+      const origin = env.API_ORIGIN || DEFAULT_API_ORIGIN;
+      const target = new URL(`${origin}/api/sitemap.xml`);
+      const resp = await fetch(target.toString(), {
+        method: "GET",
+        headers: { Accept: "application/xml" },
+      });
+      if (resp.ok) {
+        return new Response(resp.body, {
+          status: resp.status,
+          statusText: resp.statusText,
+          headers: resp.headers,
+        });
+      }
+      // Keep a build-time sitemap available if the API is temporarily down.
+      return env.ASSETS.fetch(request);
+    }
+
     if (url.pathname.startsWith("/api/")) {
       const origin = env.API_ORIGIN || DEFAULT_API_ORIGIN;
       const target = new URL(`${origin}${url.pathname}${url.search}`);

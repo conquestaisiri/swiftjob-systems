@@ -1,0 +1,33 @@
+{
+  "measuredAt": "2026-09-12T01:54:04.9092886Z",
+  "candidatePublicRead": {
+    "path": "/api/jobs",
+    "status": 200,
+    "jobCount": 95
+  },
+  "candidateInvalidApplication": {
+    "path": "/api/applications",
+    "status": 410,
+    "expected": 410,
+    "note": "Unknown job rejected before file/storage/email work"
+  },
+  "candidateProtectedRead": {
+    "path": "/api/candidate/applications",
+    "status": 401
+  },
+  "adminProtectedRead": {
+    "path": "/api/admin/stats",
+    "status": 401
+  },
+  "adminInvalidLogin": {
+    "path": "/api/admin/login",
+    "status": 401,
+    "expected": 401
+  },
+  "contactMalformed": {
+    "path": "/api/contact",
+    "status": 400,
+    "expected": 400
+  },
+  "assessment": "Safe live boundary checks only; no production PII, file upload, state mutation or outbound email was created."
+}

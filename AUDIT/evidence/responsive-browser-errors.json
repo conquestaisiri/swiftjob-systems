@@ -1,0 +1,58 @@
+{
+  "measuredAt": "2026-09-12T01:46:16.6968348Z",
+  "environment": "Production browser, live domain after lazy route deployment, viewport capability",
+  "routes": [
+    "/",
+    "/careers",
+    "/careers/product-manager",
+    "/login",
+    "/admin/login"
+  ],
+  "widths": [
+    390,
+    430,
+    768,
+    1024,
+    1280,
+    1440
+  ],
+  "checks": {
+    "bodyOverflow": false,
+    "consoleErrors": 0,
+    "consoleWarnings": 0,
+    "routeWidthSamples": 30
+  },
+  "note": "Homepage client marquee children intentionally extend outside the clipped animation track; document/body scroll width remained within viewport at every sample.",
+  "matrix": [
+    {
+      "width": 390,
+      "bodyOverflow": false,
+      "maxObservedDocumentWidth": 390
+    },
+    {
+      "width": 430,
+      "bodyOverflow": false,
+      "maxObservedDocumentWidth": 430
+    },
+    {
+      "width": 768,
+      "bodyOverflow": false,
+      "maxObservedDocumentWidth": 768
+    },
+    {
+      "width": 1024,
+      "bodyOverflow": false,
+      "maxObservedDocumentWidth": 1024
+    },
+    {
+      "width": 1280,
+      "bodyOverflow": false,
+      "maxObservedDocumentWidth": 1280
+    },
+    {
+      "width": 1440,
+      "bodyOverflow": false,
+      "maxObservedDocumentWidth": 1440
+    }
+  ]
+}

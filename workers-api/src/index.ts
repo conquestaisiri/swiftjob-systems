@@ -249,6 +249,59 @@ app.get("/api/healthz", (c) =>
   c.json({ status: "ok", timestamp: new Date().toISOString() }),
 );
 
+function escapeXml(value: string): string {
+  return value.replace(/[<>&'\"]/g, (character) => {
+    switch (character) {
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case "&":
+        return "&amp;";
+      case "'":
+        return "&apos;";
+      case "\"":
+        return "&quot;";
+      default:
+        return character;
+    }
+  });
+}
+
+function publicSiteOrigin(): string {
+  try {
+    return new URL(getEnv().FRONTEND_URL).origin;
+  } catch {
+    return "https://swiftjob.payservice.top";
+  }
+}
+
+// Keep the public sitemap tied to the same database-backed job list that the
+// careers page uses. This avoids stale job URLs after an admin publishes or
+// closes a position between Pages deployments.
+app.get("/api/sitemap.xml", async (c) => {
+  try {
+    const jobs = await jobService.listPublic();
+    const base = publicSiteOrigin();
+    const coreUrls = ["/", "/careers", "/login", "/legal", "/privacy"];
+    const jobUrls = jobs.map((job) => `/careers/${job.slug}`);
+    const urls = [...coreUrls, ...jobUrls];
+    const entries = urls
+      .map((url) => `  <url><loc>${escapeXml(`${base}${url}`)}</loc></url>`)
+      .join("\n");
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}\n</urlset>\n`;
+    return new Response(xml, {
+      headers: {
+        "Content-Type": "application/xml; charset=UTF-8",
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch (err) {
+    console.error({ err }, "Failed to generate sitemap");
+    return c.json({ error: "Failed to generate sitemap" }, 500);
+  }
+});
+
 // ============================================
 // PUBLIC JOBS
 // ============================================

@@ -6,12 +6,12 @@ The entries below preserve the original baseline evidence. The current branch di
 
 | Area | Current state |
 |---|---|
-| Candidate auth, JSON boundaries, JWT claims and session revocation | Resolved in source; 14 isolated regression groups pass; live protected-route boundary checked |
+| Candidate auth, JSON boundaries, JWT claims, session revocation and login throttling | Resolved in source; 15 isolated regression groups pass; live protected-route boundary checked |
 | Application/job binding, idempotency, uploads, privacy redaction and assessment references | Resolved in source; 7 isolated application groups pass; additive migration applied |
 | Checker safety, retired MSI/background endpoints and silent third-party loads | Resolved/retired; 2 checker groups pass; live retired route returns 410 |
-| Headers, CORS, sitemap/robots, labels, mobile admin overflow, truthful copy and factual role strip | Resolved in source and build; live headers/CORS/sitemap and representative responsive pages checked |
+| Headers, CORS, dynamic sitemap/robots, labels, mobile admin overflow, truthful copy and factual role strip | Resolved in source and build; live headers/CORS/sitemap and 30 responsive route/width samples checked |
 | Real provider email receipt and SPF/DKIM/DMARC | Not verified; requires a designated mailbox/provider evidence |
-| Exhaustive accessibility, Core Web Vitals and code-splitting | Remain quality work outside the exercised regression scope |
+| Core Web Vitals, contrast/screen-reader review and edge-distributed rate limits | Remain unverified or partially configured; initial route-level bundle splitting is verified |
 | Domain migration | Prepared in `28_DOMAIN_MIGRATION.md`; deliberately not executed |
 
 Initial baseline register. All findings remain open until their verification requirements are met. Source-only conclusions are distinguished from executed tests.

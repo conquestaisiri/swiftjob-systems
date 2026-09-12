@@ -1,12 +1,12 @@
 # Final production review
 
-This final review is populated from the completed repair, deployment, live smoke checks and regression evidence. Current gate status is **NOT READY** because real email receipt and DNS authentication remain unverified; the large SPA chunk and Core Web Vitals also remain quality work. The existing Pages/Worker/Neon/R2 architecture and domain are live.
+This final review is populated from the completed repair, deployment, live smoke checks and closure-sprint evidence. Current gate status is **NOT READY** because historical credential rotation and real email/DNS evidence remain unverified; edge-distributed rate limits, request-time schema safety-net retirement, Core Web Vitals, and full assistive-technology review remain partial. The existing Pages/Worker/Neon/R2 architecture and domain are live.
 
 Evidence classification:
 
 - **VERIFIED:** isolated runtime tests, local preview HTTP checks, local browser DOM checks, source/type/build checks.
 - **INFERENCE:** source-based architecture, provider configuration interpretation, and expected production behavior.
-- **BLOCKED:** real inbox receipt, DNS/email authentication confirmation, and exhaustive breakpoint/accessibility/performance runs.
+- **BLOCKED:** real inbox receipt, DNS/email authentication confirmation, provider-side historical credential rotation, and full Core Web Vitals/assistive-technology runs.
 
 Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2 architecture, working public job browsing, existing email templates/layout, and the current production domain remain unchanged in this branch.
 
@@ -72,4 +72,56 @@ Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2
 
 1. A real designated mailbox has not received a controlled magic-link/application/status test, so provider acceptance, inbox placement and SPF/DKIM/DMARC cannot be certified.
 2. Historical Git objects contain credential-shaped database URLs. The current tree is sanitized, but provider-side classification and rotation require the owner/provider operator.
-3. Core Web Vitals, full accessibility review and code-splitting remain unmeasured quality work; the production bundle is approximately 1.16 MB JavaScript.
+3. Core Web Vitals and full contrast/screen-reader review remain unmeasured quality work; route-level code splitting is now deployed.
+
+## Closure sprint addendum — 2026-09-12
+
+This addendum supersedes earlier future-improvement wording where it conflicts with current evidence. Dynamic sitemap generation, route-level lazy loading, form labels, and live responsive/console checks were completed after the earlier review.
+
+### Final questions, evidence-based answers
+
+| # | Current answer |
+|---:|---|
+| 1 | **NOT READY.** Public and protected boundaries pass, but historical Supabase credential rotation and real email/DNS evidence are absent. |
+| 2 | **Partially verified.** Candidate auth, application binding/upload/idempotency, portal redaction, logout and assessment boundaries pass isolated regressions; a real production candidate mutation was not run because it creates PII and sends mail. |
+| 3 | **Not implemented as a separate product.** Public contact intake and admin hiring tools exist; employer accounts, billing and self-service lifecycle are outside this architecture. |
+| 4 | **Partially verified.** Admin auth and protected API boundaries pass; live admin mutation-to-email/candidate reflection was not run. |
+| 5 | **Verified in isolation.** Magic-link issue/verify, password session replacement, logout revocation and malformed-token behavior pass; delivery remains unverified. |
+| 6 | **Verified for exercised boundaries.** Candidate ownership, admin role/claim checks, expiry and JWT algorithm pinning are regression-tested. |
+| 7 | **NOT VERIFIED.** Synthetic email sink delivery passes; no controlled production inbox, bounce event or provider acceptance evidence exists. |
+| 8 | **Verified in source/sink.** Escaped HTML, plain text and configured production links are covered; real mail-client rendering and link inspection remain unverified. |
+| 9 | **Verified for sampled live pages.** The four historical visual findings are repaired; no new obvious logo/destination/date issue was found in the browser sweep. |
+| 10 | **No obvious sampled examples.** Full visual-state review remains outside the automated sweep. |
+| 11 | **No active public examples found.** StrixJob references are retired/catalogued and unsafe installer/background behavior is removed. |
+| 12 | **No active public StrixJob UI.** Historical artifacts and evidence remain for archival cleanup. |
+| 13 | **Current tree sanitized; historical exposure classified.** The old Supabase pooler credential’s validity is UNKNOWN because authentication was not attempted; provider rotation is still required. |
+| 14 | **No exercised critical runtime failure.** Open operational risks are historical-secret rotation, provider email/DNS, distributed rate limits, request-time DDL, and unmeasured CWV/assistive technology. |
+| 15 | **Mostly verified.** Job binding, idempotency, upload validation, ownership and shortlist redaction pass; retention/deletion automation is not verified. |
+| 16 | **Partially verified.** Isolated end-to-end candidate workflow and live public boundaries pass; real inbox and live admin mutation remain untested. |
+| 17 | **Verified for 30 samples.** Five representative routes at six widths had zero body overflow. |
+| 18 | **Verified for sampled states.** Loading, error, protected and retired-route boundaries are handled; exhaustive state review remains open. |
+| 19 | **Partially verified.** Isolated status/assessment logic is consistent; live admin mutation reflection is unverified. |
+| 20 | **Partially verified.** Application writes and candidate reads pass in isolation; full live admin/employer reflection is unverified. |
+| 21 | **Partially verified.** Synthetic messages correspond to exercised transitions; provider delivery and all admin event variants are unverified. |
+| 22 | **Mostly verified.** Worker/Pages deployment, health, headers, CORS, protected routes, dynamic sitemap and CI checks pass; email DNS/provider and hosted CI remain unverified. |
+| 23 | **Prepared, not migrated.** The domain checklist and configurable URLs are present; the current temporary domain remains intentional. |
+| 24 | **Known limitations:** historical Supabase rotation; controlled mailbox/DNS; Cloudflare edge rule permission; transitional request-time DDL; CWV/contrast/screen-reader evidence; no separate employer portal. |
+| 25 | Preserve the Pages + Worker + Neon + R2 architecture, current domain until an approved migration, factual role-focused UI, and candidate magic-link flow. |
+
+### Closure scores
+
+| Dimension | Score |
+|---|---:|
+| Accessibility | 8/10 (automated DOM subset passes; contrast and screen reader unverified) |
+| SEO | 8/10 (live dynamic sitemap and robots pass) |
+| Performance | 7/10 (initial JS reduced to ~323 kB; CWV unverified; one large admin chunk remains) |
+| Infrastructure/deployment quality | 8/10 |
+| Overall production readiness | 6/10 — **NOT READY** |
+
+### Remaining hard-gate blockers
+
+1. Rotate/revoke the historical Supabase pooler/database credential for project `yfymijkhcbdubjawsngq` and confirm no remaining consumer. Current authentication validity is UNKNOWN.
+2. Provide an owner-controlled test mailbox and confirm the actual Resend sender domain. Verify magic link, application confirmation/HR notification and status-change delivery, then verify SPF/DKIM/DMARC alignment, Reply-To, links and provider events.
+3. Configure distributed Cloudflare limits for sensitive endpoints with a token that has the required Rate Limiting/Rulesets permission. Worker in-memory limits remain a useful low-volume fallback, not a distributed guarantee.
+4. Keep migrations as the deploy contract and retire request-time DDL after migration tracking/startup guarantees are established.
+5. Obtain a Chrome DevTools/Lighthouse run for LCP, INP, CLS and a full contrast/screen-reader review.
