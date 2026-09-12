@@ -178,9 +178,11 @@ function layout(opts: LayoutOptions): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
   <title>${esc(opts.headerTitle)}</title>
 </head>
-<body style="margin:0; padding:0; background:${BRAND.paper}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: ${BRAND.text};">
+<body style="margin:0; padding:0; background:${BRAND.paper}; color-scheme:light; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: ${BRAND.text};">
   <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">${esc(opts.preheader)}</div>
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.paper}; padding: 24px 12px;">
@@ -188,7 +190,7 @@ function layout(opts: LayoutOptions): string {
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; background:${BRAND.white}; border-radius: 14px; overflow: hidden; border: 1px solid ${BRAND.border};">
           <tr>
-            <td style="background:${BRAND.paperDark}; padding: 20px 32px; text-align: center; border-bottom: 3px solid ${BRAND.teal};">
+            <td bgcolor="${BRAND.white}" style="background:${BRAND.white}; background-color:${BRAND.white}; padding: 20px 32px; text-align: center; border-bottom: 3px solid ${BRAND.teal};">
               <img src="${getLogoUrl()}" alt="SwiftJob" width="220" style="max-width: 220px; height: auto; border: 0; display: inline-block;" />
             </td>
           </tr>

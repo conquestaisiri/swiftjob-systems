@@ -1,5 +1,5 @@
 {
-  "measuredAt": "2026-09-12T17:34:54.310233+00:00",
+  "measuredAt": "2026-09-12T18:54:57.126345+00:00",
   "commit": "9dcb7ce",
   "assetAlignmentCommit": "9dcb7ce",
   "sourceArtwork": {
@@ -11,7 +11,7 @@
     "pages": "https://82c6ae35.swiftjob-systems.pages.dev",
     "productionBranch": "main",
     "customDomain": "https://swiftjob.payservice.top",
-    "workerVersion": "ba7f06a3-f461-438a-90de-5a2a24e2441d"
+    "workerVersion": "a57a2143-9121-47f3-8488-fc2af8907f60"
   },
   "cacheBust": "supplied-20260912",
   "productionAssets": [
@@ -244,7 +244,7 @@
   "emailTemplateAbsoluteUrl": "https://swiftjob.payservice.top/swiftjob-logo.png?v=supplied-20260912",
   "emailVerification": {
     "providerMessageId": "49361a29-6e8d-47a5-871e-5762779ab1c7",
-    "subject": "SwiftJob supplied logo cache-bust verification \u2014 2026-09-12 17:25 UTC",
+    "subject": "SwiftJob supplied logo cache-bust verification — 2026-09-12 17:25 UTC",
     "providerLastEvent": "delivered",
     "mailbox": "elevate.tech.scale@outlook.com",
     "mailboxVisible": true,
@@ -258,10 +258,28 @@
     "screenshots": [
       "AUDIT/evidence/live-email-supplied-logo.png",
       "AUDIT/evidence/live-header-logo-crop.png",
-      "AUDIT/evidence/live-footer-logo-crop.png"
-    ]
+      "AUDIT/evidence/live-footer-logo-crop.png",
+      "AUDIT/evidence/live-email-white-header.png"
+    ],
+    "headerBackground": "#FFFFFF",
+    "logoTreatment": "Original supplied dark-green lockup unchanged",
+    "latestVerification": {
+      "subject": "SwiftJob original logo white-header verification — 2026-09-12 18:12 UTC",
+      "sendApiStatus": 200,
+      "sendResult": "sent",
+      "mailbox": "elevate.tech.scale@outlook.com",
+      "mailboxVisible": true,
+      "renderedImageUrl": "https://swiftjob.payservice.top/swiftjob-logo.png?v=supplied-20260912",
+      "renderedDimensions": [
+        1200,
+        411
+      ],
+      "headerBackground": "#FFFFFF",
+      "logoTreatment": "Original supplied dark-green lockup unchanged",
+      "screenshot": "AUDIT/evidence/live-email-white-header.png"
+    }
   },
-  "liveEmailReceipt": "PASS \u2014 owner mailbox received and rendered the cache-busted supplied lockup; provider delivery, plain text, and Reply-To were verified.",
+  "liveEmailReceipt": "PASS — latest controlled send returned HTTP 200 with sent=true; the owner mailbox visibly rendered the unchanged supplied lockup on a plain white header. The earlier provider delivery and Reply-To checks remain recorded above.",
   "visualVerification": {
     "status": "PASS",
     "surfaces": [
@@ -270,7 +288,7 @@
       "live dark footer",
       "Outlook mailbox message body"
     ],
-    "notes": "The supplied S-shaped arrow mark and SwiftJob lockup are visible on the custom domain and in Outlook after cache-busting."
+    "notes": "The supplied S-shaped arrow mark and SwiftJob lockup are visible on the custom domain and in Outlook after cache-busting. The latest Outlook verification shows the original dark-green logo on a fixed #FFFFFF email header."
   },
   "oldLogoAssetsReplaced": true,
   "remainingProductionGates": [

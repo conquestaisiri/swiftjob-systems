@@ -11,3 +11,5 @@ The owner-supplied lockup and mark are the canonical artwork for this release. T
 - `artifacts/swiftjob-systems/public/swiftjob-mark.png` and `swiftjob-logo.png` — transparent PNG fallbacks used by the favicon, social metadata, and transactional email.
 
 The SVG paths intentionally remain stable for existing page references and point to the optimized PNG artwork, while PNG delivery is used where mail clients and social crawlers require it. The wordmark is always spelled `SwiftJob` with a capital S and J.
+
+Transactional email keeps this original dark-green lockup unchanged and places it on a fixed plain-white header so it remains legible in light and dark mail clients.
