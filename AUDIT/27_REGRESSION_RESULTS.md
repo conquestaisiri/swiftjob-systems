@@ -4,6 +4,8 @@
 |---|---|---|
 | Worker typecheck | PASS | `pnpm exec tsc --noEmit` |
 | SPA typecheck | PASS | `pnpm exec tsc -p tsconfig.json --noEmit` |
+| Workspace typecheck | PASS | `pnpm run typecheck` (libraries, SPA, retired API artifact and scripts) |
+| Workspace production build | PASS | `pnpm run build` (all buildable workspace packages) |
 | Production Vite build | PASS | 323.18 kB initial JS / 229.73 kB CSS; route chunks emitted; ContactsAdmin remains the largest lazy chunk |
 | Auth/session/JSON/rate-limit boundary | PASS (15 groups) | `AUDIT/evidence/auth-regression.json` |
 | Application/file/data boundary | PASS (7 groups) | `AUDIT/evidence/application-regression.json` |
