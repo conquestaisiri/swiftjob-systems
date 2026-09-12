@@ -476,7 +476,7 @@ export function JobPage() {
                 </p>
                 <p>
                   {countriesDisplay
-                    ? `We build remote teams across ${countriesDisplay}+ countries and `
+                    ? `We build remote teams across ${countriesDisplay}+ countries and serve businesses in `
                     : "We build remote teams for businesses in "}
                   technology, financial services,
                   e-commerce, healthcare, logistics, retail, and more. When you

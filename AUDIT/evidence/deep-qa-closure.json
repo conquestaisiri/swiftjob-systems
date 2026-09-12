@@ -2,8 +2,8 @@
   "measuredAt": "2026-09-12T21:20:00Z",
   "environment": {
     "customDomain": "https://swiftjob.payservice.top",
-    "pagesProductionDeployment": "https://d1191a81.swiftjob-systems.pages.dev",
-    "pagesDeploymentId": "d1191a81",
+    "pagesProductionDeployment": "https://e8a80d63.swiftjob-systems.pages.dev",
+    "pagesDeploymentId": "e8a80d63",
     "workerVersion": "a57a2143-9121-47f3-8488-fc2af8907f60"
   },
   "publicBoundary": {
@@ -52,7 +52,7 @@
     "referralContent": "PASS — global and stale per-referral 28-country overrides removed through admin content APIs",
     "productionVerification": [
       "https://swiftjob.payservice.top/careers?qa=stats2",
-      "https://swiftjob.payservice.top/careers/virtual-receptionist?qa=copy2"
+      "https://swiftjob.payservice.top/careers/virtual-receptionist?qa=copy3"
     ]
   },
   "publicApiSmoke": {
