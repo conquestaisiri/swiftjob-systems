@@ -2,5 +2,5 @@
   <title id="title">SwiftJob mark</title>
   <desc id="desc">A geometric S-shaped path with a forward arrow, representing people moving into the right work.</desc>
   <path d="M204 44H92c-27 0-43 33-23 53l87 87c20 20 4 54-24 54H52" fill="none" stroke="#F4F7F1" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M116 128h84m0 0-30-30m30 30-30 30" fill="none" stroke="#8DE7D5" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M116 128h84m0 0-30-30m30 30-30 30" fill="none" stroke="#5FDCC4" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
