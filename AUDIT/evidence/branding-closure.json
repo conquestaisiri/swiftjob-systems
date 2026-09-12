@@ -29,6 +29,7 @@
     "status": "PASS",
     "cacheBusted": true,
     "allStatusCodes": 200,
+    "remoteBytesMatchLocal": true,
     "contentTypes": {
       "svg": "image/svg+xml",
       "png": "image/png"
