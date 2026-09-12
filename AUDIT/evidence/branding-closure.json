@@ -161,7 +161,7 @@
   },
   "emailTemplateLogoPath": "/swiftjob-logo.png",
   "emailTemplateAbsoluteUrl": "https://swiftjob.payservice.top/swiftjob-logo.png",
-  "liveEmailReceipt": "NOT VERIFIED \u00e2\u20ac\u201d owner-controlled mailbox and MX routing are still required",
+  "liveEmailReceipt": "PARTIAL - controlled production contact/application/status provider payloads are delivered and contain the shared logo; owner-controlled mailbox inspection remains required",
   "visualVerification": {
     "status": "PASS",
     "surfaces": [
