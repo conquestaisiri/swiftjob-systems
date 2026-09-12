@@ -1,9 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 180" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 411" role="img" aria-labelledby="title desc">
   <title id="title">SwiftJob</title>
-  <desc id="desc">SwiftJob wordmark with a geometric forward-motion mark.</desc>
-  <g transform="translate(0 10) scale(.625)">
-    <path d="M204 44H92c-27 0-43 33-23 53l87 87c20 20 4 54-24 54H52" fill="none" stroke="#10251D" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M116 128h84m0 0-30-30m30 30-30 30" fill="none" stroke="#5FDCC4" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
-  </g>
-  <text x="184" y="116" fill="#10251D" font-family="Inter, Arial, sans-serif" font-size="76" font-weight="800" letter-spacing="-3">SwiftJob</text>
+  <desc id="desc">SwiftJob owner-supplied horizontal lockup.</desc>
+  <image href="/swiftjob-logo.png" x="0" y="0" width="1200" height="411" preserveAspectRatio="xMidYMid meet" />
 </svg>

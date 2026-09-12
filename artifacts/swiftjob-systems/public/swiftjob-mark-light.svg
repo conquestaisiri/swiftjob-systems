@@ -1,6 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" role="img" aria-labelledby="title desc">
   <title id="title">SwiftJob mark</title>
-  <desc id="desc">A geometric S-shaped path with a forward arrow, representing people moving into the right work.</desc>
-  <path d="M204 44H92c-27 0-43 33-23 53l87 87c20 20 4 54-24 54H52" fill="none" stroke="#F4F7F1" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M116 128h84m0 0-30-30m30 30-30 30" fill="none" stroke="#5FDCC4" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <desc id="desc">SwiftJob owner-supplied light S-shaped forward-motion mark.</desc>
+  <image href="/swiftjob-mark-light.png" x="0" y="0" width="384" height="384" preserveAspectRatio="xMidYMid meet" />
 </svg>

@@ -1,13 +1,13 @@
 # SwiftJob brand system
 
-The production mark is a flat geometric S-shaped path with a forward arrow. The mark and wordmark are authored as deterministic SVG assets so they remain sharp at every size. The generated PNGs in this folder are retained as the approved visual exploration record; production pages use the SVG files and production email uses a high-resolution PNG rendered from the same SVG source.
+The owner-supplied lockup and mark are the canonical artwork for this release. The source files are retained in this folder as `source-swiftjob-lockup.png` and `source-swiftjob-mark.png`; the production copies use transparent crops of that artwork so its proportions and detail stay consistent in the site, browser icon, social preview, and mail.
 
 ## Production assets
 
-- `artifacts/swiftjob-systems/public/swiftjob-mark.svg` — primary mark for light surfaces.
-- `artifacts/swiftjob-systems/public/swiftjob-mark-light.svg` — same mark reversed for dark surfaces.
-- `artifacts/swiftjob-systems/public/swiftjob-logo.svg` — primary horizontal lockup.
-- `artifacts/swiftjob-systems/public/swiftjob-logo-light.svg` — reversed horizontal lockup.
-- `artifacts/swiftjob-systems/public/swiftjob-mark.png` and `swiftjob-logo.png` — raster delivery assets for favicon and email clients.
+- `artifacts/swiftjob-systems/public/swiftjob-mark.svg` — stable SVG delivery path for the supplied mark on light surfaces.
+- `artifacts/swiftjob-systems/public/swiftjob-mark-light.svg` — supplied mark prepared for dark surfaces.
+- `artifacts/swiftjob-systems/public/swiftjob-logo.svg` — stable SVG delivery path for the supplied horizontal lockup.
+- `artifacts/swiftjob-systems/public/swiftjob-logo-light.svg` — supplied horizontal lockup prepared for dark surfaces.
+- `artifacts/swiftjob-systems/public/swiftjob-mark.png` and `swiftjob-logo.png` — transparent PNG fallbacks used by the favicon, social metadata, and transactional email.
 
-Brand colors are `#10251D` forest navy, `#5FDCC4` mint, and `#49634B` sage. The wordmark is always spelled `SwiftJob` with a capital S and J.
+The SVG paths intentionally remain stable for existing page references and point to the optimized PNG artwork, while PNG delivery is used where mail clients and social crawlers require it. The wordmark is always spelled `SwiftJob` with a capital S and J.
