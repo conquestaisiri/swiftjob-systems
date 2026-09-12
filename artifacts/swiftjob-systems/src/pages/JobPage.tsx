@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { fetchJobBySlug } from "@/lib/jobsApi";
-import { fetchPublicStats } from "@/lib/campaignApi";
 import type { Job } from "@/data/jobs";
 import { parseDateOnly } from "@/lib/utils";
 
@@ -207,7 +206,6 @@ export function JobPage() {
     "idle" | "submitting" | "error"
   >("idle");
   const [serverError, setServerError] = useState("");
-  const [countriesDisplay, setCountriesDisplay] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const submissionKeyRef = useRef<string | null>(null);
@@ -230,15 +228,6 @@ export function JobPage() {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-    // Admin-editable stat copy (Settings → "Countries hired from" number).
-    fetchPublicStats().then((stats) => {
-      if (cancelled || !stats) return;
-      const configured = stats.countriesDisplay?.trim();
-      const reached = Number.isFinite(stats.countriesReached)
-        ? String(stats.countriesReached)
-        : null;
-      setCountriesDisplay(configured || reached);
-    });
     return () => {
       cancelled = true;
     };
@@ -475,9 +464,7 @@ export function JobPage() {
                   focus on the work.
                 </p>
                 <p>
-                  {countriesDisplay
-                    ? `We build remote teams across ${countriesDisplay}+ countries and serve businesses in `
-                    : "We build remote teams for businesses in "}
+                  We build remote teams worldwide and serve businesses in
                   technology, financial services,
                   e-commerce, healthcare, logistics, retail, and more. When you
                   work with us, we aim to be a partner for the long term—not

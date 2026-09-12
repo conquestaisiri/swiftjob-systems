@@ -2,8 +2,8 @@
   "measuredAt": "2026-09-12T21:20:00Z",
   "environment": {
     "customDomain": "https://swiftjob.payservice.top",
-    "pagesProductionDeployment": "https://e8a80d63.swiftjob-systems.pages.dev",
-    "pagesDeploymentId": "e8a80d63",
+    "pagesProductionDeployment": "https://4160501a.swiftjob-systems.pages.dev",
+    "pagesDeploymentId": "4160501a",
     "workerVersion": "a57a2143-9121-47f3-8488-fc2af8907f60"
   },
   "publicBoundary": {
@@ -48,8 +48,8 @@
       "applicationsProcessed": 3,
       "countriesReached": 2
     },
-    "careersCopy": "PASS — displays 95 open positions and 2 countries from live stats; no stale 28+ claim",
-    "jobCopy": "PASS — displays 2+ countries and grammatically correct 'and serve businesses in' sentence",
+    "careersCopy": "PASS — displays 95 open positions and the requested Worldwide label; no stale country-count claim",
+    "jobCopy": "PASS — displays the requested Worldwide wording and the grammatically correct 'and serve businesses in' sentence",
     "referralContent": "PASS — global and stale per-referral 28-country overrides removed through admin content APIs",
     "productionVerification": [
       "https://swiftjob.payservice.top/careers?qa=stats2",
@@ -67,7 +67,7 @@
     "frontendBuild": "PASS — Vite production build",
     "gitDiffCheck": "PASS",
     "changes": [
-      "Careers and job pages now derive country display from live public stats",
+      "Careers and job pages now use the requested Worldwide wording instead of a numeric country claim",
       "Referral seed and legacy replacement copy no longer claim 28+ countries",
       "Corrected the live job-page sentence joining after the stats fallback"
     ]
