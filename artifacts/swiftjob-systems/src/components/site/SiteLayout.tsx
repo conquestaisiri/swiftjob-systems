@@ -67,7 +67,7 @@ export function SiteLayout({ children, title, description }: SiteLayoutProps) {
         <nav className="container nav-bar" aria-label="Main navigation">
           <Link href="/" className="brand" data-testid="button-brand">
             <img
-              src="/swiftjob-mark.svg"
+              src="/swiftjob-mark.svg?v=supplied-20260912"
               alt="SwiftJob"
               className="brand-logo"
             />

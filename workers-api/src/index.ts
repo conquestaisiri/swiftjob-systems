@@ -2162,7 +2162,7 @@ function formatCustomMailHtml(subject: string, body: string): string {
   return `<div style="background:#F7F7F4;padding:32px 16px;">
   <div style="max-width:560px;margin:0 auto;background:#FFFFFF;border-radius:14px;overflow:hidden;border:1px solid #DFE6DC;">
     <div style="background:#EEF2EB;padding:22px 28px;text-align:center;border-bottom:3px solid #49634B;">
-      <img src="https://swiftjob.payservice.top/swiftjob-logo.png" alt="SwiftJob" width="220" style="display:inline-block;max-width:220px;height:auto;border:0;" />
+      <img src="https://swiftjob.payservice.top/swiftjob-logo.png?v=supplied-20260912" alt="SwiftJob" width="220" style="display:inline-block;max-width:220px;height:auto;border:0;" />
     </div>
     <div style="padding:28px;">
       <h2 style="margin:0 0 16px;color:#10251D;font-size:20px;">${safeSubject}</h2>

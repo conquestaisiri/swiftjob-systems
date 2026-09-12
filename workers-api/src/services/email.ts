@@ -29,6 +29,9 @@ const BRAND = {
 };
 
 const LOGO_PATH = "/swiftjob-logo.png";
+// Bump when the supplied artwork changes so mail clients cannot reuse an
+// earlier cached logo at the same URL.
+const LOGO_VERSION = "supplied-20260912";
 const FALLBACK_BASE_URL = "https://swiftjob.payservice.top";
 // Last-resort contact address, used only when neither SUPPORT_EMAIL nor
 // HR_EMAIL is configured.
@@ -49,7 +52,7 @@ export function getSupportEmail(): string {
 }
 
 function getLogoUrl(): string {
-  return `${getBaseUrl()}${LOGO_PATH}`;
+  return `${getBaseUrl()}${LOGO_PATH}?v=${LOGO_VERSION}`;
 }
 
 function esc(value: unknown): string {
