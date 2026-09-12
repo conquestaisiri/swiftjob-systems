@@ -135,7 +135,8 @@ export function AdminLayout({ view, children }: AdminLayoutProps) {
     <div className="admin-shell">
       <header className="admin-topbar">
         <Link href="/admin" className="admin-brand">
-          SwiftJob.adm
+          <img src="/swiftjob-mark-light.svg" alt="SwiftJob" />
+          <span>SwiftJob</span>
           <span className="admin-brand-area">admin</span>
         </Link>
         <button

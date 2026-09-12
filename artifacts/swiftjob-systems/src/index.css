@@ -7916,6 +7916,11 @@ h2 {
   font-size: 15px;
   letter-spacing: -0.2px;
 }
+.admin-brand img {
+  display: block;
+  width: 26px;
+  height: 26px;
+}
 .admin-brand-area {
   font-size: 10px;
   font-weight: 700;
@@ -8017,11 +8022,30 @@ h2 {
   width: 100%;
 }
 .admin-login-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-size: 16px;
   font-weight: 800;
   color: var(--navy);
   margin-bottom: 18px;
   letter-spacing: -0.2px;
+}
+.admin-login-brand img {
+  display: block;
+  width: 30px;
+  height: 30px;
+}
+.admin-login-brand-area {
+  margin-left: 2px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--mint);
+  color: var(--navy);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 /* ===== Overview ===== */

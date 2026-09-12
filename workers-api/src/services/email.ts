@@ -28,7 +28,7 @@ const BRAND = {
   purpleBg: "#E8EFE4",
 };
 
-const LOGO_PATH = "/swiftjob-mark.png";
+const LOGO_PATH = "/swiftjob-logo.png";
 const FALLBACK_BASE_URL = "https://swiftjob.payservice.top";
 // Last-resort contact address, used only when neither SUPPORT_EMAIL nor
 // HR_EMAIL is configured.
@@ -186,7 +186,7 @@ function layout(opts: LayoutOptions): string {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; background:${BRAND.white}; border-radius: 14px; overflow: hidden; border: 1px solid ${BRAND.border};">
           <tr>
             <td style="background:${BRAND.paperDark}; padding: 20px 32px; text-align: center; border-bottom: 3px solid ${BRAND.teal};">
-              <img src="${getLogoUrl()}" alt="SwiftJob" width="112" style="max-width: 112px; height: auto; border: 0; display: inline-block;" />
+              <img src="${getLogoUrl()}" alt="SwiftJob" width="220" style="max-width: 220px; height: auto; border: 0; display: inline-block;" />
             </td>
           </tr>
           <tr>
