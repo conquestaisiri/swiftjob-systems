@@ -1,6 +1,6 @@
 # Email baseline and current verification
 
-The active provider is Resend. Shared email layout uses green/cream brand colors, absolute site/logo links and escaped interpolated text. `EMAIL_FROM` supplies From; SUPPORT_EMAIL, then HR_EMAIL, supplies Reply-To. Templates are in `workers-api/src/services/email.ts`.
+The active provider is Resend. Shared email layout uses green/cream brand colors, the production `swiftjob-logo.png` lockup at an absolute site URL, and escaped interpolated text. `EMAIL_FROM` supplies From; SUPPORT_EMAIL, then HR_EMAIL, supplies Reply-To. Templates are in `workers-api/src/services/email.ts`.
 
 | Event | Recipient | Trigger | Baseline verification |
 |---|---|---|---|
@@ -26,3 +26,5 @@ Required repair verification: HTML/text parity, safe links and escaping, indepen
 The current read-only provider check is recorded in `evidence/email-dns-closure.json`. Resend reports the verified root domain `payservice.top` with DKIM and SPF checks verified. Cloudflare DNS contains the root SPF and DMARC records, the Resend DKIM record, and the provider return-path records; the configured sender domain is under the verified root. The configured `swiftjob.payservice.top` Reply-To/HR subdomain has no MX record, and the Resend history contains corresponding bounces. The DMARC policy remains `p=none`, so enforcement is intentionally not claimed.
 
 No new production message was sent because an owner-designated controlled mailbox was not provided. Synthetic email sink checks still pass for the exercised application and contact paths. A real mailbox test must cover magic link, application confirmation/HR notification and one status-change message, including inbox/spam placement, links, Reply-To and provider event state. The Resend API key itself is verified for read-only account access; sender authentication is verified, while recipient routing and controlled delivery remain NOT VERIFIED.
+
+The unified SwiftJob logo closure is recorded in `evidence/branding-closure.json`. All inspected message templates now reference `https://swiftjob.payservice.top/swiftjob-logo.png`; the asset is live and returns `image/png` on the production custom domain. This verifies the template asset and rendering path only. It does not certify inbox receipt until an owner-controlled mailbox and working MX routing are supplied.

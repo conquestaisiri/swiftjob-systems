@@ -13,6 +13,7 @@
 | Sitemap and API headers | PASS | live `public-baseline.json`; dynamic `/sitemap.xml` returned 100 valid URLs and `no-store` |
 | Responsive browser matrix | PASS | `evidence/responsive-browser-errors.json`; 30 prior samples plus 12 fresh settled samples on the latest deployment, zero body overflow and zero site-origin console errors |
 | Accessibility DOM and sampled contrast checks | PASS (automated subset) | `evidence/accessibility-closure.json`, `evidence/contrast-closure.json`; 27 controls labeled, no duplicate IDs/unnamed buttons/missing image alt, 0 sampled contrast failures |
+| Unified SwiftJob logo assets and brand surfaces | PASS (live visual sample) | `evidence/branding-closure.json`; production SVG/PNG assets, favicon, light/dark surfaces, admin login and email template path verified on the custom domain |
 | Performance bundle check | PASS (quality) | `evidence/performance-closure.json`; route-level chunks reduced initial JS; Core Web Vitals NOT VERIFIED |
 | Live candidate/admin boundary checks | PASS (safe subset) | `evidence/live-workflow-boundaries.json`; public jobs, invalid application, protected reads, invalid admin login and malformed contact |
 | Real provider email receipt | NOT VERIFIED / provider history mixed | Resend read-only history: 2 delivered, 6 bounced; five bounces target the configured `swiftjob.payservice.top` HR/Reply-To domain, which has no MX; designated owner-controlled mailbox is still required |

@@ -1,0 +1,66 @@
+{
+  "measuredAt": "2026-09-12T07:12:55.0846732Z",
+  "commit": "b0b22a4",
+  "productionDeployments": {
+    "pages": "https://b9e54d0c.swiftjob-systems.pages.dev",
+    "productionBranch": "main",
+    "customDomain": "https://swiftjob.payservice.top",
+    "workerVersion": "002c32fd-b0c6-4f8f-aaae-160e07253c18"
+  },
+  "concepts": {
+    "icon": "C:/Users/USER/.codex/generated_images/01a081fe-68e8-73a0-9707-f2415868caff/exec-86105567-17b6-4ca7-862f-1c96f30f4c4a.png",
+    "horizontalLockup": "C:/Users/USER/.codex/generated_images/01a081fe-68e8-73a0-9707-f2415868caff/exec-62815098-483d-4bb8-b5b6-41c16e0fc125.png"
+  },
+  "productionAssets": [
+    { "path": "/swiftjob-mark.svg", "format": "SVG", "localBytes": 577 },
+    { "path": "/swiftjob-mark-light.svg", "format": "SVG", "localBytes": 577 },
+    { "path": "/swiftjob-logo.svg", "format": "SVG", "localBytes": 736 },
+    { "path": "/swiftjob-logo-light.svg", "format": "SVG", "localBytes": 736 },
+    { "path": "/swiftjob-logo.png", "format": "PNG", "localBytes": 366252 },
+    { "path": "/swiftjob-mark.png", "format": "PNG", "localBytes": 379291 },
+    { "path": "/swiftjob-og.png", "format": "PNG", "localBytes": 366252 },
+    { "path": "/favicon.svg", "format": "SVG", "localBytes": 506 },
+    { "path": "/favicon.png", "format": "PNG", "localBytes": 379291 }
+  ],
+  "liveAssetCheck": {
+    "status": "PASS",
+    "cacheBusted": true,
+    "allStatusCodes": 200,
+    "contentTypes": {
+      "svg": "image/svg+xml",
+      "png": "image/png"
+    },
+    "customDomainVerified": true
+  },
+  "routesSampled": [
+    "/",
+    "/careers",
+    "/login",
+    "/admin/login",
+    "/terms",
+    "/privacy"
+  ],
+  "routeBrandChecks": {
+    "status": "PASS",
+    "brokenImages": 0,
+    "lightSurfaceAsset": "/swiftjob-mark.svg",
+    "darkSurfaceAsset": "/swiftjob-mark-light.svg",
+    "adminLoginAsset": "/swiftjob-mark.svg",
+    "footerAsset": "/swiftjob-mark-light.svg",
+    "wordmarkExact": true
+  },
+  "emailTemplateLogoPath": "/swiftjob-logo.png",
+  "emailTemplateAbsoluteUrl": "https://swiftjob.payservice.top/swiftjob-logo.png",
+  "liveEmailReceipt": "NOT VERIFIED — owner-controlled mailbox and MX routing are still required",
+  "visualVerification": {
+    "status": "PASS",
+    "surfaces": [
+      "live homepage navigation and hero",
+      "live admin login card",
+      "live SVG horizontal lockup",
+      "live footer DOM on dark background"
+    ],
+    "notes": "The production SVG lockup renders as a clean geometric S mark with a mint forward arrow and the exact SwiftJob wordmark. Dark and light variants are selected by surface."
+  },
+  "oldLogoAssetsReplaced": true
+}

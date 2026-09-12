@@ -78,6 +78,8 @@ Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2
 
 This addendum supersedes earlier future-improvement wording where it conflicts with current evidence. Dynamic sitemap generation, route-level lazy loading, form labels, live responsive/console checks, static security headers, current Cloudflare/Resend resource verification, and one active combined Cloudflare edge rate-limit rule with live 429 enforcement were completed after the earlier review.
 
+The unified SwiftJob logo system is also deployed and live-verified. Production now serves deterministic SVG mark and lockup variants plus PNG fallbacks, the favicon uses the same mark, light/dark surfaces select the matching variant, and the shared email templates use the absolute `/swiftjob-logo.png` lockup. The browser sample covered the homepage, careers, candidate login, admin login, legal pages, the dark footer and the direct SVG lockup. Evidence: `evidence/branding-closure.json`. Real email receipt remains a separate hard gate.
+
 ### Final questions, evidence-based answers
 
 | # | Current answer |
