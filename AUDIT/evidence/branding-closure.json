@@ -13,17 +13,61 @@
     "horizontalLockup": "C:/Users/USER/.codex/generated_images/01a081fe-68e8-73a0-9707-f2415868caff/exec-62815098-483d-4bb8-b5b6-41c16e0fc125.png"
   },
   "productionAssets": [
-    { "path": "/swiftjob-mark.svg", "format": "SVG", "localBytes": 578 },
-    { "path": "/swiftjob-mark-light.svg", "format": "SVG", "localBytes": 578 },
-    { "path": "/swiftjob-logo.svg", "format": "SVG", "localBytes": 737 },
-    { "path": "/swiftjob-logo-light.svg", "format": "SVG", "localBytes": 737 },
-    { "path": "/swiftjob-logo.png", "format": "PNG", "localBytes": 12977 },
-    { "path": "/swiftjob-mark.png", "format": "PNG", "localBytes": 4143 },
-    { "path": "/swiftjob-og.png", "format": "PNG", "localBytes": 12977 },
-    { "path": "/logo.png", "format": "PNG", "localBytes": 12977 },
-    { "path": "/og-image.png", "format": "PNG", "localBytes": 12977 },
-    { "path": "/favicon.svg", "format": "SVG", "localBytes": 507 },
-    { "path": "/favicon.png", "format": "PNG", "localBytes": 983 }
+    {
+      "path": "/swiftjob-mark.svg",
+      "format": "SVG",
+      "localBytes": 578
+    },
+    {
+      "path": "/swiftjob-mark-light.svg",
+      "format": "SVG",
+      "localBytes": 578
+    },
+    {
+      "path": "/swiftjob-logo.svg",
+      "format": "SVG",
+      "localBytes": 737
+    },
+    {
+      "path": "/swiftjob-logo-light.svg",
+      "format": "SVG",
+      "localBytes": 737
+    },
+    {
+      "path": "/swiftjob-logo.png",
+      "format": "PNG",
+      "localBytes": 12977
+    },
+    {
+      "path": "/swiftjob-mark.png",
+      "format": "PNG",
+      "localBytes": 4143
+    },
+    {
+      "path": "/swiftjob-og.png",
+      "format": "PNG",
+      "localBytes": 12977
+    },
+    {
+      "path": "/logo.png",
+      "format": "PNG",
+      "localBytes": 12977
+    },
+    {
+      "path": "/og-image.png",
+      "format": "PNG",
+      "localBytes": 12977
+    },
+    {
+      "path": "/favicon.svg",
+      "format": "SVG",
+      "localBytes": 507
+    },
+    {
+      "path": "/favicon.png",
+      "format": "PNG",
+      "localBytes": 983
+    }
   ],
   "liveAssetCheck": {
     "status": "PASS",
@@ -36,16 +80,66 @@
     },
     "customDomainVerified": true,
     "responses": [
-      { "path": "/logo.png", "status": 200, "contentType": "image/png", "bytes": 12977 },
-      { "path": "/og-image.png", "status": 200, "contentType": "image/png", "bytes": 12977 },
-      { "path": "/swiftjob-mark.svg", "status": 200, "contentType": "image/svg+xml", "bytes": 578 },
-      { "path": "/swiftjob-mark-light.svg", "status": 200, "contentType": "image/svg+xml", "bytes": 578 },
-      { "path": "/swiftjob-logo.svg", "status": 200, "contentType": "image/svg+xml", "bytes": 737 },
-      { "path": "/swiftjob-logo-light.svg", "status": 200, "contentType": "image/svg+xml", "bytes": 737 },
-      { "path": "/swiftjob-logo.png", "status": 200, "contentType": "image/png", "bytes": 12977 },
-      { "path": "/favicon.svg", "status": 200, "contentType": "image/svg+xml", "bytes": 507 },
-      { "path": "/favicon.png", "status": 200, "contentType": "image/png", "bytes": 983 },
-      { "path": "/swiftjob-og.png", "status": 200, "contentType": "image/png", "bytes": 12977 }
+      {
+        "path": "/logo.png",
+        "status": 200,
+        "contentType": "image/png",
+        "bytes": 12977
+      },
+      {
+        "path": "/og-image.png",
+        "status": 200,
+        "contentType": "image/png",
+        "bytes": 12977
+      },
+      {
+        "path": "/swiftjob-mark.svg",
+        "status": 200,
+        "contentType": "image/svg+xml",
+        "bytes": 578
+      },
+      {
+        "path": "/swiftjob-mark-light.svg",
+        "status": 200,
+        "contentType": "image/svg+xml",
+        "bytes": 578
+      },
+      {
+        "path": "/swiftjob-logo.svg",
+        "status": 200,
+        "contentType": "image/svg+xml",
+        "bytes": 737
+      },
+      {
+        "path": "/swiftjob-logo-light.svg",
+        "status": 200,
+        "contentType": "image/svg+xml",
+        "bytes": 737
+      },
+      {
+        "path": "/swiftjob-logo.png",
+        "status": 200,
+        "contentType": "image/png",
+        "bytes": 12977
+      },
+      {
+        "path": "/favicon.svg",
+        "status": 200,
+        "contentType": "image/svg+xml",
+        "bytes": 507
+      },
+      {
+        "path": "/favicon.png",
+        "status": 200,
+        "contentType": "image/png",
+        "bytes": 983
+      },
+      {
+        "path": "/swiftjob-og.png",
+        "status": 200,
+        "contentType": "image/png",
+        "bytes": 12977
+      }
     ]
   },
   "routesSampled": [
@@ -67,7 +161,7 @@
   },
   "emailTemplateLogoPath": "/swiftjob-logo.png",
   "emailTemplateAbsoluteUrl": "https://swiftjob.payservice.top/swiftjob-logo.png",
-  "liveEmailReceipt": "NOT VERIFIED — owner-controlled mailbox and MX routing are still required",
+  "liveEmailReceipt": "NOT VERIFIED \u00e2\u20ac\u201d owner-controlled mailbox and MX routing are still required",
   "visualVerification": {
     "status": "PASS",
     "surfaces": [
@@ -78,5 +172,12 @@
     ],
     "notes": "The production SVG lockup renders as a clean geometric S mark with the site mint forward arrow and the exact SwiftJob wordmark. PNG fallbacks are rendered from the same SVG source. Dark and light variants are selected by surface."
   },
-  "oldLogoAssetsReplaced": true
+  "oldLogoAssetsReplaced": true,
+  "currentActiveWorkerVersion": "dca9cc2f-9c7f-43e6-a3e0-57e2e35bd94e",
+  "latestSecretDeployment": {
+    "deploymentId": "9e601e79-dc86-4456-9899-f92ee36f7b43",
+    "versionId": "dca9cc2f-9c7f-43e6-a3e0-57e2e35bd94e",
+    "createdAt": "2026-09-12T15:28:12.519671Z",
+    "trigger": "secret"
+  }
 }

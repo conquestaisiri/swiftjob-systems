@@ -60,5 +60,12 @@
     "stage": "deploy"
   },
   "workerVersion": "002c32fd-b0c6-4f8f-aaae-160e07253c18",
-  "environment": "Production HTTP smoke checks after Pages header deployment; no mutation and no real email sent"
+  "environment": "Production HTTP smoke checks after Pages header deployment; no mutation and no real email sent",
+  "currentActiveWorkerVersion": "dca9cc2f-9c7f-43e6-a3e0-57e2e35bd94e",
+  "latestSecretDeployment": {
+    "deploymentId": "9e601e79-dc86-4456-9899-f92ee36f7b43",
+    "versionId": "dca9cc2f-9c7f-43e6-a3e0-57e2e35bd94e",
+    "createdAt": "2026-09-12T15:28:12.519671Z",
+    "trigger": "secret"
+  }
 }

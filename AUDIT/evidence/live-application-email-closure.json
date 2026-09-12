@@ -1,0 +1,78 @@
+{
+  "measuredAt": "2026-09-12T15:31:30.000Z",
+  "environment": "Production custom domain + Resend API; one controlled synthetic application was created with a PDF resume, transitioned by the admin API, and deleted after verification; recipient address is represented by domain only",
+  "flow": "candidate application -> HR notification -> applicant confirmation -> admin status update",
+  "recipientDomains": {
+    "candidate": "outlook.com",
+    "hr": "swiftjob.payservice.top"
+  },
+  "handlers": {
+    "adminLogin": {
+      "method": "POST",
+      "path": "/api/admin/login",
+      "status": 200
+    },
+    "jobsRead": {
+      "method": "GET",
+      "path": "/api/jobs",
+      "status": 200
+    },
+    "applicationCreate": {
+      "method": "POST",
+      "path": "/api/applications",
+      "status": 201,
+      "applicationIdRecorded": true
+    },
+    "statusUpdate": {
+      "method": "PATCH",
+      "path": "/api/admin/applications/:id/status",
+      "status": "Reviewing",
+      "notifyCandidate": true
+    }
+  },
+  "provider": {
+    "provider": "Resend",
+    "messages": [
+      {
+        "messageId": "56b882b3-6183-4f82-b72d-f4c5d2b27d39",
+        "event": "New Application",
+        "lastEvent": "delivered",
+        "toDomain": "swiftjob.payservice.top",
+        "replyToDomain": "swiftjob.payservice.top",
+        "htmlLogoReference": true,
+        "plainTextPresent": true
+      },
+      {
+        "messageId": "269c31a6-02d4-4f0b-ac17-fb6482fa5f5e",
+        "event": "Application Received",
+        "lastEvent": "delivered",
+        "toDomain": "outlook.com",
+        "replyToDomain": "swiftjob.payservice.top",
+        "htmlLogoReference": true,
+        "plainTextPresent": true
+      },
+      {
+        "messageId": "2d013b6a-90f0-4212-a465-6afccad7c686",
+        "event": "Application Update: Reviewing",
+        "lastEvent": "delivered",
+        "toDomain": "outlook.com",
+        "replyToDomain": "swiftjob.payservice.top",
+        "htmlLogoReference": true,
+        "plainTextPresent": true
+      }
+    ]
+  },
+  "cleanup": {
+    "deleteStatus": 200,
+    "postDeleteGetStatus": 404,
+    "recordRemoved": true,
+    "resumeCleanupConfirmedByDelete": true
+  },
+  "inboxInspection": "NOT VERIFIED",
+  "applicationMutation": true,
+  "workerDeployment": {
+    "versionId": "dca9cc2f-9c7f-43e6-a3e0-57e2e35bd94e",
+    "deploymentId": "9e601e79-dc86-4456-9899-f92ee36f7b43",
+    "createdAt": "2026-09-12T15:28:12.519671Z"
+  }
+}
