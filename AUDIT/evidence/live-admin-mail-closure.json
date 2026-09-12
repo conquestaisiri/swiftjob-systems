@@ -1,0 +1,66 @@
+{
+  "measuredAt": "2026-09-12T15:55:04.305Z",
+  "environment": "Production custom domain + Resend API; controlled protected admin mail and referral flows; synthetic referral was deleted after the click test",
+  "recipientDomains": {
+    "candidate": "outlook.com",
+    "hr": "swiftjob.payservice.top"
+  },
+  "customMail": {
+    "adminLoginStatus": 200,
+    "handler": {
+      "method": "POST",
+      "path": "/api/admin/mail/send",
+      "status": 200,
+      "mode": "custom",
+      "sent": 1,
+      "failed": 0
+    },
+    "provider": {
+      "messageId": "d319a87e-27e3-45e3-b353-52e42a814a54",
+      "lastEvent": "delivered",
+      "toDomain": "outlook.com",
+      "replyToDomain": "swiftjob.payservice.top",
+      "htmlLogoReference": true,
+      "plainTextPresent": true
+    }
+  },
+  "referralInvitation": {
+    "handler": {
+      "method": "POST",
+      "path": "/api/admin/mail/send",
+      "status": 200,
+      "mode": "referral",
+      "sent": 1,
+      "created": 1,
+      "failed": 0
+    },
+    "provider": {
+      "messageId": "34f15d3d-e612-4208-89b8-105f1da18f55",
+      "lastEvent": "delivered",
+      "toDomain": "outlook.com",
+      "replyToDomain": "swiftjob.payservice.top",
+      "htmlLogoReference": true,
+      "plainTextPresent": true
+    },
+    "syntheticReferralRemoved": true
+  },
+  "referralClick": {
+    "createStatus": 201,
+    "publicGetStatus": 200,
+    "roomLinkHidden": true,
+    "visitStatus": 200,
+    "clickStatus": 200,
+    "provider": {
+      "messageId": "18d55286-245a-4168-8b55-1581b83603ec",
+      "lastEvent": "delivered",
+      "toDomain": "swiftjob.payservice.top",
+      "replyToDomain": "swiftjob.payservice.top",
+      "htmlLogoReference": true,
+      "plainTextPresent": true
+    },
+    "deleteStatus": 200,
+    "postDeletePublicGetStatus": 404,
+    "syntheticReferralRemoved": true
+  },
+  "inboxInspection": "NOT VERIFIED"
+}
