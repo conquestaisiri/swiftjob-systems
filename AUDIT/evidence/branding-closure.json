@@ -1,6 +1,6 @@
 {
   "measuredAt": "2026-09-12T18:54:57.126345+00:00",
-  "commit": "9dcb7ce",
+  "commit": "a25d720",
   "assetAlignmentCommit": "9dcb7ce",
   "sourceArtwork": {
     "horizontalLockup": "AUDIT/branding/source-swiftjob-lockup.png",
@@ -296,4 +296,4 @@
     "Chrome DevTools MCP still required for Core Web Vitals, Lighthouse, and full screen-reader verification.",
     "Fine-grained Cloudflare Rulesets/Rate Limiting edit permission is still unavailable to the current token."
   ]
-}
+}\n
