@@ -1,12 +1,12 @@
 # Final production review
 
-This final review is populated from the completed repair, deployment, live smoke checks and closure-sprint evidence. Current gate status is **NOT READY** because historical credential rotation, real inbox delivery and distributed edge rate limits remain unverified; Core Web Vitals and full assistive-technology review are also unavailable in this runtime. Request-time schema self-healing has been retired and replaced with a read-only startup guard. Sampled visible-text contrast now passes on the five representative routes. The existing Pages/Worker/Neon/R2 architecture and domain are live.
+This final review is populated from the completed repair, deployment, live smoke checks and closure-sprint evidence. Current gate status is **NOT READY** because historical credential rotation and real inbox delivery remain unverified. An authenticated Cloudflare dashboard check now shows one active combined edge rule with live 429 enforcement for enumerated sensitive endpoints; fine-grained route windows remain Worker fallback on the Free plan. Core Web Vitals and full assistive-technology review are also unavailable in this runtime. Request-time schema self-healing has been retired and replaced with a read-only startup guard. Sampled visible-text contrast now passes on the five representative routes. The existing Pages/Worker/Neon/R2 architecture and domain are live.
 
 Evidence classification:
 
 - **VERIFIED:** isolated runtime tests, local preview HTTP checks, local browser DOM checks, source/type/build checks.
 - **INFERENCE:** source-based architecture, provider configuration interpretation, and expected production behavior.
-- **BLOCKED:** real inbox receipt, provider-side historical credential rotation, distributed Cloudflare Rulesets/Rate Limiting, and full Core Web Vitals/assistive-technology runs.
+- **BLOCKED:** real inbox receipt, provider-side historical credential rotation, and full Core Web Vitals/assistive-technology runs.
 
 Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2 architecture, working public job browsing, existing email templates/layout, and the current production domain remain unchanged in this branch.
 
@@ -20,14 +20,14 @@ Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2
 | 4 | **Partially.** Admin authentication, authorization and UI boundaries pass; full live admin mutation and email-reflection coverage remains unverified. |
 | 5 | **Yes for exercised paths.** Magic-link, password, session replacement, logout revocation and malformed-token handling pass; delivery of the link itself remains a provider check. |
 | 6 | **Yes for exercised boundaries.** Candidate ownership, admin role/claim checks, expiry and algorithm pinning are enforced and regression-tested. |
-| 7 | **No.** Synthetic delivery paths and rendered HTML/text pass, but provider acceptance, inbox placement, bounce handling and SPF/DKIM/DMARC are unverified. |
+| 7 | **No.** Synthetic delivery paths and rendered HTML/text pass, and Resend sender-domain/DKIM/SPF checks are verified; historical events are mixed and a controlled inbox receipt, bounce handling and DMARC enforcement remain unverified. |
 | 8 | **Yes for inspected templates.** Subjects, escaping, links, branded HTML and plain-text alternatives are covered; real mail-client rendering is unverified. |
 | 9 | **Yes for sampled public surfaces.** The four historical visual findings were repaired and the public pages now use one factual SwiftJob identity. |
 | 10 | **No obvious examples in sampled pages.** Unreviewed states still carry residual visual risk. |
 | 11 | **No obvious active examples after repair.** Fictional logos, generic social destination, unsafe installer path and silent third-party loads were removed or retired. |
 | 12 | **No active public SwiftJob UI reference.** Retired StrixJob artifacts and historical evidence remain documented for cleanup/archival. |
 | 13 | **No current source/config exposure found.** Historical Git objects contain credential-shaped database URLs; their classification and rotation remain an operator task. |
-| 14 | **No known unresolved critical runtime boundary in exercised scope.** Historical-secret rotation, in-memory rate-limit scope, provider delivery evidence and unmeasured Core Web Vitals remain open operational risks. |
+| 14 | **No known unresolved critical runtime boundary in exercised scope.** Historical-secret rotation, in-memory/fine-grained rate-limit scope, provider delivery evidence and unmeasured Core Web Vitals remain open operational risks. |
 | 15 | **Mostly.** Job binding, idempotency, upload validation, candidate ownership and shortlist redaction are tested; retention/deletion automation was not verified. |
 | 16 | **No.** Isolated end-to-end workflows and live public boundaries pass, while real email, full live admin mutation and provider callbacks remain untested. |
 | 17 | **Yes for representative pages.** Mobile navigation, careers, job form and admin shell have usable layouts with no measured horizontal overflow; every route/breakpoint was not exhaustively tested. |
@@ -35,9 +35,9 @@ Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2
 | 19 | **Partially.** Source and isolated status/assessment logic are consistent; a live admin mutation-to-candidate reflection run remains unverified. |
 | 20 | **Partially.** Application writes and candidate reads are covered in isolation; full live admin/employer reflection is unverified. |
 | 21 | **Partially.** Synthetic messages correspond to successful state transitions; real provider delivery and all admin event variants are unverified. |
-| 22 | **Mostly.** Worker/Pages deployment, health, headers, CORS, protected routes, sitemap and CI checks pass; email DNS/provider state and hosted CI results remain unverified. |
+| 22 | **Mostly.** Worker/Pages deployment, health, headers, CORS, protected routes, sitemap, active combined edge rate-limit enforcement and CI checks pass; email DNS/provider state and hosted CI results remain unverified. |
 | 23 | **Mostly.** A domain checklist and configurable frontend/API values exist; intentional fallback strings and generated metadata must be updated together during migration. |
-| 24 | **Known limitations:** real inbox/DNS evidence; historical credential rotation; in-memory isolate rate limits; Core Web Vitals; full screen-reader and dynamic-state contrast evidence; exhaustive live admin mutation coverage. |
+| 24 | **Known limitations:** real inbox/DNS evidence; historical credential rotation; in-memory isolate and fine-grained edge rate limits; Core Web Vitals; full screen-reader and dynamic-state contrast evidence; exhaustive live admin mutation coverage. |
 | 25 | Preserve the Pages + Worker + Neon + R2 architecture, public job browsing, existing email layout, current domain until a planned migration, factual role-focused visual system, and the candidate magic-link flow. |
 
 ## Evidence-based scores
@@ -76,7 +76,7 @@ Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2
 
 ## Closure sprint addendum — 2026-09-12
 
-This addendum supersedes earlier future-improvement wording where it conflicts with current evidence. Dynamic sitemap generation, route-level lazy loading, form labels, live responsive/console checks, static security headers, and current Cloudflare/Resend resource verification were completed after the earlier review.
+This addendum supersedes earlier future-improvement wording where it conflicts with current evidence. Dynamic sitemap generation, route-level lazy loading, form labels, live responsive/console checks, static security headers, current Cloudflare/Resend resource verification, and one active combined Cloudflare edge rate-limit rule with live 429 enforcement were completed after the earlier review.
 
 ### Final questions, evidence-based answers
 
@@ -95,7 +95,7 @@ This addendum supersedes earlier future-improvement wording where it conflicts w
 | 11 | **No active public examples found.** StrixJob references are retired/catalogued and unsafe installer/background behavior is removed. |
 | 12 | **No active public StrixJob UI.** Historical artifacts and evidence remain for archival cleanup. |
 | 13 | **Current tree sanitized; historical exposure classified.** The old Supabase pooler credential’s validity is UNKNOWN because authentication was not attempted; provider rotation is still required. |
-| 14 | **No exercised critical runtime failure.** Open operational risks are historical-secret rotation, provider email/DNS, distributed rate limits, and unmeasured CWV/full assistive technology. |
+| 14 | **No exercised critical runtime failure.** Open operational risks are historical-secret rotation, provider email/DNS, in-memory/fine-grained rate limits, and unmeasured CWV/full assistive technology. |
 | 15 | **Mostly verified.** Job binding, idempotency, upload validation, ownership and shortlist redaction pass; retention/deletion automation is not verified. |
 | 16 | **Partially verified.** Isolated end-to-end candidate workflow and live public boundaries pass; real inbox and live admin mutation remain untested. |
 | 17 | **Verified for 30 samples.** Five representative routes at six widths had zero body overflow. |
@@ -103,9 +103,9 @@ This addendum supersedes earlier future-improvement wording where it conflicts w
 | 19 | **Partially verified.** Isolated status/assessment logic is consistent; live admin mutation reflection is unverified. |
 | 20 | **Partially verified.** Application writes and candidate reads pass in isolation; full live admin/employer reflection is unverified. |
 | 21 | **Partially verified.** Synthetic messages correspond to exercised transitions; provider delivery and all admin event variants are unverified. |
-| 22 | **Mostly verified.** Worker/Pages deployment, health, headers, CORS, protected routes, dynamic sitemap, current Worker secret inventory, R2 and Resend provider checks pass; distributed edge rate limits, inbox delivery and hosted CI remain unverified. |
+| 22 | **Mostly verified.** Worker/Pages deployment, health, headers, CORS, protected routes, dynamic sitemap, current Worker secret inventory, R2, Resend provider checks and an active combined Cloudflare edge rule with live 429 regression pass; inbox delivery and hosted CI remain unverified. |
 | 23 | **Prepared, not migrated.** The domain checklist and configurable URLs are present; the current temporary domain remains intentional. |
-| 24 | **Known limitations:** historical Supabase rotation; controlled mailbox/DNS; Cloudflare edge rule permission; CWV/full screen-reader and dynamic-state evidence; no separate employer portal. |
+| 24 | **Known limitations:** historical Supabase rotation; controlled mailbox/DNS; fine-grained edge rule changes on the Free plan; CWV/full screen-reader and dynamic-state evidence; no separate employer portal. |
 | 25 | Preserve the Pages + Worker + Neon + R2 architecture, current domain until an approved migration, factual role-focused UI, and candidate magic-link flow. |
 
 ### Closure scores
@@ -122,6 +122,5 @@ This addendum supersedes earlier future-improvement wording where it conflicts w
 
 1. Rotate/revoke the historical Supabase pooler/database credential for project `yfymijkhcbdubjawsngq` and confirm no remaining consumer. The old project management token is unauthorized and its hostname did not resolve during this check, but that does not prove provider-side revocation.
 2. Provide an owner-controlled test mailbox and repair/confirm MX routing for the configured HR/Reply-To subdomain. Verify magic link, application confirmation/HR notification and status-change delivery, then inspect inbox/spam placement, Reply-To, links and provider events. Resend sender-domain verification and root DNS authentication are confirmed read-only.
-3. Configure distributed Cloudflare limits for sensitive endpoints with a token that has the required Rate Limiting/Rulesets permission. The supplied account token can manage Pages/Workers but both supplied tokens return 403 for those zone APIs; Worker in-memory limits remain a low-volume fallback.
-4. Keep ordered migrations as the deploy contract and monitor the read-only startup schema guard.
-5. Obtain a Chrome DevTools/Lighthouse run for LCP, INP, CLS and a full screen-reader/dynamic-state review; the required Chrome DevTools MCP tools are not configured in this runtime, while sampled visible-text contrast and static security headers pass.
+3. Keep ordered migrations as the deploy contract and monitor the read-only startup schema guard.
+4. Obtain a Chrome DevTools/Lighthouse run for LCP, INP, CLS and a full screen-reader/dynamic-state review; the required Chrome DevTools MCP tools are not configured in this runtime, while sampled visible-text contrast and static security headers pass. The active combined edge rule is live-verified for the enumerated sensitive endpoints; finer route granularity requires additional plan/permission and remains a monitored limitation.
