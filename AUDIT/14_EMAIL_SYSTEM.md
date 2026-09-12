@@ -5,7 +5,7 @@ The active provider is Resend. Shared email layout uses green/cream brand colors
 | Event | Recipient | Trigger | Baseline verification |
 |---|---|---|---|
 | Contact request | HR_EMAIL | POST contact | Synthetic sink PASS; real receipt NOT VERIFIED |
-| Magic link | Requested candidate email | POST auth/magic-link | Source reviewed; real receipt NOT VERIFIED |
+| Magic link | Requested candidate email | POST auth/magic-link | Controlled production handler, Resend delivery, token verification and logout PASS; inbox inspection NOT VERIFIED |
 | Application notification | HR_EMAIL | Successful application insert | VERIFIED only in synthetic email sink |
 | Applicant confirmation | Applicant | Successful application insert | VERIFIED only in synthetic email sink |
 | Status change | Applicant | Admin status change | Source reviewed; synthetic end-to-end simulation not exercised |
@@ -25,6 +25,6 @@ Required repair verification: HTML/text parity, safe links and escaping, indepen
 
 The current provider and routing check is recorded in `evidence/email-dns-closure.json`. Resend reports the verified root domain `payservice.top` with DKIM and SPF checks verified. Cloudflare DNS contains the root SPF and DMARC records, the Resend DKIM record, the provider return-path records and three Cloudflare Email Routing MX records at `swiftjob.payservice.top`; the configured sender domain is under the verified root. The Cloudflare dashboard reports the subdomain enabled, its destination address verified and the controlled inbound probe forwarded. The DMARC policy remains `p=none`, so enforcement is intentionally not claimed.
 
-The controlled probes are recorded in `evidence/email-dns-closure.json`. Synthetic email sink checks still pass for the exercised application and contact paths. A real mailbox test must still cover magic link, application confirmation/HR notification and one status-change message, including inbox/spam placement, links, Reply-To and provider event state. The Resend API key, sender authentication and Cloudflare recipient routing are verified; mailbox inspection and application-flow receipts remain NOT VERIFIED.
+The controlled probes are recorded in `evidence/email-dns-closure.json` and `evidence/live-email-flow-closure.json`. Synthetic email sink checks still pass for the exercised application and contact paths. The production magic-link handler returned 200, Resend reported the message `delivered`, the token was verified successfully and the test session was revoked. A real mailbox test must still cover inbox/spam placement, links and one application confirmation/HR notification plus one status-change message. The Resend API key, sender authentication and Cloudflare recipient routing are verified; mailbox inspection and the remaining application-flow receipts remain NOT VERIFIED.
 
 The unified SwiftJob logo closure is recorded in `evidence/branding-closure.json`. All inspected message templates now reference `https://swiftjob.payservice.top/swiftjob-logo.png`; the asset is live and returns `image/png` on the production custom domain. This verifies the template asset and rendering path only. Inbox receipt still requires inspection in the owner-controlled mailbox.

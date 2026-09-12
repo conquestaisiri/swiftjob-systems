@@ -5,11 +5,11 @@
   "pullRequest": {
     "number": 1,
     "url": "https://github.com/conquestaisiri/swiftjob-systems/pull/1",
-    "head": "ab5c5bdefe25ca8a69375c25055874199475497c"
+    "head": "bfdcd1af984ddb1dd2d21d48144e6ee84646b8bc"
   },
   "run": {
-    "id": 34701426524,
-    "url": "https://github.com/conquestaisiri/swiftjob-systems/actions/runs/34701426524",
+    "id": 34701538185,
+    "url": "https://github.com/conquestaisiri/swiftjob-systems/actions/runs/34701538185",
     "conclusion": "success",
     "checks": {
       "TypeCheck": "pass",
