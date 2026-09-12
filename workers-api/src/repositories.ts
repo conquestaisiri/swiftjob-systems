@@ -112,6 +112,16 @@ export const applicationRepository = {
       .orderBy(desc(applications.createdAt));
   },
 
+  async findBySubmissionKey(submissionKey: string): Promise<Application | undefined> {
+    const db = getDb();
+    const [result] = await db
+      .select()
+      .from(applications)
+      .where(eq(applications.submissionKey, submissionKey))
+      .limit(1);
+    return result;
+  },
+
   async findByReferenceCode(
     referenceCode: string,
   ): Promise<Application | undefined> {
@@ -125,6 +135,9 @@ export const applicationRepository = {
   },
 
   async findById(id: string): Promise<Application | undefined> {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+      return undefined;
+    }
     const db = getDb();
     const [result] = await db
       .select()

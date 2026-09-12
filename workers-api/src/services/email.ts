@@ -82,6 +82,23 @@ function getHrEmail(): string {
   return (getEnv().HR_EMAIL ?? "").trim();
 }
 
+function htmlToText(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<br\s*\/?>(\r?\n)?/gi, "\n")
+    .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 async function sendEmail(opts: {
   from: string;
   to: string;
@@ -98,6 +115,7 @@ async function sendEmail(opts: {
     try {
       const { data, error } = await getResend().emails.send({
         ...opts,
+        text: htmlToText(opts.html),
         from,
         // Replies go to the support inbox instead of the send-only address.
         replyTo: getSupportEmail(),

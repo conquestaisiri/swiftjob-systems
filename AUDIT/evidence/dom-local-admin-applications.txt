@@ -1,0 +1,63 @@
+- banner:
+  - link "SwiftJob.adm admin":
+    - /url: /admin
+    - text: SwiftJob.adm
+    - generic: admin
+  - button "Logout":
+    - text: Logout
+- navigation "Admin navigation":
+  - generic: Dashboard
+  - link "Overview":
+    - /url: /admin
+    - text: Overview
+  - generic: Hiring
+  - link "Applications":
+    - /url: /admin/applications
+    - text: Applications
+  - link "Referrals":
+    - /url: /admin/referrals
+    - text: Referrals
+  - link "Contacts":
+    - /url: /admin/contacts
+    - text: Contacts
+  - link "Jobs":
+    - /url: /admin/jobs
+    - text: Jobs
+  - generic: Growth
+  - link "Campaigns":
+    - /url: /admin/campaigns
+    - text: Campaigns
+  - generic: Communications
+  - link "Send mail":
+    - /url: /admin/mail
+    - text: Send mail
+  - generic: System
+  - link "Activity log":
+    - /url: /admin/activity
+    - text: Activity log
+  - link "Settings":
+    - /url: /admin/settings
+    - text: Settings
+- main:
+  - heading "Applications" [level=1]
+  - generic: 0 total
+  - searchbox "Search by name, email, position..."
+  - combobox:
+    - option "All Statuses" [selected]
+    - option "New"
+    - option "Reviewing"
+    - option "Shortlisted"
+    - option "Rejected"
+    - option "Hired"
+  - combobox "Filter by footprint":
+    - option "All footprint states" [selected]
+    - option "Visited"
+    - option "Not visited"
+    - option "Proceeded to next step"
+    - option "Visited but not proceeded"
+    - option "Hesitant"
+    - option "Blocked on mobile"
+  - heading "No applications found" [level=3]
+  - paragraph: Try adjusting your filters or search terms.
+- region "Notifications (F8)":
+  - list

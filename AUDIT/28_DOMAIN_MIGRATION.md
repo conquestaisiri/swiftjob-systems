@@ -1,0 +1,5 @@
+# Domain-migration readiness
+
+The API and email flows use `FRONTEND_URL` where configured, with a temporary-domain fallback for fail-safe links. Remaining intentional hardcoded fallbacks and generated artifacts are catalogued in `workers-api/src/index.ts`, `workers-api/src/services/auth.ts`, `workers-api/src/services/email.ts`, `workers-api/src/services/referrals.ts`, `artifacts/swiftjob-systems/functions/api/[[path]].js`, `artifacts/swiftjob-systems/public/_worker.js`, `artifacts/swiftjob-systems/index.html`, `artifacts/swiftjob-systems/scripts/generate-sitemap.mjs`, `artifacts/swiftjob-systems/public/robots.txt`, `.env.example` files, and the admin campaign/referral link builders. Before changing DNS, update these fallbacks and `FRONTEND_URL`/`VITE_FRONTEND_URL`, canonical URLs, sitemap/robots, CORS origin, Pages custom domain, Resend sender and reply-to authentication, and any Worker allowlists. Then run a fresh magic-link, assessment, resume, and email-link smoke test.
+
+No DNS, Pages custom-domain, Worker route, or email-sender change was made. Domain migration is therefore prepared as a checklist, not executed or certified.

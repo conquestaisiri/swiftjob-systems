@@ -1,0 +1,95 @@
+- banner:
+  - link "SwiftJob.adm admin":
+    - /url: /admin
+    - text: SwiftJob.adm
+    - generic: admin
+  - button "Logout":
+    - text: Logout
+- navigation "Admin navigation":
+  - generic: Dashboard
+  - link "Overview":
+    - /url: /admin
+    - text: Overview
+  - generic: Hiring
+  - link "Applications":
+    - /url: /admin/applications
+    - text: Applications
+  - link "Referrals":
+    - /url: /admin/referrals
+    - text: Referrals
+  - link "Contacts":
+    - /url: /admin/contacts
+    - text: Contacts
+  - link "Jobs":
+    - /url: /admin/jobs
+    - text: Jobs
+  - generic: Growth
+  - link "Campaigns":
+    - /url: /admin/campaigns
+    - text: Campaigns
+  - generic: Communications
+  - link "Send mail":
+    - /url: /admin/mail
+    - text: Send mail
+  - generic: System
+  - link "Activity log":
+    - /url: /admin/activity
+    - text: Activity log
+  - link "Settings":
+    - /url: /admin/settings
+    - text: Settings
+- main:
+  - heading "Settings" [level=1]
+  - generic: Global defaults
+  - heading "Referred-candidate emails" [level=3]
+  - paragraph: Referral invites are sent in batches from the Referrals panel. This limit protects your sending volume for the day.
+  - text: "Sent today:"
+  - strong: "0"
+  - text: "· Remaining:"
+  - strong: "5"
+  - generic: Daily send limit
+  - spinbutton "Daily send limit": "5"
+  - button "Save":
+    - text: Save
+  - heading "Next step flow — global defaults" [level=3]
+  - paragraph: The "wait for your room" screen shown to candidates and referral leads. These defaults apply everywhere; rooms and wait times can still be overridden per candidate from the Applications panel.
+  - generic: Tech Checker download link
+  - textbox
+  - paragraph: The file candidates download during the setup checks (your .msi). Change it anytime — the assessment page uses it instantly.
+  - generic: Background website
+  - textbox
+  - paragraph: Loaded silently while the candidate waits. Leave blank to skip the background load.
+  - generic: Default room link
+  - textbox
+  - paragraph: Used when a candidate has no room link of their own (referrals use their own link first).
+  - generic: Wait time before the room is revealed (seconds)
+  - spinbutton: "12"
+  - paragraph: Between 5 and 300. Applies when a background website is configured.
+  - generic: Waiting title
+  - textbox: Preparing your room
+  - paragraph: Shown on the waiting screen.
+  - generic: Waiting message
+  - textbox: Give us a few seconds while we get everything ready for you…
+  - paragraph: Short line shown while the candidate waits.
+  - generic: Ready title
+  - textbox: Your room is ready
+  - paragraph: Shown once the room is revealed.
+  - generic: Ready message
+  - textbox: Your unique room link is below. Open it now to continue.
+  - paragraph: Explains how to open the room.
+  - generic: Open-room button label
+  - textbox: Open my room
+  - paragraph: Text on the button that opens the room.
+  - generic: Room footnote
+  - textbox: Keep this page open until your room loads.
+  - paragraph: "Small note under the room link. Supports {hrEmail}."
+  - generic: "\"People employed so far\" number"
+  - textbox
+  - paragraph: Shown on the home page beside live system stats. Your claim to own — e.g. "212+". Leave blank to hide the card.
+  - generic: "\"Countries hired from\" number"
+  - textbox
+  - paragraph: Shown on the home page. Your claim to own — leave blank to fall back to the live count.
+  - button "Save next step defaults":
+    - text: Save next step defaults
+- region "Notifications (F8)":
+  - list

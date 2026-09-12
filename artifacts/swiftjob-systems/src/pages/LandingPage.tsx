@@ -125,7 +125,7 @@ export function LandingPage() {
             <a href="#contact">Contact</a>
           </nav>
           <div className="landing-v2-actions">
-            <Link href="/careers" className="landing-v2-login">
+            <Link href="/login" className="landing-v2-login">
               Candidate access <ArrowUpRight size={14} />
             </Link>
             <a href="#contact" className="landing-v2-button">
@@ -149,6 +149,7 @@ export function LandingPage() {
               How it works
             </a>
             <Link href="/careers">Careers</Link>
+            <Link href="/login">Candidate access</Link>
             <a href="#contact" onClick={() => setMobileOpen(false)}>
               Contact
             </a>

@@ -68,7 +68,6 @@ Thumbs.db
 # local Cloudflare tooling state
 .wrangler/
 .playwright-mcp/
-artifacts/swiftjob-systems/public/_worker.js
 
 # Foreign nested repo snapshot / local archives - kept on disk, not tracked
 extracted/

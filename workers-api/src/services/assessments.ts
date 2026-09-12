@@ -47,9 +47,14 @@ async function runAssessmentSchema(): Promise<void> {
 export function ensureAssessmentSchemaOnce(): Promise<void> {
   if (schemaEnsured) return Promise.resolve();
   if (!schemaPromise) {
-    schemaPromise = runAssessmentSchema().then(() => {
-      schemaEnsured = true;
-    });
+    schemaPromise = runAssessmentSchema()
+      .then(() => {
+        schemaEnsured = true;
+      })
+      .catch((error) => {
+        schemaPromise = null;
+        throw error;
+      });
   }
   return schemaPromise;
 }

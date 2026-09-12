@@ -3,8 +3,6 @@ import { AlertCircle, CheckCircle2, Loader2, Plus, Save } from "lucide-react";
 import { adminFetch } from "@/lib/adminApi";
 
 const NEXT_STEP_KEYS = [
-  "techCheckerUrl",
-  "backgroundUrl",
   "roomLink",
   "nextStepDelay",
   "waitTitle",
@@ -24,16 +22,6 @@ const NEXT_STEP_FIELDS: {
   textarea?: boolean;
 }[] = [
   {
-    key: "techCheckerUrl",
-    label: "Tech Checker download link",
-    hint: "The file candidates download during the setup checks (your .msi). Change it anytime — the assessment page uses it instantly.",
-  },
-  {
-    key: "backgroundUrl",
-    label: "Background website",
-    hint: "Loaded silently while the candidate waits. Leave blank to skip the background load.",
-  },
-  {
     key: "roomLink",
     label: "Default room link",
     hint: "Used when a candidate has no room link of their own (referrals use their own link first).",
@@ -41,7 +29,7 @@ const NEXT_STEP_FIELDS: {
   {
     key: "nextStepDelay",
     label: "Wait time before the room is revealed (seconds)",
-    hint: "Between 5 and 300. Applies when a background website is configured.",
+    hint: "Between 5 and 300 seconds before the candidate's room link is revealed.",
   },
   {
     key: "waitTitle",

@@ -57,9 +57,14 @@ async function runCampaignSchema(): Promise<void> {
 export function ensureCampaignSchemaOnce(): Promise<void> {
   if (schemaEnsured) return Promise.resolve();
   if (!schemaPromise) {
-    schemaPromise = runCampaignSchema().then(() => {
-      schemaEnsured = true;
-    });
+    schemaPromise = runCampaignSchema()
+      .then(() => {
+        schemaEnsured = true;
+      })
+      .catch((error) => {
+        schemaPromise = null;
+        throw error;
+      });
   }
   return schemaPromise;
 }

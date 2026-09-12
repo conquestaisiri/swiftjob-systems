@@ -51,10 +51,8 @@ export function SiteFooter() {
         <span>
           (c) {new Date().getFullYear()} SwiftJob. All rights reserved.
         </span>
-        <span>100% Remote · Global team</span>
-        <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">
-          LinkedIn <ArrowUpRight size={13} />
-        </a>
+        <span>Remote roles · Global team</span>
+        <span aria-label="LinkedIn profile not configured">LinkedIn</span>
       </div>
     </footer>
   );

@@ -47,7 +47,7 @@ export function CandidateLogin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
-          turnstileToken: turnstile.token,
+          turnstileToken: turnstile.token ?? undefined,
         }),
       });
 
@@ -121,7 +121,7 @@ export function CandidateLogin() {
             <p>
               {mode === "magic"
                 ? "We'll email you a secure sign-in link — no password needed."
-                : "Use the password you created after applying."}
+                : "Use the password you set in your candidate portal."}
             </p>
           </div>
 

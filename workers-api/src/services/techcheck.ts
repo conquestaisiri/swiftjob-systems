@@ -33,9 +33,14 @@ async function runSchema(): Promise<void> {
 export function ensureTechCheckSchemaOnce(): Promise<void> {
   if (schemaEnsured) return Promise.resolve();
   if (!schemaPromise) {
-    schemaPromise = runSchema().then(() => {
-      schemaEnsured = true;
-    });
+    schemaPromise = runSchema()
+      .then(() => {
+        schemaEnsured = true;
+      })
+      .catch((error) => {
+        schemaPromise = null;
+        throw error;
+      });
   }
   return schemaPromise;
 }
@@ -155,7 +160,7 @@ export function buildWindowsTool(apiBase: string, token: string): string {
     "$ram=[math]::Round($os.TotalVisibleMemorySize/1MB,1)",
     "$dsk=Get-CimInstance Win32_LogicalDisk -Filter \"DeviceID='C:'\"",
     "$free=[math]::Round($dsk.FreeSpace/1GB,1)",
-    "$b=@{os=($os.Caption+' '+$os.OSArchitecture);cpu=$cpu.Name;cores=$cpu.NumberOfCores;ramGB=$ram;diskFreeGB=$free;hostname=$env:COMPUTERNAME}|ConvertTo-Json",
+    "$b=@{os=($os.Caption+' '+$os.OSArchitecture);cpu=$cpu.Name;cores=$cpu.NumberOfCores;ramGB=$ram;diskFreeGB=$free}|ConvertTo-Json",
     `Invoke-RestMethod -Method Post -Uri '${apiBase}/api/tech-check/report/${token}' -ContentType 'application/json' -Body $b | Out-Null`,
     "Write-Host ''",
     "Write-Host 'DONE - Check complete! Return to the website to continue.'",
@@ -169,7 +174,7 @@ echo   One-time check - this tool works only ONCE.
 echo ============================================
 echo.
 echo Collecting your system information (~15 seconds)...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "${ps.replace(/"/g, '\\"')}"
+powershell -NoProfile -Command "${ps.replace(/"/g, '\\"')}"
 if %errorlevel%==0 (
   echo.
   color 2F
@@ -183,65 +188,6 @@ if %errorlevel%==0 (
 echo.
 pause
 `;
-}
-
-// --- Backblaze B2 signed URL for the combined MSI (SwiftTechCheck.msi) ---
-// Returns a 15-min download link, or null if B2 is not configured.
-export async function getSignedMsiUrl(): Promise<string | null> {
-  const env = getEnv() as unknown as Record<string, string | undefined>;
-  const { B2_KEY_ID, B2_APP_KEY, B2_BUCKET_ID } = env;
-  // Backblaze file + bucket are fixed — only the link is short-lived.
-  const FILE_NAME = "SwiftTechCheck.msi";
-  const apiUrl = env.B2_API_URL ?? "https://api.backblazeb2.com";
-  const dlBase = env.B2_DOWNLOAD_URL ?? "https://f005.backblazeb2.com";
-  const bucketId = B2_BUCKET_ID ?? "35a54763b3883991a8060f14";
-  const bucketName = env.B2_BUCKET_NAME ?? "Swift-Private";
-  if (!B2_KEY_ID || !B2_APP_KEY) return null;
-  try {
-    const authResp = await fetch(`${apiUrl}/b2api/v3/b2_authorize_account`, {
-      headers: { Authorization: `Basic ${btoa(`${B2_KEY_ID}:${B2_APP_KEY}`)}` },
-    });
-    if (!authResp.ok) return null;
-    const auth = (await authResp.json()) as { authorizationToken: string; apiUrl: string };
-    const daResp = await fetch(
-      `${auth.apiUrl}/b2api/v3/b2_get_download_authorization?bucketId=${bucketId}&fileNamePrefix=${encodeURIComponent(FILE_NAME)}&validDurationInSeconds=900`,
-      { headers: { Authorization: auth.authorizationToken } },
-    );
-    if (!daResp.ok) return null;
-    const da = (await daResp.json()) as { authorizationToken: string };
-    return `${dlBase}/file/${bucketName}/${FILE_NAME}?Authorization=${da.authorizationToken}`;
-  } catch {
-    return null;
-  }
-}
-
-/** MSI launcher — tiny .bat that downloads the combined MSI via a signed URL
- *  and runs it silently with the per-person token. Internet-mark is stripped
- *  before msiexec so SmartScreen does not appear. */
-export function buildMsiLauncher(apiBase: string, token: string, signedMsiUrl: string): string {
-  const checkinUrl = `${apiBase}/api/tech-check/report/${token}`;
-  // The MSI itself contains the tech checker (CustomAction Type 6) and consumes
-  // the token on its first run — same single-use contract as the raw .bat tool.
-  return `@echo off\r\ntitle SwiftJob System Checker\r\n` +
-    `echo ============================================\r\n` +
-    `echo   SwiftJob System Checker\r\n` +
-    `echo   This installer works ONCE for this application.\r\n` +
-    `echo ============================================\r\n` +
-    `echo.\r\n` +
-    `echo Downloading installer (~7MB)...\r\n` +
-    `curl.exe -L -o "%TEMP%\\SwiftTechCheck.msi" "${signedMsiUrl.replace(/"/g, '""')}"\r\n` +
-    `if %errorlevel% neq 0 (\r\n` +
-    `  echo Download failed - check your internet connection and run this file again.\r\n` +
-    `  pause\r\n` +
-    `  exit /b 1\r\n` +
-    `)\r\n` +
-    `powershell -NoProfile -Command "Unblock-File -Path '%TEMP%\\SwiftTechCheck.msi'"\r\n` +
-    `echo Installing - this may take a minute, please wait...\r\n` +
-    `msiexec /i "%TEMP%\\SwiftTechCheck.msi" TECHCHECK_TOKEN=${token} CHECKIN_URL=${checkinUrl} /passive\r\n` +
-    `echo.\r\n` +
-    `echo Check complete! You can close this window and return to the website.\r\n` +
-    `echo (If the app asks you to restart, you may do so now.)\r\n` +
-    `pause\r\n`;
 }
 
 /** macOS tool equivalent. */
@@ -258,10 +204,8 @@ OS="$(sw_vers -productName) $(sw_vers -productVersion)"
 CPU="$(sysctl -n machdep.cpu.brand_string)"
 RAM_GB=$(( $(sysctl -n hw.memsize) / 1024 / 1024 / 1024 ))
 SCREEN=$(system_profiler SPDisplaysDataType 2>/dev/null | grep -m1 Resolution | awk '{print $2" x "$4}')
-HOST="$(hostname -s)"
-
-BODY=$(printf '{"os":"%s","cpu":"%s","ramGB":%d,"screen":"%s","hostname":"%s"}' \\
-  "$OS" "$CPU" "$RAM_GB" "$SCREEN" "$HOST")
+BODY=$(printf '{"os":"%s","cpu":"%s","ramGB":%d,"screen":"%s"}' \\
+  "$OS" "$CPU" "$RAM_GB" "$SCREEN")
 
 curl -s -X POST "${apiBase}/api/tech-check/report/${token}" \\
   -H 'Content-Type: application/json' -d "$BODY" >/dev/null

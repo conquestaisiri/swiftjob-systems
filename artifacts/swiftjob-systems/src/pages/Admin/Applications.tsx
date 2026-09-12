@@ -233,7 +233,6 @@ export function Applications({ token }: ApplicationsProps) {
       meetLink?: string | null;
       interviewInstructions?: string | null;
       meetingKey?: string | null;
-      backgroundUrl?: string | null;
       roomLink?: string | null;
       nextStepDelay?: number | null;
       notifyCandidate?: boolean;
@@ -259,9 +258,6 @@ export function Applications({ token }: ApplicationsProps) {
               : {}),
             ...(opts?.meetingKey !== undefined
               ? { meetingKey: opts.meetingKey }
-              : {}),
-            ...(opts?.backgroundUrl !== undefined
-              ? { backgroundUrl: opts.backgroundUrl }
               : {}),
             ...(opts?.roomLink !== undefined
               ? { roomLink: opts.roomLink }
@@ -1210,15 +1206,11 @@ function ShortlistModal({
   application: Application;
   onClose: () => void;
   onConfirm: (opts: {
-    backgroundUrl: string;
     nextStepDelay: number | null;
     notifyCandidate: boolean;
   }) => void;
 }) {
   const isEdit = application.status === "Shortlisted";
-  const [backgroundUrl, setBackgroundUrl] = useState(
-    application.backgroundUrl ?? "",
-  );
   const [nextStepDelay, setNextStepDelay] = useState(
     application.nextStepDelay ? String(application.nextStepDelay) : "",
   );
@@ -1229,12 +1221,6 @@ function ShortlistModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    const bg = backgroundUrl.trim();
-    if (bg && !/^https?:\/\//i.test(bg)) {
-      setError("The background link must start with http:// or https://");
-      return;
-    }
 
     let delay: number | null = null;
     if (nextStepDelay.trim()) {
@@ -1248,7 +1234,6 @@ function ShortlistModal({
 
     setSubmitting(true);
     onConfirm({
-      backgroundUrl: bg,
       nextStepDelay: delay,
       notifyCandidate,
     });
@@ -1288,23 +1273,6 @@ function ShortlistModal({
                 <label className="block text-sm font-medium text-slate-700">
                   Next step (optional — applies to this candidate only)
                 </label>
-              </div>
-              <div className="mb-3">
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Background website{" "}
-                  <span className="text-slate-400">(optional)</span>
-                </label>
-                <input
-                  type="url"
-                  value={backgroundUrl}
-                  onChange={(e) => setBackgroundUrl(e.target.value)}
-                  placeholder="https://… — loaded silently in the background"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <p className="text-xs text-slate-400 mt-1">
-                  Loaded silently while the candidate waits. Leave blank to use
-                  the app-wide default (Settings → Next step).
-                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">

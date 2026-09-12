@@ -53,9 +53,12 @@ export const applications = pgTable("applications", {
   roomLink: text("room_link"),
   nextStepDelay: integer("next_step_delay"),
   campaignSlug: text("campaign_slug"),
+  submissionKey: text("submission_key").unique(),
+  jobSlug: text("job_slug"),
 });
 
 export const insertApplicationSchema = z.object({
+  jobSlug: z.string().trim().min(1).max(120),
   position: z.string().min(1),
   fullName: z.string().min(1),
   email: z.string().email(),
@@ -75,6 +78,7 @@ export const insertApplicationSchema = z.object({
   relevantExperience: z.string().min(1),
   coverLetter: z.string().min(1),
   campaignSlug: z.string().max(80).optional().nullable(),
+  submissionKey: z.string().min(16).max(128).optional().nullable(),
 });
 
 export type Application = typeof applications.$inferSelect;

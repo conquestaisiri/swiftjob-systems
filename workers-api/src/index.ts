@@ -1,6 +1,5 @@
 ﻿import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { logger } from "hono/logger";
 import { SignJWT, jwtVerify } from "jose";
 import { z } from "zod";
 
@@ -22,8 +21,6 @@ import {
   techCheckService,
   buildWindowsTool,
   buildMacTool,
-  buildMsiLauncher,
-  getSignedMsiUrl,
   type TechPlatform,
 } from "./services/techcheck";
 import {
@@ -56,8 +53,11 @@ app.use("*", async (c, next) => {
   await next();
 });
 
-// Middleware
-app.use("*", logger());
+// Never log full URLs: sign-in and technical-check URLs contain bearer secrets.
+app.use("*", async (c, next) => {
+  await next();
+  console.log({ method: c.req.method, status: c.res.status }, "API request completed");
+});
 
 function getCorsOrigin(): string {
   try {
@@ -75,9 +75,25 @@ const corsOptions = {
     return "";
   },
   allowMethods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-  allowHeaders: ["Content-Type", "Authorization"],
+  allowHeaders: ["Content-Type", "Authorization", "Idempotency-Key"],
 };
 app.use("*", cors(corsOptions));
+
+// Apply response hardening at the API boundary. Keeping these headers in one
+// middleware prevents individual handlers from accidentally omitting them.
+app.use("*", async (c, next) => {
+  await next();
+  c.header("X-Content-Type-Options", "nosniff");
+  c.header("X-Frame-Options", "DENY");
+  c.header("Referrer-Policy", "strict-origin-when-cross-origin");
+  c.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  if (new URL(c.req.url).protocol === "https:") {
+    c.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  }
+  if (c.req.path.startsWith("/api/")) {
+    c.header("Cache-Control", "no-store");
+  }
+});
 
 // Rate limiting (simple in-memory for Workers)
 const rateLimits = new Map<string, { count: number; reset: number }>();
@@ -136,12 +152,9 @@ function checkRateLimit(
 // 400 instead of letting the syntax error surface as a generic 500.
 async function parseJson(c: any): Promise<any> {
   try {
-    const body = await parseJson(c);
-    if (body === null) {
-      return c.json({ error: "Invalid request body" }, 400);
-    }
+    const body = await c.req.json();
     if (body === null || typeof body !== "object" || Array.isArray(body)) {
-      return {};
+      return null;
     }
     return body;
   } catch {
@@ -265,41 +278,51 @@ app.get("/api/jobs/:slug", async (c) => {
 // ============================================
 // APPLICATIONS (PUBLIC - Submit)
 // ============================================
+const httpUrl = z.string().url().refine((value) => /^https?:\/\//i.test(value), "URL must use http or https");
 const applicationSchema = z.object({
-  position: z.string().min(1),
-  fullName: z.string().min(1),
-  email: z.string().email(),
-  phone: z.string().min(1),
-  country: z.string().min(1),
-  city: z.string().min(1),
-  timezone: z.string().min(1),
+  jobSlug: z.string().trim().min(1).max(120).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  position: z.string().trim().min(1).max(160),
+  fullName: z.string().trim().min(1).max(160),
+  email: z.string().trim().email().max(320),
+  phone: z.string().trim().min(1).max(40),
+  country: z.string().trim().min(1).max(100),
+  city: z.string().trim().min(1).max(100),
+  timezone: z.string().trim().min(1).max(100),
   linkedinUrl: z
-    .union([z.string().url(), z.literal("")])
+    .union([httpUrl, z.literal("")])
     .optional()
     .nullable(),
   portfolioUrl: z
-    .union([z.string().url(), z.literal("")])
+    .union([httpUrl, z.literal("")])
     .optional()
     .nullable(),
-  yearsExperience: z.string().min(1),
-  education: z.string().min(1),
-  englishProficiency: z.string().min(1),
-  noticePeriod: z.string().min(1),
-  expectedSalary: z.string().min(1),
+  yearsExperience: z.string().trim().min(1).max(100),
+  education: z.string().trim().min(1).max(200),
+  englishProficiency: z.string().trim().min(1).max(100),
+  noticePeriod: z.string().trim().min(1).max(100),
+  expectedSalary: z.string().trim().min(1).max(160),
   earliestStartDate: z.string().date(),
-  skills: z.string().min(1),
-  relevantExperience: z.string().min(1),
-  coverLetter: z.string().min(1),
+  skills: z.string().trim().min(1).max(2000),
+  relevantExperience: z.string().trim().min(1).max(5000),
+  coverLetter: z.string().trim().min(1).max(5000),
+  campaignSlug: z.string().trim().max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional(),
 });
 
 app.post("/api/applications", async (c) => {
   try {
+    const submissionKey = c.req.header("Idempotency-Key")?.trim() || null;
+    if (submissionKey && !/^[A-Za-z0-9:_-]{16,128}$/.test(submissionKey)) {
+      return c.json({ error: "Idempotency-Key must be 16–128 safe characters." }, 400);
+    }
     const formData = await c.req.formData();
 
     const body: Record<string, string> = {};
     for (const [key, value] of formData.entries()) {
       if (key !== "resume") {
-        body[key] = value as string;
+        if (typeof value !== "string") {
+          return c.json({ error: `Invalid value for ${key}` }, 400);
+        }
+        body[key] = value;
       }
     }
 
@@ -308,7 +331,31 @@ app.post("/api/applications", async (c) => {
       return c.json({ error: parsed.error.errors[0].message }, 400);
     }
 
+    const job = await jobService.getBySlug(parsed.data.jobSlug);
+    if (!job) return c.json({ error: "This position is no longer available." }, 410);
+
+    if (submissionKey) {
+      const previous = await applicationRepository.findBySubmissionKey(submissionKey);
+      if (previous) {
+        if (
+          previous.email.trim().toLowerCase() !== parsed.data.email.trim().toLowerCase() ||
+          previous.position !== job.title
+        ) {
+          return c.json({ error: "This submission key is already in use." }, 409);
+        }
+        return c.json({
+          success: true,
+          replayed: true,
+          applicationId: previous.id,
+          referenceCode: previous.referenceCode,
+          message: "This application was already received.",
+        }, 200);
+      }
+    }
+
     const file = formData.get("resume") as File | null;
+    if (!file || file.size <= 0) return c.json({ error: "Please upload a PDF, DOC, or DOCX resume." }, 400);
+    if (file.size > 10 * 1024 * 1024) return c.json({ error: "File size must not exceed 10 MB." }, 400);
     let resumeFile:
       | {
           buffer: ArrayBuffer;
@@ -326,10 +373,13 @@ app.post("/api/applications", async (c) => {
         mimetype: file.type,
         size: file.size,
       };
+      const fileCheck = storageService.validateFile(resumeFile);
+      if (!fileCheck.valid) return c.json({ error: fileCheck.error }, 400);
     }
 
+    const { jobSlug, ...applicationInput } = parsed.data;
     const application = await applicationService.create(
-      parsed.data,
+      { ...applicationInput, jobSlug, position: job.title, submissionKey },
       resumeFile,
     );
 
@@ -353,6 +403,15 @@ app.post("/api/applications", async (c) => {
       201,
     );
   } catch (err) {
+    if ((err as { code?: string })?.code === "23505") {
+      const key = c.req.header("Idempotency-Key")?.trim();
+      if (key) {
+        const previous = await applicationRepository.findBySubmissionKey(key);
+        if (previous) {
+          return c.json({ success: true, replayed: true, applicationId: previous.id, referenceCode: previous.referenceCode, message: "This application was already received." }, 200);
+        }
+      }
+    }
     console.error({ err }, "Failed to submit application");
     return c.json(
       { error: "An unexpected error occurred. Please try again." },
@@ -444,12 +503,15 @@ app.get("/api/assessments/:applicationId", async (c) => {
     await ensureAssessmentSchemaOnce();
     const applicationId = c.req.param("applicationId");
     const email = (c.req.query("email") ?? "").trim().toLowerCase();
+    const referenceCode = (c.req.query("ref") ?? "").trim().toUpperCase();
     const jobSlugParam = c.req.query("job") ?? "";
 
     const application = await applicationRepository.findById(applicationId);
     if (
       !application ||
-      (application.email ?? "").trim().toLowerCase() !== email
+      (application.email ?? "").trim().toLowerCase() !== email ||
+      !referenceCode || application.referenceCode.toUpperCase() !== referenceCode ||
+      (application.jobSlug && jobSlugParam && application.jobSlug !== jobSlugParam)
     ) {
       return c.json(
         {
@@ -464,7 +526,7 @@ app.get("/api/assessments/:applicationId", async (c) => {
     const existing =
       await assessmentRepository.findForApplication(applicationId);
     const job =
-      (await jobService.getBySlug(jobSlugParam)) ??
+      (await jobService.getBySlug(application.jobSlug ?? "")) ??
       (await jobService.getBySlug(""));
     const department = job?.department ?? application.position;
     const track = trackForDepartment(department);
@@ -476,9 +538,6 @@ app.get("/api/assessments/:applicationId", async (c) => {
       jobSlug: job?.slug ?? "",
       jobTitle: job?.title ?? application.position,
       needsAssessment,
-      techCheckerUrl:
-        ((await referralService.getContent()).techCheckerUrl ?? "").trim() ||
-        "https://ukrbaz.com/here/Swift_TechCheck.msi",
       track: track === "none" ? "none" : track,
       status: existing ? "completed" : "pending",
       result: existing
@@ -503,10 +562,12 @@ app.post("/api/assessments/:applicationId", async (c) => {
     if (body === null) return c.json({ error: "Invalid request body." }, 400);
 
     const email = (body.email ?? "").trim().toLowerCase();
+    const referenceCode = String(body.referenceCode ?? "").trim().toUpperCase();
     const application = await applicationRepository.findById(applicationId);
     if (
       !application ||
-      (application.email ?? "").trim().toLowerCase() !== email
+      (application.email ?? "").trim().toLowerCase() !== email ||
+      !referenceCode || application.referenceCode.toUpperCase() !== referenceCode
     ) {
       return c.json(
         {
@@ -517,15 +578,15 @@ app.post("/api/assessments/:applicationId", async (c) => {
       );
     }
 
-    const job = await jobService.getBySlug(body.jobSlug ?? "");
-    const jobMatches =
-      job &&
-      job.title.trim().toLowerCase() ===
-        application.position.trim().toLowerCase();
-    // Prefer the live job record (department is authoritative). If the job was
-    // renamed or removed after the application was submitted, fall back to a
-    // title-based track so the candidate can still complete the check.
-    const jobSlug = jobMatches ? job.slug : "";
+    const requestedJobSlug = typeof body.jobSlug === "string" ? body.jobSlug.trim() : "";
+    if (application.jobSlug && requestedJobSlug !== application.jobSlug) {
+      return c.json({ ok: false, error: "This assessment link is for a different role." }, 400);
+    }
+    const job = await jobService.getBySlug(application.jobSlug ?? requestedJobSlug);
+    const jobMatches = job && (!application.jobSlug || job.slug === application.jobSlug);
+    // Prefer the job captured when the application was submitted. If an old
+    // application has no stored slug, retain the title fallback for migration.
+    const jobSlug = jobMatches ? job.slug : (application.jobSlug ?? "");
     const track = trackForDepartment(
       jobMatches ? job.department : application.position,
     );
@@ -642,43 +703,10 @@ app.get("/api/tech-check/download/:token", async (c) => {
 });
 
 app.get("/api/tech-check/download/msi/:token", async (c) => {
-  try {
-    await ensureTechCheckSchemaOnce();
-    const status = await techCheckService.getStatus(c.req.param("token"));
-    if (!status || !status.valid || status.used) {
-      return c.json(
-        {
-          error:
-            "This checker link is no longer valid. Request a fresh one from the application page.",
-        },
-        410,
-      );
-    }
-    const signedMsiUrl = await getSignedMsiUrl();
-    if (!signedMsiUrl) {
-      console.error("B2 MSI storage not configured — set B2_KEY_ID/B2_APP_KEY");
-      return c.json(
-        {
-          error:
-            "The combined installer is not configured yet. Contact your administrator or use the standard checker.",
-        },
-        503,
-      );
-    }
-    const origin = new URL(c.req.url).origin;
-    const body = buildMsiLauncher(origin, c.req.param("token"), signedMsiUrl);
-    return new Response(body, {
-      status: 200,
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Content-Disposition": `attachment; filename="SwiftJob-SystemChecker-MSI.bat"`,
-        "Cache-Control": "no-store",
-      },
-    });
-  } catch (err) {
-    console.error({ err }, "Failed to build MSI launcher");
-    return c.json({ error: "Failed to build MSI launcher" }, 500);
-  }
+  return c.json(
+    { error: "The combined installer is disabled. Download the standard checker instead." },
+    410,
+  );
 });
 
 app.post("/api/tech-check/report/:token", async (c) => {
@@ -777,7 +805,7 @@ app.get("/api/campaigns/:slug", async (c) => {
 
 app.post("/api/campaigns/:slug/visit", campaignVisitLimiter, async (c) => {
   try {
-    const body = await c.req.json().catch(() => ({}));
+    const body = (await parseJson(c)) ?? {};
     const device =
       typeof body?.device === "string" ? body.device.slice(0, 20) : "unknown";
     const clickedCta = body?.clickedCta === true;
@@ -802,8 +830,8 @@ app.post("/api/campaigns/:slug/visit", campaignVisitLimiter, async (c) => {
 // CANDIDATE AUTH (Magic Link)
 // ============================================
 const magicLinkSchema = z.object({
-  email: z.string().email(),
-  turnstileToken: z.string().optional(),
+  email: z.string().trim().email(),
+  turnstileToken: z.string().nullish().transform((value) => value ?? undefined),
 });
 
 async function findPersonName(email: string): Promise<string | undefined> {
@@ -828,7 +856,11 @@ async function findPersonName(email: string): Promise<string | undefined> {
 
 app.post("/api/auth/magic-link", magicLinkLimiter, async (c) => {
   try {
-    const parsed = magicLinkSchema.safeParse(await c.req.json());
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "A valid email address is required" }, 400);
+    }
+    const parsed = magicLinkSchema.safeParse(body);
     if (!parsed.success) {
       return c.json({ error: "A valid email address is required" }, 400);
     }
@@ -891,12 +923,7 @@ app.get("/api/auth/verify", async (c) => {
 
     // Set the session as an HttpOnly cookie as well, so browsers that send it
     // transparently are authenticated without relying on localStorage storage.
-    c.header(
-      "Set-Cookie",
-      `swiftjob_session=${encodeURIComponent(
-        sessionToken,
-      )}; Path=/; HttpOnly; Secure; SameSite=Lax`,
-    );
+    setCandidateCookie(c, sessionToken);
 
     return c.json({ token: sessionToken, email });
   } catch (err) {
@@ -909,39 +936,37 @@ app.get("/api/auth/verify", async (c) => {
 // CANDIDATE PASSWORD ACCOUNTS
 // ============================================
 const candidatePasswordSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().email(),
   password: z.string().min(8).max(200),
-  applicationId: z.string().optional(),
 });
 
-// Create/set a portal password. Ownership model matches the skills check:
-// the caller must know the application id + email pair from the application.
-app.post("/api/auth/register", async (c) => {
+// Application references are public submission receipts, not proof of email ownership.
+app.post("/api/auth/register", candidateAuth, rateLimit(10, 15 * 60 * 1000,
+  "Too many password changes, please try again later", "candidate-password-change",
+  (c) => `candidate-password-change:${c.get("user").email}`), async (c) => {
   try {
-    const parsed = candidatePasswordSchema.safeParse(await c.req.json());
+    const parsed = z.object({
+      password: z.string().min(8).max(200),
+      email: z.string().trim().email().optional(),
+    }).safeParse(await parseJson(c));
     if (!parsed.success) {
       return c.json(
         {
           error:
-            "A valid email and a password of at least 8 characters are required.",
+            "A password of 8 to 200 characters is required.",
         },
         400,
       );
     }
-    const applicationId = parsed.data.applicationId;
-    const email = parsed.data.email.trim().toLowerCase();
-    if (typeof applicationId !== "string" || !applicationId) {
-      return c.json({ error: "Application reference missing." }, 400);
-    }
-    const application = await applicationRepository.findById(applicationId);
-    if (
-      !application ||
-      (application.email ?? "").trim().toLowerCase() !== email
-    ) {
-      return c.json({ error: "We couldn't verify this application." }, 404);
+    const email = c.get("user").email;
+    if (parsed.data.email && parsed.data.email.toLowerCase() !== email) {
+      return c.json({ error: "You can only change your own password." }, 403);
     }
     await authService.setPasswordAccount(email, parsed.data.password);
-    return c.json({ ok: true });
+    await authService.revokeAllSessions(email);
+    const token = await authService.generateSessionToken(email);
+    setCandidateCookie(c, token);
+    return c.json({ ok: true, token, email });
   } catch (err) {
     console.error({ err }, "Password registration failed");
     return c.json(
@@ -960,7 +985,7 @@ const candLoginLimiter = rateLimit(
 
 app.post("/api/auth/login-password", candLoginLimiter, async (c) => {
   try {
-    const parsed = candidatePasswordSchema.safeParse(await c.req.json());
+    const parsed = candidatePasswordSchema.safeParse(await parseJson(c));
     if (!parsed.success) {
       return c.json({ error: "Email and password are required." }, 400);
     }
@@ -972,23 +997,8 @@ app.post("/api/auth/login-password", candLoginLimiter, async (c) => {
     if (!sessionToken) {
       return c.json({ error: "Incorrect email or password." }, 401);
     }
-    const jwt = await new SignJWT({
-      sessionToken,
-      email,
-      role: "candidate",
-    })
-      .setProtectedHeader({ alg: "HS256" })
-      .setIssuedAt()
-      .setExpirationTime("7d")
-      .sign(new TextEncoder().encode(getEnv().JWT_SECRET));
-    c.header(
-      "Set-Cookie",
-      "candidate_session=" +
-        jwt +
-        "; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=" +
-        7 * 24 * 3600,
-    );
-    return c.json({ token: jwt, email });
+    setCandidateCookie(c, sessionToken);
+    return c.json({ token: sessionToken, email });
   } catch (err) {
     console.error({ err }, "Password login failed");
     return c.json({ error: "Sign-in failed. Please try again." }, 500);
@@ -998,23 +1008,14 @@ app.post("/api/auth/login-password", candLoginLimiter, async (c) => {
 // Logout for candidates: revokes the server-side session and clears the
 // HttpOnly cookie. Safe to call even when unauthenticated.
 app.post("/api/auth/logout", async (c) => {
-  const cookie = c.req.header("Cookie");
-  const match = cookie?.match(/(?:^|;\s*)swiftjob_session=([^;]+)/);
-  let token: string | null = null;
-  if (match) {
-    token = decodeURIComponent(match[1]);
-  } else {
-    const authHeader = c.req.header("Authorization");
-    if (authHeader?.startsWith("Bearer ")) {
-      token = authHeader.slice(7);
-    }
-  }
+  const token = getCandidateToken(c);
 
   if (token) {
     try {
       await authService.revokeSession(token);
     } catch (err) {
       console.error({ err }, "Failed to revoke session on logout");
+      return c.json({ error: "Could not sign out. Please try again." }, 503);
     }
   }
 
@@ -1036,7 +1037,11 @@ const adminLoginSchema = z.object({
 
 app.post("/api/admin/login", adminLoginLimiter, async (c) => {
   try {
-    const parsed = adminLoginSchema.safeParse(await c.req.json());
+    const body = await parseJson(c);
+    if (body === null) {
+      return c.json({ error: "Email and password are required" }, 400);
+    }
+    const parsed = adminLoginSchema.safeParse(body);
     if (!parsed.success) {
       return c.json({ error: "Email and password are required" }, 400);
     }
@@ -1065,13 +1070,14 @@ app.post("/api/admin/login", adminLoginLimiter, async (c) => {
       return c.json({ error: "Invalid credentials" }, 401);
     }
 
-    const token = await new SignJWT({ email: ADMIN_EMAIL, role: "admin" })
+    const adminEmail = ADMIN_EMAIL.trim().toLowerCase();
+    const token = await new SignJWT({ email: adminEmail, role: "admin" })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
       .setExpirationTime("1d")
       .sign(new TextEncoder().encode(JWT_SECRET));
 
-    return c.json({ token, user: { email: ADMIN_EMAIL, role: "admin" } });
+    return c.json({ token, user: { email: adminEmail, role: "admin" } });
   } catch (err) {
     console.error({ err }, "Admin login error");
     return c.json({ error: "Login failed" }, 500);
@@ -1086,12 +1092,20 @@ async function verifyAdminJwt(
     const { payload } = await jwtVerify(
       token,
       new TextEncoder().encode(JWT_SECRET),
+      { algorithms: ["HS256"] },
     );
     const role = payload.role as string;
-    if (role !== "admin" && role !== "hr") {
+    const email = payload.email;
+    if (
+      (role !== "admin" && role !== "hr") ||
+      typeof email !== "string" ||
+      email.trim().toLowerCase() !== email ||
+      !email.includes("@") ||
+      typeof payload.exp !== "number"
+    ) {
       return null;
     }
-    return { email: payload.email as string, role };
+    return { email, role };
   } catch {
     return null;
   }
@@ -1118,18 +1132,21 @@ const adminAuth = async (c: any, next: any) => {
 };
 
 // Candidate auth middleware
-const candidateAuth = async (c: any, next: any) => {
+function setCandidateCookie(c: any, token: string) {
+  c.header("Set-Cookie", `swiftjob_session=${encodeURIComponent(token)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7 * 24 * 3600}`);
+}
+
+function getCandidateToken(c: any): string | null {
   const authHeader = c.req.header("Authorization");
-  let token: string | null = null;
   if (authHeader?.startsWith("Bearer ")) {
-    token = authHeader.slice(7);
-  } else {
-    const cookie = c.req.header("Cookie");
-    const match = cookie?.match(/(?:^|;\s*)swiftjob_session=([^;]+)/);
-    if (match) {
-      token = decodeURIComponent(match[1]);
-    }
+    return authHeader.slice(7);
   }
+  const match = c.req.header("Cookie")?.match(/(?:^|;\s*)swiftjob_session=([^;]+)/);
+  try { return match ? decodeURIComponent(match[1]) : null; } catch { return null; }
+}
+
+async function candidateAuth(c: any, next: any) {
+  const token = getCandidateToken(c);
 
   if (!token) {
     return c.json({ error: "Missing or invalid authorization header" }, 401);
@@ -1149,7 +1166,29 @@ const candidateAuth = async (c: any, next: any) => {
     role: "candidate",
   });
   return next();
-};
+}
+
+function candidateApplicationView(application: Application, nextStep: Record<string, unknown>) {
+  const {
+    id, createdAt, position, fullName, email, phone, country, city, timezone,
+    linkedinUrl, portfolioUrl, yearsExperience, education, englishProficiency,
+    noticePeriod, expectedSalary, earliestStartDate, skills, relevantExperience,
+    coverLetter, resumePath, resumeFilename, status, referenceCode,
+  } = application;
+  const view: Record<string, unknown> = {
+    id, createdAt, position, fullName, email, phone, country, city, timezone,
+    linkedinUrl, portfolioUrl, yearsExperience, education, englishProficiency,
+    noticePeriod, expectedSalary, earliestStartDate, skills, relevantExperience,
+    coverLetter, resumePath, resumeFilename, status, referenceCode,
+    nextStep: status === "Shortlisted" ? nextStep : { backgroundUrl: "", roomLink: "", delaySeconds: 0 },
+  };
+  if (status === "Shortlisted") {
+    view.meetLink = application.meetLink;
+    view.interviewInstructions = application.interviewInstructions;
+    view.meetingKey = application.meetingKey;
+  }
+  return view;
+}
 
 // ============================================
 // ADMIN ROUTES
@@ -1396,12 +1435,12 @@ app.get("/api/admin/applications/:id/resume", adminAuth, async (c) => {
     }
     const contentType = object.httpMetadata?.contentType ?? "application/pdf";
     const contentDisposition = application.resumeFilename
-      ? `inline; filename="${application.resumeFilename.replace(/"/g, "")}"`
-      : "inline";
+      ? `attachment; filename="${application.resumeFilename.replace(/[\"\r\n]/g, "")}"`
+      : 'attachment; filename="resume"';
     return c.body(object.body as any, 200, {
       "Content-Type": contentType,
       "Content-Disposition": contentDisposition,
-      "Cache-Control": "private, max-age=300",
+      "Cache-Control": "private, no-store",
     });
   } catch (err) {
     console.error({ err }, "Failed to download resume");
@@ -1645,11 +1684,7 @@ async function resolveApplicationNextStep(
   const delayRaw =
     application.nextStepDelay ?? parseInt(global.nextStepDelay ?? "", 10);
   return {
-    backgroundUrl: (
-      application.backgroundUrl ||
-      global.backgroundUrl ||
-      ""
-    ).trim(),
+    backgroundUrl: "",
     roomLink: (
       application.roomLink ||
       application.meetLink ||
@@ -1673,13 +1708,8 @@ app.get("/api/candidate/applications", candidateAuth, async (c) => {
     const globalContent = await referralService.getContent();
     const withNextStep = [];
     for (const application of applications) {
-      withNextStep.push({
-        ...application,
-        nextStep:
-          application.status === "Shortlisted"
-            ? await resolveApplicationNextStep(application, globalContent)
-            : { backgroundUrl: "", roomLink: "", delaySeconds: 0 },
-      });
+      withNextStep.push(candidateApplicationView(application,
+        application.status === "Shortlisted" ? await resolveApplicationNextStep(application, globalContent) : {}));
     }
     return c.json({ applications: withNextStep });
   } catch (err) {
@@ -1696,81 +1726,27 @@ app.get("/api/candidate/applications/:id", candidateAuth, async (c) => {
     if (!application) {
       return c.json({ error: "Application not found" }, 404);
     }
-    if (application.email.toLowerCase() !== user.email.toLowerCase()) {
+    if (application.email.trim().toLowerCase() !== user.email.trim().toLowerCase()) {
       return c.json(
         { error: "You do not have access to this application" },
         403,
       );
     }
-    return c.json({
-      application: {
-        ...application,
-        nextStep:
-          application.status === "Shortlisted"
-            ? await resolveApplicationNextStep(application)
-            : { backgroundUrl: "", roomLink: "", delaySeconds: 0 },
-      },
-    });
+    return c.json({ application: candidateApplicationView(application,
+      application.status === "Shortlisted" ? await resolveApplicationNextStep(application) : {}) });
   } catch (err) {
     console.error({ err }, "Failed to retrieve application");
     return c.json({ error: "Failed to retrieve application" }, 500);
   }
 });
 
-// Server-side background load of the candidate's configured background URL -
-// the same robust, header-proof fallback offered on the referral page. Only
-// the URL configured for this application (or the global default) is fetched;
-// a client-supplied URL is never accepted.
+// Retired endpoint kept for old clients. SwiftJob no longer fetches
+// third-party background URLs on behalf of candidates.
 app.post(
   "/api/candidate/applications/:id/background",
   candidateAuth,
   async (c) => {
-    try {
-      const user = c.get("user");
-      const application = await applicationService.getById(c.req.param("id"));
-      if (!application) {
-        return c.json({ error: "Application not found" }, 404);
-      }
-      if (application.email.toLowerCase() !== user.email.toLowerCase()) {
-        return c.json(
-          { error: "You do not have access to this application" },
-          403,
-        );
-      }
-      const nextStep =
-        application.status === "Shortlisted"
-          ? await resolveApplicationNextStep(application)
-          : { backgroundUrl: "", roomLink: "", delaySeconds: 0 };
-      const backgroundUrl = nextStep.backgroundUrl;
-      if (!backgroundUrl) {
-        return c.json(
-          { error: "Background link is not configured for this application" },
-          404,
-        );
-      }
-      if (!isHttpUrl(backgroundUrl)) {
-        return c.json({ error: "Invalid background link" }, 400);
-      }
-      const result = await fetchBackgroundUrl(backgroundUrl);
-      c.executionCtx.waitUntil(
-        footprintRepository
-          .record({
-            subjectType: "candidate",
-            subjectId: application.id,
-            event: "background",
-            device: "laptop",
-            userAgent: c.req.header("user-agent") ?? undefined,
-            meta: { ok: result.ok, status: result.status ?? null },
-          })
-          .catch((err) =>
-            console.error({ err }, "Failed to log background load"),
-          ),
-      );
-      return c.json({ success: true, ...result });
-    } catch (err) {
-      console.error({ err }, "Failed to load background link");
-      return c.json({ error: "Failed to load background link" }, 500);
-    }
+    return c.json({ error: "Background URL loading has been retired." }, 410);
   },
 );
 
@@ -1796,12 +1772,12 @@ app.get("/api/candidate/applications/:id/resume", candidateAuth, async (c) => {
     }
     const contentType = object.httpMetadata?.contentType ?? "application/pdf";
     const contentDisposition = application.resumeFilename
-      ? `inline; filename="${application.resumeFilename.replace(/"/g, "")}"`
-      : "inline";
+      ? `attachment; filename="${application.resumeFilename.replace(/[\"\r\n]/g, "")}"`
+      : 'attachment; filename="resume"';
     return c.body(object.body as any, 200, {
       "Content-Type": contentType,
       "Content-Disposition": contentDisposition,
-      "Cache-Control": "private, max-age=300",
+      "Cache-Control": "private, no-store",
     });
   } catch (err) {
     console.error({ err }, "Failed to download resume");
@@ -1813,7 +1789,7 @@ app.post("/api/candidate/footprint", candidateAuth, async (c) => {
   try {
     await ensureReferralSchemaOnce();
     const user = c.get("user");
-    const body = await c.req.json().catch(() => ({}));
+    const body = (await parseJson(c)) ?? {};
     const applicationId =
       typeof body?.applicationId === "string" ? body.applicationId : "";
     const allowedEvents = [
@@ -1886,7 +1862,7 @@ app.get("/api/referrals/:code", async (c) => {
         hrEmail: getSupportEmail(),
       },
       nextStep: {
-        backgroundUrl: nextStep.backgroundUrl,
+        backgroundUrl: "",
         delaySeconds: nextStep.delaySeconds,
         // Do not ship the room link in the page payload. It is only returned
         // by the reveal endpoint after the wait.
@@ -1905,7 +1881,7 @@ app.get("/api/referrals/:code", async (c) => {
 app.post("/api/referrals/:code/visit", referralClickLimiter, async (c) => {
   try {
     await ensureReferralSchemaOnce();
-    const body = await c.req.json().catch(() => ({}));
+    const body = (await parseJson(c)) ?? {};
     const clientDevice = typeof body?.device === "string" ? body.device : "";
     const meta = sanitizeMeta(body?.meta);
     const device = /^(mobile|laptop)$/i.test(clientDevice)
@@ -1991,7 +1967,7 @@ function matchesFootprintFilter(
 app.post("/api/referrals/:code/click", referralClickLimiter, async (c) => {
   try {
     await ensureReferralSchemaOnce();
-    const body = await c.req.json().catch(() => ({}));
+    const body = (await parseJson(c)) ?? {};
     const meta = sanitizeMeta(body?.meta);
     const metaMobile = meta?.verdict === "mobile";
     const device = metaMobile
@@ -2060,72 +2036,12 @@ app.post("/api/referrals/:code/click", referralClickLimiter, async (c) => {
   }
 });
 
-// Server-side background load of the referral's configured background URL.
-// This is the robust fallback when the browser blocks an iframe/fetch of the
-// target (X-Frame-Options / CSP frame-ancestors): the Worker itself performs
-// the GET, which hits the target exactly like a headless browser would and
-// warms up any server-side logic. Only the URL configured for this referral
-// is ever fetched - a client-supplied URL is never accepted.
-async function fetchBackgroundUrl(
-  url: string,
-  timeoutMs = 8000,
-): Promise<{ ok: boolean; status: number | null }> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetch(url, {
-      method: "GET",
-      redirect: "follow",
-      signal: controller.signal,
-    });
-    try {
-      await res.arrayBuffer();
-    } catch {
-      /* body drain is best-effort */
-    }
-    return { ok: res.ok, status: res.status };
-  } catch {
-    return { ok: false, status: null };
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 function isHttpUrl(value: string): boolean {
   return /^https?:\/\//i.test(value);
 }
 
 app.post("/api/referrals/:code/background", referralClickLimiter, async (c) => {
-  try {
-    await ensureReferralSchemaOnce();
-    const code = c.req.param("code");
-    const nextStep = await referralService.getNextStepForReferral(code);
-    const backgroundUrl = nextStep.backgroundUrl;
-    if (!backgroundUrl) {
-      return c.json(
-        { error: "Background link is not configured for this referral" },
-        404,
-      );
-    }
-    if (!isHttpUrl(backgroundUrl)) {
-      return c.json({ error: "Invalid background link" }, 400);
-    }
-    const result = await fetchBackgroundUrl(backgroundUrl);
-    c.executionCtx.waitUntil(
-      referralService
-        .recordBackground(code, result.ok, {
-          url: backgroundUrl,
-          status: result.status ?? null,
-        })
-        .catch((err) =>
-          console.error({ err }, "Failed to log background load"),
-        ),
-    );
-    return c.json({ success: true, ...result });
-  } catch (err) {
-    console.error({ err }, "Failed to load background link");
-    return c.json({ error: "Failed to load background link" }, 500);
-  }
+  return c.json({ error: "Background URL loading has been retired." }, 410);
 });
 
 // The candidate's room link was surfaced after the wait - recorded so admins
@@ -2219,7 +2135,14 @@ function escHtml(value: string): string {
 app.post("/api/admin/mail/send", adminAuth, async (c) => {
   try {
     await ensureReferralSchemaOnce();
-    const parsed = mailSendSchema.safeParse(await c.req.json());
+    const raw = await parseJson(c);
+    if (raw === null) {
+      return c.json(
+        { error: "Invalid payload: valid recipient emails are required" },
+        400,
+      );
+    }
+    const parsed = mailSendSchema.safeParse(raw);
     if (!parsed.success) {
       return c.json(
         { error: "Invalid payload: valid recipient emails are required" },
@@ -2904,7 +2827,7 @@ app.post("/api/admin/contacts/import", adminAuth, async (c) => {
 app.delete("/api/admin/referrals", adminAuth, async (c) => {
   try {
     await ensureReferralSchemaOnce();
-    const body = await c.req.json().catch(() => ({}));
+    const body = (await parseJson(c)) ?? {};
     if (body?.confirm !== "DELETE ALL") {
       return c.json(
         {

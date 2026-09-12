@@ -1,0 +1,67 @@
+- banner:
+  - link "SwiftJob.adm admin":
+    - /url: /admin
+    - text: SwiftJob.adm
+    - generic: admin
+  - button "Logout":
+    - text: Logout
+- navigation "Admin navigation":
+  - generic: Dashboard
+  - link "Overview":
+    - /url: /admin
+    - text: Overview
+  - generic: Hiring
+  - link "Applications":
+    - /url: /admin/applications
+    - text: Applications
+  - link "Referrals":
+    - /url: /admin/referrals
+    - text: Referrals
+  - link "Contacts":
+    - /url: /admin/contacts
+    - text: Contacts
+  - link "Jobs":
+    - /url: /admin/jobs
+    - text: Jobs
+  - generic: Growth
+  - link "Campaigns":
+    - /url: /admin/campaigns
+    - text: Campaigns
+  - generic: Communications
+  - link "Send mail":
+    - /url: /admin/mail
+    - text: Send mail
+  - generic: System
+  - link "Activity log":
+    - /url: /admin/activity
+    - text: Activity log
+  - link "Settings":
+    - /url: /admin/settings
+    - text: Settings
+- main:
+  - heading "Activity log" [level=1]
+  - generic: 0 events
+  - button "Refresh":
+    - text: Refresh
+  - combobox "Filter by action":
+    - option "All actions" [selected]
+    - option "Referral invite emailed"
+    - option "Custom email sent"
+    - option "Referral created"
+    - option "Referral updated"
+    - option "Referral deleted"
+    - option "All referrals cleared"
+    - option "Referrals imported"
+    - option "Batch emails sent"
+    - option "Referrals created from contacts"
+    - option "Contacts imported"
+    - option "Contacts deleted"
+    - option "Contact deleted"
+    - option "Page & email content saved"
+    - option "Content applied to all"
+    - option "Content applied to selected"
+    - option "Content reverted to defaults"
+    - option "Daily send limit changed"
+  - paragraph: No activity recorded yet.
+- region "Notifications (F8)":
+  - list

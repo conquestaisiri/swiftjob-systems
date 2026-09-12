@@ -31,6 +31,7 @@ function formatDate(iso: string) {
   // postedDate is date-only; parse at LOCAL midnight so timezones don't turn
   // "today" into "yesterday" (same treatment as the job detail sidebar).
   const d = parseDateOnly(iso);
+  if (Number.isNaN(d.getTime())) return "Date unavailable";
   const now = new Date();
   now.setHours(0, 0, 0, 0);
   const diffDays = Math.floor(
@@ -41,7 +42,8 @@ function formatDate(iso: string) {
   if (diffDays < 7) return `${diffDays} days ago`;
   if (diffDays < 14) return "1 week ago";
   if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  return `${Math.floor(diffDays / 30)} months ago`;
+  const months = Math.floor(diffDays / 30);
+  return `${months} month${months === 1 ? "" : "s"} ago`;
 }
 
 function JobCard({ job }: { job: Job }) {
@@ -182,7 +184,7 @@ export function CareersPage() {
   return (
     <SiteLayout
       title="Remote Careers — SwiftJob"
-      description="Explore open remote positions at SwiftJob. 100% work-from-home roles across customer support, virtual assistance, data, IT, finance, and marketing — with real companies and fair pay."
+      description="Explore open remote positions at SwiftJob across customer support, virtual assistance, data, IT, finance, and marketing — with clear role details and transparent pay."
     >
       {/* Hero */}
       <section className="careers-hero section-dark">
@@ -200,9 +202,9 @@ export function CareersPage() {
             <em>remote roles.</em>
           </h1>
           <p className="careers-hero-sub reveal">
-            Every position below is a real, open, 100% remote job with a clear
-            description and a simple way to apply. Work from home on a laptop,
-            with training and support from day one.
+            Positions below are active listings with clear requirements,
+            working arrangements, compensation, and a simple way to apply.
+            Training and support are explained during the hiring process.
           </p>
           <div className="careers-hero-stats reveal">
             <span>
@@ -284,11 +286,12 @@ export function CareersPage() {
           {filtersOpen && (
             <div className="careers-filters">
               <div className="filter-group">
-                <label>
+                <label htmlFor="careers-department">
                   Department
                   <ChevronDown size={13} />
                 </label>
                 <select
+                  id="careers-department"
                   value={department}
                   onChange={(e) => {
                     setDepartment(e.target.value);
@@ -304,11 +307,12 @@ export function CareersPage() {
                 </select>
               </div>
               <div className="filter-group">
-                <label>
+                <label htmlFor="careers-employment-type">
                   Employment type
                   <ChevronDown size={13} />
                 </label>
                 <select
+                  id="careers-employment-type"
                   value={employmentType}
                   onChange={(e) => {
                     setEmploymentType(e.target.value);
@@ -324,11 +328,12 @@ export function CareersPage() {
                 </select>
               </div>
               <div className="filter-group">
-                <label>
+                <label htmlFor="careers-experience-level">
                   Experience level
                   <ChevronDown size={13} />
                 </label>
                 <select
+                  id="careers-experience-level"
                   value={experienceLevel}
                   onChange={(e) => {
                     setExperienceLevel(e.target.value);
@@ -344,11 +349,12 @@ export function CareersPage() {
                 </select>
               </div>
               <div className="filter-group">
-                <label>
+                <label htmlFor="careers-work-arrangement">
                   Work arrangement
                   <ChevronDown size={13} />
                 </label>
                 <select
+                  id="careers-work-arrangement"
                   value={workArrangement}
                   onChange={(e) => {
                     setWorkArrangement(e.target.value);
@@ -483,7 +489,7 @@ export function CareersPage() {
               ],
               [
                 "Are these jobs actually remote?",
-                "Every listing is 100% remote. You work from your own laptop, wherever you are, with hours agreed before you start.",
+                "Each listing explains its working arrangement and hours. You work from your own laptop wherever the listing permits, with hours agreed before you start.",
               ],
               [
                 "What is the skills check?",

@@ -248,9 +248,14 @@ let schemaPromise: Promise<void> | null = null;
 export function ensureReferralSchemaOnce(): Promise<void> {
   if (schemaEnsured) return Promise.resolve();
   if (!schemaPromise) {
-    schemaPromise = runReferralSchema().then(() => {
-      schemaEnsured = true;
-    });
+    schemaPromise = runReferralSchema()
+      .then(() => {
+        schemaEnsured = true;
+      })
+      .catch((error) => {
+        schemaPromise = null;
+        throw error;
+      });
   }
   return schemaPromise;
 }

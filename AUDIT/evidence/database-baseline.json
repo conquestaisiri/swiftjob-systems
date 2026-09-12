@@ -1,0 +1,2118 @@
+{
+  "readOnly": true,
+  "connectivity": "VERIFIED",
+  "schema": [
+    {
+      "table_name": "activities",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "activities",
+      "column_name": "actor",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "activities",
+      "column_name": "action",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "activities",
+      "column_name": "target_type",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "activities",
+      "column_name": "target_id",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "activities",
+      "column_name": "target_email",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "activities",
+      "column_name": "detail",
+      "data_type": "jsonb",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "activities",
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "activities",
+      "column_name": "error",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "activities",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "position",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "full_name",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "email",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "phone",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "country",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "city",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "timezone",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "linkedin_url",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "portfolio_url",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "years_experience",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "education",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "english_proficiency",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "notice_period",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "expected_salary",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "earliest_start_date",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "skills",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "relevant_experience",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "cover_letter",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "resume_path",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "resume_filename",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "status",
+      "data_type": "USER-DEFINED",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "reference_code",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "meet_link",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "interview_instructions",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "meeting_key",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "room_link",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "next_step_delay",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "background_url",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "campaign_slug",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "submission_key",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "applications",
+      "column_name": "job_slug",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "assessments",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "assessments",
+      "column_name": "application_id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "assessments",
+      "column_name": "job_slug",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "assessments",
+      "column_name": "track",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "assessments",
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "assessments",
+      "column_name": "system_check",
+      "data_type": "jsonb",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "assessments",
+      "column_name": "responses",
+      "data_type": "jsonb",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "assessments",
+      "column_name": "score",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "assessments",
+      "column_name": "max_score",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "assessments",
+      "column_name": "completed_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "assessments",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "assessments",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "campaign_visits",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "campaign_visits",
+      "column_name": "campaign_id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "campaign_visits",
+      "column_name": "device",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "campaign_visits",
+      "column_name": "clicked_cta",
+      "data_type": "boolean",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "campaign_visits",
+      "column_name": "user_agent",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "campaign_visits",
+      "column_name": "visited_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "campaigns",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "campaigns",
+      "column_name": "name",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "campaigns",
+      "column_name": "slug",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "campaigns",
+      "column_name": "channel",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "campaigns",
+      "column_name": "utm_source",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "campaigns",
+      "column_name": "job_slug",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "campaigns",
+      "column_name": "headline",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "campaigns",
+      "column_name": "subheadline",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "campaigns",
+      "column_name": "cta_label",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "campaigns",
+      "column_name": "is_enabled",
+      "data_type": "boolean",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "campaigns",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "campaigns",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_accounts",
+      "column_name": "email",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_accounts",
+      "column_name": "password_hash",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_accounts",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_accounts",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_sessions",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_sessions",
+      "column_name": "email",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_sessions",
+      "column_name": "token_hash",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_sessions",
+      "column_name": "expires_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_sessions",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_sessions",
+      "column_name": "last_used_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_sessions",
+      "column_name": "revoked",
+      "data_type": "boolean",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "contacts",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "contacts",
+      "column_name": "first_name",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contacts",
+      "column_name": "last_name",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contacts",
+      "column_name": "full_name",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contacts",
+      "column_name": "email",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contacts",
+      "column_name": "phone",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contacts",
+      "column_name": "address",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contacts",
+      "column_name": "postal_code",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contacts",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "contacts",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "footprints",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "footprints",
+      "column_name": "subject_type",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "footprints",
+      "column_name": "subject_id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "footprints",
+      "column_name": "event",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "footprints",
+      "column_name": "device",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "footprints",
+      "column_name": "user_agent",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "footprints",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "footprints",
+      "column_name": "meta",
+      "data_type": "jsonb",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "slug",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "title",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "department",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "employment_type",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "work_arrangement",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "experience_level",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "experience",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "compensation",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "posted_date",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "summary",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "overview",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "responsibilities",
+      "data_type": "ARRAY",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "required_qualifications",
+      "data_type": "ARRAY",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "preferred_qualifications",
+      "data_type": "ARRAY",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "skills",
+      "data_type": "ARRAY",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "software_tools",
+      "data_type": "ARRAY",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "benefits",
+      "data_type": "ARRAY",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "working_hours",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "hiring_process",
+      "data_type": "ARRAY",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "is_active",
+      "data_type": "boolean",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "magic_tokens",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "magic_tokens",
+      "column_name": "token",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "magic_tokens",
+      "column_name": "email",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "magic_tokens",
+      "column_name": "expires_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "magic_tokens",
+      "column_name": "consumed_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "magic_tokens",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referral_clicks",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referral_clicks",
+      "column_name": "referral_id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referral_clicks",
+      "column_name": "device_type",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referral_clicks",
+      "column_name": "clicked_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referral_content",
+      "column_name": "key",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referral_content",
+      "column_name": "body",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referral_content",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referral_settings",
+      "column_name": "id",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referral_settings",
+      "column_name": "daily_send_limit",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referral_settings",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "referral_code",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "full_name",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "email",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "referred_by",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "job_title",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "meeting_url",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "email_sent_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "click_count",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "last_clicked_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "last_device",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "content_overrides",
+      "data_type": "jsonb",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "phone",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "city",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "country",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "address",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "zip_code",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "source",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "referrals",
+      "column_name": "notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "tech_check_tokens",
+      "column_name": "token_hash",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "tech_check_tokens",
+      "column_name": "application_id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "tech_check_tokens",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "tech_check_tokens",
+      "column_name": "expires_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "tech_check_tokens",
+      "column_name": "used_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "tech_check_tokens",
+      "column_name": "report",
+      "data_type": "jsonb",
+      "is_nullable": "YES"
+    }
+  ],
+  "aggregates": [
+    {
+      "entity": "jobs",
+      "count": 131
+    },
+    {
+      "entity": "applications",
+      "count": 3
+    },
+    {
+      "entity": "candidate_accounts",
+      "count": 0
+    }
+  ],
+  "constraints": [
+    {
+      "table_name": "activities",
+      "conname": "activities_action_not_null",
+      "contype": "n",
+      "definition": "NOT NULL action"
+    },
+    {
+      "table_name": "activities",
+      "conname": "activities_actor_not_null",
+      "contype": "n",
+      "definition": "NOT NULL actor"
+    },
+    {
+      "table_name": "activities",
+      "conname": "activities_created_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "activities",
+      "conname": "activities_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "activities",
+      "conname": "activities_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "activities",
+      "conname": "activities_status_not_null",
+      "contype": "n",
+      "definition": "NOT NULL status"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_city_not_null",
+      "contype": "n",
+      "definition": "NOT NULL city"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_country_not_null",
+      "contype": "n",
+      "definition": "NOT NULL country"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_cover_letter_not_null",
+      "contype": "n",
+      "definition": "NOT NULL cover_letter"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_created_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_earliest_start_date_not_null",
+      "contype": "n",
+      "definition": "NOT NULL earliest_start_date"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_education_not_null",
+      "contype": "n",
+      "definition": "NOT NULL education"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_email_not_null",
+      "contype": "n",
+      "definition": "NOT NULL email"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_english_proficiency_not_null",
+      "contype": "n",
+      "definition": "NOT NULL english_proficiency"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_expected_salary_not_null",
+      "contype": "n",
+      "definition": "NOT NULL expected_salary"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_full_name_not_null",
+      "contype": "n",
+      "definition": "NOT NULL full_name"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_notice_period_not_null",
+      "contype": "n",
+      "definition": "NOT NULL notice_period"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_phone_not_null",
+      "contype": "n",
+      "definition": "NOT NULL phone"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_position_not_null",
+      "contype": "n",
+      "definition": "NOT NULL \"position\""
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_reference_code_key",
+      "contype": "u",
+      "definition": "UNIQUE (reference_code)"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_reference_code_not_null",
+      "contype": "n",
+      "definition": "NOT NULL reference_code"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_relevant_experience_not_null",
+      "contype": "n",
+      "definition": "NOT NULL relevant_experience"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_skills_not_null",
+      "contype": "n",
+      "definition": "NOT NULL skills"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_status_not_null",
+      "contype": "n",
+      "definition": "NOT NULL status"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_timezone_not_null",
+      "contype": "n",
+      "definition": "NOT NULL timezone"
+    },
+    {
+      "table_name": "applications",
+      "conname": "applications_years_experience_not_null",
+      "contype": "n",
+      "definition": "NOT NULL years_experience"
+    },
+    {
+      "table_name": "assessments",
+      "conname": "assessments_application_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "assessments",
+      "conname": "assessments_application_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL application_id"
+    },
+    {
+      "table_name": "assessments",
+      "conname": "assessments_created_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "assessments",
+      "conname": "assessments_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "assessments",
+      "conname": "assessments_job_slug_not_null",
+      "contype": "n",
+      "definition": "NOT NULL job_slug"
+    },
+    {
+      "table_name": "assessments",
+      "conname": "assessments_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "assessments",
+      "conname": "assessments_responses_not_null",
+      "contype": "n",
+      "definition": "NOT NULL responses"
+    },
+    {
+      "table_name": "assessments",
+      "conname": "assessments_status_not_null",
+      "contype": "n",
+      "definition": "NOT NULL status"
+    },
+    {
+      "table_name": "assessments",
+      "conname": "assessments_system_check_not_null",
+      "contype": "n",
+      "definition": "NOT NULL system_check"
+    },
+    {
+      "table_name": "assessments",
+      "conname": "assessments_track_not_null",
+      "contype": "n",
+      "definition": "NOT NULL track"
+    },
+    {
+      "table_name": "assessments",
+      "conname": "assessments_updated_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table_name": "campaign_visits",
+      "conname": "campaign_visits_campaign_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "campaign_visits",
+      "conname": "campaign_visits_campaign_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL campaign_id"
+    },
+    {
+      "table_name": "campaign_visits",
+      "conname": "campaign_visits_clicked_cta_not_null",
+      "contype": "n",
+      "definition": "NOT NULL clicked_cta"
+    },
+    {
+      "table_name": "campaign_visits",
+      "conname": "campaign_visits_device_not_null",
+      "contype": "n",
+      "definition": "NOT NULL device"
+    },
+    {
+      "table_name": "campaign_visits",
+      "conname": "campaign_visits_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "campaign_visits",
+      "conname": "campaign_visits_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "campaign_visits",
+      "conname": "campaign_visits_visited_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL visited_at"
+    },
+    {
+      "table_name": "campaigns",
+      "conname": "campaigns_channel_not_null",
+      "contype": "n",
+      "definition": "NOT NULL channel"
+    },
+    {
+      "table_name": "campaigns",
+      "conname": "campaigns_created_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "campaigns",
+      "conname": "campaigns_cta_label_not_null",
+      "contype": "n",
+      "definition": "NOT NULL cta_label"
+    },
+    {
+      "table_name": "campaigns",
+      "conname": "campaigns_headline_not_null",
+      "contype": "n",
+      "definition": "NOT NULL headline"
+    },
+    {
+      "table_name": "campaigns",
+      "conname": "campaigns_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "campaigns",
+      "conname": "campaigns_is_enabled_not_null",
+      "contype": "n",
+      "definition": "NOT NULL is_enabled"
+    },
+    {
+      "table_name": "campaigns",
+      "conname": "campaigns_name_not_null",
+      "contype": "n",
+      "definition": "NOT NULL name"
+    },
+    {
+      "table_name": "campaigns",
+      "conname": "campaigns_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "campaigns",
+      "conname": "campaigns_slug_key",
+      "contype": "u",
+      "definition": "UNIQUE (slug)"
+    },
+    {
+      "table_name": "campaigns",
+      "conname": "campaigns_slug_not_null",
+      "contype": "n",
+      "definition": "NOT NULL slug"
+    },
+    {
+      "table_name": "campaigns",
+      "conname": "campaigns_subheadline_not_null",
+      "contype": "n",
+      "definition": "NOT NULL subheadline"
+    },
+    {
+      "table_name": "campaigns",
+      "conname": "campaigns_updated_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table_name": "candidate_accounts",
+      "conname": "candidate_accounts_created_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "candidate_accounts",
+      "conname": "candidate_accounts_email_not_null",
+      "contype": "n",
+      "definition": "NOT NULL email"
+    },
+    {
+      "table_name": "candidate_accounts",
+      "conname": "candidate_accounts_password_hash_not_null",
+      "contype": "n",
+      "definition": "NOT NULL password_hash"
+    },
+    {
+      "table_name": "candidate_accounts",
+      "conname": "candidate_accounts_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (email)"
+    },
+    {
+      "table_name": "candidate_accounts",
+      "conname": "candidate_accounts_updated_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table_name": "candidate_sessions",
+      "conname": "candidate_sessions_created_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "candidate_sessions",
+      "conname": "candidate_sessions_email_not_null",
+      "contype": "n",
+      "definition": "NOT NULL email"
+    },
+    {
+      "table_name": "candidate_sessions",
+      "conname": "candidate_sessions_expires_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL expires_at"
+    },
+    {
+      "table_name": "candidate_sessions",
+      "conname": "candidate_sessions_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "candidate_sessions",
+      "conname": "candidate_sessions_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "candidate_sessions",
+      "conname": "candidate_sessions_revoked_not_null",
+      "contype": "n",
+      "definition": "NOT NULL revoked"
+    },
+    {
+      "table_name": "candidate_sessions",
+      "conname": "candidate_sessions_token_hash_key",
+      "contype": "u",
+      "definition": "UNIQUE (token_hash)"
+    },
+    {
+      "table_name": "candidate_sessions",
+      "conname": "candidate_sessions_token_hash_not_null",
+      "contype": "n",
+      "definition": "NOT NULL token_hash"
+    },
+    {
+      "table_name": "contacts",
+      "conname": "contacts_created_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "contacts",
+      "conname": "contacts_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "contacts",
+      "conname": "contacts_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "contacts",
+      "conname": "contacts_updated_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table_name": "footprints",
+      "conname": "footprints_created_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "footprints",
+      "conname": "footprints_device_not_null",
+      "contype": "n",
+      "definition": "NOT NULL device"
+    },
+    {
+      "table_name": "footprints",
+      "conname": "footprints_event_not_null",
+      "contype": "n",
+      "definition": "NOT NULL event"
+    },
+    {
+      "table_name": "footprints",
+      "conname": "footprints_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "footprints",
+      "conname": "footprints_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "footprints",
+      "conname": "footprints_subject_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL subject_id"
+    },
+    {
+      "table_name": "footprints",
+      "conname": "footprints_subject_type_not_null",
+      "contype": "n",
+      "definition": "NOT NULL subject_type"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_benefits_not_null",
+      "contype": "n",
+      "definition": "NOT NULL benefits"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_compensation_not_null",
+      "contype": "n",
+      "definition": "NOT NULL compensation"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_created_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_department_not_null",
+      "contype": "n",
+      "definition": "NOT NULL department"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_employment_type_not_null",
+      "contype": "n",
+      "definition": "NOT NULL employment_type"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_experience_level_not_null",
+      "contype": "n",
+      "definition": "NOT NULL experience_level"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_experience_not_null",
+      "contype": "n",
+      "definition": "NOT NULL experience"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_hiring_process_not_null",
+      "contype": "n",
+      "definition": "NOT NULL hiring_process"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_is_active_not_null",
+      "contype": "n",
+      "definition": "NOT NULL is_active"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_overview_not_null",
+      "contype": "n",
+      "definition": "NOT NULL overview"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_posted_date_not_null",
+      "contype": "n",
+      "definition": "NOT NULL posted_date"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_preferred_qualifications_not_null",
+      "contype": "n",
+      "definition": "NOT NULL preferred_qualifications"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_required_qualifications_not_null",
+      "contype": "n",
+      "definition": "NOT NULL required_qualifications"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_responsibilities_not_null",
+      "contype": "n",
+      "definition": "NOT NULL responsibilities"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_skills_not_null",
+      "contype": "n",
+      "definition": "NOT NULL skills"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_slug_key",
+      "contype": "u",
+      "definition": "UNIQUE (slug)"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_slug_not_null",
+      "contype": "n",
+      "definition": "NOT NULL slug"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_software_tools_not_null",
+      "contype": "n",
+      "definition": "NOT NULL software_tools"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_summary_not_null",
+      "contype": "n",
+      "definition": "NOT NULL summary"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_title_not_null",
+      "contype": "n",
+      "definition": "NOT NULL title"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_updated_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_work_arrangement_not_null",
+      "contype": "n",
+      "definition": "NOT NULL work_arrangement"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_working_hours_not_null",
+      "contype": "n",
+      "definition": "NOT NULL working_hours"
+    },
+    {
+      "table_name": "magic_tokens",
+      "conname": "magic_tokens_created_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "magic_tokens",
+      "conname": "magic_tokens_email_not_null",
+      "contype": "n",
+      "definition": "NOT NULL email"
+    },
+    {
+      "table_name": "magic_tokens",
+      "conname": "magic_tokens_expires_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL expires_at"
+    },
+    {
+      "table_name": "magic_tokens",
+      "conname": "magic_tokens_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "magic_tokens",
+      "conname": "magic_tokens_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "magic_tokens",
+      "conname": "magic_tokens_token_key",
+      "contype": "u",
+      "definition": "UNIQUE (token)"
+    },
+    {
+      "table_name": "magic_tokens",
+      "conname": "magic_tokens_token_not_null",
+      "contype": "n",
+      "definition": "NOT NULL token"
+    },
+    {
+      "table_name": "referral_clicks",
+      "conname": "referral_clicks_clicked_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL clicked_at"
+    },
+    {
+      "table_name": "referral_clicks",
+      "conname": "referral_clicks_device_type_not_null",
+      "contype": "n",
+      "definition": "NOT NULL device_type"
+    },
+    {
+      "table_name": "referral_clicks",
+      "conname": "referral_clicks_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "referral_clicks",
+      "conname": "referral_clicks_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "referral_clicks",
+      "conname": "referral_clicks_referral_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (referral_id) REFERENCES referrals(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "referral_clicks",
+      "conname": "referral_clicks_referral_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL referral_id"
+    },
+    {
+      "table_name": "referral_content",
+      "conname": "referral_content_body_not_null",
+      "contype": "n",
+      "definition": "NOT NULL body"
+    },
+    {
+      "table_name": "referral_content",
+      "conname": "referral_content_key_not_null",
+      "contype": "n",
+      "definition": "NOT NULL key"
+    },
+    {
+      "table_name": "referral_content",
+      "conname": "referral_content_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (key)"
+    },
+    {
+      "table_name": "referral_content",
+      "conname": "referral_content_updated_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table_name": "referral_settings",
+      "conname": "referral_settings_daily_send_limit_not_null",
+      "contype": "n",
+      "definition": "NOT NULL daily_send_limit"
+    },
+    {
+      "table_name": "referral_settings",
+      "conname": "referral_settings_id_check",
+      "contype": "c",
+      "definition": "CHECK ((id = 1))"
+    },
+    {
+      "table_name": "referral_settings",
+      "conname": "referral_settings_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "referral_settings",
+      "conname": "referral_settings_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "referral_settings",
+      "conname": "referral_settings_updated_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table_name": "referrals",
+      "conname": "referrals_click_count_not_null",
+      "contype": "n",
+      "definition": "NOT NULL click_count"
+    },
+    {
+      "table_name": "referrals",
+      "conname": "referrals_content_overrides_not_null",
+      "contype": "n",
+      "definition": "NOT NULL content_overrides"
+    },
+    {
+      "table_name": "referrals",
+      "conname": "referrals_created_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "referrals",
+      "conname": "referrals_full_name_not_null",
+      "contype": "n",
+      "definition": "NOT NULL full_name"
+    },
+    {
+      "table_name": "referrals",
+      "conname": "referrals_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "referrals",
+      "conname": "referrals_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "referrals",
+      "conname": "referrals_referral_code_key",
+      "contype": "u",
+      "definition": "UNIQUE (referral_code)"
+    },
+    {
+      "table_name": "referrals",
+      "conname": "referrals_referral_code_not_null",
+      "contype": "n",
+      "definition": "NOT NULL referral_code"
+    },
+    {
+      "table_name": "referrals",
+      "conname": "referrals_status_not_null",
+      "contype": "n",
+      "definition": "NOT NULL status"
+    },
+    {
+      "table_name": "referrals",
+      "conname": "referrals_updated_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table_name": "tech_check_tokens",
+      "conname": "tech_check_tokens_application_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "tech_check_tokens",
+      "conname": "tech_check_tokens_application_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL application_id"
+    },
+    {
+      "table_name": "tech_check_tokens",
+      "conname": "tech_check_tokens_created_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "tech_check_tokens",
+      "conname": "tech_check_tokens_expires_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL expires_at"
+    },
+    {
+      "table_name": "tech_check_tokens",
+      "conname": "tech_check_tokens_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (token_hash)"
+    },
+    {
+      "table_name": "tech_check_tokens",
+      "conname": "tech_check_tokens_token_hash_not_null",
+      "contype": "n",
+      "definition": "NOT NULL token_hash"
+    }
+  ],
+  "indexes": [
+    {
+      "tablename": "activities",
+      "indexname": "activities_action_idx",
+      "indexdef": "CREATE INDEX activities_action_idx ON public.activities USING btree (action)"
+    },
+    {
+      "tablename": "activities",
+      "indexname": "activities_created_idx",
+      "indexdef": "CREATE INDEX activities_created_idx ON public.activities USING btree (created_at DESC)"
+    },
+    {
+      "tablename": "activities",
+      "indexname": "activities_pkey",
+      "indexdef": "CREATE UNIQUE INDEX activities_pkey ON public.activities USING btree (id)"
+    },
+    {
+      "tablename": "applications",
+      "indexname": "applications_pkey",
+      "indexdef": "CREATE UNIQUE INDEX applications_pkey ON public.applications USING btree (id)"
+    },
+    {
+      "tablename": "applications",
+      "indexname": "applications_reference_code_key",
+      "indexdef": "CREATE UNIQUE INDEX applications_reference_code_key ON public.applications USING btree (reference_code)"
+    },
+    {
+      "tablename": "applications",
+      "indexname": "idx_applications_campaign_slug",
+      "indexdef": "CREATE INDEX idx_applications_campaign_slug ON public.applications USING btree (campaign_slug)"
+    },
+    {
+      "tablename": "applications",
+      "indexname": "idx_applications_created_at",
+      "indexdef": "CREATE INDEX idx_applications_created_at ON public.applications USING btree (created_at DESC)"
+    },
+    {
+      "tablename": "applications",
+      "indexname": "idx_applications_email",
+      "indexdef": "CREATE INDEX idx_applications_email ON public.applications USING btree (email)"
+    },
+    {
+      "tablename": "applications",
+      "indexname": "idx_applications_job_slug",
+      "indexdef": "CREATE INDEX idx_applications_job_slug ON public.applications USING btree (job_slug)"
+    },
+    {
+      "tablename": "applications",
+      "indexname": "idx_applications_status",
+      "indexdef": "CREATE INDEX idx_applications_status ON public.applications USING btree (status)"
+    },
+    {
+      "tablename": "applications",
+      "indexname": "idx_applications_submission_key",
+      "indexdef": "CREATE UNIQUE INDEX idx_applications_submission_key ON public.applications USING btree (submission_key) WHERE (submission_key IS NOT NULL)"
+    },
+    {
+      "tablename": "assessments",
+      "indexname": "assessments_pkey",
+      "indexdef": "CREATE UNIQUE INDEX assessments_pkey ON public.assessments USING btree (id)"
+    },
+    {
+      "tablename": "assessments",
+      "indexname": "idx_assessments_application",
+      "indexdef": "CREATE UNIQUE INDEX idx_assessments_application ON public.assessments USING btree (application_id)"
+    },
+    {
+      "tablename": "assessments",
+      "indexname": "idx_assessments_job_slug",
+      "indexdef": "CREATE INDEX idx_assessments_job_slug ON public.assessments USING btree (job_slug)"
+    },
+    {
+      "tablename": "campaign_visits",
+      "indexname": "campaign_visits_pkey",
+      "indexdef": "CREATE UNIQUE INDEX campaign_visits_pkey ON public.campaign_visits USING btree (id)"
+    },
+    {
+      "tablename": "campaign_visits",
+      "indexname": "idx_campaign_visits_campaign_id",
+      "indexdef": "CREATE INDEX idx_campaign_visits_campaign_id ON public.campaign_visits USING btree (campaign_id)"
+    },
+    {
+      "tablename": "campaign_visits",
+      "indexname": "idx_campaign_visits_visited_at",
+      "indexdef": "CREATE INDEX idx_campaign_visits_visited_at ON public.campaign_visits USING btree (visited_at DESC)"
+    },
+    {
+      "tablename": "campaigns",
+      "indexname": "campaigns_pkey",
+      "indexdef": "CREATE UNIQUE INDEX campaigns_pkey ON public.campaigns USING btree (id)"
+    },
+    {
+      "tablename": "campaigns",
+      "indexname": "campaigns_slug_key",
+      "indexdef": "CREATE UNIQUE INDEX campaigns_slug_key ON public.campaigns USING btree (slug)"
+    },
+    {
+      "tablename": "candidate_accounts",
+      "indexname": "candidate_accounts_pkey",
+      "indexdef": "CREATE UNIQUE INDEX candidate_accounts_pkey ON public.candidate_accounts USING btree (email)"
+    },
+    {
+      "tablename": "candidate_sessions",
+      "indexname": "candidate_sessions_pkey",
+      "indexdef": "CREATE UNIQUE INDEX candidate_sessions_pkey ON public.candidate_sessions USING btree (id)"
+    },
+    {
+      "tablename": "candidate_sessions",
+      "indexname": "candidate_sessions_token_hash_key",
+      "indexdef": "CREATE UNIQUE INDEX candidate_sessions_token_hash_key ON public.candidate_sessions USING btree (token_hash)"
+    },
+    {
+      "tablename": "candidate_sessions",
+      "indexname": "idx_candidate_sessions_email",
+      "indexdef": "CREATE INDEX idx_candidate_sessions_email ON public.candidate_sessions USING btree (email)"
+    },
+    {
+      "tablename": "contacts",
+      "indexname": "contacts_pkey",
+      "indexdef": "CREATE UNIQUE INDEX contacts_pkey ON public.contacts USING btree (id)"
+    },
+    {
+      "tablename": "contacts",
+      "indexname": "idx_contacts_email",
+      "indexdef": "CREATE INDEX idx_contacts_email ON public.contacts USING btree (email)"
+    },
+    {
+      "tablename": "contacts",
+      "indexname": "idx_contacts_full_name",
+      "indexdef": "CREATE INDEX idx_contacts_full_name ON public.contacts USING btree (full_name)"
+    },
+    {
+      "tablename": "contacts",
+      "indexname": "idx_contacts_postal_code",
+      "indexdef": "CREATE INDEX idx_contacts_postal_code ON public.contacts USING btree (postal_code)"
+    },
+    {
+      "tablename": "footprints",
+      "indexname": "footprints_pkey",
+      "indexdef": "CREATE UNIQUE INDEX footprints_pkey ON public.footprints USING btree (id)"
+    },
+    {
+      "tablename": "footprints",
+      "indexname": "footprints_subject_idx",
+      "indexdef": "CREATE INDEX footprints_subject_idx ON public.footprints USING btree (subject_type, subject_id, created_at DESC)"
+    },
+    {
+      "tablename": "jobs",
+      "indexname": "jobs_pkey",
+      "indexdef": "CREATE UNIQUE INDEX jobs_pkey ON public.jobs USING btree (id)"
+    },
+    {
+      "tablename": "jobs",
+      "indexname": "jobs_slug_key",
+      "indexdef": "CREATE UNIQUE INDEX jobs_slug_key ON public.jobs USING btree (slug)"
+    },
+    {
+      "tablename": "magic_tokens",
+      "indexname": "idx_magic_tokens_email",
+      "indexdef": "CREATE INDEX idx_magic_tokens_email ON public.magic_tokens USING btree (email)"
+    },
+    {
+      "tablename": "magic_tokens",
+      "indexname": "magic_tokens_pkey",
+      "indexdef": "CREATE UNIQUE INDEX magic_tokens_pkey ON public.magic_tokens USING btree (id)"
+    },
+    {
+      "tablename": "magic_tokens",
+      "indexname": "magic_tokens_token_key",
+      "indexdef": "CREATE UNIQUE INDEX magic_tokens_token_key ON public.magic_tokens USING btree (token)"
+    },
+    {
+      "tablename": "referral_clicks",
+      "indexname": "referral_clicks_pkey",
+      "indexdef": "CREATE UNIQUE INDEX referral_clicks_pkey ON public.referral_clicks USING btree (id)"
+    },
+    {
+      "tablename": "referral_content",
+      "indexname": "referral_content_pkey",
+      "indexdef": "CREATE UNIQUE INDEX referral_content_pkey ON public.referral_content USING btree (key)"
+    },
+    {
+      "tablename": "referral_settings",
+      "indexname": "referral_settings_pkey",
+      "indexdef": "CREATE UNIQUE INDEX referral_settings_pkey ON public.referral_settings USING btree (id)"
+    },
+    {
+      "tablename": "referrals",
+      "indexname": "referrals_pkey",
+      "indexdef": "CREATE UNIQUE INDEX referrals_pkey ON public.referrals USING btree (id)"
+    },
+    {
+      "tablename": "referrals",
+      "indexname": "referrals_referral_code_key",
+      "indexdef": "CREATE UNIQUE INDEX referrals_referral_code_key ON public.referrals USING btree (referral_code)"
+    },
+    {
+      "tablename": "tech_check_tokens",
+      "indexname": "idx_tech_check_app",
+      "indexdef": "CREATE INDEX idx_tech_check_app ON public.tech_check_tokens USING btree (application_id)"
+    },
+    {
+      "tablename": "tech_check_tokens",
+      "indexname": "tech_check_tokens_pkey",
+      "indexdef": "CREATE UNIQUE INDEX tech_check_tokens_pkey ON public.tech_check_tokens USING btree (token_hash)"
+    }
+  ],
+  "duplicates": [
+    {
+      "duplicate_groups": 0
+    }
+  ]
+}

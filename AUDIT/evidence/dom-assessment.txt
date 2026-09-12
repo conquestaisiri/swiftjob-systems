@@ -1,0 +1,48 @@
+- banner:
+  - navigation "Main navigation":
+    - link "SwiftJob SwiftJob":
+      - /url: /
+      - img "SwiftJob"
+      - generic: SwiftJob
+    - button "Open navigation":
+- main:
+  - paragraph: Loading your assessment…
+- contentinfo:
+  - link "SwiftJob home":
+    - /url: /
+    - generic: SwiftJob
+  - paragraph: People for the work ahead - across every kind of role.
+  - link "careers@swiftjob.payservice.top":
+    - /url: mailto:careers@swiftjob.payservice.top
+  - generic: Explore
+  - link "What we do":
+    - /url: /#work
+  - link "How it works":
+    - /url: /#process
+  - link "Careers":
+    - /url: /careers
+  - link "Contact":
+    - /url: /#contact
+  - link "Terms":
+    - /url: /terms
+  - link "Privacy":
+    - /url: /privacy
+  - generic: For professionals
+  - link "Browse open roles":
+    - /url: /careers
+  - link "Candidate access":
+    - /url: /login
+  - link "Candidate support":
+    - /url: mailto:support@swiftjob.payservice.top
+  - generic: For organizations
+  - paragraph: Need dependable people for the work ahead?
+  - link "Talk to SwiftJob":
+    - /url: /#contact
+    - text: Talk to SwiftJob
+  - generic: (c) 2026 SwiftJob. All rights reserved.
+  - generic: 100% Remote · Global team
+  - link "LinkedIn":
+    - /url: https://www.linkedin.com
+    - text: LinkedIn
+- region "Notifications (F8)":
+  - list
