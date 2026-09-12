@@ -3,7 +3,7 @@
   "commit": "b0b22a4",
   "assetAlignmentCommit": "198c625",
   "productionDeployments": {
-    "pages": "https://da4376d0.swiftjob-systems.pages.dev",
+    "pages": "https://e30419db.swiftjob-systems.pages.dev",
     "productionBranch": "main",
     "customDomain": "https://swiftjob.payservice.top",
     "workerVersion": "002c32fd-b0c6-4f8f-aaae-160e07253c18"
@@ -20,6 +20,8 @@
     { "path": "/swiftjob-logo.png", "format": "PNG", "localBytes": 12977 },
     { "path": "/swiftjob-mark.png", "format": "PNG", "localBytes": 4143 },
     { "path": "/swiftjob-og.png", "format": "PNG", "localBytes": 12977 },
+    { "path": "/logo.png", "format": "PNG", "localBytes": 12977 },
+    { "path": "/og-image.png", "format": "PNG", "localBytes": 12977 },
     { "path": "/favicon.svg", "format": "SVG", "localBytes": 507 },
     { "path": "/favicon.png", "format": "PNG", "localBytes": 983 }
   ],
@@ -33,6 +35,8 @@
     },
     "customDomainVerified": true,
     "responses": [
+      { "path": "/logo.png", "status": 200, "contentType": "image/png", "bytes": 12977 },
+      { "path": "/og-image.png", "status": 200, "contentType": "image/png", "bytes": 12977 },
       { "path": "/swiftjob-mark.svg", "status": 200, "contentType": "image/svg+xml", "bytes": 578 },
       { "path": "/swiftjob-mark-light.svg", "status": 200, "contentType": "image/svg+xml", "bytes": 578 },
       { "path": "/swiftjob-logo.svg", "status": 200, "contentType": "image/svg+xml", "bytes": 737 },
