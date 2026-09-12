@@ -1,6 +1,6 @@
 {
   "provider": "Cloudflare",
-  "measuredAt": "2026-09-12T05:52:39.761008Z",
+  "measuredAt": "2026-09-12T07:45:29.6760097Z",
   "zone": "payservice.top",
   "zoneToken": {
     "verifyStatus": 200,
@@ -20,11 +20,11 @@
     ],
     "productionBranch": "main",
     "latestDeployment": {
-      "id": "ea1dd1de-e505-4fef-b1b1-5eb28118f958",
-      "url": "https://ea1dd1de.swiftjob-systems.pages.dev",
+      "id": "e30419db-9e88-4e72-b31f-2b83b62c6e67",
+      "url": "https://e30419db.swiftjob-systems.pages.dev",
       "environment": "production",
       "stage": "deploy",
-      "createdOn": "2026-09-12T05:51:10.200784Z"
+      "createdOn": "2026-09-12T07:26:10.460136Z"
     }
   },
   "worker": {

@@ -35,7 +35,7 @@ Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2
 | 19 | **Partially.** Source and isolated status/assessment logic are consistent; a live admin mutation-to-candidate reflection run remains unverified. |
 | 20 | **Partially.** Application writes and candidate reads are covered in isolation; full live admin/employer reflection is unverified. |
 | 21 | **Partially.** Synthetic messages correspond to successful state transitions; real provider delivery and all admin event variants are unverified. |
-| 22 | **Mostly.** Worker/Pages deployment, health, headers, CORS, protected routes, sitemap, active combined edge rate-limit enforcement and CI checks pass; email DNS/provider state and hosted CI results remain unverified. |
+| 22 | **Mostly.** Worker/Pages deployment, health, headers, CORS, protected routes, sitemap, active combined edge rate-limit enforcement and hosted CI checks pass; email DNS/provider state remains unverified. |
 | 23 | **Mostly.** A domain checklist and configurable frontend/API values exist; intentional fallback strings and generated metadata must be updated together during migration. |
 | 24 | **Known limitations:** real inbox/DNS evidence; historical credential rotation; in-memory isolate and fine-grained edge rate limits; Core Web Vitals; full screen-reader and dynamic-state contrast evidence; exhaustive live admin mutation coverage. |
 | 25 | Preserve the Pages + Worker + Neon + R2 architecture, public job browsing, existing email layout, current domain until a planned migration, factual role-focused visual system, and the candidate magic-link flow. |
@@ -105,7 +105,7 @@ The unified SwiftJob logo system is also deployed and live-verified. Production 
 | 19 | **Partially verified.** Isolated status/assessment logic is consistent; live admin mutation reflection is unverified. |
 | 20 | **Partially verified.** Application writes and candidate reads pass in isolation; full live admin/employer reflection is unverified. |
 | 21 | **Partially verified.** Synthetic messages correspond to exercised transitions; provider delivery and all admin event variants are unverified. |
-| 22 | **Mostly verified.** Worker/Pages deployment, health, headers, CORS, protected routes, dynamic sitemap, current Worker secret inventory, R2, Resend provider checks and an active combined Cloudflare edge rule with live 429 regression pass; inbox delivery and hosted CI remain unverified. |
+| 22 | **Mostly verified.** Worker/Pages deployment, health, headers, CORS, protected routes, dynamic sitemap, current Worker secret inventory, R2, Resend provider checks, hosted CI run `34681345770` and an active combined Cloudflare edge rule with live 429 regression pass; inbox delivery remains unverified. |
 | 23 | **Prepared, not migrated.** The domain checklist and configurable URLs are present; the current temporary domain remains intentional. |
 | 24 | **Known limitations:** historical Supabase rotation; controlled mailbox/DNS; fine-grained edge rule changes on the Free plan; CWV/full screen-reader and dynamic-state evidence; no separate employer portal. |
 | 25 | Preserve the Pages + Worker + Neon + R2 architecture, current domain until an approved migration, factual role-focused UI, and candidate magic-link flow. |

@@ -1,5 +1,5 @@
 {
-  "measuredAt": "2026-09-12T05:55:55.4212852Z",
+  "measuredAt": "2026-09-12T07:46:38.2108953Z",
   "baseUrl": "https://swiftjob.payservice.top",
   "checks": [
     {
@@ -55,10 +55,10 @@
     }
   ],
   "deployment": {
-    "url": "https://ea1dd1de.swiftjob-systems.pages.dev",
+    "url": "https://e30419db.swiftjob-systems.pages.dev",
     "environment": "production",
     "stage": "deploy"
   },
-  "workerVersion": "9a65de17-bc8f-41f5-b151-6e6603b695bd",
+  "workerVersion": "002c32fd-b0c6-4f8f-aaae-160e07253c18",
   "environment": "Production HTTP smoke checks after Pages header deployment; no mutation and no real email sent"
 }

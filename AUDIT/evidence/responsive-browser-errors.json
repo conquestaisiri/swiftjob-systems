@@ -22,7 +22,7 @@
     "consoleWarnings": 0,
     "routeWidthSamples": 30
   },
-  "latestDeployment": "ea1dd1de.swiftjob-systems.pages.dev",
+  "latestDeployment": "e30419db.swiftjob-systems.pages.dev",
   "latestSettledRun": {
     "environment": "Production custom domain in settled external Edge browser",
     "routes": ["/", "/careers", "/login", "/terms"],
