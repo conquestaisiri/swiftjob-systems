@@ -1,144 +1,225 @@
 {
-  "measuredAt": "2026-09-12T07:26:50.6358758Z",
-  "commit": "b0b22a4",
-  "assetAlignmentCommit": "198c625",
+  "measuredAt": "2026-09-12T17:34:54.310233+00:00",
+  "commit": "460fd10",
+  "assetAlignmentCommit": "460fd10",
+  "sourceArtwork": {
+    "horizontalLockup": "AUDIT/branding/source-swiftjob-lockup.png",
+    "mark": "AUDIT/branding/source-swiftjob-mark.png",
+    "ownerSupplied": true
+  },
   "productionDeployments": {
-    "pages": "https://e30419db.swiftjob-systems.pages.dev",
+    "pages": "https://82c6ae35.swiftjob-systems.pages.dev",
     "productionBranch": "main",
     "customDomain": "https://swiftjob.payservice.top",
-    "workerVersion": "002c32fd-b0c6-4f8f-aaae-160e07253c18"
+    "workerVersion": "ba7f06a3-f461-438a-90de-5a2a24e2441d"
   },
-  "concepts": {
-    "icon": "C:/Users/USER/.codex/generated_images/01a081fe-68e8-73a0-9707-f2415868caff/exec-86105567-17b6-4ca7-862f-1c96f30f4c4a.png",
-    "horizontalLockup": "C:/Users/USER/.codex/generated_images/01a081fe-68e8-73a0-9707-f2415868caff/exec-62815098-483d-4bb8-b5b6-41c16e0fc125.png"
-  },
+  "cacheBust": "supplied-20260912",
   "productionAssets": [
     {
       "path": "/swiftjob-mark.svg",
       "format": "SVG",
-      "localBytes": 578
+      "localBytes": 366,
+      "sha256": "eacecdf790f7b7509c3ab22f6b4e1adb6c9bea2c006ac6c1948316ea2e594036"
     },
     {
       "path": "/swiftjob-mark-light.svg",
       "format": "SVG",
-      "localBytes": 578
+      "localBytes": 378,
+      "sha256": "297c6b81b88ae6363b343678437859ae12a1ca3e18d5d60a971eb3c78969b7ff"
     },
     {
       "path": "/swiftjob-logo.svg",
       "format": "SVG",
-      "localBytes": 737
+      "localBytes": 352,
+      "sha256": "132f5d2453a12a1b44ce117af1424df91e7e97583e019018b9d4dc43b8de2abe"
     },
     {
       "path": "/swiftjob-logo-light.svg",
       "format": "SVG",
-      "localBytes": 737
-    },
-    {
-      "path": "/swiftjob-logo.png",
-      "format": "PNG",
-      "localBytes": 12977
+      "localBytes": 364,
+      "sha256": "6e5e32adf1c21aa9cc539ba20bbfc440d4f2c160a4dbf05a64d86355d0efd42e"
     },
     {
       "path": "/swiftjob-mark.png",
       "format": "PNG",
-      "localBytes": 4143
+      "localBytes": 96727,
+      "sha256": "6a8d4f0085cbc54c2b40a5f00c6c871400642a8780427b0c42d8ea26fa7b1745",
+      "dimensions": [
+        384,
+        384
+      ]
     },
     {
-      "path": "/swiftjob-og.png",
+      "path": "/swiftjob-mark-light.png",
       "format": "PNG",
-      "localBytes": 12977
+      "localBytes": 40403,
+      "sha256": "57c7dbe1312c18d4bc6c1ba0ad5077f10ab61ef2d25aa72667a4681ecf66169a",
+      "dimensions": [
+        384,
+        384
+      ]
     },
     {
-      "path": "/logo.png",
+      "path": "/swiftjob-logo.png",
       "format": "PNG",
-      "localBytes": 12977
+      "localBytes": 252463,
+      "sha256": "f0df71b594d2e711ea24b56ee876d1d8a51a3d22c2d66b6f83a3faebfcf80338",
+      "dimensions": [
+        1200,
+        411
+      ]
     },
     {
-      "path": "/og-image.png",
+      "path": "/swiftjob-logo-light.png",
       "format": "PNG",
-      "localBytes": 12977
+      "localBytes": 141463,
+      "sha256": "dd1aaee1746833384e560f1ee1f932cd80cd3cbf2bb77fcc2e9c89382ac4acb6",
+      "dimensions": [
+        1200,
+        411
+      ]
     },
     {
       "path": "/favicon.svg",
       "format": "SVG",
-      "localBytes": 507
+      "localBytes": 331,
+      "sha256": "f1d04575bd82509b148577f35cadc4660153f1ad6f396f617e097c919af0a01a"
     },
     {
       "path": "/favicon.png",
       "format": "PNG",
-      "localBytes": 983
+      "localBytes": 49452,
+      "sha256": "5cc18303d71336151276a61dbc392e2cc2ede9b72629f92ae71332cc40f7c689",
+      "dimensions": [
+        256,
+        256
+      ]
+    },
+    {
+      "path": "/logo.png",
+      "format": "PNG",
+      "localBytes": 252463,
+      "sha256": "f0df71b594d2e711ea24b56ee876d1d8a51a3d22c2d66b6f83a3faebfcf80338",
+      "dimensions": [
+        1200,
+        411
+      ]
+    },
+    {
+      "path": "/og-image.png",
+      "format": "PNG",
+      "localBytes": 252463,
+      "sha256": "f0df71b594d2e711ea24b56ee876d1d8a51a3d22c2d66b6f83a3faebfcf80338",
+      "dimensions": [
+        1200,
+        411
+      ]
+    },
+    {
+      "path": "/swiftjob-og.png",
+      "format": "PNG",
+      "localBytes": 252463,
+      "sha256": "f0df71b594d2e711ea24b56ee876d1d8a51a3d22c2d66b6f83a3faebfcf80338",
+      "dimensions": [
+        1200,
+        411
+      ]
     }
   ],
   "liveAssetCheck": {
     "status": "PASS",
-    "cacheBusted": true,
-    "allStatusCodes": 200,
-    "remoteBytesMatchLocal": true,
-    "contentTypes": {
-      "svg": "image/svg+xml",
-      "png": "image/png"
-    },
     "customDomainVerified": true,
     "responses": [
-      {
-        "path": "/logo.png",
-        "status": 200,
-        "contentType": "image/png",
-        "bytes": 12977
-      },
-      {
-        "path": "/og-image.png",
-        "status": 200,
-        "contentType": "image/png",
-        "bytes": 12977
-      },
       {
         "path": "/swiftjob-mark.svg",
         "status": 200,
         "contentType": "image/svg+xml",
-        "bytes": 578
+        "bytes": 366,
+        "sha256Match": true
       },
       {
         "path": "/swiftjob-mark-light.svg",
         "status": 200,
         "contentType": "image/svg+xml",
-        "bytes": 578
+        "bytes": 378,
+        "sha256Match": true
       },
       {
         "path": "/swiftjob-logo.svg",
         "status": 200,
         "contentType": "image/svg+xml",
-        "bytes": 737
+        "bytes": 352,
+        "sha256Match": true
       },
       {
         "path": "/swiftjob-logo-light.svg",
         "status": 200,
         "contentType": "image/svg+xml",
-        "bytes": 737
+        "bytes": 364,
+        "sha256Match": true
+      },
+      {
+        "path": "/swiftjob-mark.png",
+        "status": 200,
+        "contentType": "image/png",
+        "bytes": 96727,
+        "sha256Match": true
+      },
+      {
+        "path": "/swiftjob-mark-light.png",
+        "status": 200,
+        "contentType": "image/png",
+        "bytes": 40403,
+        "sha256Match": true
       },
       {
         "path": "/swiftjob-logo.png",
         "status": 200,
         "contentType": "image/png",
-        "bytes": 12977
+        "bytes": 252463,
+        "sha256Match": true
+      },
+      {
+        "path": "/swiftjob-logo-light.png",
+        "status": 200,
+        "contentType": "image/png",
+        "bytes": 141463,
+        "sha256Match": true
       },
       {
         "path": "/favicon.svg",
         "status": 200,
         "contentType": "image/svg+xml",
-        "bytes": 507
+        "bytes": 331,
+        "sha256Match": true
       },
       {
         "path": "/favicon.png",
         "status": 200,
         "contentType": "image/png",
-        "bytes": 983
+        "bytes": 49452,
+        "sha256Match": true
+      },
+      {
+        "path": "/logo.png",
+        "status": 200,
+        "contentType": "image/png",
+        "bytes": 252463,
+        "sha256Match": true
+      },
+      {
+        "path": "/og-image.png",
+        "status": 200,
+        "contentType": "image/png",
+        "bytes": 252463,
+        "sha256Match": true
       },
       {
         "path": "/swiftjob-og.png",
         "status": 200,
         "contentType": "image/png",
-        "bytes": 12977
+        "bytes": 252463,
+        "sha256Match": true
       }
     ]
   },
@@ -153,31 +234,48 @@
   "routeBrandChecks": {
     "status": "PASS",
     "brokenImages": 0,
-    "lightSurfaceAsset": "/swiftjob-mark.svg",
-    "darkSurfaceAsset": "/swiftjob-mark-light.svg",
-    "adminLoginAsset": "/swiftjob-mark.svg",
-    "footerAsset": "/swiftjob-mark-light.svg",
+    "lightSurfaceAsset": "/swiftjob-mark.png?v=supplied-20260912",
+    "darkSurfaceAsset": "/swiftjob-mark-light.png?v=supplied-20260912",
+    "adminLoginAsset": "/swiftjob-mark.png?v=supplied-20260912",
+    "footerAsset": "/swiftjob-mark-light.png?v=supplied-20260912",
     "wordmarkExact": true
   },
-  "emailTemplateLogoPath": "/swiftjob-logo.png",
-  "emailTemplateAbsoluteUrl": "https://swiftjob.payservice.top/swiftjob-logo.png",
-  "liveEmailReceipt": "PARTIAL - controlled production contact/application/status provider payloads are delivered and contain the shared logo; owner-controlled mailbox inspection remains required",
+  "emailTemplateLogoPath": "/swiftjob-logo.png?v=supplied-20260912",
+  "emailTemplateAbsoluteUrl": "https://swiftjob.payservice.top/swiftjob-logo.png?v=supplied-20260912",
+  "emailVerification": {
+    "providerMessageId": "49361a29-6e8d-47a5-871e-5762779ab1c7",
+    "subject": "SwiftJob supplied logo cache-bust verification \u2014 2026-09-12 17:25 UTC",
+    "providerLastEvent": "delivered",
+    "mailbox": "elevate.tech.scale@outlook.com",
+    "mailboxVisible": true,
+    "renderedImageUrl": "https://swiftjob.payservice.top/swiftjob-logo.png?v=supplied-20260912",
+    "renderedImageDimensions": [
+      1200,
+      411
+    ],
+    "plainTextPresent": true,
+    "replyTo": "hr@swiftjob.payservice.top",
+    "screenshots": [
+      "AUDIT/evidence/live-email-supplied-logo.png",
+      "AUDIT/evidence/live-header-logo-crop.png",
+      "AUDIT/evidence/live-footer-logo-crop.png"
+    ]
+  },
+  "liveEmailReceipt": "PASS \u2014 owner mailbox received and rendered the cache-busted supplied lockup; provider delivery, plain text, and Reply-To were verified.",
   "visualVerification": {
     "status": "PASS",
     "surfaces": [
-      "live homepage navigation and hero",
-      "live admin login card",
-      "live SVG horizontal lockup",
-      "live footer DOM on dark background"
+      "live homepage header",
+      "live admin and candidate mark references",
+      "live dark footer",
+      "Outlook mailbox message body"
     ],
-    "notes": "The production SVG lockup renders as a clean geometric S mark with the site mint forward arrow and the exact SwiftJob wordmark. PNG fallbacks are rendered from the same SVG source. Dark and light variants are selected by surface."
+    "notes": "The supplied S-shaped arrow mark and SwiftJob lockup are visible on the custom domain and in Outlook after cache-busting."
   },
   "oldLogoAssetsReplaced": true,
-  "currentActiveWorkerVersion": "dca9cc2f-9c7f-43e6-a3e0-57e2e35bd94e",
-  "latestSecretDeployment": {
-    "deploymentId": "9e601e79-dc86-4456-9899-f92ee36f7b43",
-    "versionId": "dca9cc2f-9c7f-43e6-a3e0-57e2e35bd94e",
-    "createdAt": "2026-09-12T15:28:12.519671Z",
-    "trigger": "secret"
-  }
+  "remainingProductionGates": [
+    "Historical Supabase pooler credential still requires owner/provider rotation or revocation.",
+    "Chrome DevTools MCP still required for Core Web Vitals, Lighthouse, and full screen-reader verification.",
+    "Fine-grained Cloudflare Rulesets/Rate Limiting edit permission is still unavailable to the current token."
+  ]
 }

@@ -14,7 +14,7 @@ Follow the owner's full-system program, including the four earlier inspection fi
 | 1 | Architecture, all routes/roles, UI at 1440/1280/768/390, auth/API/data/email/assets/copy/security/SEO/performance baseline | COMPLETE (baseline evidence captured; public connected actions remain read-only) |
 | 2 | Deduplicated findings with severity, causes, dependencies, verification requirements; repair batches | COMPLETE |
 | 3 | Controlled repairs; objective, files, risk and tests recorded per batch | COMPLETE |
-| 4 | Safe connected visitor/candidate/admin simulations; actual supported hiring-side roles; email receipt evidence | PARTIAL (isolated runtime and live boundary pass; real inbox receipt remains unverified) |
+| 4 | Safe connected visitor/candidate/admin simulations; actual supported hiring-side roles; email receipt evidence | PARTIAL (isolated runtime and live boundary pass; designated mailbox receipt for the supplied-logo check is verified, while broader message coverage remains open) |
 | 5 | Regression: permissions, forms, uploads, failure states, responsive UI, email, production build | COMPLETE for exercised coverage; 15 auth, 7 application, 2 checker groups plus 30 live browser samples pass |
 | 6 | Deployment, infrastructure, configuration, DNS/email authentication, domain-migration checklist | PARTIAL (deployment, live boundaries and migration contract pass; DNS/email authentication remains unverified; domain migration prepared, not executed) |
 | 7 | Fresh finished-product review, 25 final answers, evidence-based scores and explicit readiness gate | COMPLETE with NOT READY gate |

@@ -115,7 +115,7 @@ export function LandingPage() {
       <header className="landing-v2-header">
         <div className="landing-v2-nav">
           <Link href="/" className="landing-v2-brand">
-            <img src="/swiftjob-mark.svg?v=supplied-20260912" alt="SwiftJob" />
+            <img src="/swiftjob-mark.png?v=supplied-20260912" alt="SwiftJob" />
             <span>SwiftJob</span>
           </Link>
           <nav className="landing-v2-links" aria-label="Primary navigation">

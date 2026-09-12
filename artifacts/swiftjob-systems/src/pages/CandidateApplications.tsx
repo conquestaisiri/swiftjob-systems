@@ -265,7 +265,7 @@ export function CandidateApplications() {
           <div className="container candidate-header-inner">
             <Link href="/" className="candidate-brand">
               <img
-                src="/swiftjob-mark-light.svg?v=supplied-20260912"
+                src="/swiftjob-mark-light.png?v=supplied-20260912"
                 alt="SwiftJob"
                 className="candidate-logo"
               />

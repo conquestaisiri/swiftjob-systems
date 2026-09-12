@@ -1,6 +1,6 @@
 # SwiftJob production-readiness program
 
-Status: implementation, isolated regression, production deployment, live API smoke checks, responsive browser checks, accessibility DOM checks, dynamic sitemap verification, static security headers, and route-level bundle splitting are complete. The final gate remains NOT READY until a designated mailbox test, historical credential rotation, and distributed Cloudflare rate-limit rules are evidenced.
+Status: implementation, isolated regression, production deployment, live API smoke checks, responsive browser checks, accessibility DOM checks, dynamic sitemap verification, static security headers, route-level bundle splitting, and a designated mailbox logo/delivery check are complete. The final gate remains NOT READY until historical credential rotation, Core Web Vitals/assistive-technology measurement, and distributed Cloudflare rate-limit rules are evidenced.
 
 Active goal: complete the owner's eight-phase full-system audit, controlled repairs and connected verification. See `25_IMPLEMENTATION_PLAN.md` for phase gates.
 

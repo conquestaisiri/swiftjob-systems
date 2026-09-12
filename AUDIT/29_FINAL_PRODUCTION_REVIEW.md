@@ -1,12 +1,12 @@
 # Final production review
 
-This final review is populated from the completed repair, deployment, live smoke checks and closure-sprint evidence. Current gate status is **NOT READY** because historical credential rotation and real inbox delivery remain unverified. An authenticated Cloudflare dashboard check now shows one active combined edge rule with live 429 enforcement for enumerated sensitive endpoints; fine-grained route windows remain Worker fallback on the Free plan. Core Web Vitals and full assistive-technology review are also unavailable in this runtime. Request-time schema self-healing has been retired and replaced with a read-only startup guard. Sampled visible-text contrast now passes on the five representative routes. The existing Pages/Worker/Neon/R2 architecture and domain are live.
+This final review is populated from the completed repair, deployment, live smoke checks and closure-sprint evidence. Current gate status is **NOT READY** because historical credential rotation, Core Web Vitals/assistive-technology measurement, and fine-grained edge rules remain open. An authenticated Cloudflare dashboard check now shows one active combined edge rule with live 429 enforcement for enumerated sensitive endpoints; fine-grained route windows remain Worker fallback on the Free plan. The designated owner mailbox received and rendered the cache-busted supplied-logo message. Request-time schema self-healing has been retired and replaced with a read-only startup guard. Sampled visible-text contrast now passes on the five representative routes. The existing Pages/Worker/Neon/R2 architecture and domain are live.
 
 Evidence classification:
 
 - **VERIFIED:** isolated runtime tests, local preview HTTP checks, local browser DOM checks, source/type/build checks.
 - **INFERENCE:** source-based architecture, provider configuration interpretation, and expected production behavior.
-- **BLOCKED:** real inbox receipt, provider-side historical credential rotation, and full Core Web Vitals/assistive-technology runs.
+- **BLOCKED:** provider-side historical credential rotation and full Core Web Vitals/assistive-technology runs; fine-grained edge policy changes are also still unavailable to the current token.
 
 Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2 architecture, working public job browsing, existing email templates/layout, and the current production domain remain unchanged in this branch.
 
@@ -14,13 +14,13 @@ Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2
 
 | # | Answer |
 |---:|---|
-| 1 | **No, not yet.** Core public routes are live and hardened, but the readiness gate stays NOT READY until owner-mailbox inspection and historical-secret rotation are closed. |
+| 1 | **No, not yet.** Core public routes are live and hardened, but the readiness gate stays NOT READY until historical-secret rotation and the remaining performance/edge-policy evidence are closed. |
 | 2 | **Partially.** Candidate application, upload, magic-link, password/session, portal, and assessment boundaries pass isolated tests; one synthetic production candidate mutation passed and was deleted, while owner-mailbox inspection and broader live mutation coverage remain unverified. |
 | 3 | **No separate employer journey is implemented.** Contact intake and admin hiring tools exist; a complete employer account/product lifecycle is outside the current architecture. |
 | 4 | **Partially.** Admin authentication, authorization and UI boundaries pass; one live status mutation and its provider email passed, while full admin mutation and mailbox reflection coverage remains unverified. |
 | 5 | **Yes for exercised paths.** Magic-link, password, session replacement, logout revocation and malformed-token handling pass; the production magic-link handler delivered a controlled message and the issued token verified successfully, while inbox inspection remains unverified. |
 | 6 | **Yes for exercised boundaries.** Candidate ownership, admin role/claim checks, expiry and algorithm pinning are enforced and regression-tested. |
-| 7 | **Partially.** Synthetic delivery paths and rendered HTML/text pass, sender-domain/DKIM/SPF checks are verified, direct and inbound routing probes returned `delivered`, Cloudflare recorded the inbound probe as `Forwarded`, and all exercised production contact/application/admin/referral messages returned Resend `delivered`; inbox placement, Reply-To rendering, bounce handling and DMARC enforcement remain unverified. |
+| 7 | **Partially.** Synthetic delivery paths and rendered HTML/text pass, sender-domain/DKIM/SPF checks are verified, direct and inbound routing probes returned `delivered`, Cloudflare recorded the inbound probe as `Forwarded`, and all exercised production contact/application/admin/referral messages returned Resend `delivered`; the designated owner mailbox rendered the cache-busted supplied lockup with Reply-To and plain text. Bounce handling and DMARC enforcement remain unverified. |
 | 8 | **Yes for inspected templates.** Subjects, escaping, links, branded HTML and plain-text alternatives are covered; real mail-client rendering is unverified. |
 | 9 | **Yes for sampled public surfaces.** The four historical visual findings were repaired and the public pages now use one factual SwiftJob identity. |
 | 10 | **No obvious examples in sampled pages.** Unreviewed states still carry residual visual risk. |
@@ -29,12 +29,12 @@ Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2
 | 13 | **No current source/config exposure found.** Historical Git objects contain credential-shaped database URLs; their classification and rotation remain an operator task. |
 | 14 | **No known unresolved critical runtime boundary in exercised scope.** Historical-secret rotation, in-memory/fine-grained rate-limit scope, provider delivery evidence and unmeasured Core Web Vitals remain open operational risks. |
 | 15 | **Mostly.** Job binding, idempotency, upload validation, candidate ownership and shortlist redaction are tested; one production resume/application delete completed, while broader retention/deletion automation was not verified. |
-| 16 | **Partially.** The production magic-link handler, provider delivery, token verification and logout pass in a controlled run; production application, contact, custom-mail, referral-invitation, referral-click, HR notification, applicant confirmation, admin status mutation and Reviewing status messages also passed provider delivery. Owner-mailbox placement and provider callbacks remain unverified. |
+| 16 | **Partially.** The production magic-link handler, provider delivery, token verification and logout pass in a controlled run; production application, contact, custom-mail, referral-invitation, referral-click, HR notification, applicant confirmation, admin status mutation and Reviewing status messages also passed provider delivery. The designated owner mailbox rendered the cache-busted supplied-logo check; provider callbacks remain unverified. |
 | 17 | **Yes for representative pages.** Mobile navigation, careers, job form and admin shell have usable layouts with no measured horizontal overflow; every route/breakpoint was not exhaustively tested. |
 | 18 | **Yes for sampled states.** Loading, error, empty, protected and retired-route responses are handled; exhaustive route-state review remains open. |
-| 19 | **Partially.** Source and isolated status/assessment logic are consistent; a controlled live admin status mutation and provider notification passed, while candidate-mailbox reflection remains unverified. |
-| 20 | **Partially.** Application writes, one live admin status mutation and candidate reads are covered; full live admin/employer reflection and mailbox receipt are unverified. |
-| 21 | **Partially.** Synthetic messages correspond to successful state transitions, provider/routing probes are delivered and forwarded, and controlled production contact/application/admin/referral flows produced delivered Resend messages; mailbox receipt and all admin event variants remain unverified. |
+| 19 | **Partially.** Source and isolated status/assessment logic are consistent; a controlled live admin status mutation and provider notification passed, while broader candidate-mailbox reflection remains unverified. |
+| 20 | **Partially.** Application writes, one live admin status mutation and candidate reads are covered; full live admin/employer reflection remains unverified. |
+| 21 | **Partially.** Synthetic messages correspond to successful state transitions, provider/routing probes are delivered and forwarded, controlled production contact/application/admin/referral flows produced delivered Resend messages, and the designated mailbox rendered the cache-busted supplied-logo check; all admin event variants remain unverified. |
 | 22 | **Mostly.** Worker/Pages deployment, health, headers, CORS, protected routes, sitemap, active combined edge rate-limit enforcement, hosted CI checks and email DNS/routing checks pass; destination inbox inspection remains unverified. |
 | 23 | **Mostly.** A domain checklist and configurable frontend/API values exist; intentional fallback strings and generated metadata must be updated together during migration. |
 | 24 | **Known limitations:** real inbox inspection and mail-client rendering; historical credential rotation; in-memory isolate and fine-grained edge rate limits; Core Web Vitals; full screen-reader and dynamic-state contrast evidence; exhaustive live admin mutation coverage. |
@@ -70,7 +70,7 @@ Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2
 
 ## Exact gate blockers
 
-1. A real designated mailbox has not been inspected for a controlled magic-link/application/status test, so inbox placement and mail-client rendering cannot be certified. The production magic-link handler returned 200, Resend reported the message `delivered`, token verification/logout passed, direct/inbound routing probes returned `delivered` with Cloudflare recording the inbound probe as `Forwarded`, and all exercised production contact/application/admin/referral messages returned Resend `delivered`. Read-only history still shows two delivered and six bounced prior messages, five of which predate the subdomain repair. Sender-domain status, root authentication records and recipient routing are verified; mailbox inspection remains an owner check.
+1. The designated owner mailbox has now been inspected for a cache-busted supplied-logo message: Outlook shows the delivered message and loads the 1200×411 lockup, plain text, and Reply-To. The production magic-link handler returned 200, Resend reported the message `delivered`, token verification/logout passed, direct/inbound routing probes returned `delivered` with Cloudflare recording the inbound probe as `Forwarded`, and all exercised production contact/application/admin/referral messages returned Resend `delivered`. Read-only history still shows two delivered and six bounced prior messages, five of which predate the subdomain repair. Sender-domain status, root authentication records and recipient routing are verified; broader historical message placement remains an owner check.
 2. Historical Git objects contain credential-shaped database URLs. The current tree is sanitized, but provider-side classification and rotation require the owner/provider operator.
 3. Core Web Vitals and full screen-reader/dynamic-state review remain unmeasured quality work; sampled visible-text contrast passes, static security headers are deployed, and route-level code splitting is deployed.
 
@@ -78,13 +78,13 @@ Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2
 
 This addendum supersedes earlier future-improvement wording where it conflicts with current evidence. Dynamic sitemap generation, route-level lazy loading, form labels, live responsive/console checks, static security headers, current Cloudflare/Resend resource verification, and one active combined Cloudflare edge rate-limit rule with live 429 enforcement were completed after the earlier review.
 
-The unified SwiftJob logo system is also deployed and live-verified. Production now serves deterministic SVG mark and lockup variants plus PNG fallbacks, the favicon uses the same mark, light/dark surfaces select the matching variant, and the shared email templates use the absolute `/swiftjob-logo.png` lockup. The browser sample covered the homepage, careers, candidate login, admin login, legal pages, the dark footer and the direct SVG lockup. Evidence: `evidence/branding-closure.json`. Real email receipt remains a separate hard gate.
+The unified SwiftJob logo system is deployed and live-verified from the owner-supplied artwork. Production serves stable SVG paths plus optimized PNG fallbacks, the favicon uses the same mark, light/dark surfaces select the matching variant, and the shared email templates use the cache-busted `/swiftjob-logo.png?v=supplied-20260912` lockup. The browser sample covered the homepage header, careers/candidate/admin mark references, legal pages and the dark footer; Outlook visibly rendered the same supplied lockup. Evidence: `evidence/branding-closure.json`.
 
 ### Final questions, evidence-based answers
 
 | # | Current answer |
 |---:|---|
-| 1 | **NOT READY.** Public and protected boundaries pass, but historical Supabase credential rotation and destination inbox inspection remain absent; DNS/provider records and controlled application-flow provider receipts are now verified. |
+| 1 | **NOT READY.** Public and protected boundaries pass, but historical Supabase credential rotation and performance/edge-policy evidence remain absent; DNS/provider records and the designated mailbox supplied-logo receipt are verified. |
 | 2 | **Partially verified.** Candidate auth, application binding/upload/idempotency, portal redaction, logout and assessment boundaries pass isolated regressions; one synthetic production candidate mutation and cleanup passed, while owner-mailbox inspection and broader mutation coverage remain open. |
 | 3 | **Not implemented as a separate product.** Public contact intake and admin hiring tools exist; employer accounts, billing and self-service lifecycle are outside this architecture. |
 | 4 | **Partially verified.** Admin auth and protected API boundaries pass; one live admin status mutation and provider notification passed, while mailbox/candidate reflection and other mutation variants remain open. |

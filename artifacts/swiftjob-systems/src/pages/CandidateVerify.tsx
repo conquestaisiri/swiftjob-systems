@@ -61,7 +61,7 @@ export function CandidateVerify() {
           <div className="auth-card reveal is-visible">
             <div className="auth-brand">
               <img
-                src="/swiftjob-mark.svg?v=supplied-20260912"
+                src="/swiftjob-mark.png?v=supplied-20260912"
                 alt="SwiftJob"
                 className="candidate-logo"
               />
@@ -84,7 +84,7 @@ export function CandidateVerify() {
           <div className="auth-card reveal is-visible">
             <div className="auth-brand">
               <img
-                src="/swiftjob-mark.svg?v=supplied-20260912"
+                src="/swiftjob-mark.png?v=supplied-20260912"
                 alt="SwiftJob"
                 className="candidate-logo"
               />
@@ -114,7 +114,7 @@ export function CandidateVerify() {
         <div className="auth-card reveal is-visible">
           <div className="auth-brand">
             <img
-              src="/swiftjob-mark.svg?v=supplied-20260912"
+              src="/swiftjob-mark.png?v=supplied-20260912"
               alt="SwiftJob"
               className="candidate-logo"
             />

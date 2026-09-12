@@ -81,7 +81,7 @@ export function AdminLogin() {
         <div className="admin-login-card">
           <div className="text-center mb-8">
             <div className="admin-login-brand">
-              <img src="/swiftjob-mark.svg?v=supplied-20260912" alt="SwiftJob" />
+              <img src="/swiftjob-mark.png?v=supplied-20260912" alt="SwiftJob" />
               <span>SwiftJob</span>
               <span className="admin-login-brand-area">admin</span>
             </div>
