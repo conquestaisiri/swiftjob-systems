@@ -1,6 +1,7 @@
 {
   "measuredAt": "2026-09-12T07:20:55.2168510Z",
   "commit": "b0b22a4",
+  "assetAlignmentCommit": "198c625",
   "productionDeployments": {
     "pages": "https://03d6487c.swiftjob-systems.pages.dev",
     "productionBranch": "main",
