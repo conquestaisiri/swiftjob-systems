@@ -36,6 +36,8 @@
       "recipient": "hr@swiftjob.payservice.top",
       "providerEvent": "delivered",
       "cloudflareActivity": "Forwarded",
+      "cloudflareMessageId": "<010001a096226758-d2f4b780-8b72-4ddd-906e-2bba9c8bcef5-000000@email.amazonses.com>",
+      "cloudflareForwardedAt": "2026-09-12T15:00:33Z",
       "applicationMutation": false
     },
     "historicalProviderEvents": {
