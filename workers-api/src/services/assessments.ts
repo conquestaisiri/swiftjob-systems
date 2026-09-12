@@ -1,64 +1,6 @@
 import { neon } from "@neondatabase/serverless";
 import { getEnv } from "../config";
 
-// Idempotent assessment schema (mirrors migrations/009_assessments.sql).
-// Runs once per Worker isolate as a safety net, same pattern as campaigns.
-const ASSESSMENT_SCHEMA_SQL = `
-CREATE TABLE IF NOT EXISTS assessments (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  application_id uuid NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
-  job_slug text NOT NULL,
-  track text NOT NULL,
-  status text NOT NULL DEFAULT 'in_progress',
-  system_check jsonb NOT NULL DEFAULT '{}'::jsonb,
-  responses jsonb NOT NULL DEFAULT '{}'::jsonb,
-  score int,
-  max_score int,
-  completed_at timestamptz,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_assessments_application ON assessments (application_id);
-CREATE INDEX IF NOT EXISTS idx_assessments_job_slug ON assessments (job_slug);
--- Data repair: the actuary compensation was seeded with a corrupted dash
--- character. Match any "$3,000…" variant that is not already correct so the
--- repair actually fires regardless of how the dash was mangled.
-UPDATE jobs SET compensation = '$3,000–$6,500/month'
-WHERE slug = 'actuary' AND compensation LIKE '$3,000%' AND compensation <> '$3,000–$6,500/month';
-`;
-
-let schemaEnsured = false;
-let schemaPromise: Promise<void> | null = null;
-
-async function runAssessmentSchema(): Promise<void> {
-  const { DATABASE_URL } = getEnv();
-  if (!DATABASE_URL) {
-    throw new Error("DATABASE_URL must be set");
-  }
-  const sql = neon(DATABASE_URL);
-  for (const statement of ASSESSMENT_SCHEMA_SQL.split(";")) {
-    const trimmed = statement.trim();
-    if (trimmed) {
-      await sql(trimmed);
-    }
-  }
-}
-
-export function ensureAssessmentSchemaOnce(): Promise<void> {
-  if (schemaEnsured) return Promise.resolve();
-  if (!schemaPromise) {
-    schemaPromise = runAssessmentSchema()
-      .then(() => {
-        schemaEnsured = true;
-      })
-      .catch((error) => {
-        schemaPromise = null;
-        throw error;
-      });
-  }
-  return schemaPromise;
-}
-
 export type AssessmentTrack =
   "office" | "technical" | "analytical" | "creative" | "none";
 
@@ -150,7 +92,6 @@ const ROW_TO_DETAIL = (row: Record<string, unknown>): AssessmentDetail => {
   }
   return { ...ROW_TO_RESULT(row), responses, systemCheck };
 };
-
 interface AssessmentRepo {
   findForApplication(applicationId: string): Promise<AssessmentResult | null>;
   getDetailed(applicationId: string): Promise<AssessmentDetail | null>;

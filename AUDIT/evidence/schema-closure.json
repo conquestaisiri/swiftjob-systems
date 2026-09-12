@@ -1,5 +1,5 @@
 {
-  "measuredAt": "2026-09-12T01:40:53.0828491Z",
+  "measuredAt": "2026-09-12T02:44:45.9560465Z",
   "migrationFiles": [
     "001_init.sql",
     "002_shortlist_meet.sql",
@@ -21,17 +21,19 @@
     "duplicateApplicationKeys": 0
   },
   "requestTimeSafetyNet": {
-    "services": [
-      "campaigns",
-      "assessments",
-      "referrals",
-      "techcheck"
-    ],
-    "statements": "CREATE TABLE IF NOT EXISTS / ALTER TABLE ... IF NOT EXISTS / idempotent indexes and seed inserts",
-    "execution": "once per Worker isolate with shared promise; failed promise resets for retry",
-    "purpose": "availability safety net while migration runner is not part of Worker startup"
+    "status": "RETIRED",
+    "runtimeDdlLocations": [],
+    "runtimeBehavior": "No CREATE TABLE, ALTER TABLE or CREATE INDEX executes from request handlers.",
+    "startupGuard": "verifySchemaOnce performs read-only information_schema table/column checks once per Worker isolate and returns 503 when required schema is unavailable."
   },
-  "assessment": "PARTIALLY VERIFIED - schema is migration-first with an idempotent per-isolate safety net. Request-time DDL remains a deliberate transitional safeguard; it can add latency/locks and is not a substitute for controlled migrations.",
-  "failureBehavior": "Database permission or migration failure returns an API error; no destructive or partial schema rewrite is attempted.",
-  "ownerAction": "Keep migrations in CI/deploy order, run migrate.mjs with the production DATABASE_URL before deploy, and remove request-time DDL after migration tracking and startup guarantees are established."
+  "assessment": "VERIFIED - schema evolution is migration-first and request-time DDL/self-healing has been removed. A read-only startup guard fails clearly without changing schema.",
+  "failureBehavior": "Migration or schema verification failure returns a clear 503 boundary; no destructive or opportunistic DDL is attempted.",
+  "ownerAction": "Run ordered migrations before deployment with migrate.mjs; record the deployed migration commit and verify schema before routing traffic.",
+  "guardRegression": {
+    "status": 503,
+    "expected": 503,
+    "clearFailure": true,
+    "noRequestDdl": true,
+    "evidence": "schema-guard-regression.json"
+  }
 }

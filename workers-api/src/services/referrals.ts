@@ -1,4 +1,3 @@
-﻿import { neon } from "@neondatabase/serverless";
 import { getEnv } from "../config";
 import {
   referralRepository,
@@ -7,88 +6,6 @@ import {
 } from "../repositories";
 import { emailService, getSupportEmail } from "./email";
 import type { CreateReferralInput, Referral } from "../schema";
-
-const REFERRAL_SCHEMA_SQL = `
-CREATE TABLE IF NOT EXISTS referrals (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  referral_code text NOT NULL UNIQUE,
-  full_name text NOT NULL,
-  email text,
-  referred_by text,
-  job_title text,
-  meeting_url text,
-  status text NOT NULL DEFAULT 'Pending',
-  email_sent_at timestamptz,
-  click_count integer NOT NULL DEFAULT 0,
-  last_clicked_at timestamptz,
-  last_device text,
-  content_overrides jsonb NOT NULL DEFAULT '{}',
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-
-ALTER TABLE referrals ADD COLUMN IF NOT EXISTS click_count integer NOT NULL DEFAULT 0;
-ALTER TABLE referrals ADD COLUMN IF NOT EXISTS last_clicked_at timestamptz;
-ALTER TABLE referrals ADD COLUMN IF NOT EXISTS last_device text;
-ALTER TABLE referrals ADD COLUMN IF NOT EXISTS content_overrides jsonb NOT NULL DEFAULT '{}';
-ALTER TABLE referrals ADD COLUMN IF NOT EXISTS phone text;
-ALTER TABLE referrals ADD COLUMN IF NOT EXISTS city text;
-ALTER TABLE referrals ADD COLUMN IF NOT EXISTS country text;
-ALTER TABLE referrals ADD COLUMN IF NOT EXISTS address text;
-ALTER TABLE referrals ADD COLUMN IF NOT EXISTS zip_code text;
-ALTER TABLE referrals ADD COLUMN IF NOT EXISTS source text;
-ALTER TABLE referrals ADD COLUMN IF NOT EXISTS notes text;
-
-CREATE TABLE IF NOT EXISTS referral_clicks (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  referral_id uuid NOT NULL REFERENCES referrals(id) ON DELETE CASCADE,
-  device_type text NOT NULL DEFAULT 'unknown',
-  clicked_at timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS referral_content (
-  key text PRIMARY KEY,
-  body text NOT NULL DEFAULT '',
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS referral_settings (
-  id integer PRIMARY KEY DEFAULT 1 CHECK (id = 1),
-  daily_send_limit integer NOT NULL DEFAULT 5,
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS footprints (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  subject_type text NOT NULL,
-  subject_id uuid NOT NULL,
-  event text NOT NULL,
-  device text NOT NULL DEFAULT 'unknown',
-  user_agent text,
-  meta jsonb,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX IF NOT EXISTS footprints_subject_idx ON footprints (subject_type, subject_id, created_at DESC);
-ALTER TABLE footprints ADD COLUMN IF NOT EXISTS meta jsonb;
-
-CREATE TABLE IF NOT EXISTS activities (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  actor text NOT NULL,
-  action text NOT NULL,
-  target_type text,
-  target_id text,
-  target_email text,
-  detail jsonb,
-  status text NOT NULL DEFAULT 'ok',
-  error text,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX IF NOT EXISTS activities_created_idx ON activities (created_at DESC);
-CREATE INDEX IF NOT EXISTS activities_action_idx ON activities (action);
-
-INSERT INTO referral_settings (id, daily_send_limit) VALUES (1, 5)
-ON CONFLICT (id) DO NOTHING;
-`;
 
 const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
   heroTitle: "You've been referred",
@@ -129,7 +46,6 @@ const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
   emailCtaLabel: "Open my briefing",
   emailClosing: `We've put everything you need on the page - the role, how it works, your pay, and what's next. When you're ready, follow the steps inside. Questions? Reach out to HR at {hrEmail}.`,
 };
-
 // Replace the old shallow defaults with the richer copy - only where the stored
 // value still equals a known old default (so admin edits are never overwritten).
 const OLD_TO_NEW_CONTENT: Record<string, { old: string[]; next: string }> = {
@@ -218,47 +134,6 @@ const OLD_TO_NEW_CONTENT: Record<string, { old: string[]; next: string }> = {
     next: DEFAULT_REFERRAL_CONTENT.securityNote,
   },
 };
-
-async function runReferralSchema(): Promise<void> {
-  const { DATABASE_URL } = getEnv();
-  if (!DATABASE_URL) {
-    throw new Error("DATABASE_URL must be set");
-  }
-  const sql = neon(DATABASE_URL);
-  for (const statement of REFERRAL_SCHEMA_SQL.split(";")) {
-    const trimmed = statement.trim();
-    if (trimmed) {
-      await sql(trimmed);
-    }
-  }
-  // Seed only rows that are absent; then upgrade the old shallow defaults to the
-  // richer copy only where the stored value still equals a known old default, so
-  // any admin customization is never overwritten.
-  await referralRepository.seedContentIfAbsent(DEFAULT_REFERRAL_CONTENT);
-  await referralRepository.upgradeContentAll(OLD_TO_NEW_CONTENT);
-}
-
-export async function ensureReferralSchema(): Promise<void> {
-  await runReferralSchema();
-}
-
-let schemaEnsured = false;
-let schemaPromise: Promise<void> | null = null;
-
-export function ensureReferralSchemaOnce(): Promise<void> {
-  if (schemaEnsured) return Promise.resolve();
-  if (!schemaPromise) {
-    schemaPromise = runReferralSchema()
-      .then(() => {
-        schemaEnsured = true;
-      })
-      .catch((error) => {
-        schemaPromise = null;
-        throw error;
-      });
-  }
-  return schemaPromise;
-}
 
 export function publicReferralUrl(code: string): string {
   const base = (

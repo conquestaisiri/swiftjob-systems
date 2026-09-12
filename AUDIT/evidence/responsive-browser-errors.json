@@ -1,6 +1,6 @@
 {
-  "measuredAt": "2026-09-12T01:46:16.6968348Z",
-  "environment": "Production browser, live domain after lazy route deployment, viewport capability",
+  "measuredAt": "2026-09-12T03:10:00Z",
+  "environment": "Production Pages deployment 014b6028.swiftjob-systems.pages.dev browser viewport capability",
   "routes": [
     "/",
     "/careers",

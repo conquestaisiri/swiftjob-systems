@@ -1,22 +1,22 @@
 {
-  "measuredAt": "2026-09-12T01:44:38.2323028Z",
+  "measuredAt": "2026-09-12T03:08:00Z",
   "environment": "Production build and live HTTP baseline",
   "build": {
     "mainJsBytes": 323182,
     "mainJsGzipKb": 104.75,
-    "cssBytes": 229485,
-    "cssGzipKb": 40.63,
+    "cssBytes": 229730,
+    "cssGzipKb": 40.68,
     "routeChunks": "Present after route-level lazy loading",
     "largestLazyChunk": "ContactsAdmin ~352.20 kB (120.07 kB gzip)",
     "previousMainJsKb": 1160.18,
     "currentMainJsKb": 323.18
   },
   "liveBaseline": {
-    "healthzMs": 734,
-    "jobsMs": 1064,
-    "sitemapMs": 572,
-    "admin401Ms": 158,
-    "candidate401Ms": 613
+    "healthzMs": 1434,
+    "jobsMs": 996,
+    "sitemapMs": 673,
+    "admin401Ms": 180,
+    "candidate401Ms": 779
   },
   "coreWebVitals": {
     "LCP": "NOT VERIFIED - browser sandbox lacks Performance API and DevTools MCP is unavailable",

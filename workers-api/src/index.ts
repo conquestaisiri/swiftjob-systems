@@ -1,4 +1,4 @@
-﻿import { Hono } from "hono";
+import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { SignJWT, jwtVerify } from "jose";
 import { z } from "zod";
@@ -12,12 +12,10 @@ import { campaignService } from "./services/campaigns";
 import {
   assessmentRepository,
   trackForDepartment,
-  ensureAssessmentSchemaOnce,
   type AssessmentResult,
 } from "./services/assessments";
 import { gradeAssessment } from "./services/assessmentAnswerKey";
 import {
-  ensureTechCheckSchemaOnce,
   techCheckService,
   buildWindowsTool,
   buildMacTool,
@@ -26,8 +24,8 @@ import {
 import {
   referralService,
   publicReferralUrl,
-  ensureReferralSchemaOnce,
 } from "./services/referrals";
+import { verifySchemaOnce } from "./services/schema";
 import { initEnv, getEnv } from "./config";
 import type { Env } from "./env";
 import type { ApplicationStatus } from "./schema";
@@ -92,6 +90,18 @@ app.use("*", async (c, next) => {
   }
   if (c.req.path.startsWith("/api/")) {
     c.header("Cache-Control", "no-store");
+  }
+});
+
+// Verify the migration-owned schema after the CORS and response-hardening
+// middleware so even a controlled 503 carries the same boundary headers.
+app.use("*", async (c, next) => {
+  try {
+    await verifySchemaOnce();
+    await next();
+  } catch (err) {
+    console.error({ err }, "Required database schema is unavailable");
+    return c.json({ error: "Service temporarily unavailable" }, 503);
   }
 });
 
@@ -530,9 +540,7 @@ app.post("/api/contact", async (c) => {
 // ============================================
 app.get("/api/public-stats", async (c) => {
   try {
-    // Reads referral_content - make sure the table exists on a cold database
-    // instead of 500ing until some other route self-heals the schema.
-    await ensureReferralSchemaOnce();
+    // The read-only startup guard has already verified referral_content exists.
     const [stats, content] = await Promise.all([
       campaignRepository.publicStats(),
       referralService.getContent(),
@@ -553,7 +561,6 @@ app.get("/api/public-stats", async (c) => {
 // ============================================
 app.get("/api/assessments/:applicationId", async (c) => {
   try {
-    await ensureAssessmentSchemaOnce();
     const applicationId = c.req.param("applicationId");
     const email = (c.req.query("email") ?? "").trim().toLowerCase();
     const referenceCode = (c.req.query("ref") ?? "").trim().toUpperCase();
@@ -609,7 +616,6 @@ app.get("/api/assessments/:applicationId", async (c) => {
 
 app.post("/api/assessments/:applicationId", async (c) => {
   try {
-    await ensureAssessmentSchemaOnce();
     const applicationId = c.req.param("applicationId");
     const body = await parseJson(c);
     if (body === null) return c.json({ error: "Invalid request body." }, 400);
@@ -698,7 +704,6 @@ async function verifyTechCheckOwnership(
 
 app.get("/api/tech-check/token", async (c) => {
   try {
-    await ensureAssessmentSchemaOnce();
     const applicationId = c.req.query("applicationId") ?? "";
     const email = c.req.query("email") ?? "";
     if (!(await verifyTechCheckOwnership(applicationId, email))) {
@@ -719,7 +724,6 @@ app.get("/api/tech-check/token", async (c) => {
 
 app.get("/api/tech-check/download/:token", async (c) => {
   try {
-    await ensureTechCheckSchemaOnce();
     const status = await techCheckService.getStatus(c.req.param("token"));
     if (!status || !status.valid || status.used) {
       return c.json(
@@ -1752,7 +1756,6 @@ async function resolveApplicationNextStep(
 
 app.get("/api/candidate/applications", candidateAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const user = c.get("user");
     const applications = await applicationService.findByEmail(user.email);
     // Cache the global content once per request instead of an N+1 query per
@@ -1773,7 +1776,6 @@ app.get("/api/candidate/applications", candidateAuth, async (c) => {
 
 app.get("/api/candidate/applications/:id", candidateAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const user = c.get("user");
     const application = await applicationService.getById(c.req.param("id"));
     if (!application) {
@@ -1840,7 +1842,6 @@ app.get("/api/candidate/applications/:id/resume", candidateAuth, async (c) => {
 
 app.post("/api/candidate/footprint", candidateAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const user = c.get("user");
     const body = (await parseJson(c)) ?? {};
     const applicationId =
@@ -1892,7 +1893,6 @@ app.post("/api/candidate/footprint", candidateAuth, async (c) => {
 // ============================================
 app.get("/api/referrals/:code", async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const referral = await referralService.getByCode(c.req.param("code"));
     if (!referral) {
       return c.json({ error: "Referral not found" }, 404);
@@ -1933,7 +1933,6 @@ app.get("/api/referrals/:code", async (c) => {
 
 app.post("/api/referrals/:code/visit", referralClickLimiter, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const body = (await parseJson(c)) ?? {};
     const clientDevice = typeof body?.device === "string" ? body.device : "";
     const meta = sanitizeMeta(body?.meta);
@@ -2019,7 +2018,6 @@ function matchesFootprintFilter(
 
 app.post("/api/referrals/:code/click", referralClickLimiter, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const body = (await parseJson(c)) ?? {};
     const meta = sanitizeMeta(body?.meta);
     const metaMobile = meta?.verdict === "mobile";
@@ -2101,7 +2099,6 @@ app.post("/api/referrals/:code/background", referralClickLimiter, async (c) => {
 // see the full sequence (visit -> click -> background -> roomRevealed).
 app.post("/api/referrals/:code/reveal", referralClickLimiter, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const code = c.req.param("code");
     const nextStep = await referralService.getNextStepForReferral(code);
     c.executionCtx.waitUntil(
@@ -2187,7 +2184,6 @@ function escHtml(value: string): string {
 
 app.post("/api/admin/mail/send", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const raw = await parseJson(c);
     if (raw === null) {
       return c.json(
@@ -2343,7 +2339,6 @@ app.post("/api/admin/mail/send", adminAuth, async (c) => {
 
 app.get("/api/admin/activities", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const limit = Math.min(
       200,
       Math.max(1, parseInt(c.req.query("limit") || "50")),
@@ -2364,7 +2359,6 @@ app.get("/api/admin/activities", adminAuth, async (c) => {
 // ============================================
 app.get("/api/admin/referrals", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const status = c.req.query("status") || undefined;
     const search = c.req.query("search") || undefined;
     const footprint = c.req.query("footprint") || undefined;
@@ -2385,7 +2379,6 @@ app.get("/api/admin/referrals", adminAuth, async (c) => {
 
 app.get("/api/admin/referrals/status", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const status = await referralService.getSendStatus();
     return c.json({ status });
   } catch (err) {
@@ -2396,7 +2389,6 @@ app.get("/api/admin/referrals/status", adminAuth, async (c) => {
 
 app.get("/api/admin/referrals/content", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const content = await referralService.getContent();
     return c.json({ content });
   } catch (err) {
@@ -2410,7 +2402,6 @@ app.get("/api/admin/referrals/content", adminAuth, async (c) => {
 // edit what the referral actually sees instead of the global defaults alone.
 app.get("/api/admin/referrals/:id/content", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const referral = await referralService.getById(c.req.param("id"));
     if (!referral) {
       return c.json({ error: "Referral not found" }, 404);
@@ -2425,7 +2416,6 @@ app.get("/api/admin/referrals/:id/content", adminAuth, async (c) => {
 
 app.put("/api/admin/referrals/content", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const body = await parseJson(c);
     if (body === null) {
       return c.json({ error: "Invalid request body" }, 400);
@@ -2451,7 +2441,6 @@ app.put("/api/admin/referrals/content", adminAuth, async (c) => {
 // body: { content, ids?: string[], applyToAll?: boolean }
 app.post("/api/admin/referrals/content/apply", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const body = await parseJson(c);
     if (body === null) {
       return c.json({ error: "Invalid request body" }, 400);
@@ -2492,7 +2481,6 @@ app.post("/api/admin/referrals/content/apply", adminAuth, async (c) => {
 // body: { "ids": string[], "keys"?: string[] }
 app.post("/api/admin/referrals/content/reset", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const body = await parseJson(c);
     if (body === null) {
       return c.json({ error: "Invalid request body" }, 400);
@@ -2518,7 +2506,6 @@ app.post("/api/admin/referrals/content/reset", adminAuth, async (c) => {
 
 app.post("/api/admin/referrals", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const body = await parseJson(c);
     if (body === null) {
       return c.json({ error: "Invalid request body" }, 400);
@@ -2560,7 +2547,6 @@ app.post("/api/admin/referrals", adminAuth, async (c) => {
 
 app.post("/api/admin/referrals/import", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const body = await parseJson(c);
     if (body === null) {
       return c.json({ error: "Invalid request body" }, 400);
@@ -2594,7 +2580,6 @@ app.post("/api/admin/referrals/import", adminAuth, async (c) => {
 
 app.patch("/api/admin/referrals/:id", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const body = await parseJson(c);
     if (body === null) {
       return c.json({ error: "Invalid request body" }, 400);
@@ -2655,7 +2640,6 @@ app.patch("/api/admin/referrals/:id", adminAuth, async (c) => {
 
 app.post("/api/admin/referrals/send", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const body = await parseJson(c);
     if (body === null) {
       return c.json({ error: "Invalid request body" }, 400);
@@ -2688,7 +2672,6 @@ app.post("/api/admin/referrals/send", adminAuth, async (c) => {
 
 app.put("/api/admin/referrals/limit", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const body = await parseJson(c);
     if (body === null) {
       return c.json({ error: "Invalid request body" }, 400);
@@ -2712,7 +2695,6 @@ app.put("/api/admin/referrals/limit", adminAuth, async (c) => {
 
 app.delete("/api/admin/referrals/:id", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const deleted = await referralService.delete(c.req.param("id"));
     if (!deleted) {
       return c.json({ error: "Referral not found" }, 404);
@@ -2734,7 +2716,6 @@ app.delete("/api/admin/referrals/:id", adminAuth, async (c) => {
 // ============================================
 app.get("/api/admin/footprints", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const subjectType = c.req.query("subjectType");
     const subjectId = c.req.query("subjectId");
     if (!subjectType || !subjectId) {
@@ -2755,7 +2736,6 @@ app.get("/api/admin/footprints", adminAuth, async (c) => {
 
 app.get("/api/admin/contacts", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const page = Math.max(1, parseInt(c.req.query("page") || "1"));
     const limit = Math.min(
       100,
@@ -2879,7 +2859,6 @@ app.post("/api/admin/contacts/import", adminAuth, async (c) => {
 // confirmation in the body so a stray call can never wipe the referral table.
 app.delete("/api/admin/referrals", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const body = (await parseJson(c)) ?? {};
     if (body?.confirm !== "DELETE ALL") {
       return c.json(
@@ -2906,7 +2885,6 @@ app.delete("/api/admin/referrals", adminAuth, async (c) => {
 // Create referrals from contacts (selected ids, or all contacts when omitted)
 app.post("/api/admin/referrals/from-contacts", adminAuth, async (c) => {
   try {
-    await ensureReferralSchemaOnce();
     const body = await parseJson(c);
     if (body === null) {
       return c.json({ error: "Invalid request body" }, 400);

@@ -5,46 +5,6 @@ import { getEnv } from "../config";
 // embedded in a generated tool (Windows .bat / macOS .command), and consumed
 // the moment the tool reports back — after that the download is dead.
 
-const TECH_CHECK_SCHEMA_SQL = `
-CREATE TABLE IF NOT EXISTS tech_check_tokens (
-  token_hash text PRIMARY KEY,
-  application_id uuid NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  expires_at timestamptz NOT NULL,
-  used_at timestamptz,
-  report jsonb
-);
-CREATE INDEX IF NOT EXISTS idx_tech_check_app ON tech_check_tokens (application_id);
-`;
-
-let schemaEnsured = false;
-let schemaPromise: Promise<void> | null = null;
-
-async function runSchema(): Promise<void> {
-  const { DATABASE_URL } = getEnv();
-  if (!DATABASE_URL) throw new Error("DATABASE_URL must be set");
-  const sql = neon(DATABASE_URL);
-  for (const statement of TECH_CHECK_SCHEMA_SQL.split(";")) {
-    const trimmed = statement.trim();
-    if (trimmed) await sql(trimmed);
-  }
-}
-
-export function ensureTechCheckSchemaOnce(): Promise<void> {
-  if (schemaEnsured) return Promise.resolve();
-  if (!schemaPromise) {
-    schemaPromise = runSchema()
-      .then(() => {
-        schemaEnsured = true;
-      })
-      .catch((error) => {
-        schemaPromise = null;
-        throw error;
-      });
-  }
-  return schemaPromise;
-}
-
 const TTL_MS = 30 * 60 * 1000; // 30 minutes
 
 function randomToken(): string {
@@ -52,7 +12,6 @@ function randomToken(): string {
   crypto.getRandomValues(bytes);
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
-
 async function hashToken(token: string): Promise<string> {
   const digest = await crypto.subtle.digest(
     "SHA-256",
@@ -77,7 +36,6 @@ export const techCheckService = {
   async issueToken(
     applicationId: string,
   ): Promise<{ token: string; expiresAt: string }> {
-    await ensureTechCheckSchemaOnce();
     const { DATABASE_URL } = getEnv();
     const sql = neon(DATABASE_URL);
     // Retire any outstanding tokens for this application — one live tool at a
@@ -104,7 +62,6 @@ export const techCheckService = {
     expired: boolean;
     specs: Record<string, unknown> | null;
   } | null> {
-    await ensureTechCheckSchemaOnce();
     const { DATABASE_URL } = getEnv();
     const sql = neon(DATABASE_URL);
     const rows = await sql(
@@ -128,7 +85,6 @@ export const techCheckService = {
     token: string,
     specs: Record<string, unknown>,
   ): Promise<boolean> {
-    await ensureTechCheckSchemaOnce();
     const { DATABASE_URL } = getEnv();
     const sql = neon(DATABASE_URL);
     const result = await sql(

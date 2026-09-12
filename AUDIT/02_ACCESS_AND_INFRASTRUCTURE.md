@@ -11,7 +11,7 @@
 | Backblaze | NOT VERIFIED: binding names exist; actual private MSI content, signing and download behavior not exercised. No installer was executed. |
 | Render | NOT VERIFIED / apparently retired: current README and proxy use Workers. No active Render service verified. |
 
-Current public domain is `swiftjob.payservice.top`; Pages project is `swiftjob-systems`, Worker is `swiftjob-workers-api`. The repaired Worker and Pages deployments are live. Secret names missing from Worker include optional SUPPORT_EMAIL and TURNSTILE_SECRET_KEY. An absent optional binding does not alone prove a malfunction. The retired Backblaze/MSI path has been removed from active configuration and code.
+Current public domain is `swiftjob.payservice.top`; Pages project is `swiftjob-systems`, Worker is `swiftjob-workers-api`. The repaired Worker and Pages deployments are live. Secret names missing from Worker include optional SUPPORT_EMAIL and TURNSTILE_SECRET_KEY. The retired Backblaze/MSI path has been removed from active configuration and code, and its unused `B2_APP_KEY`/`B2_KEY_ID` bindings were deleted from the Worker during hard-gate closure.
 
 History scan examined 1,137 Git objects and flagged credential-shaped database URLs in historical text. Values are deliberately excluded. The current legacy migration helper now reads `DATABASE_URL` from the environment and contains no credential. Historical candidates still require operator classification and rotation. This regex scan does not prove all secrets are absent.
 
