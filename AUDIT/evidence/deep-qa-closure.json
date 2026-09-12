@@ -39,7 +39,8 @@
     ],
     "responsiveOverflow": "PASS — zero horizontal overflow on sampled public routes",
     "browserConsole": "PASS — zero error or warning entries on sampled routes",
-    "images": "PASS — lazy-loaded public images completed with zero broken images"
+    "images": "PASS — lazy-loaded public images completed with zero broken images",
+    "preparedApplicationFormScreenshot": "AUDIT/evidence/controlled-application-form.png"
   },
   "liveDataAndCopy": {
     "publicStats": {
