@@ -20,7 +20,7 @@ Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2
 | 4 | **Partially.** Admin authentication, authorization and UI boundaries pass; full live admin mutation and email-reflection coverage remains unverified. |
 | 5 | **Yes for exercised paths.** Magic-link, password, session replacement, logout revocation and malformed-token handling pass; delivery of the link itself remains a provider check. |
 | 6 | **Yes for exercised boundaries.** Candidate ownership, admin role/claim checks, expiry and algorithm pinning are enforced and regression-tested. |
-| 7 | **Partially.** Synthetic delivery paths and rendered HTML/text pass, sender-domain/DKIM/SPF checks are verified, and one controlled direct-recipient probe returned `delivered`; inbox placement, Reply-To routing, bounce handling and DMARC enforcement remain unverified. |
+| 7 | **Partially.** Synthetic delivery paths and rendered HTML/text pass, sender-domain/DKIM/SPF checks are verified, direct and inbound routing probes returned `delivered`, and Cloudflare recorded the inbound probe as `Forwarded`; inbox placement, Reply-To inspection, bounce handling and DMARC enforcement remain unverified. |
 | 8 | **Yes for inspected templates.** Subjects, escaping, links, branded HTML and plain-text alternatives are covered; real mail-client rendering is unverified. |
 | 9 | **Yes for sampled public surfaces.** The four historical visual findings were repaired and the public pages now use one factual SwiftJob identity. |
 | 10 | **No obvious examples in sampled pages.** Unreviewed states still carry residual visual risk. |
@@ -34,8 +34,8 @@ Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2
 | 18 | **Yes for sampled states.** Loading, error, empty, protected and retired-route responses are handled; exhaustive route-state review remains open. |
 | 19 | **Partially.** Source and isolated status/assessment logic are consistent; a live admin mutation-to-candidate reflection run remains unverified. |
 | 20 | **Partially.** Application writes and candidate reads are covered in isolation; full live admin/employer reflection is unverified. |
-| 21 | **Partially.** Synthetic messages correspond to successful state transitions and one direct-recipient provider probe is delivered; real application-flow receipt and all admin event variants remain unverified. |
-| 22 | **Mostly.** Worker/Pages deployment, health, headers, CORS, protected routes, sitemap, active combined edge rate-limit enforcement and hosted CI checks pass; email DNS/provider state remains unverified. |
+| 21 | **Partially.** Synthetic messages correspond to successful state transitions and provider/routing probes are delivered and forwarded; real application-flow receipt and all admin event variants remain unverified. |
+| 22 | **Mostly.** Worker/Pages deployment, health, headers, CORS, protected routes, sitemap, active combined edge rate-limit enforcement, hosted CI checks and email DNS/routing checks pass; destination inbox inspection remains unverified. |
 | 23 | **Mostly.** A domain checklist and configurable frontend/API values exist; intentional fallback strings and generated metadata must be updated together during migration. |
 | 24 | **Known limitations:** real inbox/DNS evidence; historical credential rotation; in-memory isolate and fine-grained edge rate limits; Core Web Vitals; full screen-reader and dynamic-state contrast evidence; exhaustive live admin mutation coverage. |
 | 25 | Preserve the Pages + Worker + Neon + R2 architecture, public job browsing, existing email layout, current domain until a planned migration, factual role-focused visual system, and the candidate magic-link flow. |
@@ -70,7 +70,7 @@ Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2
 
 ## Exact gate blockers
 
-1. A real designated mailbox has not received a controlled magic-link/application/status test, so inbox placement, Reply-To receipt and provider event handling cannot be certified. A separate direct-recipient Resend probe returned `delivered`, while read-only history shows two delivered and six bounced prior messages; five bounces target the configured `swiftjob.payservice.top` HR/notification or candidate-link domain, which currently has no MX record. Sender-domain status and root authentication records are verified, but recipient routing still requires owner action.
+1. A real designated mailbox has not received a controlled magic-link/application/status test, so inbox placement and application-flow handling cannot be certified. Direct and inbound routing probes returned `delivered`, and Cloudflare recorded the inbound probe as `Forwarded` after the `swiftjob` subdomain was enabled with three MX records. Read-only history still shows two delivered and six bounced prior messages, five of which predate that repair. Sender-domain status and root authentication records are verified; mailbox inspection and application-flow receipts remain owner checks.
 2. Historical Git objects contain credential-shaped database URLs. The current tree is sanitized, but provider-side classification and rotation require the owner/provider operator.
 3. Core Web Vitals and full screen-reader/dynamic-state review remain unmeasured quality work; sampled visible-text contrast passes, static security headers are deployed, and route-level code splitting is deployed.
 
@@ -90,7 +90,7 @@ The unified SwiftJob logo system is also deployed and live-verified. Production 
 | 4 | **Partially verified.** Admin auth and protected API boundaries pass; live admin mutation-to-email/candidate reflection was not run. |
 | 5 | **Verified in isolation.** Magic-link issue/verify, password session replacement, logout revocation and malformed-token behavior pass; delivery remains unverified. |
 | 6 | **Verified for exercised boundaries.** Candidate ownership, admin role/claim checks, expiry and JWT algorithm pinning are regression-tested. |
-| 7 | **PARTIALLY VERIFIED.** The Resend API key, verified domain and DKIM/SPF records pass checks; a controlled direct-recipient probe returned `delivered`, while historical events include two delivered and six bounced messages. Inbox/spam placement, Reply-To routing and application-flow receipts remain unverified. |
+| 7 | **PARTIALLY VERIFIED.** The Resend API key, verified domain and DKIM/SPF records pass checks; direct and inbound routing probes returned `delivered`, with Cloudflare recording the inbound probe as `Forwarded`. Historical events include two delivered and six bounced messages. Inbox/spam placement, Reply-To inspection and application-flow receipts remain unverified. |
 | 8 | **Verified in source/sink.** Escaped HTML, plain text and configured production links are covered; real mail-client rendering and link inspection remain unverified. |
 | 9 | **Verified for sampled live pages.** The four historical visual findings are repaired; no new obvious logo/destination/date issue was found in the browser sweep. |
 | 10 | **No obvious sampled examples.** Full visual-state review remains outside the automated sweep. |
@@ -104,8 +104,8 @@ The unified SwiftJob logo system is also deployed and live-verified. Production 
 | 18 | **Verified for sampled states.** Loading, error, protected and retired-route boundaries are handled; exhaustive state review remains open. |
 | 19 | **Partially verified.** Isolated status/assessment logic is consistent; live admin mutation reflection is unverified. |
 | 20 | **Partially verified.** Application writes and candidate reads pass in isolation; full live admin/employer reflection is unverified. |
-| 21 | **Partially verified.** Synthetic messages correspond to exercised transitions and one direct-recipient provider probe is delivered; application-flow provider delivery and all admin event variants remain unverified. |
-| 22 | **Mostly verified.** Worker/Pages deployment, health, headers, CORS, protected routes, dynamic sitemap, current Worker secret inventory, R2, Resend provider checks, hosted CI run `34681345770` and an active combined Cloudflare edge rule with live 429 regression pass; inbox delivery remains unverified. |
+| 21 | **Partially verified.** Synthetic messages correspond to exercised transitions and provider/routing probes are delivered and forwarded; application-flow provider delivery and all admin event variants remain unverified. |
+| 22 | **Mostly verified.** Worker/Pages deployment, health, headers, CORS, protected routes, dynamic sitemap, current Worker secret inventory, R2, Resend provider checks, Cloudflare Email Routing MX/subdomain forwarding, hosted CI run `34681345770` and an active combined edge rule with live 429 regression pass; destination inbox inspection remains unverified. |
 | 23 | **Prepared, not migrated.** The domain checklist and configurable URLs are present; the current temporary domain remains intentional. |
 | 24 | **Known limitations:** historical Supabase rotation; controlled mailbox/DNS; fine-grained edge rule changes on the Free plan; CWV/full screen-reader and dynamic-state evidence; no separate employer portal. |
 | 25 | Preserve the Pages + Worker + Neon + R2 architecture, current domain until an approved migration, factual role-focused UI, and candidate magic-link flow. |
@@ -123,6 +123,6 @@ The unified SwiftJob logo system is also deployed and live-verified. Production 
 ### Remaining hard-gate blockers
 
 1. Rotate/revoke the historical Supabase pooler/database credential for project `yfymijkhcbdubjawsngq` and confirm no remaining consumer. The old project management token is unauthorized and its hostname did not resolve during this check, but that does not prove provider-side revocation.
-2. Provide an owner-controlled test mailbox and repair/confirm MX routing for the configured HR/Reply-To subdomain. Verify magic link, application confirmation/HR notification and status-change delivery, then inspect inbox/spam placement, Reply-To, links and provider events. Resend sender-domain verification and root DNS authentication are confirmed read-only.
+2. Inspect the owner-controlled destination mailbox for the controlled routed message, then verify magic link, application confirmation/HR notification and status-change delivery, including inbox/spam placement, Reply-To, links and provider events. The `swiftjob` subdomain is now enabled in Cloudflare Email Routing, its three MX records resolve publicly, its destination address is verified, and the inbound probe is recorded as `Forwarded`.
 3. Keep ordered migrations as the deploy contract and monitor the read-only startup schema guard.
 4. Obtain a Chrome DevTools/Lighthouse run for LCP, INP, CLS and a full screen-reader/dynamic-state review; the required Chrome DevTools MCP tools are not configured in this runtime, while sampled visible-text contrast and static security headers pass. The active combined edge rule is live-verified for the enumerated sensitive endpoints; finer route granularity requires additional plan/permission and remains a monitored limitation.
