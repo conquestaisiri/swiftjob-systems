@@ -1,6 +1,6 @@
 {
-  "measuredAt": "2026-09-12T06:19:48.1703524Z",
-  "environment": "Cloudflare DNS API + Resend API read-only; no new production email sent during this verification",
+  "measuredAt": "2026-09-12T06:42:59.1564249Z",
+  "environment": "Cloudflare DNS API + public DNS resolver + Resend API read-only; no new production email sent during this verification",
   "sendingDomain": "payservice.top",
   "replyToDomain": "swiftjob.payservice.top",
   "resend": {
@@ -147,5 +147,13 @@
     "resendDkimPresent": true,
     "sendSpfPresent": true,
     "replyToSubdomainMxPresent": false
+  },
+  "directDnsCheck": {
+    "resolver": "Windows Resolve-DnsName",
+    "replyToSubdomainMxRecordCount": 0,
+    "replyToSubdomainARecords": 2,
+    "rootMxRecordCount": 3,
+    "rootMxObserved": true,
+    "interpretation": "Public DNS independently confirms no MX record at swiftjob.payservice.top while payservice.top has three MX records."
   }
 }
