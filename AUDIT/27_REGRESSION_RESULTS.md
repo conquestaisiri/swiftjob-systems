@@ -13,7 +13,9 @@
 | Accessibility DOM and sampled contrast checks | PASS (automated subset) | `evidence/accessibility-closure.json`, `evidence/contrast-closure.json`; 27 controls labeled, no duplicate IDs/unnamed buttons/missing image alt, 0 sampled contrast failures |
 | Performance bundle check | PASS (quality) | `evidence/performance-closure.json`; route-level chunks reduced initial JS; Core Web Vitals NOT VERIFIED |
 | Live candidate/admin boundary checks | PASS (safe subset) | `evidence/live-workflow-boundaries.json`; public jobs, invalid application, protected reads, invalid admin login and malformed contact |
-| Real provider email receipt | NOT VERIFIED | designated mailbox access required |
-| Production deploy of this branch | PASS (boundary) | Worker active version `9a65de17-bc8f-41f5-b151-6e6603b695bd`; Pages `014b6028.swiftjob-systems.pages.dev`; live domain smoke checks |
+| Real provider email receipt | NOT VERIFIED | designated owner-controlled mailbox is still required |
+| Cloudflare provider/resource verification | PASS (read-only) | supplied account token reads Pages project, Worker secrets/versions and R2; zone token reads DNS; edge Rulesets/Rate Limiting remain permission-blocked |
+| Static security headers | PASS | `evidence/live-provider-boundary.json`; Pages custom domain and latest deployment return `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy` and `Permissions-Policy` |
+| Production deploy of this branch | PASS (boundary) | Worker active version `9a65de17-bc8f-41f5-b151-6e6603b695bd`; latest Pages `ea1dd1de.swiftjob-systems.pages.dev`; live domain smoke checks |
 
 The runtime checks use synthetic people, database, R2, and email recipients. They prove application behavior in isolation and do not prove production delivery. Live checks prove the deployed public boundary, headers, protected-route responses, dynamic sitemap and proxy behavior; they do not replace a real inbox receipt, DNS authentication check, historical credential rotation, or an edge-distributed rate-limit rule.

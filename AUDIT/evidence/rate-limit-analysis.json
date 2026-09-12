@@ -13,7 +13,10 @@
   },
   "regression": "PASS — auth-regression verifies 10 failed password attempts receive 401, the next receives 429, and a second IP remains usable",
   "distributed_behavior": "A Worker isolate restart or a different isolate can reset the in-memory bucket; this is a known edge-distribution limitation.",
-  "current_assessment": "PARTIALLY VERIFIED — appropriate as a low-volume V1 abuse throttle, not a complete distributed credential-stuffing control.",
-  "provider_access": "The available Cloudflare deploy token cannot read or create zone Rate Limiting/Ruleset rules (API returns authentication error).",
-  "owner_action": "For higher traffic or hostile abuse, grant minimum Cloudflare WAF/Rate Limiting rule permission and add edge rules for password login, magic-link, admin login, applications and contact. Keep the Worker limits as a backstop."
+  "current_assessment": "PARTIALLY VERIFIED — Worker in-memory limits pass regression tests, but distributed edge enforcement remains unconfigured.",
+  "provider_access": "Cloudflare zone token verification is active; Rulesets and Rate Limiting API reads still return 403 with the supplied tokens.",
+  "owner_action": "Provide or add the missing zone Rulesets/Rate Limiting permission, then configure and verify edge rules for password login, magic-link, admin login, applications and contact.",
+  "measuredAt": "2026-09-12T05:53:29.7407404Z",
+  "account_access": "The supplied account token can read Pages, Worker versions/secrets and R2, but not zone Rulesets/Rate Limiting.",
+  "minimum_permission_required": "A Cloudflare API token with zone Rulesets/Rate Limiting read and edit permission for payservice.top."
 }

@@ -1,12 +1,12 @@
 # Final production review
 
-This final review is populated from the completed repair, deployment, live smoke checks and closure-sprint evidence. Current gate status is **NOT READY** because historical credential rotation and real email/DNS evidence remain unverified; edge-distributed rate limits, Core Web Vitals, and full assistive-technology review remain partial. Request-time schema self-healing has been retired and replaced with a read-only startup guard. Sampled visible-text contrast now passes on the five representative routes. The existing Pages/Worker/Neon/R2 architecture and domain are live.
+This final review is populated from the completed repair, deployment, live smoke checks and closure-sprint evidence. Current gate status is **NOT READY** because historical credential rotation, real inbox delivery and distributed edge rate limits remain unverified; Core Web Vitals and full assistive-technology review are also unavailable in this runtime. Request-time schema self-healing has been retired and replaced with a read-only startup guard. Sampled visible-text contrast now passes on the five representative routes. The existing Pages/Worker/Neon/R2 architecture and domain are live.
 
 Evidence classification:
 
 - **VERIFIED:** isolated runtime tests, local preview HTTP checks, local browser DOM checks, source/type/build checks.
 - **INFERENCE:** source-based architecture, provider configuration interpretation, and expected production behavior.
-- **BLOCKED:** real inbox receipt, DNS/email authentication confirmation, provider-side historical credential rotation, and full Core Web Vitals/assistive-technology runs.
+- **BLOCKED:** real inbox receipt, provider-side historical credential rotation, distributed Cloudflare Rulesets/Rate Limiting, and full Core Web Vitals/assistive-technology runs.
 
 Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2 architecture, working public job browsing, existing email templates/layout, and the current production domain remain unchanged in this branch.
 
@@ -70,25 +70,25 @@ Known non-blocking preservation targets: the existing Pages + Worker + Neon + R2
 
 ## Exact gate blockers
 
-1. A real designated mailbox has not received a controlled magic-link/application/status test, so provider acceptance, inbox placement and SPF/DKIM/DMARC cannot be certified.
+1. A real designated mailbox has not received a controlled magic-link/application/status test, so inbox placement, Reply-To receipt and provider event handling cannot be certified. Resend account/domain status and the current Cloudflare DNS records are now verified read-only.
 2. Historical Git objects contain credential-shaped database URLs. The current tree is sanitized, but provider-side classification and rotation require the owner/provider operator.
-3. Core Web Vitals and full screen-reader/dynamic-state review remain unmeasured quality work; sampled visible-text contrast passes and route-level code splitting is deployed.
+3. Core Web Vitals and full screen-reader/dynamic-state review remain unmeasured quality work; sampled visible-text contrast passes, static security headers are deployed, and route-level code splitting is deployed.
 
 ## Closure sprint addendum — 2026-09-12
 
-This addendum supersedes earlier future-improvement wording where it conflicts with current evidence. Dynamic sitemap generation, route-level lazy loading, form labels, and live responsive/console checks were completed after the earlier review.
+This addendum supersedes earlier future-improvement wording where it conflicts with current evidence. Dynamic sitemap generation, route-level lazy loading, form labels, live responsive/console checks, static security headers, and current Cloudflare/Resend resource verification were completed after the earlier review.
 
 ### Final questions, evidence-based answers
 
 | # | Current answer |
 |---:|---|
-| 1 | **NOT READY.** Public and protected boundaries pass, but historical Supabase credential rotation and real email/DNS evidence are absent. |
+| 1 | **NOT READY.** Public and protected boundaries pass, but historical Supabase credential rotation and real inbox delivery remain absent; DNS/provider records are now read-only verified. |
 | 2 | **Partially verified.** Candidate auth, application binding/upload/idempotency, portal redaction, logout and assessment boundaries pass isolated regressions; a real production candidate mutation was not run because it creates PII and sends mail. |
 | 3 | **Not implemented as a separate product.** Public contact intake and admin hiring tools exist; employer accounts, billing and self-service lifecycle are outside this architecture. |
 | 4 | **Partially verified.** Admin auth and protected API boundaries pass; live admin mutation-to-email/candidate reflection was not run. |
 | 5 | **Verified in isolation.** Magic-link issue/verify, password session replacement, logout revocation and malformed-token behavior pass; delivery remains unverified. |
 | 6 | **Verified for exercised boundaries.** Candidate ownership, admin role/claim checks, expiry and JWT algorithm pinning are regression-tested. |
-| 7 | **NOT VERIFIED.** Synthetic email sink delivery passes; no controlled production inbox, bounce event or provider acceptance evidence exists. |
+| 7 | **NOT VERIFIED.** The Resend API key, verified domain, DKIM/SPF records and DNS alignment inputs pass read-only checks; no controlled production inbox, bounce event or provider acceptance evidence exists. |
 | 8 | **Verified in source/sink.** Escaped HTML, plain text and configured production links are covered; real mail-client rendering and link inspection remain unverified. |
 | 9 | **Verified for sampled live pages.** The four historical visual findings are repaired; no new obvious logo/destination/date issue was found in the browser sweep. |
 | 10 | **No obvious sampled examples.** Full visual-state review remains outside the automated sweep. |
@@ -103,7 +103,7 @@ This addendum supersedes earlier future-improvement wording where it conflicts w
 | 19 | **Partially verified.** Isolated status/assessment logic is consistent; live admin mutation reflection is unverified. |
 | 20 | **Partially verified.** Application writes and candidate reads pass in isolation; full live admin/employer reflection is unverified. |
 | 21 | **Partially verified.** Synthetic messages correspond to exercised transitions; provider delivery and all admin event variants are unverified. |
-| 22 | **Mostly verified.** Worker/Pages deployment, health, headers, CORS, protected routes, dynamic sitemap and CI checks pass; email DNS/provider and hosted CI remain unverified. |
+| 22 | **Mostly verified.** Worker/Pages deployment, health, headers, CORS, protected routes, dynamic sitemap, current Worker secret inventory, R2 and Resend provider checks pass; distributed edge rate limits, inbox delivery and hosted CI remain unverified. |
 | 23 | **Prepared, not migrated.** The domain checklist and configurable URLs are present; the current temporary domain remains intentional. |
 | 24 | **Known limitations:** historical Supabase rotation; controlled mailbox/DNS; Cloudflare edge rule permission; CWV/full screen-reader and dynamic-state evidence; no separate employer portal. |
 | 25 | Preserve the Pages + Worker + Neon + R2 architecture, current domain until an approved migration, factual role-focused UI, and candidate magic-link flow. |
@@ -120,8 +120,8 @@ This addendum supersedes earlier future-improvement wording where it conflicts w
 
 ### Remaining hard-gate blockers
 
-1. Rotate/revoke the historical Supabase pooler/database credential for project `yfymijkhcbdubjawsngq` and confirm no remaining consumer. Current authentication validity is UNKNOWN.
-2. Provide an owner-controlled test mailbox and confirm the actual Resend sender domain. Verify magic link, application confirmation/HR notification and status-change delivery, then verify SPF/DKIM/DMARC alignment, Reply-To, links and provider events.
-3. Configure distributed Cloudflare limits for sensitive endpoints with a token that has the required Rate Limiting/Rulesets permission. Worker in-memory limits remain a useful low-volume fallback, not a distributed guarantee.
+1. Rotate/revoke the historical Supabase pooler/database credential for project `yfymijkhcbdubjawsngq` and confirm no remaining consumer. The old project management token is unauthorized and its hostname did not resolve during this check, but that does not prove provider-side revocation.
+2. Provide an owner-controlled test mailbox. Verify magic link, application confirmation/HR notification and status-change delivery, then inspect inbox/spam placement, Reply-To, links and provider events. Resend domain verification and Cloudflare DNS records are already confirmed read-only.
+3. Configure distributed Cloudflare limits for sensitive endpoints with a token that has the required Rate Limiting/Rulesets permission. The supplied account token can manage Pages/Workers but both supplied tokens return 403 for those zone APIs; Worker in-memory limits remain a low-volume fallback.
 4. Keep ordered migrations as the deploy contract and monitor the read-only startup schema guard.
-5. Obtain a Chrome DevTools/Lighthouse run for LCP, INP, CLS and a full screen-reader/dynamic-state review; sampled visible-text contrast is already passing.
+5. Obtain a Chrome DevTools/Lighthouse run for LCP, INP, CLS and a full screen-reader/dynamic-state review; the required Chrome DevTools MCP tools are not configured in this runtime, while sampled visible-text contrast and static security headers pass.

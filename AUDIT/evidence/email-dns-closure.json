@@ -1,25 +1,127 @@
 {
-  "measuredAt": "2026-09-12T01:40:21.4432148Z",
-  "environment": "Public DNS queries from production closure sprint; no provider dashboard access",
-  "sendingDomainStatus": "UNKNOWN - production EMAIL_FROM secret and provider verification state are not exposed to this audit runtime",
-  "records": {
-    "payservice.top": {
-      "spf": "present (Cloudflare include)",
-      "dmarc": "present (p=none; rua configured)",
-      "mx": "Cloudflare Email Routing MX present"
-    },
-    "swiftjob.payservice.top": {
-      "spf": "no public TXT record observed",
-      "dmarc": "no _dmarc record observed",
-      "mx": "no MX record observed"
-    },
-    "resend._domainkey.payservice.top": {
-      "dkim": "public key record present; key material intentionally omitted"
-    },
-    "resend._domainkey.swiftjob.payservice.top": {
-      "dkim": "no public TXT record observed"
+  "measuredAt": "2026-09-12T05:52:50.0097820Z",
+  "environment": "Cloudflare DNS API + Resend API read-only; no production email sent",
+  "sendingDomain": "payservice.top",
+  "replyToDomain": "swiftjob.payservice.top",
+  "resend": {
+    "provider": "Resend",
+    "measuredAt": "2026-09-12T05:52:48.4041000Z",
+    "apiKeyReadStatus": 200,
+    "domains": [
+      {
+        "id": "aafedf67-c524-4847-988d-320b381464e3",
+        "name": "payservice.top",
+        "status": "verified",
+        "region": "us-east-1"
+      }
+    ],
+    "emailReceipt": "NOT VERIFIED — no owner-designated mailbox was supplied; no message sent",
+    "domainDetail": {
+      "status": 200,
+      "name": "payservice.top",
+      "statusValue": "verified",
+      "region": "us-east-1",
+      "records": [
+        {
+          "type": "DKIM",
+          "status": "verified",
+          "valuePresent": true
+        },
+        {
+          "type": "SPF",
+          "status": "verified",
+          "valuePresent": true
+        },
+        {
+          "type": "SPF",
+          "status": "verified",
+          "valuePresent": true
+        }
+      ]
     }
   },
-  "assessment": "Cannot certify SPF, DKIM and DMARC alignment for the actual production sender domain. No DNS records were mutated.",
-  "ownerAction": "Confirm the Resend-verified sender domain and publish the exact provider SPF, DKIM and DMARC records; then send a controlled message to an owner-designated mailbox."
+  "cloudflareDns": {
+    "status": 200,
+    "records": [
+      {
+        "name": "payservice.top",
+        "type": "MX",
+        "ttl": 1,
+        "spf": false,
+        "dmarc": false,
+        "resendMarker": false,
+        "contentLength": 24
+      },
+      {
+        "name": "payservice.top",
+        "type": "MX",
+        "ttl": 1,
+        "spf": false,
+        "dmarc": false,
+        "resendMarker": false,
+        "contentLength": 24
+      },
+      {
+        "name": "payservice.top",
+        "type": "MX",
+        "ttl": 1,
+        "spf": false,
+        "dmarc": false,
+        "resendMarker": false,
+        "contentLength": 24
+      },
+      {
+        "name": "send.payservice.top",
+        "type": "MX",
+        "ttl": 3600,
+        "spf": false,
+        "dmarc": false,
+        "resendMarker": true,
+        "contentLength": 37
+      },
+      {
+        "name": "_dmarc.payservice.top",
+        "type": "TXT",
+        "ttl": 1,
+        "spf": false,
+        "dmarc": true,
+        "resendMarker": false,
+        "contentLength": 54
+      },
+      {
+        "name": "payservice.top",
+        "type": "TXT",
+        "ttl": 1,
+        "spf": true,
+        "dmarc": false,
+        "resendMarker": false,
+        "contentLength": 44
+      },
+      {
+        "name": "resend._domainkey.payservice.top",
+        "type": "TXT",
+        "ttl": 3600,
+        "spf": false,
+        "dmarc": false,
+        "resendMarker": false,
+        "contentLength": 220
+      },
+      {
+        "name": "send.payservice.top",
+        "type": "TXT",
+        "ttl": 3600,
+        "spf": true,
+        "dmarc": false,
+        "resendMarker": true,
+        "contentLength": 35
+      }
+    ]
+  },
+  "alignment": {
+    "senderUnderVerifiedRoot": true,
+    "rootSpfPresent": true,
+    "rootDmarcPresent": true,
+    "resendDkimPresent": true,
+    "sendSpfPresent": true
+  }
 }

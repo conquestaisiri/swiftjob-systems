@@ -1,0 +1,64 @@
+{
+  "measuredAt": "2026-09-12T05:55:55.4212852Z",
+  "baseUrl": "https://swiftjob.payservice.top",
+  "checks": [
+    {
+      "name": "homepage",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "securityHeaders": {
+        "xContentTypeOptions": "nosniff",
+        "xFrameOptions": "DENY",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "permissionsPolicy": "camera=(), microphone=(), geolocation=()"
+      }
+    },
+    {
+      "name": "healthz",
+      "status": 200,
+      "contentType": "application/json",
+      "securityHeaders": {
+        "xContentTypeOptions": "nosniff",
+        "xFrameOptions": "DENY",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "permissionsPolicy": "camera=(), microphone=(), geolocation=()"
+      }
+    },
+    {
+      "name": "jobs",
+      "status": 200,
+      "contentType": "application/json",
+      "securityHeaders": {
+        "xContentTypeOptions": "nosniff",
+        "xFrameOptions": "DENY",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "permissionsPolicy": "camera=(), microphone=(), geolocation=()"
+      }
+    },
+    {
+      "name": "sitemap",
+      "status": 200,
+      "contentType": "application/xml; charset=UTF-8"
+    },
+    {
+      "name": "robots",
+      "status": 200,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "name": "admin-protected-without-auth",
+      "status": 401
+    },
+    {
+      "name": "retired-installer",
+      "status": 410
+    }
+  ],
+  "deployment": {
+    "url": "https://ea1dd1de.swiftjob-systems.pages.dev",
+    "environment": "production",
+    "stage": "deploy"
+  },
+  "workerVersion": "9a65de17-bc8f-41f5-b151-6e6603b695bd",
+  "environment": "Production HTTP smoke checks after Pages header deployment; no mutation and no real email sent"
+}
