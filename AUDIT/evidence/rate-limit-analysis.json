@@ -18,5 +18,7 @@
   "owner_action": "Provide or add the missing zone Rulesets/Rate Limiting permission, then configure and verify edge rules for password login, magic-link, admin login, applications and contact.",
   "measuredAt": "2026-09-12T05:53:29.7407404Z",
   "account_access": "The supplied account token can read Pages, Worker versions/secrets and R2, but not zone Rulesets/Rate Limiting.",
-  "minimum_permission_required": "A Cloudflare API token with zone Rulesets/Rate Limiting read and edit permission for payservice.top."
+  "zone_plan": "Free Website",
+  "minimum_permission_required": "A Cloudflare API token with zone Rulesets/Rate Limiting read and edit permission for payservice.top.",
+  "permission_reference": "Cloudflare's zone rate-limiting API requires Zone WAF Write; account-level rate-limiting rulesets require Account WAF Write or Account Rulesets Write."
 }
