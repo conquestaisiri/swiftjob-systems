@@ -24,7 +24,7 @@ const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
   getStartedTitle: "Your next step",
   getStartedBody: `When you're ready, use the button on this page to continue. It works on any device, though a laptop or desktop is the most comfortable way to read through everything.`,
   companyTitle: "About SwiftJob",
-  companyBody: `SwiftJob is a remote-first staffing and BPO partner helping businesses in 28+ countries build and run remote teams. We connect people to real work they can do from a laptop anywhere, and pay them fairly. You're not a number here; you'll have a real point of contact throughout.`,
+  companyBody: `SwiftJob is a remote-first staffing and BPO partner helping businesses build and run remote teams. We connect people to real work they can do from a laptop anywhere, and pay them fairly. You're not a number here; you'll have a real point of contact throughout.`,
   ctaLabel: "Continue to your next step",
   workTypeLabel: "100% remote · work from anywhere",
   sidebarLaptopNote: "Fully remote · clear weekly hours",
@@ -74,7 +74,7 @@ const OLD_TO_NEW_CONTENT: Record<string, { old: string[]; next: string }> = {
   },
   companyBody: {
     old: [
-      `SwiftJob helps businesses in 28+ countries build and run teams. We connect people to work they can actually do and pay them fairly - whether the role is done from a laptop at home or hands-on at a site. You're not a number here; you'll have a real point of contact throughout.`,
+      `SwiftJob helps businesses build and run remote teams. We connect people to work they can actually do and pay them fairly. You're not a number here; you'll have a real point of contact throughout.`,
     ],
     next: DEFAULT_REFERRAL_CONTENT.companyBody,
   },

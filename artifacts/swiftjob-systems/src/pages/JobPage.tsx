@@ -207,7 +207,7 @@ export function JobPage() {
     "idle" | "submitting" | "error"
   >("idle");
   const [serverError, setServerError] = useState("");
-  const [countriesDisplay, setCountriesDisplay] = useState("28");
+  const [countriesDisplay, setCountriesDisplay] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const submissionKeyRef = useRef<string | null>(null);
@@ -232,9 +232,12 @@ export function JobPage() {
       });
     // Admin-editable stat copy (Settings → "Countries hired from" number).
     fetchPublicStats().then((stats) => {
-      if (!cancelled && stats?.countriesDisplay) {
-        setCountriesDisplay(stats.countriesDisplay);
-      }
+      if (cancelled || !stats) return;
+      const configured = stats.countriesDisplay?.trim();
+      const reached = Number.isFinite(stats.countriesReached)
+        ? String(stats.countriesReached)
+        : null;
+      setCountriesDisplay(configured || reached);
     });
     return () => {
       cancelled = true;
@@ -472,8 +475,10 @@ export function JobPage() {
                   focus on the work.
                 </p>
                 <p>
-                  We build remote teams across {countriesDisplay}+ countries and
-                  serve businesses in technology, financial services,
+                  {countriesDisplay
+                    ? `We build remote teams across ${countriesDisplay}+ countries and `
+                    : "We build remote teams for businesses in "}
+                  technology, financial services,
                   e-commerce, healthcare, logistics, retail, and more. When you
                   work with us, we aim to be a partner for the long term—not
                   just a one-off placement.

@@ -105,7 +105,7 @@ export function CareersPage() {
   const [workArrangement, setWorkArrangement] = useState("");
   const [visibleCount, setVisibleCount] = useState(JOBS_PER_PAGE);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [countriesDisplay, setCountriesDisplay] = useState<string>("28");
+  const [countriesDisplay, setCountriesDisplay] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -126,8 +126,12 @@ export function CareersPage() {
       });
     // Admin-editable stat copy (Settings → "Countries hired from" number).
     fetchPublicStats().then((stats) => {
-      if (cancelled || !stats?.countriesDisplay) return;
-      setCountriesDisplay(stats.countriesDisplay);
+      if (cancelled || !stats) return;
+      const configured = stats.countriesDisplay?.trim();
+      const reached = Number.isFinite(stats.countriesReached)
+        ? String(stats.countriesReached)
+        : null;
+      setCountriesDisplay(configured || reached);
     });
     return () => {
       cancelled = true;
@@ -216,7 +220,15 @@ export function CareersPage() {
             </span>
             <span className="stat-sep">·</span>
             <span>
-              <strong>{countriesDisplay}</strong> countries
+              {countriesDisplay ? (
+                <>
+                  <strong>{countriesDisplay}</strong> countries
+                </>
+              ) : (
+                <>
+                  <strong>Global</strong> reach
+                </>
+              )}
             </span>
           </div>
         </div>

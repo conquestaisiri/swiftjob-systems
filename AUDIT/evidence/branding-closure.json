@@ -8,7 +8,7 @@
     "ownerSupplied": true
   },
   "productionDeployments": {
-    "pages": "https://82c6ae35.swiftjob-systems.pages.dev",
+    "pages": "https://d1191a81.swiftjob-systems.pages.dev",
     "productionBranch": "main",
     "customDomain": "https://swiftjob.payservice.top",
     "workerVersion": "a57a2143-9121-47f3-8488-fc2af8907f60"
