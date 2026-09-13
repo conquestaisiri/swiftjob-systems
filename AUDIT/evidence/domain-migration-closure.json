@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-09-13T02:19:00Z",
+  "checkedAt": "2026-09-13T04:08:00Z",
   "productionDomain": "https://swiftjob.online",
   "previousDomain": "https://swiftjob.payservice.top",
   "cloudflare": {
@@ -13,6 +13,21 @@
       "name": "swiftjob.online",
       "target": "swiftjob-systems.pages.dev",
       "proxied": false
+    },
+    "emailRouting": {
+      "domain": "swiftjob.online",
+      "status": "enabled",
+      "dnsRecords": "Cloudflare MX, DKIM, and SPF records present; legacy SpaceMail MX/SPF records removed",
+      "rules": 0,
+      "destination": "swiftjobs113@gmail.com",
+      "destinationStatus": "pending verification",
+      "catchAll": "disabled / drop"
+    },
+    "pagesAdditionalCustomDomain": {
+      "hostname": "www.swiftjob.online",
+      "status": "active",
+      "ssl": "enabled",
+      "dns": "CNAME www -> swiftjob-systems.pages.dev"
     }
   },
   "deployments": {
@@ -40,7 +55,8 @@
     "robots": 200,
     "logoPng": 200,
     "adminLogin": 200,
-    "adminReadOnlyEndpoints": 200
+    "adminReadOnlyEndpoints": 200,
+    "www": "DNS/CNAME created and Pages SSL active (public resolver propagation in progress)"
   },
   "email": {
     "resendDomain": "swiftjob.online",
@@ -48,9 +64,9 @@
     "sending": "enabled",
     "requestedInboundDestination": "swiftjobs113@gmail.com",
     "controlledCustomMail": "delivered",
-    "contactNotification": "bounced: hr@swiftjob.online has no receiving mailbox or route",
-    "receiving": "not configured",
-    "routingTokenProbe": "The newly supplied Cloudflare token was rejected as invalid by /user/tokens/verify; no routing change was attempted. Existing active token lacks Email Routing Settings/Rules write access."
+    "contactNotification": "not re-tested after routing activation; aliases are blocked until destination verification",
+    "receiving": "enabled in Cloudflare Email Routing; destination verification pending",
+    "routingTokenProbe": "Dashboard session activated Email Routing successfully. The newly supplied token remains invalid at /user/tokens/verify and is not used."
   },
-  "remainingGate": "Authorize the active Cloudflare token for Email Routing Settings/Rules, add and verify swiftjobs113@gmail.com as the destination, route hr@swiftjob.online, careers@swiftjob.online, support@swiftjob.online, and admin@swiftjob.online, then rerun inbound contact/application/status/reply-to receipt checks."
+  "remainingGate": "Click the Cloudflare verification link sent to swiftjobs113@gmail.com. Then add hr, careers, support, admin, and catch-all forwarding rules to that verified destination and rerun inbound delivery checks."
 }

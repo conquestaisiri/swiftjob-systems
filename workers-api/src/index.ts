@@ -377,6 +377,13 @@ app.post("/api/applications", async (c) => {
     if (submissionKey && !/^[A-Za-z0-9:_-]{16,128}$/.test(submissionKey)) {
       return c.json({ error: "Idempotency-Key must be 16–128 safe characters." }, 400);
     }
+    const contentType = c.req.header("Content-Type")?.toLowerCase() ?? "";
+    if (
+      !contentType.includes("multipart/form-data") &&
+      !contentType.includes("application/x-www-form-urlencoded")
+    ) {
+      return c.json({ error: "Application data must be submitted as a form." }, 400);
+    }
     const formData = await c.req.formData();
 
     const body: Record<string, string> = {};
