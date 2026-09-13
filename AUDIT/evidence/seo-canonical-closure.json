@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-13",
+  "status": "PASS",
+  "publicRole": {
+    "url": "https://swiftjob.online/careers/captioner-subtitler",
+    "title": "Captioner / Subtitler — Careers at SwiftJob",
+    "canonical": "https://swiftjob.online/careers/captioner-subtitler",
+    "ogUrl": "https://swiftjob.online/careers/captioner-subtitler",
+    "robots": "index, follow"
+  },
+  "privateLogin": {
+    "url": "https://swiftjob.online/login",
+    "canonical": "https://swiftjob.online/login",
+    "robots": "noindex, nofollow"
+  },
+  "sitemap": {
+    "status": 200,
+    "validXml": true,
+    "urlCount": 100
+  }
+}
