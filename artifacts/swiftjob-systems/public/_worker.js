@@ -3,6 +3,54 @@
 // dist/public and wrangler pages deploy picks it up as the Pages worker.
 const DEFAULT_API_ORIGIN =
   "https://swiftjob-workers-api.conquestsammy5.workers.dev";
+const PUBLIC_ORIGIN = "https://swiftjob.online";
+
+function escapeAttribute(value) {
+  return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+}
+
+function replaceOrInsert(html, pattern, tag) {
+  if (pattern.test(html)) return html.replace(pattern, `\n    ${tag}`);
+  return html.replace(/<\/head>/i, `    ${tag}\n  </head>`);
+}
+
+function rewriteDocumentMetadata(response, requestUrl) {
+  const contentType = response.headers.get("content-type") || "";
+  if (!contentType.toLowerCase().includes("text/html")) return response;
+
+  return response.text().then((html) => {
+    const pathname = requestUrl.pathname || "/";
+    const canonicalUrl = `${PUBLIC_ORIGIN}${pathname}`;
+    const privateRoute = /^\/(admin|candidate|login|assessment|r(?:\/|$))/.test(
+      pathname,
+    );
+    const robots = privateRoute ? "noindex, nofollow" : "index, follow";
+    let rewritten = html;
+    rewritten = replaceOrInsert(
+      rewritten,
+      /\s*<link\b[^>]*\brel=["']canonical["'][^>]*>/i,
+      `<link rel="canonical" href="${escapeAttribute(canonicalUrl)}" />`,
+    );
+    rewritten = replaceOrInsert(
+      rewritten,
+      /\s*<meta\b[^>]*\bproperty=["']og:url["'][^>]*>/i,
+      `<meta property="og:url" content="${escapeAttribute(canonicalUrl)}" />`,
+    );
+    rewritten = replaceOrInsert(
+      rewritten,
+      /\s*<meta\b[^>]*\bname=["']robots["'][^>]*>/i,
+      `<meta name="robots" content="${robots}" />`,
+    );
+
+    const headers = new Headers(response.headers);
+    headers.delete("content-length");
+    return new Response(rewritten, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
+  });
+}
 
 export default {
   async fetch(request, env) {
@@ -73,6 +121,7 @@ export default {
       });
     }
 
-    return env.ASSETS.fetch(request);
+    const assetResponse = await env.ASSETS.fetch(request);
+    return rewriteDocumentMetadata(assetResponse, url);
   },
 };
