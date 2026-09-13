@@ -18,6 +18,9 @@ Date: 2026-09-13
 - Added candidate dashboard totals for referrals, verified hires, pending
   rewards, and paid rewards. Payout remains an explicit admin/business action;
   no payment is claimed until the hire is verified.
+- Added an admin Referral rewards screen and protected API controls to review
+  account referrals, mark a candidate hired, and then mark the approved reward
+  paid. The API rejects a paid state until the referral is hired.
 - Refreshed referral email/page defaults and made the content seeding and exact
   legacy-copy upgrade hooks run when content is first requested.
 
@@ -34,13 +37,16 @@ Date: 2026-09-13
 - Existing auth, application, and tech-check regression suites all passed.
 - The focused referral regression passed: valid attribution creates one pending
   reward at the job amount, repeated applications do not duplicate the reward,
-  and self-referrals are ignored.
+  self-referrals are ignored, and the admin hired → paid transition is guarded.
 - Frontend build and worker/frontend TypeScript checks passed.
 
 ## Live browser verification
 
 - A controlled candidate session signed in through the production magic-link
   flow and loaded the Applications, Profile, and Referrals pages.
+- The protected admin referral-rewards API accepted the configured admin
+  session and returned the live referral list; unauthenticated access returned
+  401.
 - Desktop and 390px mobile layouts were visually inspected; navigation, logo,
   reward cards, form fields, and empty states rendered cleanly.
 - The session created both a general referral link and a role-specific

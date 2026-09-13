@@ -60,4 +60,5 @@ traffic to a new deployment.
   `/candidate/profile` (editable candidate profile), and `/candidate/referrals`
   (account-owned links with role-based $40–$100 rewards and pending/paid tracking)
 - Admin: `/admin` — Overview, Applications (+ Skills Check tab), Jobs,
-  Referrals (send/content editor), Mail, Contacts, Campaigns, Activity, Settings
+  Referrals (send/content editor), Referral rewards (verify hires and approve
+  payouts), Mail, Contacts, Campaigns, Activity, Settings

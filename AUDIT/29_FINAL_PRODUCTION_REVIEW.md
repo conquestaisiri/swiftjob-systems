@@ -138,6 +138,8 @@ Referrals pages at desktop and 390px mobile widths, created general and
 role-specific links, and followed a role link to the correct job with referral
 attribution preserved. Local and production smoke checks also verified one
 attributed referral per candidate/role, duplicate protection, self-referral
-blocking, and cleanup of temporary test data. Evidence is in
+blocking, the admin hired-to-paid transition guard, and cleanup of temporary
+test data. The admin now has a dedicated Referral rewards screen for reviewing
+these records. Evidence is in
 `AUDIT/29_ACCOUNT_REFERRALS.md` and
 `AUDIT/evidence/candidate-referral-live-closure.json`.

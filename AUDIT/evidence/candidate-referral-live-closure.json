@@ -6,6 +6,7 @@
     "referralList": 200,
     "referralCreate": 201,
     "publicHandoff": 200,
+    "adminCandidateReferralList": 200,
     "unauthorizedReferralList": 401,
     "invalidPublicReferral": 404
   },
