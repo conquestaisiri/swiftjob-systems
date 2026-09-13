@@ -106,7 +106,7 @@ The unified SwiftJob logo system is deployed and live-verified from the owner-su
 | 20 | **Partially verified.** Application writes, candidate reads and one live admin status mutation pass; full live admin/employer reflection is unverified. |
 | 21 | **Partially verified.** Synthetic messages correspond to exercised transitions, provider/routing probes are delivered and forwarded, and controlled production contact/application/admin/referral flows produced delivered Resend messages; the designated mailbox supplied-logo receipt is verified, while all admin event variants remain open. |
 | 22 | **Mostly verified.** Worker/Pages deployment, health, headers, CORS, protected routes, dynamic sitemap, current Worker secret inventory, controlled R2 upload/delete, Resend provider checks, Cloudflare Email Routing MX/subdomain forwarding, hosted CI run `34712839036` and an active combined edge rule with live 429 regression pass; the designated mailbox supplied-logo receipt is verified and broader destination-message inspection remains open. |
-| 23 | **Prepared, not migrated.** The domain checklist and configurable URLs are present; the current temporary domain remains intentional. |
+| 23 | **Migrated.** The production site, API, metadata, email sender and generated links use `swiftjob.online`; the legacy `swiftjob.payservice.top` Pages alias remains reachable for compatibility. |
 | 24 | **Known limitations:** historical Supabase rotation; owner mailbox/mail-client rendering; fine-grained edge rule changes on the Free plan; CWV/full screen-reader and dynamic-state evidence; no separate employer portal. |
 | 25 | Preserve the Pages + Worker + Neon + R2 architecture, current domain until an approved migration, factual role-focused UI, and candidate magic-link flow. |
 
@@ -126,3 +126,18 @@ The unified SwiftJob logo system is deployed and live-verified from the owner-su
 2. Broaden owner-controlled mailbox inspection to the remaining controlled product-flow messages, including inbox/spam placement, Reply-To, links and provider events. The designated mailbox supplied-logo receipt is complete; the `swiftjob` subdomain is enabled in Cloudflare Email Routing, its three MX records resolve publicly, its destination address is verified, and the inbound probe is recorded as `Forwarded`; Resend provider delivery for the contact, application and admin/referral flows is recorded in `evidence/live-contact-email-closure.json`, `evidence/live-application-email-closure.json` and `evidence/live-admin-mail-closure.json`.
 3. Keep ordered migrations as the deploy contract and monitor the read-only startup schema guard.
 4. Obtain a Chrome DevTools/Lighthouse run for LCP, INP, CLS and a full screen-reader/dynamic-state review; the required Chrome DevTools MCP tools are not configured in this runtime, while sampled visible-text contrast and static security headers pass. The active combined edge rule is live-verified for the enumerated sensitive endpoints; finer route granularity requires additional plan/permission and remains a monitored limitation.
+
+## Account referral addendum — 2026-09-13
+
+The candidate account referral feature is deployed and verified. Candidate
+profiles and referral links are private behind magic-link authentication;
+role-specific links show the exact configured reward, and general links show
+the `$40–$100` range because the eventual role determines the amount. A
+controlled signed-in browser session loaded the Applications, Profile, and
+Referrals pages at desktop and 390px mobile widths, created general and
+role-specific links, and followed a role link to the correct job with referral
+attribution preserved. Local and production smoke checks also verified one
+attributed referral per candidate/role, duplicate protection, self-referral
+blocking, and cleanup of temporary test data. Evidence is in
+`AUDIT/29_ACCOUNT_REFERRALS.md` and
+`AUDIT/evidence/candidate-referral-live-closure.json`.
