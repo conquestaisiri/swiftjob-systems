@@ -143,6 +143,10 @@ test data. The admin now has a dedicated Referral rewards screen for reviewing
 these records. Evidence is in
 `AUDIT/29_ACCOUNT_REFERRALS.md` and
 `AUDIT/evidence/candidate-referral-live-closure.json`.
+The authenticated admin overview and Referral rewards screen were also loaded
+and visually inspected in the connected browser; the empty-state and summary
+cards rendered correctly. Evidence is in
+`AUDIT/evidence/admin-candidate-referral-live-closure.json`.
 
 ## Direct metadata addendum — 2026-09-13
 
