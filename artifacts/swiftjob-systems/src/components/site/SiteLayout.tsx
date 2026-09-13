@@ -39,6 +39,34 @@ export function SiteLayout({ children, title, description }: SiteLayoutProps) {
   }, [title, description]);
 
   useEffect(() => {
+    const canonicalUrl = new URL(window.location.pathname || "/", "https://swiftjob.online").toString();
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.setAttribute("rel", "canonical");
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute("href", canonicalUrl);
+
+    let ogUrl = document.querySelector('meta[property="og:url"]');
+    if (!ogUrl) {
+      ogUrl = document.createElement("meta");
+      ogUrl.setAttribute("property", "og:url");
+      document.head.appendChild(ogUrl);
+    }
+    ogUrl.setAttribute("content", canonicalUrl);
+
+    let robots = document.querySelector('meta[name="robots"]');
+    if (!robots) {
+      robots = document.createElement("meta");
+      robots.setAttribute("name", "robots");
+      document.head.appendChild(robots);
+    }
+    const privateRoute = /^\/(admin|candidate|login|assessment|r(?:\/|$))/.test(window.location.pathname);
+    robots.setAttribute("content", privateRoute ? "noindex, nofollow" : "index, follow");
+  }, [location]);
+
+  useEffect(() => {
     const onScroll = () => setShowTop(window.scrollY > 480);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
