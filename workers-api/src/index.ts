@@ -61,7 +61,7 @@ function getCorsOrigin(): string {
   try {
     return getEnv().FRONTEND_URL;
   } catch {
-    return "https://swiftjob.payservice.top";
+    return "https://swiftjob.online";
   }
 }
 
@@ -282,7 +282,7 @@ function publicSiteOrigin(): string {
   try {
     return new URL(getEnv().FRONTEND_URL).origin;
   } catch {
-    return "https://swiftjob.payservice.top";
+    return "https://swiftjob.online";
   }
 }
 
@@ -2162,12 +2162,12 @@ function formatCustomMailHtml(subject: string, body: string): string {
   return `<div style="background:#F7F7F4;padding:32px 16px;">
   <div style="max-width:560px;margin:0 auto;background:#FFFFFF;border-radius:14px;overflow:hidden;border:1px solid #DFE6DC;">
     <div style="background:#FFFFFF;background-color:#FFFFFF;padding:22px 28px;text-align:center;border-bottom:3px solid #49634B;">
-      <img src="https://swiftjob.payservice.top/swiftjob-logo.png?v=supplied-20260912" alt="SwiftJob" width="220" style="display:inline-block;max-width:220px;height:auto;border:0;" />
+      <img src="https://swiftjob.online/swiftjob-logo.png?v=supplied-20260912" alt="SwiftJob" width="220" style="display:inline-block;max-width:220px;height:auto;border:0;" />
     </div>
     <div style="padding:28px;">
       <h2 style="margin:0 0 16px;color:#10251D;font-size:20px;">${safeSubject}</h2>
       ${paragraphs}
-      <p style="margin:20px 0 0;color:#66706A;font-size:12.5px;line-height:1.6;">You received this message from SwiftJob. If you have any questions, contact us at <a href="mailto:${escHtml(getEnv().HR_EMAIL ?? "support@swiftjob.payservice.top")}" style="color:#49634B;">${escHtml(getEnv().HR_EMAIL ?? "support@swiftjob.payservice.top")}</a>.</p>
+      <p style="margin:20px 0 0;color:#66706A;font-size:12.5px;line-height:1.6;">You received this message from SwiftJob. If you have any questions, contact us at <a href="mailto:${escHtml(getEnv().HR_EMAIL ?? "support@swiftjob.online")}" style="color:#49634B;">${escHtml(getEnv().HR_EMAIL ?? "support@swiftjob.online")}</a>.</p>
     </div>
   </div>
 </div>`;

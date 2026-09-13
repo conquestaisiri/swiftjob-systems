@@ -2,8 +2,8 @@
 // VITE_CAREERS_EMAIL; these fallbacks match the API defaults.
 export const SUPPORT_EMAIL =
   (import.meta.env.VITE_SUPPORT_EMAIL as string | undefined) ??
-  "support@swiftjob.payservice.top";
+  "support@swiftjob.online";
 
 export const CAREERS_EMAIL =
   (import.meta.env.VITE_CAREERS_EMAIL as string | undefined) ??
-  "careers@swiftjob.payservice.top";
+  "careers@swiftjob.online";

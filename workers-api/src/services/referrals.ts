@@ -137,7 +137,7 @@ const OLD_TO_NEW_CONTENT: Record<string, { old: string[]; next: string }> = {
 
 export function publicReferralUrl(code: string): string {
   const base = (
-    getEnv().FRONTEND_URL ?? "https://swiftjob.payservice.top"
+    getEnv().FRONTEND_URL ?? "https://swiftjob.online"
   ).replace(/\/$/, "");
   return `${base}/referral/${code}`;
 }

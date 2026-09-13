@@ -38,7 +38,7 @@ function getFrontendUrl(): string {
     console.warn(
       "FRONTEND_URL not set - magic links will use the default domain. Set FRONTEND_URL in production.",
     );
-    return "https://swiftjob.payservice.top".replace(/\/$/, "");
+    return "https://swiftjob.online".replace(/\/$/, "");
   }
   return url.replace(/\/$/, "");
 }

@@ -8,7 +8,7 @@ const source = await readFile(path.join(root, "src/data/jobs.ts"), "utf8");
 const slugs = [...source.matchAll(/^\s*slug:\s*["']([^"']+)["']/gm)]
   .map((match) => match[1])
   .filter((slug, index, all) => all.indexOf(slug) === index);
-const base = "https://swiftjob.payservice.top";
+const base = "https://swiftjob.online";
 const core = ["/", "/careers", "/login", "/legal", "/privacy"];
 const urls = [...core, ...slugs.map((slug) => `/careers/${slug}`)];
 const escapeXml = (value) => value.replace(/[<>&'\"]/g, (character) => ({
