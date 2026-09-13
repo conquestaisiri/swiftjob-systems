@@ -156,3 +156,13 @@ link unfurlers before the SPA loads. A live crawl of all 100 sitemap URLs
 returned HTTP 200, a title, and a matching `https://swiftjob.online` canonical;
 private routes returned `noindex, nofollow`. Evidence is in
 `AUDIT/evidence/public-route-crawl.json`.
+
+## Owner mailbox addendum — 2026-09-13
+
+Fresh production referral, applicant-confirmation and magic-link messages were
+opened in the connected Outlook mailbox. All three used the new sender and
+links, rendered the supplied logo on the white header, and the magic-link
+button opened the candidate portal. The temporary application, profile and
+session were cleaned up. Older pre-migration messages still contain the legacy
+domain and were left unchanged. Evidence is in
+`AUDIT/evidence/live-owner-mailbox-closure.json`.

@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-13",
+  "zone": "swiftjob.online",
+  "zoneStatus": "active",
+  "routing": {
+    "status": 200,
+    "success": true,
+    "enabled": true,
+    "state": "ready"
+  },
+  "rules": {
+    "status": 200,
+    "success": true,
+    "enabledCount": 5,
+    "totalCount": 5,
+    "aliases": [
+      "admin",
+      "careers",
+      "catch-all",
+      "hr",
+      "support"
+    ],
+    "allForwardToConfiguredGmail": true
+  },
+  "dns": {
+    "status": 200,
+    "success": true,
+    "recordCount": 5,
+    "mxCount": 3
+  },
+  "status": "PASS"
+}

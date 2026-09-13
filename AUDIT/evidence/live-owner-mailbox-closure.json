@@ -1,0 +1,38 @@
+{
+  "date": "2026-09-13",
+  "environment": "Connected Outlook owner mailbox",
+  "status": "PASS",
+  "messages": [
+    {
+      "type": "referral invitation",
+      "subject": "You've been referred for a Captioner / Subtitler role",
+      "from": "careers@swiftjob.online",
+      "linkDomain": "swiftjob.online",
+      "logoVisible": true,
+      "plainTextAndReplyToVisible": true
+    },
+    {
+      "type": "applicant confirmation",
+      "subject": "Application Received: Captioner / Subtitler at SwiftJob",
+      "from": "careers@swiftjob.online",
+      "linkDomain": "swiftjob.online",
+      "logoVisible": true,
+      "plainTextAndReplyToVisible": true
+    },
+    {
+      "type": "magic link",
+      "subject": "Sign in to your SwiftJob candidate portal",
+      "from": "careers@swiftjob.online",
+      "linkDomain": "swiftjob.online",
+      "logoVisible": true,
+      "singleUseExpiryTextVisible": true
+    }
+  ],
+  "candidatePortalLink": "PASS",
+  "temporaryTestDataCleanup": "PASS",
+  "notes": [
+    "The fresh messages were generated after the swiftjob.online migration and rendered the supplied dark-green lockup on the fixed white email header.",
+    "Older inbox messages from before migration still contain payservice.top links; they were historical messages and were not modified.",
+    "HR-forwarded variants, spam placement and provider bounce callbacks remain separate coverage items."
+  ]
+}
