@@ -34,10 +34,25 @@ Date: 2026-09-13
 - Existing auth, application, and tech-check regression suites all passed.
 - Frontend build and worker/frontend TypeScript checks passed.
 
-## Remaining live check
+## Live browser verification
 
-The account-only referral dashboard needs a verified candidate session to test
-the interactive create/copy flow. The public and protected access gates are
-already validated; the next browser pass should use the authorized test mailbox
-to complete one magic-link sign-in, create one temporary link, open it, and
-submit a controlled application through it.
+- A controlled candidate session signed in through the production magic-link
+  flow and loaded the Applications, Profile, and Referrals pages.
+- Desktop and 390px mobile layouts were visually inspected; navigation, logo,
+  reward cards, form fields, and empty states rendered cleanly.
+- The session created both a general referral link and a role-specific
+  Captioner / Subtitler link. The role-specific link showed the expected $40
+  reward and the public handoff resolved to the correct job with its `ref`
+  attribution parameter.
+- Temporary candidate data, session, and referral links were removed after the
+  check.
+
+## Remaining production coverage
+
+- The authorized owner mailbox still needs an inbox-placement check for the
+  complete magic-link, application, and referral email sequence.
+- Hire verification and payout settlement remain explicit admin/business
+  actions; this change records pending and paid states but does not move money.
+- The broader production review still tracks historical credential rotation,
+  Core Web Vitals/DevTools measurement, full screen-reader review, and
+  fine-grained edge-rule verification as separate gates.
