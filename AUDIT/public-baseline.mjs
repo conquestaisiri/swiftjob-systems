@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-const origin='https://swiftjob.payservice.top';
+const origin='https://swiftjob.online';
 const results=[];
 for (const path of ['/api/healthz','/api/jobs','/api/admin/stats','/api/candidate/applications','/robots.txt','/sitemap.xml']) {
   const start=performance.now();
