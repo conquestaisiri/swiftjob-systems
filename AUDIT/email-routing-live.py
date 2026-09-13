@@ -15,6 +15,7 @@ for line in ENV.read_text(encoding="utf-8").splitlines():
 
 token = values.get("CLOUDFLARE_API_TOKEN_SPARKLING_SALAD", "")
 zone_id = values.get("SWIFTJOB_CLOUDFLARE_ZONE_ID", "")
+destination = values.get("CLOUDFLARE_EMAIL_ROUTING_DESTINATION", "").strip().lower()
 
 
 def get(path):
@@ -45,7 +46,17 @@ rules_status, rules_data = get(f"zones/{zone_id}/email/routing/rules")
 dns_status, dns_data = get(f"zones/{zone_id}/email/routing/dns")
 rules = rules_data.get("result") or []
 aliases = []
+forward_targets = []
 for rule in rules:
+    for action in rule.get("actions") or []:
+        if action.get("type") != "forward":
+            continue
+        raw_targets = action.get("value") or []
+        if not isinstance(raw_targets, list):
+            raw_targets = [raw_targets]
+        forward_targets.extend(
+            str(target).strip().lower() for target in raw_targets if target
+        )
     for matcher in rule.get("matchers") or []:
         if matcher.get("field") == "to" and matcher.get("type") == "literal":
             aliases.append(matcher.get("value", "").split("@", 1)[0])
@@ -68,11 +79,11 @@ evidence = {
         "enabledCount": sum(1 for rule in rules if rule.get("enabled")),
         "totalCount": len(rules),
         "aliases": sorted(aliases),
-        "allForwardToConfiguredGmail": all(
-            action.get("type") == "forward" and action.get("value")
-            for rule in rules
-            for action in rule.get("actions") or []
-        ),
+        "forwardRuleCount": len(forward_targets),
+        "destinationConfigured": bool(destination),
+        "allForwardToConfiguredGmail": bool(destination)
+        and len(forward_targets) == len(rules)
+        and all(target == destination for target in forward_targets),
     },
     "dns": {
         "status": dns_status,
@@ -88,6 +99,8 @@ evidence["status"] = "PASS" if (
     and evidence["rules"]["success"] is True
     and evidence["rules"]["enabledCount"] == evidence["rules"]["totalCount"] == 5
     and set(evidence["rules"]["aliases"]) == {"admin", "careers", "hr", "support", "catch-all"}
+    and evidence["rules"]["destinationConfigured"]
+    and evidence["rules"]["forwardRuleCount"] == 5
     and evidence["rules"]["allForwardToConfiguredGmail"]
     and evidence["dns"]["mxCount"] == 3
 ) else "FAIL"

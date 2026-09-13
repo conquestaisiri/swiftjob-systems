@@ -20,6 +20,8 @@
       "hr",
       "support"
     ],
+    "forwardRuleCount": 5,
+    "destinationConfigured": true,
     "allForwardToConfiguredGmail": true
   },
   "dns": {
