@@ -46,9 +46,10 @@ function formatDate(iso: string) {
 }
 
 function JobCard({ job }: { job: Job }) {
+  const referralCode = new URLSearchParams(window.location.search).get("ref");
   return (
     <Link
-      href={`/careers/${job.slug}`}
+      href={`/careers/${job.slug}${referralCode ? `?ref=${encodeURIComponent(referralCode)}` : ""}`}
       className="job-card"
       data-testid={`job-card-${job.slug}`}
     >

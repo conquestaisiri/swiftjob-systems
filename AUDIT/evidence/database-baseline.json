@@ -261,6 +261,12 @@
       "is_nullable": "YES"
     },
     {
+      "table_name": "applications",
+      "column_name": "referral_code",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
       "table_name": "assessments",
       "column_name": "id",
       "data_type": "uuid",
@@ -460,6 +466,210 @@
     },
     {
       "table_name": "candidate_accounts",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "email",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "full_name",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "phone",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "country",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "city",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "timezone",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "address",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "linkedin_url",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "portfolio_url",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "headline",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "skills",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "experience_summary",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "education",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "resume_path",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "resume_filename",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_referral_links",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_referral_links",
+      "column_name": "owner_email",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_referral_links",
+      "column_name": "code",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_referral_links",
+      "column_name": "job_slug",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_referral_links",
+      "column_name": "active",
+      "data_type": "boolean",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_referral_links",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "column_name": "owner_email",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "column_name": "link_code",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "column_name": "referred_email",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "column_name": "application_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "column_name": "job_slug",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "column_name": "reward_cents",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "column_name": "payout_status",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "candidate_referrals",
       "column_name": "updated_at",
       "data_type": "timestamp with time zone",
       "is_nullable": "NO"
@@ -751,6 +961,12 @@
       "column_name": "updated_at",
       "data_type": "timestamp with time zone",
       "is_nullable": "NO"
+    },
+    {
+      "table_name": "jobs",
+      "column_name": "referral_reward_cents",
+      "data_type": "integer",
+      "is_nullable": "YES"
     },
     {
       "table_name": "magic_tokens",
@@ -1411,6 +1627,144 @@
       "definition": "NOT NULL updated_at"
     },
     {
+      "table_name": "candidate_profiles",
+      "conname": "candidate_profiles_created_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "conname": "candidate_profiles_email_not_null",
+      "contype": "n",
+      "definition": "NOT NULL email"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "conname": "candidate_profiles_full_name_not_null",
+      "contype": "n",
+      "definition": "NOT NULL full_name"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "conname": "candidate_profiles_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (email)"
+    },
+    {
+      "table_name": "candidate_profiles",
+      "conname": "candidate_profiles_updated_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table_name": "candidate_referral_links",
+      "conname": "candidate_referral_links_active_not_null",
+      "contype": "n",
+      "definition": "NOT NULL active"
+    },
+    {
+      "table_name": "candidate_referral_links",
+      "conname": "candidate_referral_links_code_key",
+      "contype": "u",
+      "definition": "UNIQUE (code)"
+    },
+    {
+      "table_name": "candidate_referral_links",
+      "conname": "candidate_referral_links_code_not_null",
+      "contype": "n",
+      "definition": "NOT NULL code"
+    },
+    {
+      "table_name": "candidate_referral_links",
+      "conname": "candidate_referral_links_created_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "candidate_referral_links",
+      "conname": "candidate_referral_links_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "candidate_referral_links",
+      "conname": "candidate_referral_links_owner_email_not_null",
+      "contype": "n",
+      "definition": "NOT NULL owner_email"
+    },
+    {
+      "table_name": "candidate_referral_links",
+      "conname": "candidate_referral_links_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "conname": "candidate_referrals_application_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "conname": "candidate_referrals_created_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "conname": "candidate_referrals_id_not_null",
+      "contype": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "conname": "candidate_referrals_link_code_not_null",
+      "contype": "n",
+      "definition": "NOT NULL link_code"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "conname": "candidate_referrals_owner_email_not_null",
+      "contype": "n",
+      "definition": "NOT NULL owner_email"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "conname": "candidate_referrals_payout_status_not_null",
+      "contype": "n",
+      "definition": "NOT NULL payout_status"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "conname": "candidate_referrals_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "conname": "candidate_referrals_reward_cents_check",
+      "contype": "c",
+      "definition": "CHECK (((reward_cents >= 4000) AND (reward_cents <= 10000)))"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "conname": "candidate_referrals_reward_cents_not_null",
+      "contype": "n",
+      "definition": "NOT NULL reward_cents"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "conname": "candidate_referrals_status_not_null",
+      "contype": "n",
+      "definition": "NOT NULL status"
+    },
+    {
+      "table_name": "candidate_referrals",
+      "conname": "candidate_referrals_updated_at_not_null",
+      "contype": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
       "table_name": "candidate_sessions",
       "conname": "candidate_sessions_created_at_not_null",
       "contype": "n",
@@ -1607,6 +1961,12 @@
       "conname": "jobs_preferred_qualifications_not_null",
       "contype": "n",
       "definition": "NOT NULL preferred_qualifications"
+    },
+    {
+      "table_name": "jobs",
+      "conname": "jobs_referral_reward_cents_check",
+      "contype": "c",
+      "definition": "CHECK (((referral_reward_cents IS NULL) OR ((referral_reward_cents >= 4000) AND (referral_reward_cents <= 10000))))"
     },
     {
       "table_name": "jobs",
@@ -1951,6 +2311,11 @@
     },
     {
       "tablename": "applications",
+      "indexname": "idx_applications_referral_code",
+      "indexdef": "CREATE INDEX idx_applications_referral_code ON public.applications USING btree (referral_code)"
+    },
+    {
+      "tablename": "applications",
       "indexname": "idx_applications_status",
       "indexdef": "CREATE INDEX idx_applications_status ON public.applications USING btree (status)"
     },
@@ -2003,6 +2368,46 @@
       "tablename": "candidate_accounts",
       "indexname": "candidate_accounts_pkey",
       "indexdef": "CREATE UNIQUE INDEX candidate_accounts_pkey ON public.candidate_accounts USING btree (email)"
+    },
+    {
+      "tablename": "candidate_profiles",
+      "indexname": "candidate_profiles_pkey",
+      "indexdef": "CREATE UNIQUE INDEX candidate_profiles_pkey ON public.candidate_profiles USING btree (email)"
+    },
+    {
+      "tablename": "candidate_referral_links",
+      "indexname": "candidate_referral_links_code_key",
+      "indexdef": "CREATE UNIQUE INDEX candidate_referral_links_code_key ON public.candidate_referral_links USING btree (code)"
+    },
+    {
+      "tablename": "candidate_referral_links",
+      "indexname": "candidate_referral_links_pkey",
+      "indexdef": "CREATE UNIQUE INDEX candidate_referral_links_pkey ON public.candidate_referral_links USING btree (id)"
+    },
+    {
+      "tablename": "candidate_referral_links",
+      "indexname": "idx_candidate_referral_links_owner",
+      "indexdef": "CREATE INDEX idx_candidate_referral_links_owner ON public.candidate_referral_links USING btree (owner_email, created_at DESC)"
+    },
+    {
+      "tablename": "candidate_referrals",
+      "indexname": "candidate_referrals_pkey",
+      "indexdef": "CREATE UNIQUE INDEX candidate_referrals_pkey ON public.candidate_referrals USING btree (id)"
+    },
+    {
+      "tablename": "candidate_referrals",
+      "indexname": "idx_candidate_referrals_application",
+      "indexdef": "CREATE INDEX idx_candidate_referrals_application ON public.candidate_referrals USING btree (application_id)"
+    },
+    {
+      "tablename": "candidate_referrals",
+      "indexname": "idx_candidate_referrals_dedupe",
+      "indexdef": "CREATE UNIQUE INDEX idx_candidate_referrals_dedupe ON public.candidate_referrals USING btree (link_code, lower(referred_email), job_slug) WHERE (referred_email IS NOT NULL)"
+    },
+    {
+      "tablename": "candidate_referrals",
+      "indexname": "idx_candidate_referrals_owner",
+      "indexdef": "CREATE INDEX idx_candidate_referrals_owner ON public.candidate_referrals USING btree (owner_email, created_at DESC)"
     },
     {
       "tablename": "candidate_sessions",

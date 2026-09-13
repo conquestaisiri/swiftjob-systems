@@ -70,6 +70,7 @@ export interface NormalizedJob {
   workingHours: string;
   hiringProcess: string[];
   isActive: boolean;
+  referralRewardCents: number | null;
 }
 
 function normalizeInput(body: Record<string, unknown>): NormalizedJob {
@@ -95,6 +96,14 @@ function normalizeInput(body: Record<string, unknown>): NormalizedJob {
     throw new ValidationError("postedDate must be a valid date");
   }
   const isActive = body.isActive === undefined ? true : toBoolean(body.isActive);
+  let referralRewardCents: number | null = null;
+  if (body.referralRewardCents !== undefined && body.referralRewardCents !== null && String(body.referralRewardCents).trim() !== "") {
+    const amount = Number(body.referralRewardCents);
+    if (!Number.isInteger(amount) || amount < 4000 || amount > 10000) {
+      throw new ValidationError("Referral reward must be a whole-dollar amount from $40 to $100");
+    }
+    referralRewardCents = amount;
+  }
 
   return {
     slug,
@@ -117,6 +126,7 @@ function normalizeInput(body: Record<string, unknown>): NormalizedJob {
     workingHours: String(body.workingHours).trim(),
     hiringProcess: toList(body.hiringProcess),
     isActive,
+    referralRewardCents,
   };
 }
 

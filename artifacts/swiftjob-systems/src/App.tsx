@@ -38,6 +38,15 @@ const CandidateApplications = lazy(() =>
     default: m.CandidateApplications,
   })),
 );
+const CandidateReferrals = lazy(() =>
+  import("@/pages/CandidateReferrals").then((m) => ({ default: m.CandidateReferrals })),
+);
+const CandidateProfile = lazy(() =>
+  import("@/pages/CandidateProfile").then((m) => ({ default: m.CandidateProfile })),
+);
+const CandidateReferralLanding = lazy(() =>
+  import("@/pages/CandidateReferralLanding").then((m) => ({ default: m.CandidateReferralLanding })),
+);
 const ReferralPage = lazy(() =>
   import("@/pages/ReferralPage").then((m) => ({ default: m.ReferralPage })),
 );
@@ -116,6 +125,8 @@ function App() {
                 path="/candidate/applications"
                 component={CandidateApplications}
               />
+              <Route path="/candidate/profile" component={CandidateProfile} />
+              <Route path="/candidate/referrals" component={CandidateReferrals} />
               <Route
                 path="/careers/apply/success"
                 component={ApplicationSuccess}
@@ -126,6 +137,7 @@ function App() {
               <Route path="/careers/:slug" component={JobPage} />
               <Route path="/careers" component={CareersPage} />
               <Route path="/referral/:code" component={ReferralPage} />
+              <Route path="/r/:code" component={CandidateReferralLanding} />
               <Route path="/campaign/:slug" component={CampaignLanding} />
               <Route path="/admin/login" component={AdminLogin} />
               <Route path="/admin">

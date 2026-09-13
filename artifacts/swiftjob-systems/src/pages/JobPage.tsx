@@ -277,6 +277,11 @@ export function JobPage() {
     );
   }
 
+  const referralCode = new URLSearchParams(window.location.search).get("ref")?.toUpperCase() || "";
+  const referralReward = typeof job.referralRewardCents === "number"
+    ? `$${Math.round(job.referralRewardCents / 100)}`
+    : null;
+
   const set =
     (field: keyof FormData) =>
     (
@@ -343,6 +348,7 @@ export function JobPage() {
     const campaignSlug =
       new URLSearchParams(window.location.search).get("campaign") ?? "";
     if (campaignSlug) data.append("campaignSlug", campaignSlug);
+    if (/^SJREF-[A-Z0-9]{8}$/.test(referralCode)) data.append("referralCode", referralCode);
     if (resumeFile) data.append("resume", resumeFile);
 
     try {
@@ -423,6 +429,11 @@ export function JobPage() {
                 <span>
                   <DollarSign size={14} /> {job.compensation}
                 </span>
+                {referralReward && (
+                  <span title="Paid to the referring account after a verified hire">
+                    <Users size={14} /> Refer & earn {referralReward}
+                  </span>
+                )}
               </div>
             </div>
             <div className="job-header-actions">
@@ -451,6 +462,12 @@ export function JobPage() {
               <section className="job-section">
                 <h2>About the role</h2>
                 <p>{job.overview}</p>
+                {referralReward && (
+                  <div className="referral-reward-callout" role="note">
+                    <strong>Referral reward: {referralReward}</strong>
+                    <span>Share this role from your candidate account. The reward is paid after the referred candidate is hired and verified.</span>
+                  </div>
+                )}
               </section>
 
               {/* About SwiftJob */}
@@ -574,6 +591,10 @@ export function JobPage() {
                     <span>Compensation</span>
                     <strong>{job.compensation}</strong>
                   </div>
+                  {referralReward && <div className="job-detail-item">
+                    <span>Referral reward</span>
+                    <strong>{referralReward}</strong>
+                  </div>}
                 </div>
               </section>
 

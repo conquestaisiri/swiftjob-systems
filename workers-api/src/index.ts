@@ -36,6 +36,7 @@ import {
   footprintRepository,
   activityRepository,
   campaignRepository,
+  candidateRepository,
   type FootprintSummary,
 } from "./repositories";
 import type { Application } from "./schema";
@@ -369,6 +370,7 @@ const applicationSchema = z.object({
   relevantExperience: z.string().trim().min(1).max(5000),
   coverLetter: z.string().trim().min(1).max(5000),
   campaignSlug: z.string().trim().max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional(),
+  referralCode: z.string().trim().toUpperCase().regex(/^SJREF-[A-Z0-9]{8}$/).optional(),
 });
 
 app.post("/api/applications", async (c) => {
@@ -452,6 +454,38 @@ app.post("/api/applications", async (c) => {
       { ...applicationInput, jobSlug, position: job.title, submissionKey },
       resumeFile,
     );
+
+    // Keep the candidate profile useful immediately after an application and
+    // attach a valid account referral to this application exactly once.
+    try {
+      await candidateRepository.upsertProfile(application.email, {
+        fullName: application.fullName,
+        phone: application.phone,
+        country: application.country,
+        city: application.city,
+        timezone: application.timezone,
+        linkedinUrl: application.linkedinUrl,
+        portfolioUrl: application.portfolioUrl,
+        skills: application.skills,
+        experienceSummary: application.relevantExperience,
+        education: application.education,
+        resumePath: application.resumePath,
+        resumeFilename: application.resumeFilename,
+      });
+      if (parsed.data.referralCode) {
+        await candidateRepository.attachApplication({
+          code: parsed.data.referralCode,
+          referredEmail: application.email,
+          applicationId: application.id,
+          jobSlug,
+          rewardCents: job.referralRewardCents ?? 4000,
+        });
+      }
+    } catch (profileError) {
+      // Application delivery must not fail after its durable row and resume
+      // have been stored. The profile/referral can be repaired from admin data.
+      console.error({ profileError, applicationId: application.id }, "Profile/referral enrichment failed");
+    }
 
     // Keep the Worker alive until the async emails finish sending (isolate may
     // otherwise freeze as soon as the response is returned).
@@ -1232,6 +1266,46 @@ async function candidateAuth(c: any, next: any) {
   return next();
 }
 
+const candidateProfileSchema = z.object({
+  fullName: z.string().trim().min(1).max(160).optional(),
+  phone: z.string().trim().max(40).optional().nullable(),
+  country: z.string().trim().max(100).optional().nullable(),
+  city: z.string().trim().max(100).optional().nullable(),
+  timezone: z.string().trim().max(100).optional().nullable(),
+  address: z.string().trim().max(240).optional().nullable(),
+  linkedinUrl: z.union([httpUrl, z.literal("")]).optional().nullable(),
+  portfolioUrl: z.union([httpUrl, z.literal("")]).optional().nullable(),
+  headline: z.string().trim().max(180).optional().nullable(),
+  skills: z.string().trim().max(2000).optional().nullable(),
+  experienceSummary: z.string().trim().max(5000).optional().nullable(),
+  education: z.string().trim().max(500).optional().nullable(),
+});
+
+function candidateReferralBaseUrl(): string {
+  return (getEnv().FRONTEND_URL || "https://swiftjob.online").replace(/\/$/, "");
+}
+
+// Public destination for account-owned referral links. It reveals only the
+// linked role and reward; the owner's identity and account data stay private.
+app.get("/api/candidate-referrals/:code", async (c) => {
+  try {
+    const code = c.req.param("code").trim().toUpperCase();
+    if (!/^SJREF-[A-Z0-9]{8}$/.test(code)) return c.json({ error: "Referral link not found" }, 404);
+    const link = await candidateRepository.findReferralLink(code);
+    if (!link) return c.json({ error: "Referral link not found" }, 404);
+    const job = link.jobSlug ? await jobService.getBySlug(link.jobSlug) : null;
+    return c.json({
+      code: link.code,
+      jobSlug: link.jobSlug,
+      job: job ? { slug: job.slug, title: job.title, summary: job.summary, referralRewardCents: job.referralRewardCents ?? 4000 } : null,
+      referralRewardCents: job?.referralRewardCents ?? 4000,
+    });
+  } catch (err) {
+    console.error({ err }, "Failed to load candidate referral link");
+    return c.json({ error: "Unable to load referral link" }, 500);
+  }
+});
+
 function candidateApplicationView(application: Application, nextStep: Record<string, unknown>) {
   const {
     id, createdAt, position, fullName, email, phone, country, city, timezone,
@@ -1778,6 +1852,93 @@ app.get("/api/candidate/applications", candidateAuth, async (c) => {
   } catch (err) {
     console.error({ err }, "Failed to retrieve applications");
     return c.json({ error: "Failed to retrieve applications" }, 500);
+  }
+});
+
+app.get("/api/candidate/profile", candidateAuth, async (c) => {
+  try {
+    const email = c.get("user").email;
+    let profile = await candidateRepository.getProfile(email);
+    if (!profile) {
+      const applications = await applicationService.findByEmail(email);
+      const latest = applications[0];
+      profile = await candidateRepository.upsertProfile(email, latest ? {
+        fullName: latest.fullName,
+        phone: latest.phone,
+        country: latest.country,
+        city: latest.city,
+        timezone: latest.timezone,
+        linkedinUrl: latest.linkedinUrl,
+        portfolioUrl: latest.portfolioUrl,
+        skills: latest.skills,
+        experienceSummary: latest.relevantExperience,
+        education: latest.education,
+        resumePath: latest.resumePath,
+        resumeFilename: latest.resumeFilename,
+      } : {});
+    }
+    return c.json({ profile });
+  } catch (err) {
+    console.error({ err }, "Failed to retrieve candidate profile");
+    return c.json({ error: "Failed to retrieve profile" }, 500);
+  }
+});
+
+app.patch("/api/candidate/profile", candidateAuth, async (c) => {
+  try {
+    const parsed = candidateProfileSchema.safeParse(await parseJson(c));
+    if (!parsed.success) return c.json({ error: parsed.error.errors[0]?.message ?? "Invalid profile" }, 400);
+    const profile = await candidateRepository.upsertProfile(c.get("user").email, parsed.data);
+    return c.json({ profile });
+  } catch (err) {
+    console.error({ err }, "Failed to update candidate profile");
+    return c.json({ error: "Failed to update profile" }, 500);
+  }
+});
+
+app.get("/api/candidate/referrals", candidateAuth, async (c) => {
+  try {
+    const email = c.get("user").email;
+    await candidateRepository.ensureDefaultReferralLink(email);
+    const [links, referrals] = await Promise.all([
+      candidateRepository.listReferralLinks(email),
+      candidateRepository.listReferrals(email),
+    ]);
+    const enrichedLinks = await Promise.all(links.map(async (link) => {
+      const job = link.jobSlug ? await jobService.getBySlug(link.jobSlug) : null;
+      return {
+        code: link.code,
+        jobSlug: link.jobSlug,
+        jobTitle: job?.title ?? "Any open position",
+        rewardCents: job?.referralRewardCents ?? 4000,
+        url: `${candidateReferralBaseUrl()}/r/${link.code}`,
+      };
+    }));
+    const totals = referrals.reduce((acc, row) => {
+      acc.total += 1;
+      if (row.status === "hired") acc.hired += 1;
+      if (row.payoutStatus === "paid") acc.paidCents += row.rewardCents;
+      else if (row.status === "hired") acc.pendingCents += row.rewardCents;
+      return acc;
+    }, { total: 0, hired: 0, pendingCents: 0, paidCents: 0 });
+    return c.json({ links: enrichedLinks, referrals, totals });
+  } catch (err) {
+    console.error({ err }, "Failed to retrieve candidate referrals");
+    return c.json({ error: "Failed to retrieve referrals" }, 500);
+  }
+});
+
+app.post("/api/candidate/referrals", candidateAuth, async (c) => {
+  try {
+    const body = (await parseJson(c)) ?? {};
+    const jobSlug = typeof body.jobSlug === "string" && body.jobSlug.trim() ? body.jobSlug.trim() : null;
+    if (jobSlug && !(await jobService.getBySlug(jobSlug))) return c.json({ error: "That position is not available." }, 400);
+    const link = await candidateRepository.createReferralLink(c.get("user").email, jobSlug);
+    const job = jobSlug ? await jobService.getBySlug(jobSlug) : null;
+    return c.json({ link: { code: link.code, jobSlug, jobTitle: job?.title ?? "Any open position", rewardCents: job?.referralRewardCents ?? 4000, url: `${candidateReferralBaseUrl()}/r/${link.code}` } }, 201);
+  } catch (err) {
+    console.error({ err }, "Failed to create candidate referral link");
+    return c.json({ error: "Failed to create referral link" }, 500);
   }
 });
 

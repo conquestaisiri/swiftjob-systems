@@ -56,6 +56,8 @@ traffic to a new deployment.
 
 - Public: `/` landing · `/careers` · `/careers/:slug` apply · `/assessment` ·
   `/campaign/:slug` · `/referral/:code` private briefing · `/login` candidate magic-link
-- Candidate portal: `/candidate/applications` (status, resume, private room)
+- Candidate portal: `/candidate/applications` (status, resume, private room),
+  `/candidate/profile` (editable candidate profile), and `/candidate/referrals`
+  (account-owned links with role-based $40–$100 rewards and pending/paid tracking)
 - Admin: `/admin` — Overview, Applications (+ Skills Check tab), Jobs,
   Referrals (send/content editor), Mail, Contacts, Campaigns, Activity, Settings

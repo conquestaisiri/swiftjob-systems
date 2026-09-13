@@ -70,6 +70,7 @@ const EMPTY_FORM: FormState = {
   experienceLevel: "Entry-Level",
   experience: "",
   compensation: "",
+  referralRewardCents: "8000",
   postedDate: "",
   summary: "",
   overview: "",
@@ -300,6 +301,19 @@ function JobEditor({
                   placeholder="e.g. $700–$1,000/month"
                   required
                 />
+              </div>
+              <div className="job-editor-field">
+                <label>Referral reward <span className="opt">$40–$100</span></label>
+                <input
+                  type="number"
+                  min="40"
+                  max="100"
+                  step="1"
+                  value={form.referralRewardCents ? String(Number(form.referralRewardCents) / 100) : ""}
+                  onChange={(e) => setForm((f) => ({ ...f, referralRewardCents: e.target.value ? String(Number(e.target.value) * 100) : "" }))}
+                  placeholder="e.g. 80"
+                />
+                <span className="job-editor-help">Paid after a referred candidate is hired and verified.</span>
               </div>
               <div className="job-editor-field">
                 <label>
@@ -560,6 +574,7 @@ export function JobsAdmin({ token }: { token: string }) {
                 <th>Position</th>
                 <th>Department</th>
                 <th>Compensation</th>
+                <th>Referral</th>
                 <th>Posted</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -580,6 +595,11 @@ export function JobsAdmin({ token }: { token: string }) {
                   <td>
                     <div className="position-experience">
                       {job.compensation}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="position-experience">
+                      {typeof job.referralRewardCents === "number" ? `$${Math.round(job.referralRewardCents / 100)}` : "—"}
                     </div>
                   </td>
                   <td className="date-cell">

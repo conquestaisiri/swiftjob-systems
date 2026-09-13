@@ -272,6 +272,11 @@ export function CandidateApplications() {
             </Link>
             <div className="candidate-header-actions">
               <span className="candidate-user">{countLabel}</span>
+              <nav className="candidate-portal-nav" aria-label="Candidate portal">
+                <Link href="/candidate/applications" className="active">Applications</Link>
+                <Link href="/candidate/profile">Profile</Link>
+                <Link href="/candidate/referrals">Referrals</Link>
+              </nav>
               <button
                 onClick={handleLogout}
                 disabled={signingOut}

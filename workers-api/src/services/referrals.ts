@@ -10,17 +10,17 @@ import type { CreateReferralInput, Referral } from "../schema";
 const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
   heroTitle: "You've been referred",
   heroSubtitle: "A private opportunity from SwiftJob",
-  intro: `Hi {name}, {referredBy} referred you for this opportunity, and we've personally selected you to review it. Please read through everything below carefully before you do anything, so you know exactly what to expect.`,
+  intro: `Hi {name}, {referredBy} shared this SwiftJob opportunity with you. Review the role details and apply if it matches your experience.`,
   aboutRoleTitle: "About the role",
-  aboutRoleBody: `This is a real, paid {position} role with SwiftJob, and it is fully remote. You will work from your own laptop, on a schedule agreed during onboarding, with a team that supports you day to day. This is not a commission-only or pyramid situation: you are being hired to do a defined job for fair, guaranteed pay, and the team will walk you through everything step by step.`,
+  aboutRoleBody: `This is a paid, fully remote {position} role with SwiftJob. The team will confirm the schedule, pay, and responsibilities before you accept an offer.`,
   roleMetaTitle: "What to expect",
   roleMetaBody: `• Clear, realistic pay that you'll be told in full before you commit.\n• A set schedule (or agreed hours) so you always know when you're working.\n• Simple, hands-on training — no experience or special software needed.\n• A real point of contact who answers when you have questions.\n\nIf anything below seems off or you're ever uncertain, stop, contact us, and we'll clarify — never pay anyone to "start" a job.`,
   whatYouDoTitle: "What you'll be doing",
-  whatYouDoBody: `You'll join a small remote team handling the day-to-day work for this role — things like customer support, admin, data, marketing, or finance, depending on the position. Everything is done on your laptop from wherever you work best. You'll get full training and support - you don't need to bring any special software, tools, or experience to get started.`,
+  whatYouDoBody: `You will handle the day-to-day work described in the role listing from your own laptop. Training, tools, and a clear point of contact are provided.`,
   payTitle: "Pay & earnings",
   payBody: `Pay is clear, agreed in advance, and predictable. You'll be given your exact rate, how and how often you get paid, and what to do if you have trouble receiving a payment during your onboarding. We do not ask for payments, fees, or "hold" money at any point.`,
   howWorksTitle: "How it works",
-  howWorksBody: `Getting set up is simple and fully online. After you continue, you'll see exactly what the role involves, how your pay works, and what happens next - no calls, no interviews, nothing to schedule. Everything is explained clearly on this page and in your portal.`,
+  howWorksBody: `The process is online: review the role, submit your application, and follow the next steps in your candidate portal. We explain pay and timing before any offer is made.`,
   getStartedTitle: "Your next step",
   getStartedBody: `When you're ready, use the button on this page to continue. It works on any device, though a laptop or desktop is the most comfortable way to read through everything.`,
   companyTitle: "About SwiftJob",
@@ -42,9 +42,9 @@ const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
   roomNote: `Keep this page open while your room loads. If the link does not respond, contact HR at {hrEmail}.`,
   emailSubject: "You've been referred for a {position} role",
   emailGreeting: "Hi {name},",
-  emailBody: `Someone from SwiftJob referred you, and we'd love for you to review this opportunity. We open a limited number of spots each week and you've been selected to review this one. Open your briefing below - it explains the role, your pay, and your exact next steps. Works on any device — a laptop or desktop is most comfortable.`,
+  emailBody: `Someone shared a SwiftJob opportunity with you. The link below explains the role, the hiring process, and how to apply.`,
   emailCtaLabel: "Open my briefing",
-  emailClosing: `We've put everything you need on the page - the role, how it works, your pay, and what's next. When you're ready, follow the steps inside. Questions? Reach out to HR at {hrEmail}.`,
+  emailClosing: `Review the details at your own pace. If you have a question, contact HR at {hrEmail}.`,
 };
 // Replace the old shallow defaults with the richer copy - only where the stored
 // value still equals a known old default (so admin edits are never overwritten).
@@ -463,6 +463,11 @@ export const referralService = {
   },
 
   async getContent() {
+    // Keep production rows populated even when the first deployment did not
+    // run the old one-time seed hook. Known legacy defaults are upgraded only
+    // by exact match, so admin-authored copy remains untouched.
+    await referralRepository.seedContentIfAbsent(DEFAULT_REFERRAL_CONTENT);
+    await referralRepository.upgradeContentAll(OLD_TO_NEW_CONTENT);
     return referralRepository.getContent();
   },
 

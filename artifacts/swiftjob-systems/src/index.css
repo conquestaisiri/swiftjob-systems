@@ -5597,6 +5597,21 @@ h2 {
   background: #efede6;
   min-height: 100vh;
 }
+
+.referral-reward-callout {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 20px;
+  padding: 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--mint) 55%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--mint) 12%, white);
+  color: var(--slate-ink);
+}
+
+.referral-reward-callout strong { color: var(--forest); }
+.referral-reward-callout span { font-size: 0.9rem; line-height: 1.5; }
 .candidate-header {
   background: var(--navy);
   color: #fff;
@@ -5630,6 +5645,66 @@ h2 {
   align-items: center;
   gap: 14px;
 }
+.candidate-portal-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.candidate-portal-nav a {
+  color: rgba(255,255,255,.78);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.candidate-portal-nav a:hover,
+.candidate-portal-nav a.active { color: #fff; }
+.candidate-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.candidate-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.candidate-stat-card svg { color: var(--blue); }
+.candidate-stat-card strong { font-size: 23px; color: var(--navy); }
+.candidate-stat-card span { font-size: 12px; color: #64748b; }
+.candidate-panel {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 22px;
+  margin-bottom: 18px;
+}
+.candidate-panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
+.candidate-panel-heading h2 { margin: 0 0 4px; color: var(--navy); font-size: 18px; }
+.candidate-panel-heading p, .candidate-panel-empty { margin: 0; color: #64748b; font-size: 13px; }
+.candidate-referral-create { display: flex; gap: 8px; align-items: center; }
+.candidate-referral-create select, .candidate-profile-form input, .candidate-profile-form textarea { border: 1px solid var(--line); border-radius: 8px; padding: 10px 11px; font: inherit; color: var(--navy); background: #fff; }
+.candidate-referral-create select { min-width: 220px; }
+.candidate-link-list { display: grid; gap: 10px; }
+.candidate-link-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 14px; background: #f7f8fa; border: 1px solid #e4e9ef; border-radius: 10px; }
+.candidate-link-row > div { min-width: 0; display: grid; gap: 3px; }
+.candidate-link-row strong { color: var(--navy); font-size: 13px; }
+.candidate-link-row span { color: var(--forest); font-size: 12px; font-weight: 700; }
+.candidate-link-row code { color: #64748b; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.candidate-referral-table { display: grid; gap: 0; border: 1px solid #e4e9ef; border-radius: 10px; overflow: hidden; }
+.candidate-referral-table-head, .candidate-referral-table-row { display: grid; grid-template-columns: 1.2fr 1fr .8fr .8fr; gap: 12px; align-items: center; padding: 12px 14px; font-size: 12px; }
+.candidate-referral-table-head { color: #64748b; font-weight: 700; background: #f7f8fa; }
+.candidate-referral-table-row { color: var(--navy); border-top: 1px solid #e4e9ef; }
+.candidate-success { margin-bottom: 18px; padding: 13px 16px; border: 1px solid #b7e4d5; background: #ecfdf5; color: #166534; border-radius: 10px; font-size: 13px; }
+.candidate-profile-form { padding: 26px; }
+.candidate-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.candidate-form-grid label { display: grid; gap: 6px; color: var(--navy); font-size: 12px; font-weight: 700; }
+.candidate-form-full { grid-column: 1 / -1; }
+.candidate-form-actions { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 20px; margin-top: 20px; border-top: 1px solid var(--line); color: #64748b; font-size: 12px; }
 .candidate-user {
   font-size: 12px;
   font-weight: 600;
@@ -9653,4 +9728,20 @@ h2 {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+@media (max-width: 760px) {
+  .candidate-portal-nav { gap: 9px; }
+  .candidate-portal-nav a { font-size: 11px; }
+  .candidate-portal-nav .button { padding-inline: 8px; }
+  .candidate-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .candidate-panel-heading { flex-direction: column; }
+  .candidate-referral-create { width: 100%; }
+  .candidate-referral-create select { min-width: 0; flex: 1; }
+  .candidate-link-row { align-items: flex-start; flex-direction: column; }
+  .candidate-referral-table { overflow-x: auto; }
+  .candidate-referral-table-head, .candidate-referral-table-row { min-width: 620px; }
+  .candidate-form-grid { grid-template-columns: 1fr; }
+  .candidate-form-full { grid-column: auto; }
+  .candidate-form-actions { align-items: flex-start; flex-direction: column; }
 }
