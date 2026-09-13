@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-09-13T04:12:00Z",
+  "checkedAt": "2026-09-13T04:16:00Z",
   "productionDomain": "https://swiftjob.online",
   "previousDomain": "https://swiftjob.payservice.top",
   "cloudflare": {
@@ -17,11 +17,12 @@
     "emailRouting": {
       "domain": "swiftjob.online",
       "status": "enabled",
-      "dnsRecords": "Cloudflare MX, DKIM, and SPF records present; legacy SpaceMail MX/SPF records removed",
+      "dnsRecords": "Cloudflare MX, DKIM, and SPF records present; all legacy SpaceMail MX, SPF, and autodiscover SRV records removed",
       "rules": 0,
       "destination": "swiftjobs113@gmail.com",
       "destinationStatus": "pending verification",
-      "catchAll": "disabled / drop"
+      "catchAll": "disabled / drop",
+      "dnsRecordCount": 10
     },
     "pagesAdditionalCustomDomain": {
       "hostname": "www.swiftjob.online",
