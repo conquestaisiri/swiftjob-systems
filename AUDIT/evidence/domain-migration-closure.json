@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-09-13T04:16:00Z",
+  "checkedAt": "2026-09-13T04:18:00Z",
   "productionDomain": "https://swiftjob.online",
   "previousDomain": "https://swiftjob.payservice.top",
   "cloudflare": {
@@ -57,7 +57,7 @@
     "logoPng": 200,
     "adminLogin": 200,
     "adminReadOnlyEndpoints": 200,
-    "www": "200 via Pages after DNS/SSL activation (direct resolver probe)",
+    "www": "200 via Cloudflare Pages with active SSL",
     "sitemapUrls": 100,
     "apiJobRoutes": 95,
     "applicationMalformedContentType": 400
