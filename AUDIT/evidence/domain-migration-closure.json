@@ -46,9 +46,11 @@
     "resendDomain": "swiftjob.online",
     "resendStatus": "verified",
     "sending": "enabled",
+    "requestedInboundDestination": "swiftjobs113@gmail.com",
     "controlledCustomMail": "delivered",
     "contactNotification": "bounced: hr@swiftjob.online has no receiving mailbox or route",
-    "receiving": "not configured"
+    "receiving": "not configured",
+    "routingTokenProbe": "The newly supplied Cloudflare token was rejected as invalid by /user/tokens/verify; no routing change was attempted. Existing active token lacks Email Routing Settings/Rules write access."
   },
-  "remainingGate": "Create or route hr@swiftjob.online, careers@swiftjob.online, and support@swiftjob.online through the active mail provider, then rerun inbound contact/application/status/reply-to receipt checks."
+  "remainingGate": "Authorize the active Cloudflare token for Email Routing Settings/Rules, add and verify swiftjobs113@gmail.com as the destination, route hr@swiftjob.online, careers@swiftjob.online, support@swiftjob.online, and admin@swiftjob.online, then rerun inbound contact/application/status/reply-to receipt checks."
 }
