@@ -1,0 +1,54 @@
+{
+  "checkedAt": "2026-09-13T02:19:00Z",
+  "productionDomain": "https://swiftjob.online",
+  "previousDomain": "https://swiftjob.payservice.top",
+  "cloudflare": {
+    "zone": "swiftjob.online",
+    "zoneStatus": "active",
+    "pagesProject": "swiftjob-systems",
+    "pagesCustomDomain": "active",
+    "pagesCertificate": "active",
+    "dnsRecord": {
+      "type": "CNAME",
+      "name": "swiftjob.online",
+      "target": "swiftjob-systems.pages.dev",
+      "proxied": false
+    }
+  },
+  "deployments": {
+    "pages": "3374ec21.swiftjob-systems.pages.dev",
+    "worker": "deployed successfully from the migrated branch"
+  },
+  "sourceMigration": {
+    "frontendFallbacks": "swiftjob.online",
+    "workerFrontendUrl": "https://swiftjob.online",
+    "canonicalAndSocialUrls": "swiftjob.online",
+    "sitemapAndRobots": "swiftjob.online",
+    "emailLogoUrl": "https://swiftjob.online/swiftjob-logo.png?v=supplied-20260912"
+  },
+  "liveChecks": {
+    "homepage": 200,
+    "careers": 200,
+    "jobPage": 200,
+    "login": 200,
+    "privacy": 200,
+    "terms": 200,
+    "healthz": 200,
+    "publicStats": 200,
+    "jobsApi": 200,
+    "sitemap": 200,
+    "robots": 200,
+    "logoPng": 200,
+    "adminLogin": 200,
+    "adminReadOnlyEndpoints": 200
+  },
+  "email": {
+    "resendDomain": "swiftjob.online",
+    "resendStatus": "verified",
+    "sending": "enabled",
+    "controlledCustomMail": "delivered",
+    "contactNotification": "bounced: hr@swiftjob.online has no receiving mailbox or route",
+    "receiving": "not configured"
+  },
+  "remainingGate": "Create or route hr@swiftjob.online, careers@swiftjob.online, and support@swiftjob.online through the active mail provider, then rerun inbound contact/application/status/reply-to receipt checks."
+}
