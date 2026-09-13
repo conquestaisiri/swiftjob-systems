@@ -143,3 +143,12 @@ test data. The admin now has a dedicated Referral rewards screen for reviewing
 these records. Evidence is in
 `AUDIT/29_ACCOUNT_REFERRALS.md` and
 `AUDIT/evidence/candidate-referral-live-closure.json`.
+
+## Direct metadata addendum — 2026-09-13
+
+The Pages edge worker now rewrites canonical, Open Graph URL, and robots tags
+in direct HTML responses. This keeps route metadata correct for crawlers and
+link unfurlers before the SPA loads. A live crawl of all 100 sitemap URLs
+returned HTTP 200, a title, and a matching `https://swiftjob.online` canonical;
+private routes returned `noindex, nofollow`. Evidence is in
+`AUDIT/evidence/public-route-crawl.json`.
