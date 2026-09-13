@@ -488,6 +488,36 @@ export const candidateRepository = {
       .orderBy(desc(candidateReferrals.createdAt));
   },
 
+  async listAllReferrals(): Promise<CandidateReferral[]> {
+    const db = getDb();
+    return db.select().from(candidateReferrals)
+      .orderBy(desc(candidateReferrals.createdAt));
+  },
+
+  async getReferral(id: string): Promise<CandidateReferral | undefined> {
+    const db = getDb();
+    const [referral] = await db.select().from(candidateReferrals)
+      .where(eq(candidateReferrals.id, id)).limit(1);
+    return referral;
+  },
+
+  async updateReferral(id: string, input: { status?: string; payoutStatus?: string }): Promise<CandidateReferral | undefined> {
+    const current = await this.getReferral(id);
+    if (!current) return undefined;
+    const status = input.status ?? current.status;
+    const payoutStatus = input.payoutStatus ?? current.payoutStatus;
+    if (payoutStatus === "paid" && status !== "hired") {
+      throw new Error("A referral must be marked hired before it can be paid.");
+    }
+    const db = getDb();
+    const [updated] = await db.update(candidateReferrals).set({
+      ...(input.status !== undefined ? { status } : {}),
+      ...(input.payoutStatus !== undefined ? { payoutStatus } : {}),
+      updatedAt: new Date(),
+    }).where(eq(candidateReferrals.id, id)).returning();
+    return updated;
+  },
+
   async attachApplication(input: {
     code: string;
     referredEmail: string;

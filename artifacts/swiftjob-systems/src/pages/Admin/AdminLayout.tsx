@@ -11,6 +11,7 @@ import {
   Megaphone,
   Send,
   Settings,
+  WalletCards,
 } from "lucide-react";
 import { clearAdminToken, getAdminToken } from "@/lib/adminApi";
 
@@ -18,6 +19,7 @@ export type AdminView =
   | "overview"
   | "applications"
   | "referrals"
+  | "candidate-referrals"
   | "contacts"
   | "jobs"
   | "mail"
@@ -59,6 +61,12 @@ const NAV_GROUPS: {
         label: "Referrals",
         href: "/admin/referrals",
         icon: Link2,
+      },
+      {
+        view: "candidate-referrals",
+        label: "Referral rewards",
+        href: "/admin/candidate-referrals",
+        icon: WalletCards,
       },
       {
         view: "contacts",

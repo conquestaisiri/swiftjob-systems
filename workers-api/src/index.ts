@@ -2540,6 +2540,48 @@ app.get("/api/admin/activities", adminAuth, async (c) => {
 // ============================================
 // REFERRALS (ADMIN)
 // ============================================
+const candidateReferralUpdateSchema = z.object({
+  status: z.enum(["applied", "hired", "rejected"]).optional(),
+  payoutStatus: z.enum(["pending", "paid"]).optional(),
+}).refine((value) => value.status !== undefined || value.payoutStatus !== undefined, {
+  message: "Provide a status or payoutStatus to update",
+});
+
+app.get("/api/admin/candidate-referrals", adminAuth, async (c) => {
+  try {
+    const referrals = await candidateRepository.listAllReferrals();
+    const enriched = await Promise.all(referrals.map(async (referral) => {
+      const job = referral.jobSlug ? await jobService.getBySlug(referral.jobSlug) : null;
+      return { ...referral, jobTitle: job?.title ?? referral.jobSlug ?? "Any open position" };
+    }));
+    return c.json({ referrals: enriched });
+  } catch (err) {
+    console.error({ err }, "Failed to fetch candidate referral rewards");
+    return c.json({ error: "Failed to fetch candidate referral rewards" }, 500);
+  }
+});
+
+app.patch("/api/admin/candidate-referrals/:id", adminAuth, async (c) => {
+  try {
+    const parsed = candidateReferralUpdateSchema.safeParse(await parseJson(c));
+    if (!parsed.success) return c.json({ error: parsed.error.errors[0]?.message ?? "Invalid referral update" }, 400);
+    const updated = await candidateRepository.updateReferral(c.req.param("id"), parsed.data);
+    if (!updated) return c.json({ error: "Candidate referral not found" }, 404);
+    logActivity(c, {
+      action: "admin.candidate_referral_updated",
+      targetType: "candidate_referral",
+      targetId: updated.id,
+      detail: { status: updated.status, payoutStatus: updated.payoutStatus },
+    });
+    return c.json({ referral: updated });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to update candidate referral";
+    if (message.includes("must be marked hired")) return c.json({ error: message }, 400);
+    console.error({ err }, "Failed to update candidate referral");
+    return c.json({ error: "Failed to update candidate referral" }, 500);
+  }
+});
+
 app.get("/api/admin/referrals", adminAuth, async (c) => {
   try {
     const status = c.req.query("status") || undefined;

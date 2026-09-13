@@ -4,6 +4,7 @@ import { createHarness } from './harness.mjs';
 
 const h = await createHarness();
 const results = [];
+let referralId;
 async function check(name, fn) {
   try {
     await fn();
@@ -114,9 +115,11 @@ try {
     });
     assert.equal(response.status, 201);
     const rows = (await h.database.query(
-      'SELECT owner_email, link_code, referred_email, job_slug, status, reward_cents, payout_status FROM candidate_referrals',
+      'SELECT id, owner_email, link_code, referred_email, job_slug, status, reward_cents, payout_status FROM candidate_referrals',
     )).rows;
     assert.equal(rows.length, 1);
+    referralId = rows[0].id;
+    delete rows[0].id;
     assert.deepEqual(rows[0], {
       owner_email: 'referrer@example.test',
       link_code: 'SJREF-TEST1234',
@@ -144,6 +147,41 @@ try {
     });
     assert.equal(response.status, 201);
     assert.equal((await h.database.query('SELECT count(*)::int AS count FROM candidate_referrals')).rows[0].count, 1);
+  });
+
+  await check('Admin can verify a hire and then mark the reward paid', async () => {
+    const login = await h.request('/api/admin/login', {
+      method: 'POST',
+      body: { email: h.env.ADMIN_EMAIL, password: h.env.ADMIN_PASSWORD },
+    });
+    assert.equal(login.status, 200);
+    const token = login.data.token;
+    const list = await h.request('/api/admin/candidate-referrals', { token });
+    assert.equal(list.status, 200);
+    assert.equal(list.data.referrals[0].id, referralId);
+
+    const earlyPayout = await h.request(`/api/admin/candidate-referrals/${referralId}`, {
+      method: 'PATCH',
+      token,
+      body: { payoutStatus: 'paid' },
+    });
+    assert.equal(earlyPayout.status, 400);
+
+    const hired = await h.request(`/api/admin/candidate-referrals/${referralId}`, {
+      method: 'PATCH',
+      token,
+      body: { status: 'hired' },
+    });
+    assert.equal(hired.status, 200);
+    assert.equal(hired.data.referral.status, 'hired');
+
+    const paid = await h.request(`/api/admin/candidate-referrals/${referralId}`, {
+      method: 'PATCH',
+      token,
+      body: { payoutStatus: 'paid' },
+    });
+    assert.equal(paid.status, 200);
+    assert.equal(paid.data.referral.payoutStatus, 'paid');
   });
 
   await check('General referral links expose a range instead of a misleading fixed reward', async () => {

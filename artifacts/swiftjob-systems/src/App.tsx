@@ -84,6 +84,11 @@ const ReferralsAdmin = lazy(() =>
     default: m.ReferralsAdmin,
   })),
 );
+const CandidateReferralRewardsAdmin = lazy(() =>
+  import("@/pages/Admin/CandidateReferralRewardsAdmin").then((m) => ({
+    default: m.CandidateReferralRewardsAdmin,
+  })),
+);
 const ContactsAdmin = lazy(() =>
   import("@/pages/Admin/ContactsAdmin").then((m) => ({
     default: m.ContactsAdmin,
@@ -153,6 +158,11 @@ function App() {
               <Route path="/admin/referrals">
                 <AdminLayout view="referrals">
                   {(token) => <ReferralsAdmin token={token} />}
+                </AdminLayout>
+              </Route>
+              <Route path="/admin/candidate-referrals">
+                <AdminLayout view="candidate-referrals">
+                  {(token) => <CandidateReferralRewardsAdmin token={token} />}
                 </AdminLayout>
               </Route>
               <Route path="/admin/contacts">
