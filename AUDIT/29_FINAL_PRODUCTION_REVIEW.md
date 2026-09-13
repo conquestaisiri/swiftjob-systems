@@ -156,6 +156,8 @@ link unfurlers before the SPA loads. A live crawl of all 100 sitemap URLs
 returned HTTP 200, a title, and a matching `https://swiftjob.online` canonical;
 private routes returned `noindex, nofollow`. Evidence is in
 `AUDIT/evidence/public-route-crawl.json`.
+A rendered-content scan of the same 100 URLs found no legacy `payservice.top` references and no retired “two countries” wording. Evidence is in
+`AUDIT/evidence/public-content-domain-scan.json`.
 
 ## Owner mailbox addendum — 2026-09-13
 

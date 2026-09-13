@@ -11,6 +11,7 @@
 | Application/file/data boundary | PASS (7 groups) | `AUDIT/evidence/application-regression.json` |
 | Checker safety and retired MSI | PASS (2 groups) | `AUDIT/evidence/techcheck-regression.json` |
 | Sitemap and API headers | PASS | live `public-baseline.json`; dynamic `/sitemap.xml` returned 100 valid URLs and `no-store` |
+| Public content/domain/copy scan | PASS | `evidence/public-content-domain-scan.json`; all 100 sitemap pages returned 200 with a title and contained no legacy `payservice.top` references or retired “two countries” wording |
 | Responsive browser matrix | PASS | `evidence/responsive-browser-errors.json`; 30 prior samples plus 12 fresh settled samples on the latest deployment, zero body overflow and zero site-origin console errors |
 | Accessibility DOM and sampled contrast checks | PASS (automated subset) | `evidence/accessibility-closure.json`, `evidence/contrast-closure.json`; 27 controls labeled, no duplicate IDs/unnamed buttons/missing image alt, 0 sampled contrast failures |
 | Unified SwiftJob logo assets and brand surfaces | PASS (live visual sample) | `evidence/branding-closure.json`; production SVG/PNG assets, favicon, light/dark surfaces, admin login and email template path verified on the custom domain |
