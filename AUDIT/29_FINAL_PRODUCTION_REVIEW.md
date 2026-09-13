@@ -168,3 +168,35 @@ button opened the candidate portal. The temporary application, profile and
 session were cleaned up. Older pre-migration messages still contain the legacy
 domain and were left unchanged. Evidence is in
 `AUDIT/evidence/live-owner-mailbox-closure.json`.
+
+## Current live verification addendum — 2026-09-13
+
+The remaining frontend closure work is now deployed to `https://swiftjob.online`.
+The homepage client mark contrast issue was repaired, the primary hero image is
+marked eager/high-priority, the public `llms.txt` endpoint returns HTTP 200, and
+the duplicate Google Fonts import was removed in favor of one asynchronous
+stylesheet path. TypeScript and production builds pass.
+
+Live browser checks now show Lighthouse 100 for Accessibility, Best Practices,
+SEO, and Agentic Browsing on both desktop and mobile homepage navigations (58
+audits passed, 0 failed). A fresh performance trace measured LCP 837 ms and
+CLS 0.00 under an unthrottled lab run. The remaining trace suggestion is the
+bundled application CSS as a render-blocking request; it is an optimization
+opportunity, not a failing Web Vital.
+
+The current live route crawl passes all 100 sitemap URLs with no legacy-domain
+or retired-copy matches. Candidate referral production smoke, admin referral
+smoke, application/auth/referral/tech-check regressions, and cryptographic
+runtime checks pass. Authenticated browser inspection loaded Overview,
+Applications, Referrals, Referral rewards, Contacts, Jobs, Campaigns, Send
+mail, Activity log, and Settings; Settings eventually loaded its live defaults
+after the API response settled. No payment or password changes were made.
+
+This supersedes the earlier statement that Chrome performance tooling was
+unavailable. Full screen-reader/dynamic-state review, Gmail destination and
+bounce placement checks, finer-grained Cloudflare edge rules, and owner-only
+historical Supabase credential rotation remain open; the database/password
+credential was intentionally left unchanged.
+
+Machine-readable evidence for this run is in
+`AUDIT/evidence/current-live-verification-2026-09-13.json`.

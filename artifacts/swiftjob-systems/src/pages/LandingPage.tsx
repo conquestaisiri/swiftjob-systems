@@ -201,6 +201,9 @@ export function LandingPage() {
               <img
                 src="/wfh-desk.jpg"
                 alt="A professional taking a call while working from home"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
               />
             </figure>
             <figure className="landing-v2-photo landing-v2-photo-b">
