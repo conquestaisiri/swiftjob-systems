@@ -4,7 +4,7 @@ Repairs include strict candidate ownership, session revocation, JWT algorithm/cl
 
 The combined MSI route is retired. Standard checkers collect basic specs only, do not bypass PowerShell execution policy, do not include hostnames, and consume a one-time token. The history scan found credential-shaped database URLs in current/history objects; values were not emitted, and rotating any exposed historical credentials remains an operator task.
 
-The historical-secret classification is in `evidence/history-secrets.json`: an old Supabase pooler credential was present in retired Express history, was removed from the current tree, and has unknown provider-side validity because authentication was not attempted. The owner must rotate/revoke the Supabase project pooler/database password and confirm no remaining consumer before a READY gate.
+The historical-secret classification is in `evidence/history-secrets.json`. The old Supabase token and project reference have now been removed from both local SwiftJob credential files; production uses Neon and the database password was left unchanged. Provider-side Supabase PAT revocation is owner-only and remains separate from this project cleanup. Evidence is in `evidence/supabase-local-access-removal.json`.
 
 The Worker secret inventory was rechecked after deployment. Only the active production set remains (`DATABASE_URL`, `RESEND_API_KEY`, sender/recipient settings, JWT and admin credentials); the unused legacy Backblaze key bindings were deleted.
 

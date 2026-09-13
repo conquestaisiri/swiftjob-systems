@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-09-13",
+  "status": "PASS_LOCAL_REMOVAL",
+  "runtimeDatabase": "Neon",
+  "removedKeys": [
+    "SUPABASE_ACCESS_TOKEN",
+    "SUPABASE_PROJECT_REF"
+  ],
+  "filesChecked": [
+    "C:/Users/USER/Desktop/SWIFTJOB-ALL-ACCOUNT-ACCESS-KEYS.env",
+    ".secrets/SWIFTJOB/swiftjob-all-account-access-keys.local.env"
+  ],
+  "supabaseProviderRevocation": "NOT_PERFORMED; requires the Supabase account owner dashboard",
+  "databasePassword": "UNCHANGED",
+  "valuesPrinted": false
+}
