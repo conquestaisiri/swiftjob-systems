@@ -1285,6 +1285,19 @@ function candidateReferralBaseUrl(): string {
   return (getEnv().FRONTEND_URL || "https://swiftjob.online").replace(/\/$/, "");
 }
 
+const CANDIDATE_REFERRAL_MIN_REWARD_CENTS = 4000;
+const CANDIDATE_REFERRAL_MAX_REWARD_CENTS = 10000;
+
+function candidateReferralReward(job: { referralRewardCents?: number | null } | null | undefined) {
+  return {
+    rewardCents: job?.referralRewardCents ?? null,
+    rewardRangeCents: {
+      min: CANDIDATE_REFERRAL_MIN_REWARD_CENTS,
+      max: CANDIDATE_REFERRAL_MAX_REWARD_CENTS,
+    },
+  };
+}
+
 // Public destination for account-owned referral links. It reveals only the
 // linked role and reward; the owner's identity and account data stay private.
 app.get("/api/candidate-referrals/:code", async (c) => {
@@ -1294,11 +1307,12 @@ app.get("/api/candidate-referrals/:code", async (c) => {
     const link = await candidateRepository.findReferralLink(code);
     if (!link) return c.json({ error: "Referral link not found" }, 404);
     const job = link.jobSlug ? await jobService.getBySlug(link.jobSlug) : null;
+    const reward = candidateReferralReward(job);
     return c.json({
       code: link.code,
       jobSlug: link.jobSlug,
-      job: job ? { slug: job.slug, title: job.title, summary: job.summary, referralRewardCents: job.referralRewardCents ?? 4000 } : null,
-      referralRewardCents: job?.referralRewardCents ?? 4000,
+      job: job ? { slug: job.slug, title: job.title, summary: job.summary, ...reward } : null,
+      ...reward,
     });
   } catch (err) {
     console.error({ err }, "Failed to load candidate referral link");
@@ -1906,11 +1920,12 @@ app.get("/api/candidate/referrals", candidateAuth, async (c) => {
     ]);
     const enrichedLinks = await Promise.all(links.map(async (link) => {
       const job = link.jobSlug ? await jobService.getBySlug(link.jobSlug) : null;
+      const reward = candidateReferralReward(job);
       return {
         code: link.code,
         jobSlug: link.jobSlug,
         jobTitle: job?.title ?? "Any open position",
-        rewardCents: job?.referralRewardCents ?? 4000,
+        ...reward,
         url: `${candidateReferralBaseUrl()}/r/${link.code}`,
       };
     }));
@@ -1935,7 +1950,8 @@ app.post("/api/candidate/referrals", candidateAuth, async (c) => {
     if (jobSlug && !(await jobService.getBySlug(jobSlug))) return c.json({ error: "That position is not available." }, 400);
     const link = await candidateRepository.createReferralLink(c.get("user").email, jobSlug);
     const job = jobSlug ? await jobService.getBySlug(jobSlug) : null;
-    return c.json({ link: { code: link.code, jobSlug, jobTitle: job?.title ?? "Any open position", rewardCents: job?.referralRewardCents ?? 4000, url: `${candidateReferralBaseUrl()}/r/${link.code}` } }, 201);
+    const reward = candidateReferralReward(job);
+    return c.json({ link: { code: link.code, jobSlug, jobTitle: job?.title ?? "Any open position", ...reward, url: `${candidateReferralBaseUrl()}/r/${link.code}` } }, 201);
   } catch (err) {
     console.error({ err }, "Failed to create candidate referral link");
     return c.json({ error: "Failed to create referral link" }, 500);

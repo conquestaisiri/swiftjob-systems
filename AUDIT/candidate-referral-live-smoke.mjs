@@ -31,12 +31,20 @@ try {
   const list = await fetch("https://swiftjob.online/api/candidate/referrals", { headers });
   const listBody = await list.json();
   if (list.status !== 200 || !Array.isArray(listBody.links) || listBody.links.length < 1) throw new Error(`Referral list returned ${list.status}`);
+  const general = listBody.links.find((link) => !link.jobSlug);
+  if (!general || general.rewardCents !== null || general.rewardRangeCents?.min !== 4000 || general.rewardRangeCents?.max !== 10000) {
+    throw new Error("General referral link did not expose the $40–$100 range");
+  }
   const created = await fetch("https://swiftjob.online/api/candidate/referrals", { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ jobSlug: "captioner-subtitler" }) });
   const createdBody = await created.json();
   if (created.status !== 201 || createdBody.link?.rewardCents !== 4000) throw new Error(`Referral create returned ${created.status}`);
   const publicResponse = await fetch(`https://swiftjob.online/api/candidate-referrals/${createdBody.link.code}`);
   if (publicResponse.status !== 200) throw new Error(`Public handoff returned ${publicResponse.status}`);
-  console.log(JSON.stringify({ status: "PASS", profile: profile.status, list: list.status, create: created.status, publicHandoff: publicResponse.status }));
+  const publicBody = await publicResponse.json();
+  if (publicBody.rewardCents !== 4000 || publicBody.rewardRangeCents?.min !== 4000 || publicBody.rewardRangeCents?.max !== 10000) {
+    throw new Error("Role referral handoff returned an unexpected reward");
+  }
+  console.log(JSON.stringify({ status: "PASS", profile: profile.status, list: list.status, create: created.status, publicHandoff: publicResponse.status, generalRange: general.rewardRangeCents, roleRewardCents: publicBody.rewardCents }));
 } finally {
   await sql`DELETE FROM candidate_referrals WHERE owner_email = ${email}`;
   await sql`DELETE FROM candidate_referral_links WHERE owner_email = ${email}`;

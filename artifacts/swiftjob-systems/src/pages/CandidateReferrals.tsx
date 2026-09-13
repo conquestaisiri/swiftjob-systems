@@ -5,10 +5,16 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
-type LinkRow = { code: string; jobSlug: string | null; jobTitle: string; rewardCents: number; url: string };
+type LinkRow = { code: string; jobSlug: string | null; jobTitle: string; rewardCents: number | null; rewardRangeCents?: { min: number; max: number }; url: string };
 type ReferralRow = { id: string; referredEmail: string | null; jobSlug: string | null; status: string; rewardCents: number; payoutStatus: string; createdAt: string };
 
 function money(cents: number) { return `$${Math.round(cents / 100)}`; }
+function rewardLabel(row: LinkRow) {
+  if (typeof row.rewardCents === "number") return money(row.rewardCents);
+  const min = row.rewardRangeCents?.min ?? 4000;
+  const max = row.rewardRangeCents?.max ?? 10000;
+  return `${money(min)}–${money(max)} depending on the role`;
+}
 
 export function CandidateReferrals() {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("candidate_token"));
@@ -71,7 +77,7 @@ export function CandidateReferrals() {
         {loading ? <div className="candidate-loading"><Loader2 size={32} className="animate-spin" /><p>Loading your referral dashboard…</p></div> : <>
           <div className="candidate-stats-grid"><div className="candidate-stat-card"><Link2 size={19} /><strong>{totals.total}</strong><span>Total referrals</span></div><div className="candidate-stat-card"><UserRound size={19} /><strong>{totals.hired}</strong><span>Verified hires</span></div><div className="candidate-stat-card"><WalletCards size={19} /><strong>{money(totals.pendingCents)}</strong><span>Pending rewards</span></div><div className="candidate-stat-card"><WalletCards size={19} /><strong>{money(totals.paidCents)}</strong><span>Paid rewards</span></div></div>
           <section className="candidate-panel"><div className="candidate-panel-heading"><div><h2>Share a referral link</h2><p>Create a link for one role or for any open position.</p></div><div className="candidate-referral-create"><select aria-label="Role for referral link" value={jobSlug} onChange={(e) => setJobSlug(e.target.value)}><option value="">Any open position</option>{jobs.map((job) => <option key={job.slug} value={job.slug}>{job.title}</option>)}</select><button className="button button-blue" onClick={createLink} disabled={saving}><Plus size={16} /> {saving ? "Creating…" : "Create link"}</button></div></div>
-            <div className="candidate-link-list">{links.map((row) => <div className="candidate-link-row" key={row.code}><div><strong>{row.jobTitle}</strong><span>Reward: {money(row.rewardCents)}</span><code>{row.url}</code></div><button className="button button-outline button-sm" onClick={() => copy(row)}><Copy size={14} /> {copied === row.code ? "Copied" : "Copy link"}</button></div>)}</div>
+            <div className="candidate-link-list">{links.map((row) => <div className="candidate-link-row" key={row.code}><div><strong>{row.jobTitle}</strong><span>Reward: {rewardLabel(row)}</span><code>{row.url}</code></div><button className="button button-outline button-sm" onClick={() => copy(row)}><Copy size={14} /> {copied === row.code ? "Copied" : "Copy link"}</button></div>)}</div>
           </section>
           <section className="candidate-panel"><div className="candidate-panel-heading"><div><h2>Referral activity</h2><p>Rewards remain pending until SwiftJob verifies the hire.</p></div></div>{referrals.length === 0 ? <p className="candidate-panel-empty">No one has applied through your links yet.</p> : <div className="candidate-referral-table"><div className="candidate-referral-table-head"><span>Candidate</span><span>Role</span><span>Status</span><span>Reward</span></div>{referrals.map((row) => <div className="candidate-referral-table-row" key={row.id}><span>{row.referredEmail || "Candidate"}</span><span>{row.jobSlug || "Open position"}</span><span className="status-badge status-live">{row.status}</span><span>{money(row.rewardCents)} · {row.payoutStatus}</span></div>)}</div>}</section>
         </>}

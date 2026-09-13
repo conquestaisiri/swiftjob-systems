@@ -14,6 +14,7 @@
     "profilePage": "PASS",
     "referralsPage": "PASS",
     "roleSpecificLink": "PASS",
+    "generalLinkRange": "PASS",
     "desktopVisual": "PASS",
     "mobile390Visual": "PASS",
     "temporaryDataCleanup": "PASS"

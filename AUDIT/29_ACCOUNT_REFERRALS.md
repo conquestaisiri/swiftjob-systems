@@ -32,6 +32,9 @@ Date: 2026-09-13
 - Live protected candidate referral endpoint returned 401 without a session;
   invalid public referral codes returned 404.
 - Existing auth, application, and tech-check regression suites all passed.
+- The focused referral regression passed: valid attribution creates one pending
+  reward at the job amount, repeated applications do not duplicate the reward,
+  and self-referrals are ignored.
 - Frontend build and worker/frontend TypeScript checks passed.
 
 ## Live browser verification
@@ -43,7 +46,7 @@ Date: 2026-09-13
 - The session created both a general referral link and a role-specific
   Captioner / Subtitler link. The role-specific link showed the expected $40
   reward and the public handoff resolved to the correct job with its `ref`
-  attribution parameter.
+  attribution parameter; the general link correctly showed a $40–$100 range.
 - Temporary candidate data, session, and referral links were removed after the
   check.
 
