@@ -2,7 +2,7 @@
   {
     "path": "/api/healthz",
     "status": 200,
-    "ms": 1216,
+    "ms": 1174,
     "contentType": "application/json",
     "cacheControl": "no-store",
     "securityHeaders": {
@@ -16,7 +16,7 @@
   {
     "path": "/api/jobs",
     "status": 200,
-    "ms": 1026,
+    "ms": 1039,
     "contentType": "application/json",
     "cacheControl": "no-store",
     "securityHeaders": {
@@ -31,7 +31,7 @@
   {
     "path": "/api/admin/stats",
     "status": 401,
-    "ms": 179,
+    "ms": 170,
     "contentType": "application/json",
     "cacheControl": "no-store",
     "securityHeaders": {
@@ -45,7 +45,7 @@
   {
     "path": "/api/candidate/applications",
     "status": 401,
-    "ms": 986,
+    "ms": 1073,
     "contentType": "application/json",
     "cacheControl": "no-store",
     "securityHeaders": {
@@ -59,7 +59,7 @@
   {
     "path": "/robots.txt",
     "status": 200,
-    "ms": 197,
+    "ms": 183,
     "contentType": "text/plain; charset=utf-8",
     "cacheControl": "public, max-age=0, must-revalidate",
     "securityHeaders": {
@@ -74,7 +74,7 @@
   {
     "path": "/sitemap.xml",
     "status": 200,
-    "ms": 910,
+    "ms": 890,
     "contentType": "application/xml; charset=UTF-8",
     "cacheControl": "no-store",
     "securityHeaders": {
