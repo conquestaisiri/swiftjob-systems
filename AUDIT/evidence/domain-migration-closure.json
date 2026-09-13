@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-09-13T04:18:00Z",
+  "checkedAt": "2026-09-13T11:39:11.1956979Z",
   "productionDomain": "https://swiftjob.online",
   "previousDomain": "https://swiftjob.payservice.top",
   "cloudflare": {
@@ -18,11 +18,22 @@
       "domain": "swiftjob.online",
       "status": "enabled",
       "dnsRecords": "Cloudflare MX, DKIM, and SPF records present; all legacy SpaceMail MX, SPF, and autodiscover SRV records removed",
-      "rules": 0,
+      "rules": 4,
       "destination": "swiftjobs113@gmail.com",
-      "destinationStatus": "pending verification",
-      "catchAll": "disabled / drop",
-      "dnsRecordCount": 10
+      "destinationStatus": "verified",
+      "catchAll": "active / forward to verified destination",
+      "dnsRecordCount": 10,
+      "aliases": [
+        "hr@swiftjob.online",
+        "careers@swiftjob.online",
+        "support@swiftjob.online",
+        "admin@swiftjob.online"
+      ],
+      "legacyZone": "payservice.top",
+      "legacyZoneRules": 12,
+      "legacyZoneRouting": "enabled; all 12 existing specific rules and catch-all active to swiftjobs113@gmail.com",
+      "totalRulesIncludingCatchAll": 5,
+      "legacyTotalRulesIncludingCatchAll": 13
     },
     "pagesAdditionalCustomDomain": {
       "hostname": "www.swiftjob.online",
@@ -68,9 +79,10 @@
     "sending": "enabled",
     "requestedInboundDestination": "swiftjobs113@gmail.com",
     "controlledCustomMail": "delivered",
-    "contactNotification": "not re-tested after routing activation; aliases are blocked until destination verification",
-    "receiving": "enabled in Cloudflare Email Routing; destination verification pending",
-    "routingTokenProbe": "Dashboard session activated Email Routing successfully. The newly supplied token remains invalid at /user/tokens/verify and is not used."
+    "contactNotification": "controlled inbound test sent to hr@swiftjob.online; Cloudflare activity log shows Forwarded",
+    "receiving": "enabled in Cloudflare Email Routing; destination verified; named aliases and catch-all active on both zones",
+    "routingTokenProbe": "Dashboard session activated Email Routing successfully. The newly supplied token remains invalid at /user/tokens/verify and is not used.",
+    "controlledInboundTest": "Cloudflare activity log shows SwiftJob inbound routing verification from careers@swiftjob.online to hr@swiftjob.online as Forwarded"
   },
-  "remainingGate": "Click the Cloudflare verification link sent to swiftjobs113@gmail.com. Then add hr, careers, support, admin, and catch-all forwarding rules to that verified destination and rerun inbound delivery checks."
+  "remainingGate": "No Cloudflare configuration gate remains. The test is confirmed forwarded by Cloudflare; visual confirmation inside the destination Gmail inbox is not available in the current browser session."
 }
