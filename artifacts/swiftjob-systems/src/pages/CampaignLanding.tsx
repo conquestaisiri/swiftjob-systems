@@ -81,7 +81,7 @@ export function CampaignLanding() {
       <div className="campaign-shell">
         <header className="campaign-header">
           <Link href="/" className="landing-v2-brand">
-            <img src="/swiftjob-mark.svg" alt="SwiftJob" />
+            <img src="/swiftjob-mark.png?v=supplied-20260912" alt="SwiftJob" />
             <span>SwiftJob</span>
           </Link>
         </header>
@@ -103,7 +103,7 @@ export function CampaignLanding() {
       <div className="campaign-shell">
         <header className="campaign-header">
           <Link href="/" className="landing-v2-brand">
-            <img src="/swiftjob-mark.svg" alt="SwiftJob" />
+            <img src="/swiftjob-mark.png?v=supplied-20260912" alt="SwiftJob" />
             <span>SwiftJob</span>
           </Link>
         </header>
@@ -131,7 +131,7 @@ export function CampaignLanding() {
     <div className="campaign-shell">
       <header className="campaign-header">
         <Link href="/" className="landing-v2-brand">
-          <img src="/swiftjob-mark.svg" alt="SwiftJob" />
+          <img src="/swiftjob-mark.png?v=supplied-20260912" alt="SwiftJob" />
           <span>SwiftJob</span>
         </Link>
       </header>

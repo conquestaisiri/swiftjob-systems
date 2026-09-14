@@ -1,0 +1,88 @@
+{
+  "checkedAt": "2026-09-13T11:39:11.1956979Z",
+  "productionDomain": "https://swiftjob.online",
+  "previousDomain": "https://swiftjob.payservice.top",
+  "cloudflare": {
+    "zone": "swiftjob.online",
+    "zoneStatus": "active",
+    "pagesProject": "swiftjob-systems",
+    "pagesCustomDomain": "active",
+    "pagesCertificate": "active",
+    "dnsRecord": {
+      "type": "CNAME",
+      "name": "swiftjob.online",
+      "target": "swiftjob-systems.pages.dev",
+      "proxied": false
+    },
+    "emailRouting": {
+      "domain": "swiftjob.online",
+      "status": "enabled",
+      "dnsRecords": "Cloudflare MX, DKIM, and SPF records present; all legacy SpaceMail MX, SPF, and autodiscover SRV records removed",
+      "rules": 4,
+      "destination": "swiftjobs113@gmail.com",
+      "destinationStatus": "verified",
+      "catchAll": "active / forward to verified destination",
+      "dnsRecordCount": 10,
+      "aliases": [
+        "hr@swiftjob.online",
+        "careers@swiftjob.online",
+        "support@swiftjob.online",
+        "admin@swiftjob.online"
+      ],
+      "legacyZone": "payservice.top",
+      "legacyZoneRules": 12,
+      "legacyZoneRouting": "enabled; all 12 existing specific rules and catch-all active to swiftjobs113@gmail.com",
+      "totalRulesIncludingCatchAll": 5,
+      "legacyTotalRulesIncludingCatchAll": 13
+    },
+    "pagesAdditionalCustomDomain": {
+      "hostname": "www.swiftjob.online",
+      "status": "active",
+      "ssl": "enabled",
+      "dns": "CNAME www -> swiftjob-systems.pages.dev"
+    }
+  },
+  "deployments": {
+    "pages": "3374ec21.swiftjob-systems.pages.dev",
+    "worker": "deployed successfully from the migrated branch"
+  },
+  "sourceMigration": {
+    "frontendFallbacks": "swiftjob.online",
+    "workerFrontendUrl": "https://swiftjob.online",
+    "canonicalAndSocialUrls": "swiftjob.online",
+    "sitemapAndRobots": "swiftjob.online",
+    "emailLogoUrl": "https://swiftjob.online/swiftjob-logo.png?v=supplied-20260912"
+  },
+  "liveChecks": {
+    "homepage": 200,
+    "careers": 200,
+    "jobPage": 200,
+    "login": 200,
+    "privacy": 200,
+    "terms": 200,
+    "healthz": 200,
+    "publicStats": 200,
+    "jobsApi": 200,
+    "sitemap": 200,
+    "robots": 200,
+    "logoPng": 200,
+    "adminLogin": 200,
+    "adminReadOnlyEndpoints": 200,
+    "www": "200 via Cloudflare Pages with active SSL",
+    "sitemapUrls": 100,
+    "apiJobRoutes": 95,
+    "applicationMalformedContentType": 400
+  },
+  "email": {
+    "resendDomain": "swiftjob.online",
+    "resendStatus": "verified",
+    "sending": "enabled",
+    "requestedInboundDestination": "swiftjobs113@gmail.com",
+    "controlledCustomMail": "delivered",
+    "contactNotification": "controlled inbound test sent to hr@swiftjob.online; Cloudflare activity log shows Forwarded",
+    "receiving": "enabled in Cloudflare Email Routing; destination verified; named aliases and catch-all active on both zones",
+    "routingTokenProbe": "Dashboard session activated Email Routing successfully. The newly supplied token remains invalid at /user/tokens/verify and is not used.",
+    "controlledInboundTest": "Cloudflare activity log shows SwiftJob inbound routing verification from careers@swiftjob.online to hr@swiftjob.online as Forwarded"
+  },
+  "remainingGate": "No Cloudflare configuration gate remains. The test is confirmed forwarded by Cloudflare; visual confirmation inside the destination Gmail inbox is not available in the current browser session."
+}

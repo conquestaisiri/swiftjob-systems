@@ -25,6 +25,7 @@ export interface Job {
   benefits: string[];
   workingHours: string;
   hiringProcess: string[];
+  referralRewardCents?: number | null;
 }
 
 export const JOBS: Job[] = [

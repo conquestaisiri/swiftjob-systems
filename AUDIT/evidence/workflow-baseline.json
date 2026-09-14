@@ -1,0 +1,42 @@
+{
+  "environment": "Local PGlite + original Worker; synthetic records and email sink; no production writes",
+  "checks": [
+    {
+      "name": "Valid contact submission",
+      "expected": 201,
+      "actual": 400,
+      "response": {
+        "error": "Required"
+      }
+    },
+    {
+      "name": "Unknown job and missing required CV",
+      "expected": 400,
+      "actual": 201
+    },
+    {
+      "name": "Unauthenticated password registration",
+      "expected": 401,
+      "actual": 200
+    },
+    {
+      "name": "Unauthenticated password overwrite",
+      "expected": 401,
+      "actual": 200
+    },
+    {
+      "name": "Password session accepted by portal",
+      "loginStatus": 200,
+      "expected": 200,
+      "actual": 401,
+      "response": {
+        "error": "Session expired or revoked"
+      }
+    },
+    {
+      "name": "Candidate password cookie uses portal cookie name",
+      "expected": true,
+      "actual": false
+    }
+  ]
+}

@@ -1,0 +1,2710 @@
+{
+  "tracked_files": [
+    {
+      "file": ".gitattributes",
+      "bytes": 90
+    },
+    {
+      "file": ".github/workflows/ci-cd.yml",
+      "bytes": 4691
+    },
+    {
+      "file": ".gitignore",
+      "bytes": 1206
+    },
+    {
+      "file": ".node-version",
+      "bytes": 3
+    },
+    {
+      "file": ".npmrc",
+      "bytes": 56
+    },
+    {
+      "file": ".replit",
+      "bytes": 1103
+    },
+    {
+      "file": ".replitignore",
+      "bytes": 201
+    },
+    {
+      "file": "LICENSE",
+      "bytes": 1071
+    },
+    {
+      "file": "README.md",
+      "bytes": 2204
+    },
+    {
+      "file": "artifacts/api-server/.env.example",
+      "bytes": 1325
+    },
+    {
+      "file": "artifacts/api-server/.replit-artifact/artifact.toml",
+      "bytes": 784
+    },
+    {
+      "file": "artifacts/api-server/Dockerfile",
+      "bytes": 780
+    },
+    {
+      "file": "artifacts/api-server/build.mjs",
+      "bytes": 3455
+    },
+    {
+      "file": "artifacts/api-server/create-tables.mjs",
+      "bytes": 1139
+    },
+    {
+      "file": "artifacts/api-server/drizzle.config.ts",
+      "bytes": 411
+    },
+    {
+      "file": "artifacts/api-server/package.json",
+      "bytes": 1378
+    },
+    {
+      "file": "artifacts/api-server/scripts/seed-jobs.ts",
+      "bytes": 1384
+    },
+    {
+      "file": "artifacts/api-server/src/app.ts",
+      "bytes": 3797
+    },
+    {
+      "file": "artifacts/api-server/src/index.ts",
+      "bytes": 535
+    },
+    {
+      "file": "artifacts/api-server/src/lib/.gitkeep",
+      "bytes": 0
+    },
+    {
+      "file": "artifacts/api-server/src/lib/logger.ts",
+      "bytes": 421
+    },
+    {
+      "file": "artifacts/api-server/src/middleware/auth.ts",
+      "bytes": 2509
+    },
+    {
+      "file": "artifacts/api-server/src/middleware/upload.ts",
+      "bytes": 513
+    },
+    {
+      "file": "artifacts/api-server/src/middlewares/.gitkeep",
+      "bytes": 0
+    },
+    {
+      "file": "artifacts/api-server/src/models/application.ts",
+      "bytes": 172
+    },
+    {
+      "file": "artifacts/api-server/src/repositories/applicationRepository.ts",
+      "bytes": 2350
+    },
+    {
+      "file": "artifacts/api-server/src/repositories/authRepository.ts",
+      "bytes": 2551
+    },
+    {
+      "file": "artifacts/api-server/src/repositories/jobRepository.ts",
+      "bytes": 1558
+    },
+    {
+      "file": "artifacts/api-server/src/routes/admin.ts",
+      "bytes": 5430
+    },
+    {
+      "file": "artifacts/api-server/src/routes/adminJobs.ts",
+      "bytes": 2706
+    },
+    {
+      "file": "artifacts/api-server/src/routes/applications.ts",
+      "bytes": 2858
+    },
+    {
+      "file": "artifacts/api-server/src/routes/auth.ts",
+      "bytes": 1573
+    },
+    {
+      "file": "artifacts/api-server/src/routes/candidate.ts",
+      "bytes": 2905
+    },
+    {
+      "file": "artifacts/api-server/src/routes/candidateAuth.ts",
+      "bytes": 2319
+    },
+    {
+      "file": "artifacts/api-server/src/routes/contact.ts",
+      "bytes": 2072
+    },
+    {
+      "file": "artifacts/api-server/src/routes/health.ts",
+      "bytes": 288
+    },
+    {
+      "file": "artifacts/api-server/src/routes/index.ts",
+      "bytes": 728
+    },
+    {
+      "file": "artifacts/api-server/src/routes/jobs.ts",
+      "bytes": 910
+    },
+    {
+      "file": "artifacts/api-server/src/services/applicationService.ts",
+      "bytes": 4066
+    },
+    {
+      "file": "artifacts/api-server/src/services/authService.ts",
+      "bytes": 4014
+    },
+    {
+      "file": "artifacts/api-server/src/services/emailService.ts",
+      "bytes": 20723
+    },
+    {
+      "file": "artifacts/api-server/src/services/jobService.ts",
+      "bytes": 4288
+    },
+    {
+      "file": "artifacts/api-server/src/services/storageService.ts",
+      "bytes": 3557
+    },
+    {
+      "file": "artifacts/api-server/src/types/express.d.ts",
+      "bytes": 190
+    },
+    {
+      "file": "artifacts/api-server/test-create.mjs",
+      "bytes": 707
+    },
+    {
+      "file": "artifacts/api-server/tsconfig.json",
+      "bytes": 346
+    },
+    {
+      "file": "artifacts/mockup-sandbox/.replit-artifact/artifact.toml",
+      "bytes": 327
+    },
+    {
+      "file": "artifacts/mockup-sandbox/components.json",
+      "bytes": 426
+    },
+    {
+      "file": "artifacts/mockup-sandbox/index.html",
+      "bytes": 4325
+    },
+    {
+      "file": "artifacts/mockup-sandbox/mockupPreviewPlugin.ts",
+      "bytes": 4639
+    },
+    {
+      "file": "artifacts/mockup-sandbox/package.json",
+      "bytes": 2515
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/.generated/mockup-components.ts",
+      "bytes": 171
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/App.tsx",
+      "bytes": 3654
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/accordion.tsx",
+      "bytes": 2001
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/alert-dialog.tsx",
+      "bytes": 4419
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/alert.tsx",
+      "bytes": 1598
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/aspect-ratio.tsx",
+      "bytes": 140
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/avatar.tsx",
+      "bytes": 1419
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/badge.tsx",
+      "bytes": 1163
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/breadcrumb.tsx",
+      "bytes": 2712
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/button-group.tsx",
+      "bytes": 2209
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/button.tsx",
+      "bytes": 1925
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/calendar.tsx",
+      "bytes": 7569
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/card.tsx",
+      "bytes": 1828
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/carousel.tsx",
+      "bytes": 6210
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/chart.tsx",
+      "bytes": 10674
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/checkbox.tsx",
+      "bytes": 1031
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/collapsible.tsx",
+      "bytes": 329
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/command.tsx",
+      "bytes": 4887
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/context-menu.tsx",
+      "bytes": 7406
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/dialog.tsx",
+      "bytes": 3835
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/drawer.tsx",
+      "bytes": 3007
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/dropdown-menu.tsx",
+      "bytes": 7606
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/empty.tsx",
+      "bytes": 2396
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/field.tsx",
+      "bytes": 6044
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/form.tsx",
+      "bytes": 4175
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/hover-card.tsx",
+      "bytes": 1237
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/input-group.tsx",
+      "bytes": 4883
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/input-otp.tsx",
+      "bytes": 2143
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/input.tsx",
+      "bytes": 768
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/item.tsx",
+      "bytes": 4494
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/kbd.tsx",
+      "bytes": 862
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/label.tsx",
+      "bytes": 724
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/menubar.tsx",
+      "bytes": 8608
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/navigation-menu.tsx",
+      "bytes": 5124
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/pagination.tsx",
+      "bytes": 2751
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/popover.tsx",
+      "bytes": 1342
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/progress.tsx",
+      "bytes": 792
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/radio-group.tsx",
+      "bytes": 1410
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/resizable.tsx",
+      "bytes": 1723
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/scroll-area.tsx",
+      "bytes": 1642
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/select.tsx",
+      "bytes": 5745
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/separator.tsx",
+      "bytes": 756
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/sheet.tsx",
+      "bytes": 4280
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/sidebar.tsx",
+      "bytes": 21056
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/skeleton.tsx",
+      "bytes": 266
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/slider.tsx",
+      "bytes": 1037
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/sonner.tsx",
+      "bytes": 894
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/spinner.tsx",
+      "bytes": 331
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/switch.tsx",
+      "bytes": 1148
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/table.tsx",
+      "bytes": 2859
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/tabs.tsx",
+      "bytes": 1877
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/textarea.tsx",
+      "bytes": 649
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/toast.tsx",
+      "bytes": 4845
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/toaster.tsx",
+      "bytes": 772
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/toggle-group.tsx",
+      "bytes": 1753
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/toggle.tsx",
+      "bytes": 1486
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/components/ui/tooltip.tsx",
+      "bytes": 1267
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/hooks/use-mobile.tsx",
+      "bytes": 565
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/hooks/use-toast.ts",
+      "bytes": 3767
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/index.css",
+      "bytes": 5760
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/lib/utils.ts",
+      "bytes": 166
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/main.tsx",
+      "bytes": 157
+    },
+    {
+      "file": "artifacts/mockup-sandbox/tsconfig.json",
+      "bytes": 513
+    },
+    {
+      "file": "artifacts/mockup-sandbox/vite.config.ts",
+      "bytes": 1383
+    },
+    {
+      "file": "artifacts/swiftjob-systems/.env.example",
+      "bytes": 322
+    },
+    {
+      "file": "artifacts/swiftjob-systems/.replit-artifact/artifact.toml",
+      "bytes": 544
+    },
+    {
+      "file": "artifacts/swiftjob-systems/components.json",
+      "bytes": 434
+    },
+    {
+      "file": "artifacts/swiftjob-systems/functions/api/[[path]].js",
+      "bytes": 1369
+    },
+    {
+      "file": "artifacts/swiftjob-systems/index.html",
+      "bytes": 1989
+    },
+    {
+      "file": "artifacts/swiftjob-systems/package.json",
+      "bytes": 2787
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/favicon.png",
+      "bytes": 11886
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/favicon.svg",
+      "bytes": 735
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/logo.png",
+      "bytes": 11517
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/og-image.png",
+      "bytes": 32910
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/robots.txt",
+      "bytes": 23
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/swiftjob-mark.png",
+      "bytes": 6070
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/swiftjob-mark.svg",
+      "bytes": 735
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/swiftjob-og.png",
+      "bytes": 32910
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/team-call.jpg",
+      "bytes": 111355
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/wfh-call.jpg",
+      "bytes": 115742
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/wfh-desk.jpg",
+      "bytes": 86288
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/wfh-dev.jpg",
+      "bytes": 101577
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/wfh-home.jpg",
+      "bytes": 107964
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/wfh-team.jpg",
+      "bytes": 93526
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/work-professional-real.jpg",
+      "bytes": 217103
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/work-team-real.jpg",
+      "bytes": 220004
+    },
+    {
+      "file": "artifacts/swiftjob-systems/public/work-team.jpg",
+      "bytes": 366417
+    },
+    {
+      "file": "artifacts/swiftjob-systems/scripts/seed-jobs.ts",
+      "bytes": 1469
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "bytes": 4606
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/NextStepFlow.tsx",
+      "bytes": 12018
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/PreChecks.tsx",
+      "bytes": 24664
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/site/ClientMarquee.tsx",
+      "bytes": 7165
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/site/SiteFooter.tsx",
+      "bytes": 2201
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/site/SiteLayout.tsx",
+      "bytes": 4920
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/site/adIcons.tsx",
+      "bytes": 2141
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/accordion.tsx",
+      "bytes": 2013
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/alert-dialog.tsx",
+      "bytes": 4447
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/alert.tsx",
+      "bytes": 1609
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/aspect-ratio.tsx",
+      "bytes": 143
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/avatar.tsx",
+      "bytes": 1431
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/badge.tsx",
+      "bytes": 1528
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/breadcrumb.tsx",
+      "bytes": 2735
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/button-group.tsx",
+      "bytes": 2222
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/button.tsx",
+      "bytes": 2370
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/calendar.tsx",
+      "bytes": 7607
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/card.tsx",
+      "bytes": 1856
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/carousel.tsx",
+      "bytes": 6288
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/chart.tsx",
+      "bytes": 10846
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/checkbox.tsx",
+      "bytes": 1038
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/collapsible.tsx",
+      "bytes": 335
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/command.tsx",
+      "bytes": 4918
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/context-menu.tsx",
+      "bytes": 7446
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/dialog.tsx",
+      "bytes": 3889
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/drawer.tsx",
+      "bytes": 3029
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/dropdown-menu.tsx",
+      "bytes": 7646
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/empty.tsx",
+      "bytes": 2410
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/field.tsx",
+      "bytes": 6079
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/form.tsx",
+      "bytes": 4232
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/hover-card.tsx",
+      "bytes": 1245
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/input-group.tsx",
+      "bytes": 4993
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/input-otp.tsx",
+      "bytes": 2160
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/input.tsx",
+      "bytes": 775
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/item.tsx",
+      "bytes": 4519
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/kbd.tsx",
+      "bytes": 867
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/label.tsx",
+      "bytes": 733
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/menubar.tsx",
+      "bytes": 8655
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/navigation-menu.tsx",
+      "bytes": 5150
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/pagination.tsx",
+      "bytes": 2772
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/popover.tsx",
+      "bytes": 1351
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/progress.tsx",
+      "bytes": 799
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/radio-group.tsx",
+      "bytes": 1421
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/resizable.tsx",
+      "bytes": 1733
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/scroll-area.tsx",
+      "bytes": 1650
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/select.tsx",
+      "bytes": 5773
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/separator.tsx",
+      "bytes": 764
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/sheet.tsx",
+      "bytes": 4307
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/sidebar.tsx",
+      "bytes": 21969
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/skeleton.tsx",
+      "bytes": 269
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/slider.tsx",
+      "bytes": 1043
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/sonner.tsx",
+      "bytes": 902
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/spinner.tsx",
+      "bytes": 334
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/switch.tsx",
+      "bytes": 1155
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/table.tsx",
+      "bytes": 2881
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/tabs.tsx",
+      "bytes": 1890
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/textarea.tsx",
+      "bytes": 655
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/toast.tsx",
+      "bytes": 4871
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/toaster.tsx",
+      "bytes": 777
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/toggle-group.tsx",
+      "bytes": 1767
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/toggle.tsx",
+      "bytes": 1494
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/components/ui/tooltip.tsx",
+      "bytes": 1277
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/data/jobs.ts",
+      "bytes": 258389
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/hooks/use-mobile.tsx",
+      "bytes": 585
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/hooks/use-toast.ts",
+      "bytes": 3952
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/index.css",
+      "bytes": 187564
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/lib/adminApi.ts",
+      "bytes": 1276
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/lib/adminAuth.ts",
+      "bytes": 582
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/lib/assessmentTracks.ts",
+      "bytes": 10914
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/lib/campaignApi.ts",
+      "bytes": 1484
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/lib/contact.ts",
+      "bytes": 390
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/lib/deviceGuard.ts",
+      "bytes": 8969
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/lib/jobsApi.ts",
+      "bytes": 1229
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/lib/testimonials.ts",
+      "bytes": 575
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/lib/tracking.ts",
+      "bytes": 2429
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/lib/turnstile.tsx",
+      "bytes": 3317
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/lib/utils.ts",
+      "bytes": 652
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/main.tsx",
+      "bytes": 223
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Admin/ActivityAdmin.tsx",
+      "bytes": 6685
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Admin/AdminLayout.tsx",
+      "bytes": 3840
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Admin/AdminLogin.tsx",
+      "bytes": 6464
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Admin/Applications.tsx",
+      "bytes": 48816
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Admin/CampaignsAdmin.tsx",
+      "bytes": 17678
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Admin/ContactsAdmin.tsx",
+      "bytes": 20338
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Admin/ImportModal.tsx",
+      "bytes": 15464
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Admin/JobsAdmin.tsx",
+      "bytes": 20059
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Admin/MailAdmin.tsx",
+      "bytes": 18948
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Admin/Overview.tsx",
+      "bytes": 7794
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Admin/ReferralsAdmin.tsx",
+      "bytes": 58675
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Admin/Settings.tsx",
+      "bytes": 11179
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/ApplicationSuccess.tsx",
+      "bytes": 9758
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/AssessmentPage.tsx",
+      "bytes": 19111
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/CampaignLanding.tsx",
+      "bytes": 5428
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/CandidateApplications.tsx",
+      "bytes": 19773
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/CandidateLogin.tsx",
+      "bytes": 10462
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/CandidateVerify.tsx",
+      "bytes": 4320
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/CareersPage.tsx",
+      "bytes": 18583
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/JobPage.tsx",
+      "bytes": 38842
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/LandingPage.tsx",
+      "bytes": 18458
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Legal.tsx",
+      "bytes": 8559
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/ReferralPage.tsx",
+      "bytes": 16367
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/not-found.tsx",
+      "bytes": 1647
+    },
+    {
+      "file": "artifacts/swiftjob-systems/tsconfig.json",
+      "bytes": 520
+    },
+    {
+      "file": "artifacts/swiftjob-systems/vite.config.ts",
+      "bytes": 1880
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785168031791.txt",
+      "bytes": 5577
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184588731.txt",
+      "bytes": 5577
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184600530.txt",
+      "bytes": 5577
+    },
+    {
+      "file": "attached_assets/Pasted--MASTER-WEBSITE-GENERATION-PROMPT-You-are-a-Principal-S_1785166526942.txt",
+      "bytes": 7767
+    },
+    {
+      "file": "attached_assets/Pasted-Build-an-enterprise-outsourcing-and-workforce-solutions_1785184656205.txt",
+      "bytes": 3160
+    },
+    {
+      "file": "attached_assets/Pasted-Got-it-you-want-a-Send-Email-button-that-opens-a-choose_1785168026549.txt",
+      "bytes": 2368
+    },
+    {
+      "file": "careers-latest.png",
+      "bytes": 364574
+    },
+    {
+      "file": "careers-rebuild.png",
+      "bytes": 535607
+    },
+    {
+      "file": "check_db.js",
+      "bytes": 315
+    },
+    {
+      "file": "current-site.png",
+      "bytes": 776687
+    },
+    {
+      "file": "download (1).png",
+      "bytes": 45636
+    },
+    {
+      "file": "download (2).png",
+      "bytes": 37272
+    },
+    {
+      "file": "download (3).png",
+      "bytes": 26868
+    },
+    {
+      "file": "download (4).png",
+      "bytes": 30322
+    },
+    {
+      "file": "download landing page (1).png",
+      "bytes": 417785
+    },
+    {
+      "file": "job-latest.png",
+      "bytes": 139849
+    },
+    {
+      "file": "landing-after.png",
+      "bytes": 19957
+    },
+    {
+      "file": "landing-after2.png",
+      "bytes": 686479
+    },
+    {
+      "file": "landing-check-final.png",
+      "bytes": 480829
+    },
+    {
+      "file": "landing-footer-audit.png",
+      "bytes": 35444
+    },
+    {
+      "file": "landing-hero-audit.png",
+      "bytes": 79829
+    },
+    {
+      "file": "landing-latest.png",
+      "bytes": 540299
+    },
+    {
+      "file": "landing-mobile-after.png",
+      "bytes": 264303
+    },
+    {
+      "file": "landing-mobile-after2.png",
+      "bytes": 257410
+    },
+    {
+      "file": "landing-mobile-final.png",
+      "bytes": 257798
+    },
+    {
+      "file": "landing-mobile-preview.png",
+      "bytes": 206814
+    },
+    {
+      "file": "landing-preview.png",
+      "bytes": 774833
+    },
+    {
+      "file": "landing-real-photography-audit.png",
+      "bytes": 64496
+    },
+    {
+      "file": "landing-rebuild-desktop.png",
+      "bytes": 556006
+    },
+    {
+      "file": "landing-rebuild-mobile.png",
+      "bytes": 167984
+    },
+    {
+      "file": "landing-rebuild-mobile2.png",
+      "bytes": 199871
+    },
+    {
+      "file": "landing-work-audit.png",
+      "bytes": 41556
+    },
+    {
+      "file": "lib/api-client-react/package.json",
+      "bytes": 265
+    },
+    {
+      "file": "lib/api-client-react/src/custom-fetch.ts",
+      "bytes": 11377
+    },
+    {
+      "file": "lib/api-client-react/src/generated/api.schemas.ts",
+      "bytes": 178
+    },
+    {
+      "file": "lib/api-client-react/src/generated/api.ts",
+      "bytes": 2544
+    },
+    {
+      "file": "lib/api-client-react/src/index.ts",
+      "bytes": 194
+    },
+    {
+      "file": "lib/api-client-react/tsconfig.json",
+      "bytes": 251
+    },
+    {
+      "file": "lib/api-spec/openapi.yaml",
+      "bytes": 778
+    },
+    {
+      "file": "lib/api-spec/orval.config.ts",
+      "bytes": 1803
+    },
+    {
+      "file": "lib/api-spec/package.json",
+      "bytes": 228
+    },
+    {
+      "file": "lib/api-zod/package.json",
+      "bytes": 189
+    },
+    {
+      "file": "lib/api-zod/src/generated/api.ts",
+      "bytes": 296
+    },
+    {
+      "file": "lib/api-zod/src/generated/types/healthStatus.ts",
+      "bytes": 179
+    },
+    {
+      "file": "lib/api-zod/src/generated/types/index.ts",
+      "bytes": 159
+    },
+    {
+      "file": "lib/api-zod/src/index.ts",
+      "bytes": 68
+    },
+    {
+      "file": "lib/api-zod/tsconfig.json",
+      "bytes": 221
+    },
+    {
+      "file": "lib/db/drizzle.config.ts",
+      "bytes": 381
+    },
+    {
+      "file": "lib/db/package.json",
+      "bytes": 578
+    },
+    {
+      "file": "lib/db/src/index.ts",
+      "bytes": 416
+    },
+    {
+      "file": "lib/db/src/schema/applications.ts",
+      "bytes": 1931
+    },
+    {
+      "file": "lib/db/src/schema/auth.ts",
+      "bytes": 1251
+    },
+    {
+      "file": "lib/db/src/schema/index.ts",
+      "bytes": 79
+    },
+    {
+      "file": "lib/db/src/schema/jobs.ts",
+      "bytes": 1557
+    },
+    {
+      "file": "lib/db/tsconfig.json",
+      "bytes": 244
+    },
+    {
+      "file": "live-admin.png",
+      "bytes": 34767
+    },
+    {
+      "file": "live-careers.png",
+      "bytes": 364574
+    },
+    {
+      "file": "live-home.png",
+      "bytes": 482571
+    },
+    {
+      "file": "package.json",
+      "bytes": 1007
+    },
+    {
+      "file": "pnpm-lock.yaml",
+      "bytes": 266054
+    },
+    {
+      "file": "pnpm-workspace.yaml",
+      "bytes": 6580
+    },
+    {
+      "file": "replit.md",
+      "bytes": 1521
+    },
+    {
+      "file": "replit.nix",
+      "bytes": 43
+    },
+    {
+      "file": "scripts/package.json",
+      "bytes": 281
+    },
+    {
+      "file": "scripts/post-merge.sh",
+      "bytes": 72
+    },
+    {
+      "file": "scripts/src/hello.ts",
+      "bytes": 46
+    },
+    {
+      "file": "scripts/tsconfig.json",
+      "bytes": 157
+    },
+    {
+      "file": "scrolled-800.png",
+      "bytes": 82262
+    },
+    {
+      "file": "test-email.json",
+      "bytes": 28
+    },
+    {
+      "file": "tsconfig.base.json",
+      "bytes": 692
+    },
+    {
+      "file": "tsconfig.json",
+      "bytes": 236
+    },
+    {
+      "file": "ui-verified-footer.png",
+      "bytes": 41431
+    },
+    {
+      "file": "ui-verified-header.png",
+      "bytes": 104496
+    },
+    {
+      "file": "ui-verified-work-section.png",
+      "bytes": 103406
+    },
+    {
+      "file": "workers-api/.dev.vars.example",
+      "bytes": 1852
+    },
+    {
+      "file": "workers-api/migrate.mjs",
+      "bytes": 1669
+    },
+    {
+      "file": "workers-api/migrations/001_init.sql",
+      "bytes": 3148
+    },
+    {
+      "file": "workers-api/migrations/002_shortlist_meet.sql",
+      "bytes": 398
+    },
+    {
+      "file": "workers-api/migrations/003_shortlist_key.sql",
+      "bytes": 309
+    },
+    {
+      "file": "workers-api/migrations/004_referrals.sql",
+      "bytes": 3544
+    },
+    {
+      "file": "workers-api/migrations/005_referrals_drift.sql",
+      "bytes": 1947
+    },
+    {
+      "file": "workers-api/migrations/006_contacts.sql",
+      "bytes": 718
+    },
+    {
+      "file": "workers-api/migrations/007_next_step.sql",
+      "bytes": 1492
+    },
+    {
+      "file": "workers-api/migrations/008_campaigns.sql",
+      "bytes": 2035
+    },
+    {
+      "file": "workers-api/migrations/009_assessments.sql",
+      "bytes": 1463
+    },
+    {
+      "file": "workers-api/migrations/010_footprints_activities.sql",
+      "bytes": 1240
+    },
+    {
+      "file": "workers-api/migrations/011_tech_checks.sql",
+      "bytes": 624
+    },
+    {
+      "file": "workers-api/migrations/012_candidate_accounts.sql",
+      "bytes": 381
+    },
+    {
+      "file": "workers-api/package.json",
+      "bytes": 565
+    },
+    {
+      "file": "workers-api/src/config.ts",
+      "bytes": 292
+    },
+    {
+      "file": "workers-api/src/db.ts",
+      "bytes": 547
+    },
+    {
+      "file": "workers-api/src/env.ts",
+      "bytes": 615
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "bytes": 95333
+    },
+    {
+      "file": "workers-api/src/repositories.ts",
+      "bytes": 42109
+    },
+    {
+      "file": "workers-api/src/schema.ts",
+      "bytes": 10965
+    },
+    {
+      "file": "workers-api/src/services/applications.ts",
+      "bytes": 5155
+    },
+    {
+      "file": "workers-api/src/services/assessmentAnswerKey.ts",
+      "bytes": 1743
+    },
+    {
+      "file": "workers-api/src/services/assessments.ts",
+      "bytes": 8397
+    },
+    {
+      "file": "workers-api/src/services/auth.ts",
+      "bytes": 8637
+    },
+    {
+      "file": "workers-api/src/services/campaigns.ts",
+      "bytes": 5123
+    },
+    {
+      "file": "workers-api/src/services/email.ts",
+      "bytes": 32325
+    },
+    {
+      "file": "workers-api/src/services/jobs.ts",
+      "bytes": 4431
+    },
+    {
+      "file": "workers-api/src/services/referrals.ts",
+      "bytes": 34665
+    },
+    {
+      "file": "workers-api/src/services/storage.ts",
+      "bytes": 2244
+    },
+    {
+      "file": "workers-api/src/services/techcheck.ts",
+      "bytes": 10698
+    },
+    {
+      "file": "workers-api/tsconfig.json",
+      "bytes": 455
+    },
+    {
+      "file": "workers-api/wrangler.toml",
+      "bytes": 277
+    }
+  ],
+  "secret_candidates": [
+    {
+      "type": "credential URL",
+      "file": "artifacts/api-server/.env.example",
+      "line": 6,
+      "risk": "tracked literal; validity not tested"
+    },
+    {
+      "type": "credential URL",
+      "file": "artifacts/api-server/create-tables.mjs",
+      "line": 2,
+      "risk": "tracked literal; validity not tested"
+    }
+  ],
+  "legacy": [
+    {
+      "file": ".gitattributes",
+      "line": 1,
+      "terms": [
+        "Blue_peak"
+      ]
+    },
+    {
+      "file": ".gitignore",
+      "line": 59,
+      "terms": [
+        "Supabase"
+      ]
+    },
+    {
+      "file": ".gitignore",
+      "line": 63,
+      "terms": [
+        "Blue-peak"
+      ]
+    },
+    {
+      "file": "artifacts/api-server/.env.example",
+      "line": 1,
+      "terms": [
+        "Supabase"
+      ]
+    },
+    {
+      "file": "artifacts/api-server/.env.example",
+      "line": 2,
+      "terms": [
+        "Supabase"
+      ]
+    },
+    {
+      "file": "artifacts/api-server/.env.example",
+      "line": 3,
+      "terms": [
+        "Supabase"
+      ]
+    },
+    {
+      "file": "artifacts/api-server/.env.example",
+      "line": 6,
+      "terms": [
+        "supabase"
+      ]
+    },
+    {
+      "file": "artifacts/api-server/create-tables.mjs",
+      "line": 2,
+      "terms": [
+        "supabase"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785168031791.txt",
+      "line": 3,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785168031791.txt",
+      "line": 13,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785168031791.txt",
+      "line": 19,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785168031791.txt",
+      "line": 83,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785168031791.txt",
+      "line": 92,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785168031791.txt",
+      "line": 115,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785168031791.txt",
+      "line": 180,
+      "terms": [
+        "bluepeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785168031791.txt",
+      "line": 182,
+      "terms": [
+        "bluepeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785168031791.txt",
+      "line": 208,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184588731.txt",
+      "line": 3,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184588731.txt",
+      "line": 13,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184588731.txt",
+      "line": 19,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184588731.txt",
+      "line": 83,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184588731.txt",
+      "line": 92,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184588731.txt",
+      "line": 115,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184588731.txt",
+      "line": 180,
+      "terms": [
+        "bluepeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184588731.txt",
+      "line": 182,
+      "terms": [
+        "bluepeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184588731.txt",
+      "line": 208,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184600530.txt",
+      "line": 3,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184600530.txt",
+      "line": 13,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184600530.txt",
+      "line": 19,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184600530.txt",
+      "line": 83,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184600530.txt",
+      "line": 92,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184600530.txt",
+      "line": 115,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184600530.txt",
+      "line": 180,
+      "terms": [
+        "bluepeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184600530.txt",
+      "line": 182,
+      "terms": [
+        "bluepeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184600530.txt",
+      "line": 208,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--MASTER-WEBSITE-GENERATION-PROMPT-You-are-a-Principal-S_1785166526942.txt",
+      "line": 5,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--MASTER-WEBSITE-GENERATION-PROMPT-You-are-a-Principal-S_1785166526942.txt",
+      "line": 33,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted--MASTER-WEBSITE-GENERATION-PROMPT-You-are-a-Principal-S_1785166526942.txt",
+      "line": 137,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted-Build-an-enterprise-outsourcing-and-workforce-solutions_1785184656205.txt",
+      "line": 1,
+      "terms": [
+        "BluePeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted-Build-an-enterprise-outsourcing-and-workforce-solutions_1785184656205.txt",
+      "line": 9,
+      "terms": [
+        "Supabase"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted-Got-it-you-want-a-Send-Email-button-that-opens-a-choose_1785168026549.txt",
+      "line": 47,
+      "terms": [
+        "bluepeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted-Got-it-you-want-a-Send-Email-button-that-opens-a-choose_1785168026549.txt",
+      "line": 53,
+      "terms": [
+        "bluepeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted-Got-it-you-want-a-Send-Email-button-that-opens-a-choose_1785168026549.txt",
+      "line": 59,
+      "terms": [
+        "bluepeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted-Got-it-you-want-a-Send-Email-button-that-opens-a-choose_1785168026549.txt",
+      "line": 65,
+      "terms": [
+        "bluepeak"
+      ]
+    },
+    {
+      "file": "attached_assets/Pasted-Got-it-you-want-a-Send-Email-button-that-opens-a-choose_1785168026549.txt",
+      "line": 78,
+      "terms": [
+        "BluePeak"
+      ]
+    }
+  ],
+  "domain_dependencies": [
+    {
+      "file": "artifacts/api-server/.env.example",
+      "line": 10
+    },
+    {
+      "file": "artifacts/api-server/.env.example",
+      "line": 11
+    },
+    {
+      "file": "artifacts/api-server/.env.example",
+      "line": 23
+    },
+    {
+      "file": "artifacts/api-server/src/services/emailService.ts",
+      "line": 213
+    },
+    {
+      "file": "artifacts/api-server/src/services/emailService.ts",
+      "line": 220
+    },
+    {
+      "file": "artifacts/api-server/src/services/emailService.ts",
+      "line": 264
+    },
+    {
+      "file": "artifacts/api-server/src/services/emailService.ts",
+      "line": 316
+    },
+    {
+      "file": "artifacts/swiftjob-systems/.env.example",
+      "line": 5
+    },
+    {
+      "file": "artifacts/swiftjob-systems/.env.example",
+      "line": 6
+    },
+    {
+      "file": "artifacts/swiftjob-systems/index.html",
+      "line": 25
+    },
+    {
+      "file": "artifacts/swiftjob-systems/index.html",
+      "line": 35
+    },
+    {
+      "file": "artifacts/swiftjob-systems/scripts/seed-jobs.ts",
+      "line": 3
+    },
+    {
+      "file": "artifacts/swiftjob-systems/scripts/seed-jobs.ts",
+      "line": 5
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/lib/contact.ts",
+      "line": 5
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/lib/contact.ts",
+      "line": 9
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Admin/CampaignsAdmin.tsx",
+      "line": 392
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Admin/ReferralsAdmin.tsx",
+      "line": 25
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Legal.tsx",
+      "line": 48
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/pages/Legal.tsx",
+      "line": 144
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785168031791.txt",
+      "line": 180
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785168031791.txt",
+      "line": 182
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184588731.txt",
+      "line": 180
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184588731.txt",
+      "line": 182
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184600530.txt",
+      "line": 180
+    },
+    {
+      "file": "attached_assets/Pasted--ADDITIONAL-BUILD-INSTRUCTIONS-CAREERS-PORTAL-APPLICATI_1785184600530.txt",
+      "line": 182
+    },
+    {
+      "file": "attached_assets/Pasted-Got-it-you-want-a-Send-Email-button-that-opens-a-choose_1785168026549.txt",
+      "line": 47
+    },
+    {
+      "file": "attached_assets/Pasted-Got-it-you-want-a-Send-Email-button-that-opens-a-choose_1785168026549.txt",
+      "line": 53
+    },
+    {
+      "file": "attached_assets/Pasted-Got-it-you-want-a-Send-Email-button-that-opens-a-choose_1785168026549.txt",
+      "line": 59
+    },
+    {
+      "file": "attached_assets/Pasted-Got-it-you-want-a-Send-Email-button-that-opens-a-choose_1785168026549.txt",
+      "line": 65
+    },
+    {
+      "file": "workers-api/.dev.vars.example",
+      "line": 12
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 66
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2199
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2205
+    },
+    {
+      "file": "workers-api/src/services/auth.ts",
+      "line": 40
+    },
+    {
+      "file": "workers-api/src/services/email.ts",
+      "line": 32
+    },
+    {
+      "file": "workers-api/src/services/email.ts",
+      "line": 35
+    },
+    {
+      "file": "workers-api/src/services/referrals.ts",
+      "line": 260
+    },
+    {
+      "file": "workers-api/wrangler.toml",
+      "line": 8
+    }
+  ],
+  "routes": [
+    {
+      "file": "artifacts/api-server/src/app.ts",
+      "line": 95,
+      "method": "use",
+      "route": "/api"
+    },
+    {
+      "file": "artifacts/api-server/src/app.ts",
+      "line": 96,
+      "method": "use",
+      "route": "/api/applications"
+    },
+    {
+      "file": "artifacts/api-server/src/app.ts",
+      "line": 97,
+      "method": "use",
+      "route": "/api/contact"
+    },
+    {
+      "file": "artifacts/api-server/src/app.ts",
+      "line": 98,
+      "method": "use",
+      "route": "/api/auth/magic-link"
+    },
+    {
+      "file": "artifacts/api-server/src/app.ts",
+      "line": 107,
+      "method": "use",
+      "route": "/api"
+    },
+    {
+      "file": "artifacts/api-server/src/app.ts",
+      "line": 110,
+      "method": "get",
+      "route": "/healthz"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/admin.ts",
+      "line": 15,
+      "method": "use",
+      "route": "/jobs"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/admin.ts",
+      "line": 18,
+      "method": "get",
+      "route": "/applications"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/admin.ts",
+      "line": 61,
+      "method": "get",
+      "route": "/applications/:id"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/admin.ts",
+      "line": 75,
+      "method": "patch",
+      "route": "/applications/:id/status"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/admin.ts",
+      "line": 98,
+      "method": "get",
+      "route": "/applications/:id/resume"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/admin.ts",
+      "line": 116,
+      "method": "delete",
+      "route": "/applications/:id"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/admin.ts",
+      "line": 131,
+      "method": "get",
+      "route": "/stats"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/adminJobs.ts",
+      "line": 10,
+      "method": "get",
+      "route": "/"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/adminJobs.ts",
+      "line": 21,
+      "method": "get",
+      "route": "/:id"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/adminJobs.ts",
+      "line": 35,
+      "method": "post",
+      "route": "/"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/adminJobs.ts",
+      "line": 50,
+      "method": "put",
+      "route": "/:id"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/adminJobs.ts",
+      "line": 68,
+      "method": "delete",
+      "route": "/:id"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/auth.ts",
+      "line": 15,
+      "method": "post",
+      "route": "/login"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/auth.ts",
+      "line": 38,
+      "method": "get",
+      "route": "/verify"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/candidate.ts",
+      "line": 14,
+      "method": "get",
+      "route": "/applications"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/candidate.ts",
+      "line": 25,
+      "method": "get",
+      "route": "/applications/:id"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/candidate.ts",
+      "line": 44,
+      "method": "get",
+      "route": "/applications/:id/resume"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/candidateAuth.ts",
+      "line": 12,
+      "method": "post",
+      "route": "/magic-link"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/candidateAuth.ts",
+      "line": 44,
+      "method": "get",
+      "route": "/verify"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/contact.ts",
+      "line": 17,
+      "method": "post",
+      "route": "/"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/health.ts",
+      "line": 6,
+      "method": "get",
+      "route": "/healthz"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/index.ts",
+      "line": 14,
+      "method": "use",
+      "route": "/applications"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/index.ts",
+      "line": 15,
+      "method": "use",
+      "route": "/contact"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/index.ts",
+      "line": 16,
+      "method": "use",
+      "route": "/jobs"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/index.ts",
+      "line": 17,
+      "method": "use",
+      "route": "/admin"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/index.ts",
+      "line": 18,
+      "method": "use",
+      "route": "/admin"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/index.ts",
+      "line": 19,
+      "method": "use",
+      "route": "/auth"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/index.ts",
+      "line": 20,
+      "method": "use",
+      "route": "/candidate"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/jobs.ts",
+      "line": 8,
+      "method": "get",
+      "route": "/"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/jobs.ts",
+      "line": 19,
+      "method": "get",
+      "route": "/:slug"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 37,
+      "method": "PAGE",
+      "route": "/"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 38,
+      "method": "PAGE",
+      "route": "/login"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 39,
+      "method": "PAGE",
+      "route": "/login/confirm"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 48,
+      "method": "PAGE",
+      "route": "/assessment"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 49,
+      "method": "PAGE",
+      "route": "/privacy"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 50,
+      "method": "PAGE",
+      "route": "/terms"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 51,
+      "method": "PAGE",
+      "route": "/careers/:slug"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 52,
+      "method": "PAGE",
+      "route": "/careers"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 53,
+      "method": "PAGE",
+      "route": "/referral/:code"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 54,
+      "method": "PAGE",
+      "route": "/campaign/:slug"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 55,
+      "method": "PAGE",
+      "route": "/admin/login"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 56,
+      "method": "PAGE",
+      "route": "/admin"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 61,
+      "method": "PAGE",
+      "route": "/admin/applications"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 66,
+      "method": "PAGE",
+      "route": "/admin/referrals"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 71,
+      "method": "PAGE",
+      "route": "/admin/contacts"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 76,
+      "method": "PAGE",
+      "route": "/admin/jobs"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 81,
+      "method": "PAGE",
+      "route": "/admin/mail"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 86,
+      "method": "PAGE",
+      "route": "/admin/campaigns"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 91,
+      "method": "PAGE",
+      "route": "/admin/activity"
+    },
+    {
+      "file": "artifacts/swiftjob-systems/src/App.tsx",
+      "line": 96,
+      "method": "PAGE",
+      "route": "/admin/settings"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 54,
+      "method": "use",
+      "route": "*"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 60,
+      "method": "use",
+      "route": "*"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 80,
+      "method": "use",
+      "route": "*"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 230,
+      "method": "use",
+      "route": "/api/*"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 231,
+      "method": "use",
+      "route": "/api/applications"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 232,
+      "method": "use",
+      "route": "/api/contact"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 235,
+      "method": "get",
+      "route": "/api/healthz"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 242,
+      "method": "get",
+      "route": "/api/jobs"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 252,
+      "method": "get",
+      "route": "/api/jobs/:slug"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 295,
+      "method": "post",
+      "route": "/api/applications"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 382,
+      "method": "post",
+      "route": "/api/contact"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 419,
+      "method": "get",
+      "route": "/api/public-stats"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 442,
+      "method": "get",
+      "route": "/api/assessments/:applicationId"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 498,
+      "method": "post",
+      "route": "/api/assessments/:applicationId"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 585,
+      "method": "get",
+      "route": "/api/tech-check/token"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 606,
+      "method": "get",
+      "route": "/api/tech-check/download/:token"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 644,
+      "method": "get",
+      "route": "/api/tech-check/download/msi/:token"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 684,
+      "method": "post",
+      "route": "/api/tech-check/report/:token"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 714,
+      "method": "get",
+      "route": "/api/tech-check/status/:token"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 733,
+      "method": "post",
+      "route": "/api/tech-check/upload"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 754,
+      "method": "get",
+      "route": "/api/campaigns/:slug"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 778,
+      "method": "post",
+      "route": "/api/campaigns/:slug/visit"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 829,
+      "method": "post",
+      "route": "/api/auth/magic-link"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 877,
+      "method": "get",
+      "route": "/api/auth/verify"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 919,
+      "method": "post",
+      "route": "/api/auth/register"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 961,
+      "method": "post",
+      "route": "/api/auth/login-password"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1000,
+      "method": "post",
+      "route": "/api/auth/logout"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1037,
+      "method": "post",
+      "route": "/api/admin/login"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1157,
+      "method": "get",
+      "route": "/api/admin/stats"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1193,
+      "method": "get",
+      "route": "/api/admin/applications"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1262,
+      "method": "get",
+      "route": "/api/admin/applications/:id"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1277,
+      "method": "patch",
+      "route": "/api/admin/applications/:id/status"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1384,
+      "method": "get",
+      "route": "/api/admin/applications/:id/resume"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1412,
+      "method": "delete",
+      "route": "/api/admin/applications/:id"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1431,
+      "method": "get",
+      "route": "/api/admin/jobs"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1441,
+      "method": "get",
+      "route": "/api/admin/jobs/:id"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1454,
+      "method": "post",
+      "route": "/api/admin/jobs"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1472,
+      "method": "put",
+      "route": "/api/admin/jobs/:id"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1493,
+      "method": "delete",
+      "route": "/api/admin/jobs/:id"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1526,
+      "method": "get",
+      "route": "/api/admin/campaigns"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1536,
+      "method": "post",
+      "route": "/api/admin/campaigns"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1575,
+      "method": "put",
+      "route": "/api/admin/campaigns/:id"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1611,
+      "method": "delete",
+      "route": "/api/admin/campaigns/:id"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1665,
+      "method": "get",
+      "route": "/api/candidate/applications"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1691,
+      "method": "get",
+      "route": "/api/candidate/applications/:id"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1777,
+      "method": "get",
+      "route": "/api/candidate/applications/:id/resume"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1812,
+      "method": "post",
+      "route": "/api/candidate/footprint"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1864,
+      "method": "get",
+      "route": "/api/referrals/:code"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1905,
+      "method": "post",
+      "route": "/api/referrals/:code/visit"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 1991,
+      "method": "post",
+      "route": "/api/referrals/:code/click"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2098,
+      "method": "post",
+      "route": "/api/referrals/:code/background"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2133,
+      "method": "post",
+      "route": "/api/referrals/:code/reveal"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2219,
+      "method": "post",
+      "route": "/api/admin/mail/send"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2368,
+      "method": "get",
+      "route": "/api/admin/activities"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2389,
+      "method": "get",
+      "route": "/api/admin/referrals"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2410,
+      "method": "get",
+      "route": "/api/admin/referrals/status"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2421,
+      "method": "get",
+      "route": "/api/admin/referrals/content"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2435,
+      "method": "get",
+      "route": "/api/admin/referrals/:id/content"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2450,
+      "method": "put",
+      "route": "/api/admin/referrals/content"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2476,
+      "method": "post",
+      "route": "/api/admin/referrals/content/apply"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2517,
+      "method": "post",
+      "route": "/api/admin/referrals/content/reset"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2543,
+      "method": "post",
+      "route": "/api/admin/referrals"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2585,
+      "method": "post",
+      "route": "/api/admin/referrals/import"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2619,
+      "method": "patch",
+      "route": "/api/admin/referrals/:id"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2680,
+      "method": "post",
+      "route": "/api/admin/referrals/send"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2713,
+      "method": "put",
+      "route": "/api/admin/referrals/limit"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2737,
+      "method": "delete",
+      "route": "/api/admin/referrals/:id"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2759,
+      "method": "get",
+      "route": "/api/admin/footprints"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2780,
+      "method": "get",
+      "route": "/api/admin/contacts"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2832,
+      "method": "delete",
+      "route": "/api/admin/contacts/:id"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2850,
+      "method": "post",
+      "route": "/api/admin/contacts/delete-many"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2875,
+      "method": "post",
+      "route": "/api/admin/contacts/import"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2904,
+      "method": "delete",
+      "route": "/api/admin/referrals"
+    },
+    {
+      "file": "workers-api/src/index.ts",
+      "line": 2931,
+      "method": "post",
+      "route": "/api/admin/referrals/from-contacts"
+    }
+  ],
+  "local_configuration_keys_only": [
+    {
+      "file": "workers-api\\.dev.vars",
+      "keys": [
+        "DATABASE_URL"
+      ],
+      "tracked": false
+    },
+    {
+      "file": "workers-api\\.dev.vars.example",
+      "keys": [
+        "DATABASE_URL",
+        "RESEND_API_KEY",
+        "EMAIL_FROM",
+        "HR_EMAIL",
+        "SUPPORT_EMAIL",
+        "JWT_SECRET",
+        "ADMIN_EMAIL",
+        "ADMIN_PASSWORD",
+        "B2_KEY_ID",
+        "B2_APP_KEY",
+        "B2_BUCKET_ID",
+        "B2_BUCKET_NAME",
+        "B2_API_URL",
+        "B2_DOWNLOAD_URL"
+      ],
+      "tracked": true
+    },
+    {
+      "file": "artifacts\\swiftjob-systems\\.env.example",
+      "keys": [
+        "VITE_API_URL",
+        "VITE_TURNSTILE_SITE_KEY",
+        "VITE_SUPPORT_EMAIL",
+        "VITE_CAREERS_EMAIL"
+      ],
+      "tracked": true
+    }
+  ]
+}

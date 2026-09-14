@@ -1,0 +1,291 @@
+[
+  {
+    "check": "CLOUDFLARE_DEPLOY_TOKEN validity",
+    "http_status": 200,
+    "success": true,
+    "token_status": "active"
+  },
+  {
+    "check": "CLOUDFLARE_ZONE_DNS_TOKEN validity",
+    "http_status": 200,
+    "success": true,
+    "token_status": "active"
+  },
+  {
+    "check": "CLOUDFLARE_ZONE_DNS_TOKEN_2 validity",
+    "http_status": 200,
+    "success": true,
+    "token_status": "active"
+  },
+  {
+    "check": "workers/scripts",
+    "http_status": 200,
+    "success": true,
+    "workers": [
+      {
+        "id": "swiftjob-systems",
+        "modified_on": "2026-09-13T01:09:50.322499Z"
+      },
+      {
+        "id": "swiftjob-workers-api",
+        "modified_on": "2026-09-13T13:37:28.592083Z"
+      }
+    ]
+  },
+  {
+    "check": "pages/projects",
+    "http_status": 200,
+    "success": true,
+    "projects": [
+      {
+        "name": "swiftjob-systems",
+        "subdomain": "swiftjob-systems.pages.dev",
+        "domains": [
+          "swiftjob-systems.pages.dev",
+          "swiftjob.online",
+          "swiftjob.payservice.top",
+          "www.swiftjob.online"
+        ],
+        "production_branch": "main",
+        "latest_deployment": {
+          "id": "b0ffae7a-e841-4037-9180-636ca848ad2b",
+          "url": "https://b0ffae7a.swiftjob-systems.pages.dev",
+          "created_on": "2026-09-13T13:50:47.376886Z"
+        }
+      },
+      {
+        "name": "bluepeak-redirect",
+        "subdomain": "bluepeak-redirect.pages.dev",
+        "domains": [
+          "bluepeak-redirect.pages.dev",
+          "bluepeak.payservice.top"
+        ],
+        "production_branch": "main",
+        "latest_deployment": {
+          "id": "08e6b498-21dc-4ac8-8f67-b698efdac089",
+          "url": "https://08e6b498.bluepeak-redirect.pages.dev",
+          "created_on": "2026-08-08T03:14:26.771119Z"
+        }
+      }
+    ]
+  },
+  {
+    "check": "workers/scripts/swiftjob-workers-api/secrets",
+    "http_status": 200,
+    "success": true,
+    "secret_names": [
+      "ADMIN_EMAIL",
+      "ADMIN_PASSWORD",
+      "DATABASE_URL",
+      "EMAIL_FROM",
+      "HR_EMAIL",
+      "JWT_SECRET",
+      "RESEND_API_KEY"
+    ]
+  },
+  {
+    "check": "workers/scripts/swiftjob-workers-api/deployments",
+    "http_status": 200,
+    "success": true,
+    "deployments": {
+      "deployments": [
+        {
+          "id": "06442702-dc15-4546-8c37-cc785909e429",
+          "source": "wrangler",
+          "strategy": "percentage",
+          "author_email": "conquestsammy5@gmail.com",
+          "annotations": {
+            "workers/triggered_by": "deployment"
+          },
+          "versions": [
+            {
+              "version_id": "70886f74-d035-4d82-8fa1-95297ec64429",
+              "percentage": 100
+            }
+          ],
+          "created_on": "2026-09-13T13:37:27.269001Z"
+        },
+        {
+          "id": "db577106-ae09-4ad6-aa54-576dac108c6f",
+          "source": "wrangler",
+          "strategy": "percentage",
+          "author_email": "conquestsammy5@gmail.com",
+          "annotations": {
+            "workers/triggered_by": "deployment"
+          },
+          "versions": [
+            {
+              "version_id": "fcc2a454-ab6f-4bba-acbc-1fef0eeebc93",
+              "percentage": 100
+            }
+          ],
+          "created_on": "2026-09-13T12:54:34.159336Z"
+        },
+        {
+          "id": "e56984f9-a1ec-4a76-a2b1-2c9375d5b1d9",
+          "source": "wrangler",
+          "strategy": "percentage",
+          "author_email": "conquestsammy5@gmail.com",
+          "annotations": {
+            "workers/triggered_by": "deployment"
+          },
+          "versions": [
+            {
+              "version_id": "fa958da2-1351-444d-8b56-aee781e67936",
+              "percentage": 100
+            }
+          ],
+          "created_on": "2026-09-13T12:51:44.687341Z"
+        },
+        {
+          "id": "e2b2d8f8-2c57-4a2f-ac8d-e5a1c7edebd4",
+          "source": "wrangler",
+          "strategy": "percentage",
+          "author_email": "conquestsammy5@gmail.com",
+          "annotations": {
+            "workers/triggered_by": "deployment"
+          },
+          "versions": [
+            {
+              "version_id": "ea44deae-12f8-4365-adfb-b8c47ae952e3",
+              "percentage": 100
+            }
+          ],
+          "created_on": "2026-09-13T12:25:41.492969Z"
+        },
+        {
+          "id": "6d064d64-cb9f-4be9-acfc-86ea52333344",
+          "source": "wrangler",
+          "strategy": "percentage",
+          "author_email": "conquestsammy5@gmail.com",
+          "annotations": {
+            "workers/triggered_by": "deployment"
+          },
+          "versions": [
+            {
+              "version_id": "a1f27e92-d6c9-47f1-bd09-3513f21560a9",
+              "percentage": 100
+            }
+          ],
+          "created_on": "2026-09-13T03:58:47.434386Z"
+        },
+        {
+          "id": "710c8e06-f819-419f-9f53-45b30afdacbc",
+          "source": "wrangler",
+          "strategy": "percentage",
+          "author_email": "conquestsammy5@gmail.com",
+          "annotations": {
+            "workers/triggered_by": "deployment"
+          },
+          "versions": [
+            {
+              "version_id": "8d78e1df-e32d-4b65-bbd5-8d295d4f523b",
+              "percentage": 100
+            }
+          ],
+          "created_on": "2026-09-13T02:16:57.123408Z"
+        },
+        {
+          "id": "74bb1333-0ea6-4e23-a156-9f3a1a5e28b1",
+          "source": "wrangler",
+          "strategy": "percentage",
+          "author_email": "conquestsammy5@gmail.com",
+          "annotations": {
+            "workers/triggered_by": "secret"
+          },
+          "versions": [
+            {
+              "version_id": "a0c272ce-b0aa-496d-ba2b-c8d7386b4b6b",
+              "percentage": 100
+            }
+          ],
+          "created_on": "2026-09-13T02:16:43.069123Z"
+        },
+        {
+          "id": "73968b10-a110-4824-8b57-2f6ba3497e47",
+          "source": "wrangler",
+          "strategy": "percentage",
+          "author_email": "conquestsammy5@gmail.com",
+          "annotations": {
+            "workers/triggered_by": "secret"
+          },
+          "versions": [
+            {
+              "version_id": "d5481e06-8a17-4040-b69f-b5f11a79ffd5",
+              "percentage": 100
+            }
+          ],
+          "created_on": "2026-09-13T02:16:38.05545Z"
+        },
+        {
+          "id": "8cd9409d-a5e1-4eba-9aef-a814e7814078",
+          "source": "wrangler",
+          "strategy": "percentage",
+          "author_email": "conquestsammy5@gmail.com",
+          "annotations": {
+            "workers/triggered_by": "secret"
+          },
+          "versions": [
+            {
+              "version_id": "c15753b6-c3ee-4ce7-9d05-3488431b7a3f",
+              "percentage": 100
+            }
+          ],
+          "created_on": "2026-09-13T02:16:32.892606Z"
+        },
+        {
+          "id": "20c4ad91-da2b-482e-99ee-7d8543885d52",
+          "source": "wrangler",
+          "strategy": "percentage",
+          "author_email": "conquestsammy5@gmail.com",
+          "annotations": {
+            "workers/triggered_by": "secret"
+          },
+          "versions": [
+            {
+              "version_id": "c444ab97-b4f7-4255-9da6-ff5239d9e5d2",
+              "percentage": 100
+            }
+          ],
+          "created_on": "2026-09-13T02:16:27.51491Z"
+        }
+      ]
+    }
+  },
+  {
+    "check": "r2/buckets",
+    "http_status": 200,
+    "success": true,
+    "buckets": [
+      "swiftjobsystems"
+    ]
+  },
+  {
+    "check": "CLOUDFLARE_ZONE_DNS_TOKEN zone read",
+    "http_status": 200,
+    "success": true,
+    "zones": [
+      {
+        "id": "461a2227cdedf959fd4d88c3861091aa",
+        "name": "payservice.top",
+        "status": "active"
+      }
+    ]
+  },
+  {
+    "check": "CLOUDFLARE_ZONE_DNS_TOKEN_2 zone read",
+    "http_status": 200,
+    "success": true,
+    "zones": [
+      {
+        "id": "461a2227cdedf959fd4d88c3861091aa",
+        "name": "payservice.top",
+        "status": "active"
+      }
+    ]
+  },
+  {
+    "check": "repository remotes",
+    "value": "gitsafe-backup\tgit://gitsafe:5418/backup.git (fetch)\ngitsafe-backup\tgit://gitsafe:5418/backup.git (push)\norigin\thttps://github.com/conquestaisiri/swiftjob-systems.git (fetch)\norigin\thttps://github.com/conquestaisiri/swiftjob-systems.git (push)\n"
+  }
+]

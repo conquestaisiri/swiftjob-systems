@@ -28,11 +28,14 @@ const BRAND = {
   purpleBg: "#E8EFE4",
 };
 
-const LOGO_PATH = "/swiftjob-mark.png";
-const FALLBACK_BASE_URL = "https://swiftjob.payservice.top";
+const LOGO_PATH = "/swiftjob-logo.png";
+// Bump when the supplied artwork changes so mail clients cannot reuse an
+// earlier cached logo at the same URL.
+const LOGO_VERSION = "supplied-20260912";
+const FALLBACK_BASE_URL = "https://swiftjob.online";
 // Last-resort contact address, used only when neither SUPPORT_EMAIL nor
 // HR_EMAIL is configured.
-const FALLBACK_SUPPORT_EMAIL = "support@swiftjob.payservice.top";
+const FALLBACK_SUPPORT_EMAIL = "support@swiftjob.online";
 
 function getBaseUrl(): string {
   const url = (getEnv().FRONTEND_URL ?? "").trim().replace(/\/$/, "");
@@ -49,7 +52,7 @@ export function getSupportEmail(): string {
 }
 
 function getLogoUrl(): string {
-  return `${getBaseUrl()}${LOGO_PATH}`;
+  return `${getBaseUrl()}${LOGO_PATH}?v=${LOGO_VERSION}`;
 }
 
 function esc(value: unknown): string {
@@ -82,6 +85,23 @@ function getHrEmail(): string {
   return (getEnv().HR_EMAIL ?? "").trim();
 }
 
+function htmlToText(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<br\s*\/?>(\r?\n)?/gi, "\n")
+    .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 async function sendEmail(opts: {
   from: string;
   to: string;
@@ -98,6 +118,7 @@ async function sendEmail(opts: {
     try {
       const { data, error } = await getResend().emails.send({
         ...opts,
+        text: htmlToText(opts.html),
         from,
         // Replies go to the support inbox instead of the send-only address.
         replyTo: getSupportEmail(),
@@ -157,9 +178,11 @@ function layout(opts: LayoutOptions): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
   <title>${esc(opts.headerTitle)}</title>
 </head>
-<body style="margin:0; padding:0; background:${BRAND.paper}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: ${BRAND.text};">
+<body style="margin:0; padding:0; background:${BRAND.paper}; color-scheme:light; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: ${BRAND.text};">
   <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">${esc(opts.preheader)}</div>
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.paper}; padding: 24px 12px;">
@@ -167,8 +190,8 @@ function layout(opts: LayoutOptions): string {
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; background:${BRAND.white}; border-radius: 14px; overflow: hidden; border: 1px solid ${BRAND.border};">
           <tr>
-            <td style="background:${BRAND.paperDark}; padding: 20px 32px; text-align: center; border-bottom: 3px solid ${BRAND.teal};">
-              <img src="${getLogoUrl()}" alt="SwiftJob" width="112" style="max-width: 112px; height: auto; border: 0; display: inline-block;" />
+            <td bgcolor="${BRAND.white}" style="background:${BRAND.white}; background-color:${BRAND.white}; padding: 20px 32px; text-align: center; border-bottom: 3px solid ${BRAND.teal};">
+              <img src="${getLogoUrl()}" alt="SwiftJob" width="220" style="max-width: 220px; height: auto; border: 0; display: inline-block;" />
             </td>
           </tr>
           <tr>

@@ -1,0 +1,63 @@
+- banner:
+  - link "SwiftJob.adm admin":
+    - /url: /admin
+    - text: SwiftJob.adm
+    - generic: admin
+  - button "Logout":
+    - text: Logout
+- navigation "Admin navigation":
+  - generic: Dashboard
+  - link "Overview":
+    - /url: /admin
+    - text: Overview
+  - generic: Hiring
+  - link "Applications":
+    - /url: /admin/applications
+    - text: Applications
+  - link "Referrals":
+    - /url: /admin/referrals
+    - text: Referrals
+  - link "Contacts":
+    - /url: /admin/contacts
+    - text: Contacts
+  - link "Jobs":
+    - /url: /admin/jobs
+    - text: Jobs
+  - generic: Growth
+  - link "Campaigns":
+    - /url: /admin/campaigns
+    - text: Campaigns
+  - generic: Communications
+  - link "Send mail":
+    - /url: /admin/mail
+    - text: Send mail
+  - generic: System
+  - link "Activity log":
+    - /url: /admin/activity
+    - text: Activity log
+  - link "Settings":
+    - /url: /admin/settings
+    - text: Settings
+- main:
+  - heading "Send mail" [level=1]
+  - generic: 0 recipients
+  - heading "Recipients" [level=3]
+  - paragraph: One per line — plain email, or "Name <email>". You can also pick people from your database below.
+  - textbox "name@example.com Jane Smith <jane@example.com>":
+    - /placeholder: "name@example.com\nJane Smith <jane@example.com>"
+  - button "Add from contacts":
+    - text: Add from contacts
+  - button "Add from referrals":
+    - text: Add from referrals
+  - heading "Message" [level=3]
+  - button "Referral invite"
+  - button "Custom message"
+  - paragraph: Each recipient gets their own private referral link and the branded briefing email. Anyone without a referral yet is created automatically.
+  - generic: Referrer name (optional)
+  - textbox "e.g. Tracy Miller"
+  - generic: Job title (optional)
+  - textbox "e.g. Virtual Assistant"
+  - button "Send to 0 recipients":
+    - text: Send to 0 recipients
+- region "Notifications (F8)":
+  - list

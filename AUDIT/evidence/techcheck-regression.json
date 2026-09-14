@@ -1,0 +1,13 @@
+{
+  "environment": "Source assertions + Local PGlite Worker; no production access",
+  "results": [
+    {
+      "name": "Generated checkers do not bypass execution policy or collect hostname",
+      "status": "PASS"
+    },
+    {
+      "name": "Combined installer endpoint is retired",
+      "status": "PASS"
+    }
+  ]
+}

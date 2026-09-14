@@ -1,0 +1,80 @@
+{
+  "date": "2026-09-13",
+  "origin": "https://swiftjob.online",
+  "deployment": "Cloudflare Pages project swiftjob-systems, production branch main",
+  "sourceChanges": [
+    "Improved client-mark contrast",
+    "Marked the homepage hero image eager/high-priority",
+    "Added public llms.txt",
+    "Removed the duplicate Google Fonts CSS import and made the remaining font stylesheet asynchronous"
+  ],
+  "validation": {
+    "typecheck": "PASS",
+    "productionBuild": "PASS",
+    "publicSitemapRouteCount": 100,
+    "publicRouteCrawl": "PASS",
+    "publicLegacyDomainScan": "PASS",
+    "candidateReferralLiveSmoke": "PASS",
+    "adminCandidateReferralLiveSmoke": "PASS",
+    "authRegression": "PASS",
+    "applicationRegression": "PASS",
+    "referralRegression": "PASS",
+    "techCheckRegression": "PASS",
+    "cryptoRuntime": "PASS",
+    "llmsStatus": 200,
+    "securityHeaders": "PASS"
+  },
+  "browser": {
+    "homepageLighthouseDesktop": {
+      "accessibility": 100,
+      "bestPractices": 100,
+      "seo": 100,
+      "agenticBrowsing": 100,
+      "passed": 58,
+      "failed": 0
+    },
+    "homepageLighthouseMobile": {
+      "accessibility": 100,
+      "bestPractices": 100,
+      "seo": 100,
+      "agenticBrowsing": 100,
+      "passed": 58,
+      "failed": 0
+    },
+    "homepagePerformanceLab": {
+      "lcpMs": 837,
+      "cls": 0,
+      "ttfbMs": 159,
+      "renderDelayMs": 678
+    },
+    "adminRoutesLoaded": [
+      "/admin",
+      "/admin/applications",
+      "/admin/referrals",
+      "/admin/candidate-referrals",
+      "/admin/contacts",
+      "/admin/jobs",
+      "/admin/campaigns",
+      "/admin/mail",
+      "/admin/activity",
+      "/admin/settings"
+    ],
+    "protectedCandidateRoutesRedirectToLogin": [
+      "/candidate/applications",
+      "/candidate/profile",
+      "/candidate/referrals"
+    ],
+    "homepageConsoleErrors": 0
+  },
+  "explicitlyUnchanged": [
+    "Payments",
+    "Passwords",
+    "Database credentials"
+  ],
+  "remainingOwnerChecks": [
+    "Historical provider-side Supabase credential rotation",
+    "Gmail destination placement and bounce inspection",
+    "Full screen-reader and exhaustive dynamic-state review",
+    "Finer-grained Cloudflare edge rate-limit permissions"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "measuredAt": "2026-09-12T01:53:12.7370997Z",
+  "checks": [
+    {
+      "path": "/api/admin/stats",
+      "status": 401,
+      "cacheControl": [
+        "no-store"
+      ],
+      "xContentTypeOptions": [
+        "nosniff"
+      ]
+    },
+    {
+      "path": "/api/candidate/applications",
+      "status": 401,
+      "cacheControl": [
+        "no-store"
+      ],
+      "xContentTypeOptions": [
+        "nosniff"
+      ]
+    },
+    {
+      "path": "/api/assessments/not-a-uuid",
+      "status": 404,
+      "cacheControl": [
+        "no-store"
+      ],
+      "xContentTypeOptions": [
+        "nosniff"
+      ]
+    },
+    {
+      "path": "/api/tech-check/download/msi/not-a-token",
+      "status": 410,
+      "cacheControl": [
+        "no-store"
+      ],
+      "xContentTypeOptions": [
+        "nosniff"
+      ]
+    }
+  ],
+  "preflight": {
+    "status": 204,
+    "allowOrigin": [
+      "https://swiftjob.payservice.top"
+    ],
+    "allowHeaders": [
+      "Content-Type, Authorization, Idempotency-Key"
+    ],
+    "allowMethods": [
+      "GET,POST,PATCH,PUT,DELETE,OPTIONS"
+    ]
+  },
+  "assessment": "PASS for sampled public security boundaries and same-origin preflight"
+}

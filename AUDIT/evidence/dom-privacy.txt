@@ -1,0 +1,91 @@
+- banner:
+  - navigation "Main navigation":
+    - link "SwiftJob SwiftJob":
+      - /url: /
+      - img "SwiftJob"
+      - generic: SwiftJob
+    - button "Open navigation":
+- main:
+  - link "SwiftJob":
+    - /url: /
+  - text: /Privacy Policy
+  - heading "Privacy Policy" [level=1]
+  - paragraph: "Last updated: August 2026"
+  - paragraph: SwiftJob is a remote-first staffing and business process outsourcing (BPO) company. We help businesses build remote teams, and we help candidates find remote work. This policy explains what information we collect when you use swiftjob.payservice.top, why we collect it, and the choices you have.
+  - heading "What we collect" [level=2]
+  - list:
+    - strong: Application details
+    - text: "you submit: name, email address, phone number, location and time zone, résumé/CV file, experience, education, expected salary, cover letter, and links you choose to share (LinkedIn, portfolio)."
+    - strong: "Candidate portal activity:"
+    - text: the status of your applications, notes our recruitment team writes about your application, and optional skills-check results.
+    - strong: "Skills-check technical data (optional stage):"
+    - text: if you complete the setup checks, we store an estimate of your internet speed, your typing speed and accuracy for one short passage, basic browser-reported details (CPU core count, approximate device memory, screen size, time zone), and — only if you choose to download and run it — the output of the one-time SwiftJob System Checker tool (operating system, processor model, RAM, free disk space). The checker runs once, reports once, and then stops working.
+    - strong: "Referral pages:"
+    - text: when you open a private referral briefing, we record that the page was viewed and on what type of device so the referring person and our team know the link reached you.
+    - strong: "Essential service data:"
+    - text: standard server logs used to keep the site secure and working.
+  - heading "What we never do" [level=2]
+  - list:
+    - listitem: We never charge you anything to apply, interview, or start.
+    - listitem: We never sell your personal information to anyone, ever. Your details are shared only with the client company considering you for a role, and only at the relevant stage of hiring.
+    - listitem: We do not install software on your computer. The optional System Checker is a small script you choose to download; you can read exactly what it collects in the section above, and it stops working after one run.
+  - heading "Why we process your information" [level=2]
+  - paragraph: To evaluate your application, contact you about roles you applied or were referred for, operate your candidate portal, meet our legal and payroll obligations when you are hired, and improve the fairness and quality of our screening. Our lawful basis is your consent (submitting an application) and our legitimate interest in running a staffing service.
+  - heading "How long we keep it" [level=2]
+  - paragraph:
+    - text: Application details are kept while a role is open and for up to 24 months afterwards so we can consider you for future remote positions, unless you ask us sooner to delete them. You can request deletion at any time by emailing
+    - link "support@swiftjob.payservice.top":
+      - /url: mailto:support@swiftjob.payservice.top
+    - text: .
+  - heading "Your rights" [level=2]
+  - paragraph:
+    - text: You may ask for a copy of your data, correction of anything inaccurate, deletion of your data, or withdrawal of consent at any time. Email
+    - link "support@swiftjob.payservice.top":
+      - /url: mailto:support@swiftjob.payservice.top
+    - text: — no forms, no hoops. If you are in the EU/UK, you also have the right to complain to your local data protection authority.
+  - heading "Security" [level=2]
+  - paragraph: Résumés are stored in access-controlled cloud storage, sign-in links are single-use and expire in 15 minutes, candidate sessions are encrypted in transit, and administrative actions on your data are logged.
+  - paragraph:
+    - text: Questions about this page? Email us at
+    - link "support@swiftjob.payservice.top":
+      - /url: mailto:support@swiftjob.payservice.top
+    - text: and a real person will respond.
+- contentinfo:
+  - link "SwiftJob home":
+    - /url: /
+    - generic: SwiftJob
+  - paragraph: People for the work ahead - across every kind of role.
+  - link "careers@swiftjob.payservice.top":
+    - /url: mailto:careers@swiftjob.payservice.top
+  - generic: Explore
+  - link "What we do":
+    - /url: /#work
+  - link "How it works":
+    - /url: /#process
+  - link "Careers":
+    - /url: /careers
+  - link "Contact":
+    - /url: /#contact
+  - link "Terms":
+    - /url: /terms
+  - link "Privacy":
+    - /url: /privacy
+  - generic: For professionals
+  - link "Browse open roles":
+    - /url: /careers
+  - link "Candidate access":
+    - /url: /login
+  - link "Candidate support":
+    - /url: mailto:support@swiftjob.payservice.top
+  - generic: For organizations
+  - paragraph: Need dependable people for the work ahead?
+  - link "Talk to SwiftJob":
+    - /url: /#contact
+    - text: Talk to SwiftJob
+  - generic: (c) 2026 SwiftJob. All rights reserved.
+  - generic: 100% Remote · Global team
+  - link "LinkedIn":
+    - /url: https://www.linkedin.com
+    - text: LinkedIn
+- region "Notifications (F8)":
+  - list

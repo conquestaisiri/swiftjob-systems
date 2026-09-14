@@ -29,7 +29,6 @@ interface LoadPayload {
   jobSlug: string;
   jobTitle: string;
   needsAssessment: boolean;
-  techCheckerUrl?: string;
   track: AssessmentTrack;
   status: string;
   result: { score: number; maxScore: number; completedAt: string } | null;
@@ -49,6 +48,7 @@ export function AssessmentPage() {
   const applicationId = params.get("id") ?? "";
   const email = params.get("email") ?? "";
   const jobSlug = params.get("job") ?? "";
+  const referenceCode = params.get("ref") ?? "";
 
   const [payload, setPayload] = useState<LoadPayload | null>(null);
   const [loadError, setLoadError] = useState("");
@@ -79,6 +79,7 @@ export function AssessmentPage() {
       return;
     }
     const qs = new URLSearchParams({ email });
+    if (referenceCode) qs.set("ref", referenceCode);
     if (jobSlug) qs.set("job", jobSlug);
     fetch(
       `${API_BASE}/api/assessments/${encodeURIComponent(applicationId)}?${qs}`,
@@ -113,7 +114,7 @@ export function AssessmentPage() {
     return () => {
       cancelled = true;
     };
-  }, [applicationId, email, jobSlug]);
+  }, [applicationId, email, jobSlug, referenceCode]);
 
   const config = useMemo(
     () => (payload && payload.track !== "none" ? TRACKS[payload.track] : null),
@@ -163,6 +164,7 @@ export function AssessmentPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email,
+            referenceCode,
             jobSlug: payload.jobSlug,
             systemCheck: {
               sentAt: new Date().toISOString(),
@@ -201,19 +203,6 @@ export function AssessmentPage() {
     }
   };
 
-  if (step === "loading" || !payload) {
-    return (
-      <SiteLayout title="Assessment — SwiftJob">
-        <div className="assessment-shell">
-          <div className="assessment-card">
-            <Loader2 size={34} className="spin" />
-            <p className="assessment-loading-text">Loading your assessment…</p>
-          </div>
-        </div>
-      </SiteLayout>
-    );
-  }
-
   if (step === "error") {
     return (
       <SiteLayout title="Assessment — SwiftJob">
@@ -232,6 +221,19 @@ export function AssessmentPage() {
                 <ArrowLeft size={16} /> Back to positions
               </a>
             </div>
+          </div>
+        </div>
+      </SiteLayout>
+    );
+  }
+
+  if (step === "loading" || !payload) {
+    return (
+      <SiteLayout title="Assessment — SwiftJob">
+        <div className="assessment-shell">
+          <div className="assessment-card">
+            <Loader2 size={34} className="spin" />
+            <p className="assessment-loading-text">Loading your assessment…</p>
           </div>
         </div>
       </SiteLayout>
@@ -292,7 +294,6 @@ export function AssessmentPage() {
           <PreChecks
             applicationId={applicationId}
             email={email}
-            techCheckerUrl={payload.techCheckerUrl ?? ""}
             onComplete={(result) => {
               precheckRef.current = result;
               setStep("questions");

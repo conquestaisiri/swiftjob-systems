@@ -12,7 +12,7 @@ export function SiteFooter() {
             className="site-footer-wordmark"
             aria-label="SwiftJob home"
           >
-            <img src="/swiftjob-mark.svg" alt="" className="site-footer-logo" />
+            <img src="/swiftjob-mark-light.png?v=supplied-20260912" alt="" className="site-footer-logo" />
             <span>SwiftJob</span>
           </Link>
           <p>People for the work ahead - across every kind of role.</p>
@@ -51,10 +51,8 @@ export function SiteFooter() {
         <span>
           (c) {new Date().getFullYear()} SwiftJob. All rights reserved.
         </span>
-        <span>100% Remote · Global team</span>
-        <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">
-          LinkedIn <ArrowUpRight size={13} />
-        </a>
+        <span>Remote roles · Global team</span>
+        <span aria-label="LinkedIn profile not configured">LinkedIn</span>
       </div>
     </footer>
   );

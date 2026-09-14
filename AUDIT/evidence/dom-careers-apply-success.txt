@@ -1,0 +1,85 @@
+- banner:
+  - navigation "Main navigation":
+    - link "SwiftJob SwiftJob":
+      - /url: /
+      - img "SwiftJob"
+      - generic: SwiftJob
+    - button "Open navigation":
+- main:
+  - heading "Application received" [level=1]
+  - paragraph:
+    - text: Thank you — your application for
+    - strong: the position
+    - text: has been securely received. Our recruitment team will carefully review your submission and contact you within
+    - strong: 3–5 business days
+    - text: regarding next steps. No further action is required at this time.
+  - generic: Reference
+  - code: —
+  - main:
+    - heading "What happens next" [level=2]
+    - list:
+      - generic: "01"
+      - strong: Application Review
+      - paragraph: Our team reviews every application. Typically 3–5 business days.
+      - generic: "02"
+      - strong: Skills Check
+      - paragraph: Complete the optional skills check above to strengthen your application.
+      - generic: "03"
+      - strong: Team Review & Feedback
+      - paragraph: If your profile matches, we reach out directly by email — no interviews.
+      - generic: "04"
+      - strong: Offer & Onboarding
+      - paragraph: Successful candidates receive a formal offer and fully remote onboarding.
+  - complementary:
+    - heading "Your Reference" [level=4]
+    - code: —
+    - paragraph: Keep this handy for correspondence.
+    - heading "Contact Recruitment" [level=4]
+    - link "careers@swiftjob.payservice.top":
+      - /url: mailto:careers@swiftjob.payservice.top
+      - text: careers@swiftjob.payservice.top
+  - link "View all positions":
+    - /url: /careers
+    - text: View all positions
+  - link "Return to homepage":
+    - /url: /
+    - text: Return to homepage
+- contentinfo:
+  - link "SwiftJob home":
+    - /url: /
+    - generic: SwiftJob
+  - paragraph: People for the work ahead - across every kind of role.
+  - link "careers@swiftjob.payservice.top":
+    - /url: mailto:careers@swiftjob.payservice.top
+  - generic: Explore
+  - link "What we do":
+    - /url: /#work
+  - link "How it works":
+    - /url: /#process
+  - link "Careers":
+    - /url: /careers
+  - link "Contact":
+    - /url: /#contact
+  - link "Terms":
+    - /url: /terms
+  - link "Privacy":
+    - /url: /privacy
+  - generic: For professionals
+  - link "Browse open roles":
+    - /url: /careers
+  - link "Candidate access":
+    - /url: /login
+  - link "Candidate support":
+    - /url: mailto:support@swiftjob.payservice.top
+  - generic: For organizations
+  - paragraph: Need dependable people for the work ahead?
+  - link "Talk to SwiftJob":
+    - /url: /#contact
+    - text: Talk to SwiftJob
+  - generic: (c) 2026 SwiftJob. All rights reserved.
+  - generic: 100% Remote · Global team
+  - link "LinkedIn":
+    - /url: https://www.linkedin.com
+    - text: LinkedIn
+- region "Notifications (F8)":
+  - list

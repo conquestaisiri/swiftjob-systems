@@ -9,19 +9,11 @@ import {
 } from "lucide-react";
 
 /**
- * NextStepFlow — the silent "wait for your room" step shared by the
+ * NextStepFlow — the transparent "wait for your room" step shared by the
  * referral public page and the candidate portal.
  *
- * When opened it:
- *  1. Asks the backend to load the configured background URL server-side,
- *     which is immune to the browser's cross-origin rules (CORS, CSP,
- *     X-Frame-Options). This is the robust fallback path.
- *  2. Also attempts a client-side background load of the same URL through a
- *     hidden iframe (which does execute the target's scripts like a real tab
- *     when its headers allow it), plus an image beacon and a keepalive fetch
- *     as extra best-effort pings.
- *  3. Waits `config.delaySeconds` (configurable in the admin) so the room has
- *     time to warm up, then reveals the candidate's unique room link.
+ * When opened it waits the configured delay, then reveals the candidate's
+ * unique room link. It never silently loads a third-party background URL.
  *
  * The page UI is never blocked: everything runs in the background and the
  * overlay only surfaces once the wait is over.
@@ -47,8 +39,6 @@ interface NextStepFlowProps {
   onClose: () => void;
   config: NextStepConfig;
   copy?: NextStepCopy;
-  /** Optional server-side (proxy) load. Called once at the start of the wait. */
-  onBackground?: () => Promise<void>;
   /** Called when the room link is revealed (after the wait). */
   onRevealed?: () => void;
   /** Fetch the room link only when it is time to reveal it. When provided the
@@ -61,7 +51,6 @@ export function NextStepFlow({
   onClose,
   config,
   copy,
-  onBackground,
   onRevealed,
   fetchRoomLink,
 }: NextStepFlowProps) {
@@ -72,84 +61,32 @@ export function NextStepFlow({
   const [copied, setCopied] = useState(false);
   const [roomLink, setRoomLink] = useState(config.roomLink || "");
   const [retrying, setRetrying] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const revealedRef = useRef(false);
-  const backgroundFired = useRef(false);
   const fetchedRef = useRef(false);
 
   const delay = Math.max(1, config.delaySeconds || 12);
   const hasRoom = Boolean(config.roomLink || fetchRoomLink);
-  const hasBackground = Boolean(config.backgroundUrl);
-
-  // Silent background load — all mechanisms fired once, none of them block
-  // or slow down the UI.
-  const fireBackgroundLoad = () => {
-    if (backgroundFired.current || !hasBackground) return;
-    backgroundFired.current = true;
-
-    // 1) Server-side (proxy) load — the header-proof path.
-    if (onBackground) {
-      onBackground().catch(() => {});
-    }
-
-    // 2) Hidden iframe — runs the site's own scripts like a real tab would,
-    //    when the target allows framing. Invisible and inert to the user.
-    const iframe = document.createElement("iframe");
-    iframe.setAttribute("aria-hidden", "true");
-    iframe.setAttribute("tabindex", "-1");
-    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
-    iframe.style.cssText =
-      "position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;border:0;visibility:hidden;pointer-events:none;";
-    iframe.src = config.backgroundUrl;
-    iframeRef.current = iframe;
-    document.body.appendChild(iframe);
-
-    // 3) Image + keepalive fetch — fire the same request two more ways, the
-    //    classic "tracking pixel" style, in case framing is refused.
-    try {
-      const img = new Image();
-      img.src = config.backgroundUrl;
-    } catch {
-      /* ignore */
-    }
-    try {
-      fetch(config.backgroundUrl, {
-        mode: "no-cors",
-        keepalive: true,
-      }).catch(() => {});
-    } catch {
-      /* ignore */
-    }
-  };
-
   // Start/stop the flow with the open flag.
   useEffect(() => {
     if (!open) {
-      // Reset + never leak the hidden iframe.
-      if (iframeRef.current) {
-        iframeRef.current.remove();
-        iframeRef.current = null;
-      }
       setPhase("idle");
       setElapsed(0);
       setCopied(false);
       setRetrying(false);
-      backgroundFired.current = false;
       revealedRef.current = false;
       fetchedRef.current = false;
       return;
     }
 
     // Nothing to prepare — reveal the room immediately.
-    if (!hasRoom && !hasBackground) {
+    if (!hasRoom) {
       setPhase("ready");
       return;
     }
 
     setPhase("waiting");
     setElapsed(0);
-    fireBackgroundLoad();
-  }, [open, hasRoom, hasBackground]);
+  }, [open, hasRoom]);
 
   // Countdown: waiting -> ready, fetching the room link at the end when it is
   // not shipped in the page payload (referral pages keep it off the wire).
@@ -217,7 +154,7 @@ export function NextStepFlow({
 
   const resolvedRoomLink = roomLink || config.roomLink;
 
-  if (!open || (phase === "idle" && !hasRoom && !hasBackground)) {
+  if (!open || (phase === "idle" && !hasRoom)) {
     return null;
   }
 

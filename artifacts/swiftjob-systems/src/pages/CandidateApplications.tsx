@@ -23,6 +23,7 @@ import { format } from "date-fns";
 import { parseDateOnly } from "@/lib/utils";
 import { analyzeDevice, deviceMeta } from "@/lib/deviceGuard";
 import { NextStepFlow } from "@/components/NextStepFlow";
+import { CandidatePasswordForm } from "@/components/CandidatePasswordForm";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -161,6 +162,7 @@ export function CandidateApplications() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -207,9 +209,22 @@ export function CandidateApplications() {
     };
   }, [token]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("candidate_token");
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      const response = await fetch(`${API_BASE}/api/auth/logout`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Could not sign out. Please try again.");
+      localStorage.removeItem("candidate_token");
+      window.location.href = "/login";
+    } catch {
+      setError("Could not sign out. Please check your connection and try again.");
+      setSigningOut(false);
+    }
   };
 
   const handleDownloadResume = async (application: Application) => {
@@ -250,18 +265,24 @@ export function CandidateApplications() {
           <div className="container candidate-header-inner">
             <Link href="/" className="candidate-brand">
               <img
-                src="/swiftjob-mark.svg"
+                src="/swiftjob-mark-light.png?v=supplied-20260912"
                 alt="SwiftJob"
                 className="candidate-logo"
               />
             </Link>
             <div className="candidate-header-actions">
               <span className="candidate-user">{countLabel}</span>
+              <nav className="candidate-portal-nav" aria-label="Candidate portal">
+                <Link href="/candidate/applications" className="active">Applications</Link>
+                <Link href="/candidate/profile">Profile</Link>
+                <Link href="/candidate/referrals">Referrals</Link>
+              </nav>
               <button
                 onClick={handleLogout}
+                disabled={signingOut}
                 className="button button-ghost button-sm"
               >
-                <ArrowLeft size={14} /> Sign out
+                <ArrowLeft size={14} /> {signingOut ? "Signing out…" : "Sign out"}
               </button>
             </div>
           </div>
@@ -277,8 +298,10 @@ export function CandidateApplications() {
               </p>
             </div>
 
+            <CandidatePasswordForm token={token} onSessionChanged={setToken} />
+
             {error && (
-              <div className="candidate-alert">
+              <div className="candidate-alert" role="alert">
                 <AlertCircle size={18} />
                 <span>{error}</span>
               </div>
@@ -362,9 +385,8 @@ function NextStepPanel({
     (application.meetLink || application.nextStep?.roomLink)
   ) {
     const nextStep = application.nextStep;
-    // When a room-level link is configured (globally or for this candidate)
-    // the "Start your next step" button reveals the room after a silent
-    // background load + wait. Otherwise keep the direct-open behaviour.
+    // When a room-level link is configured, reveal it after the configured
+    // wait. The flow never performs a silent third-party request.
     const hasFlow = Boolean(nextStep?.roomLink);
 
     const handleOpenBriefing = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -376,16 +398,6 @@ function NextStepPanel({
       }
       recordCandidateFootprint(token, application.id, "proceed");
       window.open(application.meetLink as string, "_blank", "noreferrer");
-    };
-
-    const fireBackground = async () => {
-      fetch(
-        `${API_BASE}/api/candidate/applications/${application.id}/background`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      ).catch(() => {});
     };
 
     return (
@@ -435,7 +447,6 @@ function NextStepPanel({
               roomLink: nextStep.roomLink,
               delaySeconds: nextStep.delaySeconds,
             }}
-            onBackground={fireBackground}
             onRevealed={() =>
               recordCandidateFootprint(token, application.id, "roomRevealed")
             }

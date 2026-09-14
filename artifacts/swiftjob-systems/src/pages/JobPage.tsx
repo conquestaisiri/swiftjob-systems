@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { fetchJobBySlug } from "@/lib/jobsApi";
-import { fetchPublicStats } from "@/lib/campaignApi";
 import type { Job } from "@/data/jobs";
 import { parseDateOnly } from "@/lib/utils";
 
@@ -207,9 +206,9 @@ export function JobPage() {
     "idle" | "submitting" | "error"
   >("idle");
   const [serverError, setServerError] = useState("");
-  const [countriesDisplay, setCountriesDisplay] = useState("28");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
+  const submissionKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -229,12 +228,6 @@ export function JobPage() {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-    // Admin-editable stat copy (Settings → "Countries hired from" number).
-    fetchPublicStats().then((stats) => {
-      if (!cancelled && stats?.countriesDisplay) {
-        setCountriesDisplay(stats.countriesDisplay);
-      }
-    });
     return () => {
       cancelled = true;
     };
@@ -283,6 +276,11 @@ export function JobPage() {
       </SiteLayout>
     );
   }
+
+  const referralCode = new URLSearchParams(window.location.search).get("ref")?.toUpperCase() || "";
+  const referralReward = typeof job.referralRewardCents === "number"
+    ? `$${Math.round(job.referralRewardCents / 100)}`
+    : null;
 
   const set =
     (field: keyof FormData) =>
@@ -343,17 +341,22 @@ export function JobPage() {
 
     const data = new FormData();
     data.append("position", job.title);
+    data.append("jobSlug", job.slug);
     (Object.entries(form) as [string, string][]).forEach(([k, v]) =>
       data.append(k, v),
     );
     const campaignSlug =
       new URLSearchParams(window.location.search).get("campaign") ?? "";
     if (campaignSlug) data.append("campaignSlug", campaignSlug);
+    if (/^SJREF-[A-Z0-9]{8}$/.test(referralCode)) data.append("referralCode", referralCode);
     if (resumeFile) data.append("resume", resumeFile);
 
     try {
+      const submissionKey = submissionKeyRef.current ?? crypto.randomUUID();
+      submissionKeyRef.current = submissionKey;
       const res = await fetch("/api/applications", {
         method: "POST",
+        headers: { "Idempotency-Key": submissionKey },
         body: data,
       });
       const json = await res.json();
@@ -426,6 +429,11 @@ export function JobPage() {
                 <span>
                   <DollarSign size={14} /> {job.compensation}
                 </span>
+                {referralReward && (
+                  <span title="Paid to the referring account after a verified hire">
+                    <Users size={14} /> Refer & earn {referralReward}
+                  </span>
+                )}
               </div>
             </div>
             <div className="job-header-actions">
@@ -454,6 +462,12 @@ export function JobPage() {
               <section className="job-section">
                 <h2>About the role</h2>
                 <p>{job.overview}</p>
+                {referralReward && (
+                  <div className="referral-reward-callout" role="note">
+                    <strong>Referral reward: {referralReward}</strong>
+                    <span>Share this role from your candidate account. The reward is paid after the referred candidate is hired and verified.</span>
+                  </div>
+                )}
               </section>
 
               {/* About SwiftJob */}
@@ -467,8 +481,8 @@ export function JobPage() {
                   focus on the work.
                 </p>
                 <p>
-                  We build remote teams across {countriesDisplay}+ countries and
-                  serve businesses in technology, financial services,
+                  We build remote teams worldwide and serve businesses in
+                  technology, financial services,
                   e-commerce, healthcare, logistics, retail, and more. When you
                   work with us, we aim to be a partner for the long term—not
                   just a one-off placement.
@@ -577,6 +591,10 @@ export function JobPage() {
                     <span>Compensation</span>
                     <strong>{job.compensation}</strong>
                   </div>
+                  {referralReward && <div className="job-detail-item">
+                    <span>Referral reward</span>
+                    <strong>{referralReward}</strong>
+                  </div>}
                 </div>
               </section>
 
@@ -682,10 +700,11 @@ export function JobPage() {
               <div className="form-section-title">Personal information</div>
               <div className="app-form-grid">
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-full-name">
                     Full name <span className="req">*</span>
                   </label>
                   <input
+                    id="application-full-name"
                     type="text"
                     value={form.fullName}
                     onChange={set("fullName")}
@@ -699,10 +718,11 @@ export function JobPage() {
                   )}
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-email">
                     Email address <span className="req">*</span>
                   </label>
                   <input
+                    id="application-email"
                     type="email"
                     value={form.email}
                     onChange={set("email")}
@@ -716,10 +736,11 @@ export function JobPage() {
                   )}
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-phone">
                     Phone number <span className="req">*</span>
                   </label>
                   <input
+                    id="application-phone"
                     type="tel"
                     value={form.phone}
                     onChange={set("phone")}
@@ -733,10 +754,11 @@ export function JobPage() {
                   )}
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-country">
                     Country <span className="req">*</span>
                   </label>
                   <select
+                    id="application-country"
                     value={form.country}
                     onChange={set("country")}
                     className={errors.country ? "has-error" : ""}
@@ -755,10 +777,11 @@ export function JobPage() {
                   )}
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-city">
                     City <span className="req">*</span>
                   </label>
                   <input
+                    id="application-city"
                     type="text"
                     value={form.city}
                     onChange={set("city")}
@@ -772,10 +795,11 @@ export function JobPage() {
                   )}
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-timezone">
                     Time zone <span className="req">*</span>
                   </label>
                   <select
+                    id="application-timezone"
                     value={form.timezone}
                     onChange={set("timezone")}
                     className={errors.timezone ? "has-error" : ""}
@@ -794,10 +818,11 @@ export function JobPage() {
                   )}
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-linkedin">
                     LinkedIn profile <span className="opt">(optional)</span>
                   </label>
                   <input
+                    id="application-linkedin"
                     type="url"
                     value={form.linkedinUrl}
                     onChange={set("linkedinUrl")}
@@ -805,10 +830,11 @@ export function JobPage() {
                   />
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-portfolio">
                     Portfolio or website <span className="opt">(optional)</span>
                   </label>
                   <input
+                    id="application-portfolio"
                     type="url"
                     value={form.portfolioUrl}
                     onChange={set("portfolioUrl")}
@@ -821,8 +847,9 @@ export function JobPage() {
               <div className="form-section-title">Position details</div>
               <div className="app-form-grid">
                 <div className="app-field">
-                  <label>Position applying for</label>
+                  <label htmlFor="application-position">Position applying for</label>
                   <input
+                    id="application-position"
                     type="text"
                     value={job.title}
                     readOnly
@@ -830,10 +857,11 @@ export function JobPage() {
                   />
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-years-experience">
                     Years of relevant experience <span className="req">*</span>
                   </label>
                   <select
+                    id="application-years-experience"
                     value={form.yearsExperience}
                     onChange={set("yearsExperience")}
                     className={errors.yearsExperience ? "has-error" : ""}
@@ -854,10 +882,11 @@ export function JobPage() {
                   )}
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-education">
                     Highest education level <span className="req">*</span>
                   </label>
                   <select
+                    id="application-education"
                     value={form.education}
                     onChange={set("education")}
                     className={errors.education ? "has-error" : ""}
@@ -879,10 +908,11 @@ export function JobPage() {
                   )}
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-english">
                     English proficiency <span className="req">*</span>
                   </label>
                   <select
+                    id="application-english"
                     value={form.englishProficiency}
                     onChange={set("englishProficiency")}
                     className={errors.englishProficiency ? "has-error" : ""}
@@ -901,10 +931,11 @@ export function JobPage() {
                   )}
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-notice-period">
                     Notice period <span className="req">*</span>
                   </label>
                   <select
+                    id="application-notice-period"
                     value={form.noticePeriod}
                     onChange={set("noticePeriod")}
                     className={errors.noticePeriod ? "has-error" : ""}
@@ -924,10 +955,11 @@ export function JobPage() {
                   )}
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-expected-salary">
                     Expected monthly salary (USD) <span className="req">*</span>
                   </label>
                   <input
+                    id="application-expected-salary"
                     type="text"
                     value={form.expectedSalary}
                     onChange={set("expectedSalary")}
@@ -941,10 +973,11 @@ export function JobPage() {
                   )}
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-earliest-start-date">
                     Earliest start date <span className="req">*</span>
                   </label>
                   <input
+                    id="application-earliest-start-date"
                     type="date"
                     value={form.earliestStartDate}
                     onChange={set("earliestStartDate")}
@@ -958,10 +991,11 @@ export function JobPage() {
                   )}
                 </div>
                 <div className="app-field">
-                  <label>
+                  <label htmlFor="application-skills">
                     Key skills <span className="req">*</span>
                   </label>
                   <input
+                    id="application-skills"
                     type="text"
                     value={form.skills}
                     onChange={set("skills")}
@@ -979,10 +1013,11 @@ export function JobPage() {
               {/* Long-form fields */}
               <div className="form-section-title">Your background</div>
               <div className="app-field app-field-full">
-                <label>
+                <label htmlFor="application-relevant-experience">
                   Relevant experience <span className="req">*</span>
                 </label>
                 <textarea
+                  id="application-relevant-experience"
                   value={form.relevantExperience}
                   onChange={set("relevantExperience")}
                   rows={5}
@@ -996,10 +1031,11 @@ export function JobPage() {
                 )}
               </div>
               <div className="app-field app-field-full">
-                <label>
+                <label htmlFor="application-cover-letter">
                   Cover letter <span className="req">*</span>
                 </label>
                 <textarea
+                  id="application-cover-letter"
                   value={form.coverLetter}
                   onChange={set("coverLetter")}
                   rows={6}
@@ -1016,7 +1052,7 @@ export function JobPage() {
               {/* Resume Upload */}
               <div className="form-section-title">Resume / CV</div>
               <div className="app-field app-field-full">
-                <label>
+                <label htmlFor="application-resume">
                   Upload your CV or resume <span className="req">*</span>
                 </label>
                 <div
@@ -1059,6 +1095,7 @@ export function JobPage() {
                 </div>
                 <input
                   ref={fileInputRef}
+                  id="application-resume"
                   type="file"
                   accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                   style={{ display: "none" }}
@@ -1075,7 +1112,7 @@ export function JobPage() {
               </div>
 
               {serverError && (
-                <div className="app-server-error">
+                <div className="app-server-error" role="alert">
                   <AlertCircle size={16} />
                   <span>{serverError}</span>
                 </div>

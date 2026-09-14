@@ -53,9 +53,13 @@ export const applications = pgTable("applications", {
   roomLink: text("room_link"),
   nextStepDelay: integer("next_step_delay"),
   campaignSlug: text("campaign_slug"),
+  submissionKey: text("submission_key").unique(),
+  jobSlug: text("job_slug"),
+  referralCode: text("referral_code"),
 });
 
 export const insertApplicationSchema = z.object({
+  jobSlug: z.string().trim().min(1).max(120),
   position: z.string().min(1),
   fullName: z.string().min(1),
   email: z.string().email(),
@@ -75,6 +79,8 @@ export const insertApplicationSchema = z.object({
   relevantExperience: z.string().min(1),
   coverLetter: z.string().min(1),
   campaignSlug: z.string().max(80).optional().nullable(),
+  submissionKey: z.string().min(16).max(128).optional().nullable(),
+  referralCode: z.string().trim().regex(/^SJREF-[A-Z0-9]{8}$/).optional().nullable(),
 });
 
 export type Application = typeof applications.$inferSelect;
@@ -119,6 +125,7 @@ export const jobs = pgTable("jobs", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
+  referralRewardCents: integer("referral_reward_cents"),
 });
 
 export type Job = typeof jobs.$inferSelect;
@@ -146,6 +153,53 @@ export const candidateSessions = pgTable("candidate_sessions", {
   lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
   revoked: boolean("revoked").default(false).notNull(),
 });
+
+export const candidateProfiles = pgTable("candidate_profiles", {
+  email: text("email").primaryKey(),
+  fullName: text("full_name").notNull().default(""),
+  phone: text("phone"),
+  country: text("country"),
+  city: text("city"),
+  timezone: text("timezone"),
+  address: text("address"),
+  linkedinUrl: text("linkedin_url"),
+  portfolioUrl: text("portfolio_url"),
+  headline: text("headline"),
+  skills: text("skills"),
+  experienceSummary: text("experience_summary"),
+  education: text("education"),
+  resumePath: text("resume_path"),
+  resumeFilename: text("resume_filename"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const candidateReferralLinks = pgTable("candidate_referral_links", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  ownerEmail: text("owner_email").notNull(),
+  code: text("code").notNull().unique(),
+  jobSlug: text("job_slug"),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const candidateReferrals = pgTable("candidate_referrals", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  ownerEmail: text("owner_email").notNull(),
+  linkCode: text("link_code").notNull(),
+  referredEmail: text("referred_email"),
+  applicationId: uuid("application_id").references(() => applications.id, { onDelete: "set null" }),
+  jobSlug: text("job_slug"),
+  status: text("status").notNull().default("clicked"),
+  rewardCents: integer("reward_cents").notNull(),
+  payoutStatus: text("payout_status").notNull().default("pending"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type CandidateProfile = typeof candidateProfiles.$inferSelect;
+export type CandidateReferralLink = typeof candidateReferralLinks.$inferSelect;
+export type CandidateReferral = typeof candidateReferrals.$inferSelect;
 
 export type MagicToken = typeof magicTokens.$inferSelect;
 export type CreateMagicTokenInput = typeof magicTokens.$inferInsert;

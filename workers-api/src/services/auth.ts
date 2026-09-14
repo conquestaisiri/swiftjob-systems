@@ -5,6 +5,7 @@ import { getEnv } from "../config";
 
 const MAGIC_LINK_TTL = 15 * 60 * 1000; // 15 minutes
 const SESSION_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+const PASSWORD_ITERATIONS = 100_000;
 
 function getJwtSecret(): Uint8Array {
   const { JWT_SECRET } = getEnv();
@@ -37,7 +38,7 @@ function getFrontendUrl(): string {
     console.warn(
       "FRONTEND_URL not set - magic links will use the default domain. Set FRONTEND_URL in production.",
     );
-    return "https://swiftjob.payservice.top".replace(/\/$/, "");
+    return "https://swiftjob.online".replace(/\/$/, "");
   }
   return url.replace(/\/$/, "");
 }
@@ -103,13 +104,17 @@ export const authService = {
     sessionToken?: string;
   } | null> {
     try {
-      const { payload } = await jwtVerify(token, getJwtSecret());
-      const email = payload.email as string;
+      const { payload } = await jwtVerify(token, getJwtSecret(), { algorithms: ["HS256"] });
+      if (payload.role !== "candidate" || typeof payload.email !== "string" ||
+          !payload.email.includes("@") || payload.email !== payload.email.trim().toLowerCase() ||
+          typeof payload.sessionToken !== "string" || !/^[a-f0-9]{64}$/.test(payload.sessionToken) ||
+          typeof payload.exp !== "number") return null;
+      const email = payload.email;
       return {
         id: email,
         email,
-        role: (payload.role as string) || "candidate",
-        sessionToken: payload.sessionToken as string | undefined,
+        role: "candidate",
+        sessionToken: payload.sessionToken,
       };
     } catch {
       return null;
@@ -128,7 +133,7 @@ export const authService = {
     const session =
       await authRepository.findCandidateSessionByTokenHash(tokenHash);
 
-    if (!session) {
+    if (!session || session.email !== decoded.email) {
       return { email: decoded.email, valid: false };
     }
 
@@ -180,7 +185,7 @@ export const authService = {
       {
         name: "PBKDF2",
         salt: saltBytes,
-        iterations: 150_000,
+        iterations: PASSWORD_ITERATIONS,
         hash: "SHA-256",
       },
       key,
@@ -236,7 +241,7 @@ export const authService = {
     if (!DATABASE_URL) throw new Error("DATABASE_URL must be set");
     const normalized = email.toLowerCase().trim();
     const { hash, salt } = await this.hashPassword(password);
-    const stored = `pbkdf2$150000$${salt}$${hash}`;
+    const stored = `pbkdf2$${PASSWORD_ITERATIONS}$${salt}$${hash}`;
     const sql = neon(DATABASE_URL);
     await sql(
       `INSERT INTO candidate_accounts (email, password_hash)

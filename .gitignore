@@ -56,7 +56,7 @@ Thumbs.db
 .dev.vars
 !.dev.vars.example
 
-# deprecated local SQLite database (replaced by Supabase/Postgres)
+# deprecated local SQLite database (replaced by Neon/Postgres)
 /artifacts/api-server/data/
 
 # nested zip-extraction leftover
@@ -68,7 +68,6 @@ Thumbs.db
 # local Cloudflare tooling state
 .wrangler/
 .playwright-mcp/
-artifacts/swiftjob-systems/public/_worker.js
 
 # Foreign nested repo snapshot / local archives - kept on disk, not tracked
 extracted/

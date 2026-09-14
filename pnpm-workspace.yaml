@@ -158,8 +158,8 @@ allowBuilds:
   '@tailwindcss/oxide': true
   lightningcss: true
   rollup: true
-  sharp: set this to true or false
-  workerd: set this to true or false
+  sharp: true
+  workerd: true
 
 onlyBuiltDependencies:
   - esbuild

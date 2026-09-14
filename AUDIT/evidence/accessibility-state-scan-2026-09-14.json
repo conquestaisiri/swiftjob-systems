@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-14",
+  "origin": "https://swiftjob.online",
+  "method": "Live browser DOM/accessibility-state scan; no forms submitted",
+  "routes": [
+    "/",
+    "/careers",
+    "/careers/captioner-subtitler",
+    "/login",
+    "/terms",
+    "/privacy",
+    "/assessment",
+    "/careers/apply/success",
+    "/unknown"
+  ],
+  "results": {
+    "eachRouteHasExactlyOneH1": true,
+    "missingControlNames": 0,
+    "missingImageAltAttributes": 0,
+    "unnamedLinks": 0,
+    "duplicateIds": 0,
+    "errorStatesDetected": 0,
+    "careersEngineeringFilter": "PASS",
+    "candidatePasswordTab": "PASS"
+  }
+}

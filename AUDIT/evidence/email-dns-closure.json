@@ -1,0 +1,189 @@
+{
+  "measuredAt": "2026-09-12T15:05:06.2787565Z",
+  "environment": "Cloudflare DNS API + public DNS resolver + Resend API + authenticated Cloudflare Email Routing dashboard; controlled direct and inbound routing probes sent, no application mutation",
+  "sendingDomain": "payservice.top",
+  "replyToDomain": "swiftjob.payservice.top",
+  "resend": {
+    "provider": "Resend",
+    "measuredAt": "2026-09-12T06:19:48.1703524Z",
+    "apiKeyReadStatus": 200,
+    "webhooks": {
+      "status": 200,
+      "configured": 0
+    },
+    "domains": [
+      {
+        "id": "aafedf67-c524-4847-988d-320b381464e3",
+        "name": "payservice.top",
+        "status": "verified",
+        "region": "us-east-1"
+      }
+    ],
+    "emailReceipt": "PARTIAL — direct recipient and inbound route probes returned delivered; Cloudflare recorded the inbound message as Forwarded; inbox/spam placement remains unverified",
+    "controlledProbe": {
+      "providerMessageId": "82f5497d-b33d-42a2-a6cc-93649e1329f0",
+      "sentAt": "2026-09-12T07:50:08Z",
+      "recipientDomain": "outlook.com",
+      "fromDomain": "payservice.top",
+      "replyToDomain": "swiftjob.payservice.top",
+      "providerEvent": "delivered",
+      "applicationMutation": false,
+      "inboxInspection": "NOT VERIFIED"
+    },
+    "inboundRoutingProbe": {
+      "providerMessageId": "54650313-bb31-4bf8-b729-4b4ade2ac714",
+      "sentAt": "2026-09-12T07:58:53Z",
+      "recipient": "hr@swiftjob.payservice.top",
+      "providerEvent": "delivered",
+      "cloudflareActivity": "Forwarded",
+      "cloudflareMessageId": "<010001a096226758-d2f4b780-8b72-4ddd-906e-2bba9c8bcef5-000000@email.amazonses.com>",
+      "cloudflareForwardedAt": "2026-09-12T15:00:33Z",
+      "applicationMutation": false
+    },
+    "historicalProviderEvents": {
+      "status": 200,
+      "messagesInspected": 8,
+      "delivered": 2,
+      "bounced": 6,
+      "deliveredSubjects": [
+        "Application Received",
+        "Referral invitation"
+      ],
+      "bouncePattern": "Five messages addressed to the configured @swiftjob.payservice.top HR/notification or candidate-link domain ended as transient/general bounces after mail-server connection failures; one synthetic test.com message bounced because its mail server was unavailable.",
+      "controlledMailboxEvidence": false,
+      "contentChecks": "All eight inspected messages contained both HTML and plain-text bodies and production SwiftJob links; no unexpected external links were found. This verifies provider payload construction, not inbox receipt."
+    },
+    "domainDetail": {
+      "status": 200,
+      "name": "payservice.top",
+      "statusValue": "verified",
+      "region": "us-east-1",
+      "records": [
+        {
+          "type": "DKIM",
+          "status": "verified",
+          "valuePresent": true
+        },
+        {
+          "type": "SPF",
+          "status": "verified",
+          "valuePresent": true
+        },
+        {
+          "type": "SPF",
+          "status": "verified",
+          "valuePresent": true
+        }
+      ]
+    }
+  },
+  "cloudflareDns": {
+    "status": 200,
+    "configuredReplyToSubdomainMx": {
+      "name": "swiftjob.payservice.top",
+      "type": "MX",
+      "recordCount": 3,
+      "status": "PRESENT"
+    },
+    "records": [
+      {
+        "name": "payservice.top",
+        "type": "MX",
+        "ttl": 1,
+        "spf": false,
+        "dmarc": false,
+        "resendMarker": false,
+        "contentLength": 24
+      },
+      {
+        "name": "payservice.top",
+        "type": "MX",
+        "ttl": 1,
+        "spf": false,
+        "dmarc": false,
+        "resendMarker": false,
+        "contentLength": 24
+      },
+      {
+        "name": "payservice.top",
+        "type": "MX",
+        "ttl": 1,
+        "spf": false,
+        "dmarc": false,
+        "resendMarker": false,
+        "contentLength": 24
+      },
+      {
+        "name": "send.payservice.top",
+        "type": "MX",
+        "ttl": 3600,
+        "spf": false,
+        "dmarc": false,
+        "resendMarker": true,
+        "contentLength": 37
+      },
+      {
+        "name": "_dmarc.payservice.top",
+        "type": "TXT",
+        "ttl": 1,
+        "spf": false,
+        "dmarc": true,
+        "resendMarker": false,
+        "contentLength": 54
+      },
+      {
+        "name": "payservice.top",
+        "type": "TXT",
+        "ttl": 1,
+        "spf": true,
+        "dmarc": false,
+        "resendMarker": false,
+        "contentLength": 44
+      },
+      {
+        "name": "resend._domainkey.payservice.top",
+        "type": "TXT",
+        "ttl": 3600,
+        "spf": false,
+        "dmarc": false,
+        "resendMarker": false,
+        "contentLength": 220
+      },
+      {
+        "name": "send.payservice.top",
+        "type": "TXT",
+        "ttl": 3600,
+        "spf": true,
+        "dmarc": false,
+        "resendMarker": true,
+        "contentLength": 35
+      }
+    ]
+  },
+  "alignment": {
+    "senderUnderVerifiedRoot": true,
+    "rootSpfPresent": true,
+    "rootDmarcPresent": true,
+    "resendDkimPresent": true,
+    "sendSpfPresent": true,
+    "replyToSubdomainMxPresent": true
+  },
+  "directDnsCheck": {
+    "resolver": "Windows Resolve-DnsName",
+    "replyToSubdomainMxRecordCount": 3,
+    "replyToSubdomainARecords": 2,
+    "rootMxRecordCount": 3,
+    "rootMxObserved": true,
+    "interpretation": "Public DNS independently confirms three Cloudflare Email Routing MX records at swiftjob.payservice.top and three root MX records at payservice.top."
+  },
+  "cloudflareRouting": {
+    "dashboardStatus": "authenticated",
+    "serviceStatus": "Enabled",
+    "subdomain": "swiftjob.payservice.top",
+    "subdomainStatus": "Enabled",
+    "routingRules": 12,
+    "destinationAddresses": 5,
+    "destinationAddressStatus": "Verified",
+    "inboundActivityResult": "Forwarded"
+  }
+}

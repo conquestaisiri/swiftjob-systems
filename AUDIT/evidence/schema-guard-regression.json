@@ -1,0 +1,9 @@
+{
+  "measuredAt": "2026-09-12T02:46:20.1309609Z",
+  "droppedTable": "campaigns",
+  "status": 503,
+  "expectedStatus": 503,
+  "clearFailure": true,
+  "noRequestDdl": true,
+  "verification": "Read-only information_schema guard rejected an incomplete local migrated database; no CREATE/ALTER/INDEX ran."
+}

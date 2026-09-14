@@ -1,0 +1,30 @@
+{
+  "measuredAt": "2026-09-12T15:44:06.943Z",
+  "environment": "Production custom domain + Resend API; one controlled synthetic contact request; no contact record is persisted by this endpoint",
+  "flow": "contact request -> HR notification",
+  "recipientDomain": "outlook.com",
+  "handler": {
+    "method": "POST",
+    "path": "/api/contact",
+    "status": 201
+  },
+  "provider": {
+    "provider": "Resend",
+    "messageId": "de0a4b2a-4f43-4d6a-b4ea-8aa3f6d0c4f0",
+    "subject": "New contact message: SwiftJob Contact Verification (Something else)",
+    "detailStatus": 200,
+    "lastEvent": "delivered",
+    "toDomain": "swiftjob.payservice.top",
+    "replyToDomain": "swiftjob.payservice.top",
+    "htmlLogoReference": true,
+    "plainTextPresent": true
+  },
+  "workerDeployment": {
+    "versionId": "dca9cc2f-9c7f-43e6-a3e0-57e2e35bd94e",
+    "deploymentId": "9e601e79-dc86-4456-9899-f92ee36f7b43",
+    "createdAt": "2026-09-12T15:28:12.519671Z",
+    "trigger": "secret"
+  },
+  "inboxInspection": "NOT VERIFIED",
+  "databaseMutation": false
+}

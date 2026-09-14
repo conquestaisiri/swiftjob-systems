@@ -1,8 +1,8 @@
 import { JOBS } from "../src/data/jobs";
 
-const API_BASE = process.env.SEED_API_URL || "https://swiftjob.payservice.top";
+const API_BASE = process.env.SEED_API_URL || "https://swiftjob.online";
 const ADMIN_EMAIL =
-  process.env.SEED_ADMIN_EMAIL || "admin@swiftjob.payservice.top";
+  process.env.SEED_ADMIN_EMAIL || "admin@swiftjob.online";
 const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || "";
 
 if (!ADMIN_PASSWORD) {

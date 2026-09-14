@@ -45,7 +45,7 @@ export function PrivacyPolicy() {
         SwiftJob is a remote-first staffing and business process outsourcing
         (BPO) company. We help businesses build remote teams, and we help
         candidates find remote work. This policy explains what information we
-        collect when you use swiftjob.payservice.top, why we collect it, and the
+        collect when you use swiftjob.online, why we collect it, and the
         choices you have.
       </p>
 
@@ -141,7 +141,7 @@ export function TermsOfService() {
   return (
     <LegalShell title="Terms of Service" updated="August 2026">
       <p className="legal-p">
-        These terms govern your use of swiftjob.payservice.top — including
+        These terms govern your use of swiftjob.online — including
         browsing roles, applying, being referred, completing skills checks, and
         using the candidate portal.
       </p>

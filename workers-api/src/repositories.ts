@@ -13,6 +13,9 @@ import {
   activities,
   campaigns,
   campaignVisits,
+  candidateProfiles,
+  candidateReferralLinks,
+  candidateReferrals,
 } from "./schema";
 import {
   eq,
@@ -52,6 +55,9 @@ import type {
   CreateActivityInput,
   Campaign,
   CreateCampaignInput,
+  CandidateProfile,
+  CandidateReferralLink,
+  CandidateReferral,
 } from "./schema";
 import type { SQL } from "drizzle-orm";
 
@@ -112,6 +118,16 @@ export const applicationRepository = {
       .orderBy(desc(applications.createdAt));
   },
 
+  async findBySubmissionKey(submissionKey: string): Promise<Application | undefined> {
+    const db = getDb();
+    const [result] = await db
+      .select()
+      .from(applications)
+      .where(eq(applications.submissionKey, submissionKey))
+      .limit(1);
+    return result;
+  },
+
   async findByReferenceCode(
     referenceCode: string,
   ): Promise<Application | undefined> {
@@ -125,6 +141,9 @@ export const applicationRepository = {
   },
 
   async findById(id: string): Promise<Application | undefined> {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+      return undefined;
+    }
     const db = getDb();
     const [result] = await db
       .select()
@@ -362,6 +381,171 @@ export const authRepository = {
     await db
       .delete(candidateSessions)
       .where(lt(candidateSessions.expiresAt, now));
+  },
+};
+
+function generateCandidateReferralCode(): string {
+  let value = "";
+  for (let i = 0; i < 8; i++) value += randomCharsetChar();
+  return `SJREF-${value}`;
+}
+
+export const candidateRepository = {
+  async getProfile(email: string): Promise<CandidateProfile | undefined> {
+    const db = getDb();
+    const [profile] = await db.select().from(candidateProfiles)
+      .where(eq(candidateProfiles.email, email.toLowerCase().trim())).limit(1);
+    return profile;
+  },
+
+  async upsertProfile(email: string, input: Partial<Omit<CandidateProfile, "email" | "createdAt" | "updatedAt">>): Promise<CandidateProfile> {
+    const db = getDb();
+    const normalized = email.toLowerCase().trim();
+    const [profile] = await db.insert(candidateProfiles).values({
+      email: normalized,
+      fullName: input.fullName ?? "",
+      phone: input.phone ?? null,
+      country: input.country ?? null,
+      city: input.city ?? null,
+      timezone: input.timezone ?? null,
+      address: input.address ?? null,
+      linkedinUrl: input.linkedinUrl ?? null,
+      portfolioUrl: input.portfolioUrl ?? null,
+      headline: input.headline ?? null,
+      skills: input.skills ?? null,
+      experienceSummary: input.experienceSummary ?? null,
+      education: input.education ?? null,
+      resumePath: input.resumePath ?? null,
+      resumeFilename: input.resumeFilename ?? null,
+    }).onConflictDoUpdate({
+      target: candidateProfiles.email,
+      set: {
+        ...(input.fullName !== undefined ? { fullName: input.fullName } : {}),
+        ...(input.phone !== undefined ? { phone: input.phone } : {}),
+        ...(input.country !== undefined ? { country: input.country } : {}),
+        ...(input.city !== undefined ? { city: input.city } : {}),
+        ...(input.timezone !== undefined ? { timezone: input.timezone } : {}),
+        ...(input.address !== undefined ? { address: input.address } : {}),
+        ...(input.linkedinUrl !== undefined ? { linkedinUrl: input.linkedinUrl } : {}),
+        ...(input.portfolioUrl !== undefined ? { portfolioUrl: input.portfolioUrl } : {}),
+        ...(input.headline !== undefined ? { headline: input.headline } : {}),
+        ...(input.skills !== undefined ? { skills: input.skills } : {}),
+        ...(input.experienceSummary !== undefined ? { experienceSummary: input.experienceSummary } : {}),
+        ...(input.education !== undefined ? { education: input.education } : {}),
+        ...(input.resumePath !== undefined ? { resumePath: input.resumePath } : {}),
+        ...(input.resumeFilename !== undefined ? { resumeFilename: input.resumeFilename } : {}),
+        updatedAt: new Date(),
+      },
+    }).returning();
+    return profile;
+  },
+
+  async createReferralLink(ownerEmail: string, jobSlug?: string | null): Promise<CandidateReferralLink> {
+    const db = getDb();
+    const normalized = ownerEmail.toLowerCase().trim();
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try {
+        const [link] = await db.insert(candidateReferralLinks).values({
+          ownerEmail: normalized,
+          code: generateCandidateReferralCode(),
+          jobSlug: jobSlug?.trim() || null,
+        }).returning();
+        return link;
+      } catch (error) {
+        if ((error as { code?: string })?.code !== "23505" || attempt === 4) throw error;
+      }
+    }
+    throw new Error("Unable to create referral link");
+  },
+
+  async ensureDefaultReferralLink(ownerEmail: string): Promise<CandidateReferralLink> {
+    const db = getDb();
+    const normalized = ownerEmail.toLowerCase().trim();
+    const [existing] = await db.select().from(candidateReferralLinks)
+      .where(and(eq(candidateReferralLinks.ownerEmail, normalized), isNull(candidateReferralLinks.jobSlug), eq(candidateReferralLinks.active, true)))
+      .orderBy(asc(candidateReferralLinks.createdAt)).limit(1);
+    return existing ?? this.createReferralLink(normalized, null);
+  },
+
+  async listReferralLinks(ownerEmail: string): Promise<CandidateReferralLink[]> {
+    const db = getDb();
+    return db.select().from(candidateReferralLinks)
+      .where(and(eq(candidateReferralLinks.ownerEmail, ownerEmail.toLowerCase().trim()), eq(candidateReferralLinks.active, true)))
+      .orderBy(desc(candidateReferralLinks.createdAt));
+  },
+
+  async findReferralLink(code: string): Promise<CandidateReferralLink | undefined> {
+    const db = getDb();
+    const [link] = await db.select().from(candidateReferralLinks)
+      .where(and(eq(candidateReferralLinks.code, code.trim().toUpperCase()), eq(candidateReferralLinks.active, true))).limit(1);
+    return link;
+  },
+
+  async listReferrals(ownerEmail: string): Promise<CandidateReferral[]> {
+    const db = getDb();
+    return db.select().from(candidateReferrals)
+      .where(eq(candidateReferrals.ownerEmail, ownerEmail.toLowerCase().trim()))
+      .orderBy(desc(candidateReferrals.createdAt));
+  },
+
+  async listAllReferrals(): Promise<CandidateReferral[]> {
+    const db = getDb();
+    return db.select().from(candidateReferrals)
+      .orderBy(desc(candidateReferrals.createdAt));
+  },
+
+  async getReferral(id: string): Promise<CandidateReferral | undefined> {
+    const db = getDb();
+    const [referral] = await db.select().from(candidateReferrals)
+      .where(eq(candidateReferrals.id, id)).limit(1);
+    return referral;
+  },
+
+  async updateReferral(id: string, input: { status?: string; payoutStatus?: string }): Promise<CandidateReferral | undefined> {
+    const current = await this.getReferral(id);
+    if (!current) return undefined;
+    const status = input.status ?? current.status;
+    const payoutStatus = input.payoutStatus ?? current.payoutStatus;
+    if (payoutStatus === "paid" && status !== "hired") {
+      throw new Error("A referral must be marked hired before it can be paid.");
+    }
+    const db = getDb();
+    const [updated] = await db.update(candidateReferrals).set({
+      ...(input.status !== undefined ? { status } : {}),
+      ...(input.payoutStatus !== undefined ? { payoutStatus } : {}),
+      updatedAt: new Date(),
+    }).where(eq(candidateReferrals.id, id)).returning();
+    return updated;
+  },
+
+  async attachApplication(input: {
+    code: string;
+    referredEmail: string;
+    applicationId: string;
+    jobSlug: string;
+    rewardCents: number;
+  }): Promise<CandidateReferral | undefined> {
+    const link = await this.findReferralLink(input.code);
+    const referredEmail = input.referredEmail.toLowerCase().trim();
+    if (!link || link.ownerEmail === referredEmail) return undefined;
+    const db = getDb();
+    const [existing] = await db.select().from(candidateReferrals).where(and(
+      eq(candidateReferrals.linkCode, link.code),
+      eq(candidateReferrals.referredEmail, referredEmail),
+      eq(candidateReferrals.jobSlug, input.jobSlug),
+    )).limit(1);
+    if (existing) return existing;
+    const [referral] = await db.insert(candidateReferrals).values({
+      ownerEmail: link.ownerEmail,
+      linkCode: link.code,
+      referredEmail,
+      applicationId: input.applicationId,
+      jobSlug: input.jobSlug,
+      status: "applied",
+      rewardCents: Math.max(4000, Math.min(10000, Math.round(input.rewardCents))),
+      payoutStatus: "pending",
+    }).returning();
+    return referral;
   },
 };
 

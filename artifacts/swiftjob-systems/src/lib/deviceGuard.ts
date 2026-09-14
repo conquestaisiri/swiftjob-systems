@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect } from "react";
 
 // ============================================================================
-// Device guard — decides, with high confidence and against every common spoof
-// trick (request-desktop-site UA/width, extensions, VPNs, emulation), whether
-// the visitor is really on a PC/laptop.
+// Device hints — estimate the visitor's device for analytics and guidance.
+// Browser signals are inherently spoofable, so the result is never an access
+// control and never blocks a candidate from continuing.
 //
 // Strategy: you cannot fake the PHYSICS of a phone.
 //   - A real phone/tablet has a coarse primary pointer, no hover capability,
@@ -51,9 +51,8 @@ export function installRuntimeListeners(): void {
 }
 
 /**
- * Full analysis of the current device. Returns a verdict, the individual
- * signals (for audit/logging), the weighted score, and the "hard" reasons that
- * by themselves prove a mobile device.
+ * Full analysis of the current device. Returns a best-effort verdict and the
+ * individual signals for audit/logging; callers must treat it as a hint.
  */
 export function analyzeDevice(): {
   verdict: DeviceVerdict;
@@ -208,10 +207,8 @@ export function deviceMeta(): Record<string, unknown> {
 }
 
 /**
- * React hook: keeps a live verdict, re-verifying on every pointer/touch event,
- * focus, and on a short interval so any spoof trick gets caught the moment it
- * happens. The gate UI must not enable the continue link until status is
- * "desktop".
+ * React hook: keeps a live best-effort hint for UI copy and analytics. It does
+ * not gate navigation or eligibility.
  */
 export function useDeviceGuard(): {
   status: GuardStatus;

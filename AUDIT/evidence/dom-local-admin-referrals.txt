@@ -1,0 +1,73 @@
+- banner:
+  - link "SwiftJob.adm admin":
+    - /url: /admin
+    - text: SwiftJob.adm
+    - generic: admin
+  - button "Logout":
+    - text: Logout
+- navigation "Admin navigation":
+  - generic: Dashboard
+  - link "Overview":
+    - /url: /admin
+    - text: Overview
+  - generic: Hiring
+  - link "Applications":
+    - /url: /admin/applications
+    - text: Applications
+  - link "Referrals":
+    - /url: /admin/referrals
+    - text: Referrals
+  - link "Contacts":
+    - /url: /admin/contacts
+    - text: Contacts
+  - link "Jobs":
+    - /url: /admin/jobs
+    - text: Jobs
+  - generic: Growth
+  - link "Campaigns":
+    - /url: /admin/campaigns
+    - text: Campaigns
+  - generic: Communications
+  - link "Send mail":
+    - /url: /admin/mail
+    - text: Send mail
+  - generic: System
+  - link "Activity log":
+    - /url: /admin/activity
+    - text: Activity log
+  - link "Settings":
+    - /url: /admin/settings
+    - text: Settings
+- main:
+  - heading "Referrals" [level=1]
+  - generic: 0 total
+  - button "Edit page & email":
+    - text: Edit page & email
+  - strong: "5"
+  - text: of 5 sends left today (sent 0)
+  - button "0 All":
+    - strong: "0"
+    - text: All
+  - button "0 Visited":
+    - strong: "0"
+    - text: Visited
+  - button "0 Not visited":
+    - strong: "0"
+    - text: Not visited
+  - button "0 Clicked":
+    - strong: "0"
+    - text: Clicked
+  - button "0 Hesitant":
+    - strong: "0"
+    - text: Hesitant
+  - button "0 Mobile blocked":
+    - strong: "0"
+    - text: Mobile blocked
+  - textbox "Search by name or email…"
+  - combobox:
+    - option "All statuses" [selected]
+    - option "Pending"
+    - option "Sent"
+  - paragraph: Loading referrals...
+- region "Notifications (F8)":
+  - list

@@ -8,6 +8,7 @@ import {
   Loader2,
   Mail,
   Send,
+  WalletCards,
 } from "lucide-react";
 import { adminFetch } from "@/lib/adminApi";
 
@@ -49,6 +50,7 @@ const QUICK_LINKS = [
     icon: ClipboardList,
   },
   { href: "/admin/referrals", label: "Manage referrals", icon: Link2 },
+  { href: "/admin/candidate-referrals", label: "Referral rewards", icon: WalletCards },
   { href: "/admin/contacts", label: "Contacts", icon: Mail },
   { href: "/admin/jobs", label: "Jobs", icon: Briefcase },
 ];

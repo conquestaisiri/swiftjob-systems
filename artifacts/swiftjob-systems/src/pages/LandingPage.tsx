@@ -115,7 +115,7 @@ export function LandingPage() {
       <header className="landing-v2-header">
         <div className="landing-v2-nav">
           <Link href="/" className="landing-v2-brand">
-            <img src="/swiftjob-mark.svg" alt="SwiftJob" />
+            <img src="/swiftjob-mark.png?v=supplied-20260912" alt="SwiftJob" />
             <span>SwiftJob</span>
           </Link>
           <nav className="landing-v2-links" aria-label="Primary navigation">
@@ -125,7 +125,7 @@ export function LandingPage() {
             <a href="#contact">Contact</a>
           </nav>
           <div className="landing-v2-actions">
-            <Link href="/careers" className="landing-v2-login">
+            <Link href="/login" className="landing-v2-login">
               Candidate access <ArrowUpRight size={14} />
             </Link>
             <a href="#contact" className="landing-v2-button">
@@ -149,6 +149,7 @@ export function LandingPage() {
               How it works
             </a>
             <Link href="/careers">Careers</Link>
+            <Link href="/login">Candidate access</Link>
             <a href="#contact" onClick={() => setMobileOpen(false)}>
               Contact
             </a>
@@ -200,6 +201,9 @@ export function LandingPage() {
               <img
                 src="/wfh-desk.jpg"
                 alt="A professional taking a call while working from home"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
               />
             </figure>
             <figure className="landing-v2-photo landing-v2-photo-b">

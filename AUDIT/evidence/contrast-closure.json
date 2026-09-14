@@ -1,0 +1,16 @@
+{
+  "measuredAt": "2026-09-12T03:07:00Z",
+  "environment": "Production Pages deployment 014b6028.swiftjob-systems.pages.dev",
+  "routes": [
+    { "path": "/", "visibleTextElementsChecked": 91, "contrastFailures": 0 },
+    { "path": "/careers", "visibleTextElementsChecked": 51, "contrastFailures": 0 },
+    { "path": "/careers/product-manager", "visibleTextElementsChecked": 124, "contrastFailures": 0 },
+    { "path": "/login", "visibleTextElementsChecked": 30, "contrastFailures": 0 },
+    { "path": "/admin/login", "visibleTextElementsChecked": 3, "contrastFailures": 0 }
+  ],
+  "target": "WCAG AA text contrast thresholds applied to visible leaf text with a resolved RGB background.",
+  "knownLimitations": [
+    "This DOM evaluator does not replace a full Lighthouse or assistive-technology audit.",
+    "Gradients, images, focus states, placeholders and screen-reader behavior require separate review."
+  ]
+}

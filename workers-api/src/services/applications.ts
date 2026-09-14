@@ -26,19 +26,22 @@ export const applicationService = {
       resumeFilename = uploadResult.filename;
     }
 
-    const application = await applicationRepository.create({
-      ...input,
-      resumePath,
-      resumeFilename,
-    });
-
-    return application;
+    try {
+      return await applicationRepository.create({ ...input, resumePath, resumeFilename });
+    } catch (error) {
+      if (resumePath) {
+        try { await storageService.delete(resumePath); }
+        catch (cleanupError) { console.error({ cleanupError, resumePath }, "Failed to clean up orphaned resume"); }
+      }
+      throw error;
+    }
   },
 
   async sendEmailsAsync(application: StoredApplication) {
     // Send each email independently so a failure of one never prevents the others.
-    const notification = await this.trySend("HR notification", () =>
-      emailService.sendApplicationNotification({
+    let notification = false;
+    try {
+      await emailService.sendApplicationNotification({
         applicationId: application.id,
         position: application.position,
         fullName: application.fullName,
@@ -55,8 +58,11 @@ export const applicationService = {
         expectedSalary: application.expectedSalary,
         earliestStartDate: application.earliestStartDate,
         skills: application.skills,
-      }),
-    );
+      });
+      notification = true;
+    } catch (error) {
+      console.error({ error, label: "HR notification" }, "Email send failed");
+    }
 
     await this.trySend("applicant confirmation", () =>
       emailService.sendApplicantConfirmation({
@@ -172,6 +178,7 @@ export const applicationService = {
         await storageService.delete(application.resumePath);
       } catch (error) {
         console.error({ error }, "Failed to delete resume file");
+        throw new Error("Resume storage could not be deleted; application was retained for retry.");
       }
     }
 

@@ -22,7 +22,7 @@ import { handleAdminUnauthorized, isUnauthorized } from "@/lib/adminAuth";
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const FRONTEND_BASE =
   (import.meta.env.VITE_FRONTEND_URL as string | undefined) ??
-  "https://swiftjob.payservice.top";
+  "https://swiftjob.online";
 
 interface ReferralRow {
   id: string;

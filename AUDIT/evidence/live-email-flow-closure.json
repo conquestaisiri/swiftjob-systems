@@ -1,0 +1,26 @@
+{
+  "measuredAt": "2026-09-12T15:16:26.4730359Z",
+  "environment": "Production custom domain + Resend API; one controlled magic-link request using the verified destination address; session revoked after verification",
+  "flow": "candidate magic link",
+  "recipientDomain": "outlook.com",
+  "handler": {
+    "method": "POST",
+    "path": "/api/auth/magic-link",
+    "status": 200,
+    "message": "Check your email for a magic link."
+  },
+  "provider": {
+    "provider": "Resend",
+    "messageId": "0658d888-03c6-4474-a8a9-79c2be55c215",
+    "subject": "Sign in to your SwiftJob candidate portal",
+    "lastEvent": "delivered"
+  },
+  "tokenFlow": {
+    "linkFoundInProviderPayload": true,
+    "verifyStatus": 200,
+    "logoutStatus": 200,
+    "testSessionRevoked": true
+  },
+  "inboxInspection": "NOT VERIFIED",
+  "applicationMutation": false
+}

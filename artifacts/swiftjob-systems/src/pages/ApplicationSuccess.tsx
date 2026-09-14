@@ -7,8 +7,6 @@ import {
   ArrowLeft,
   ClipboardCheck,
   ArrowRight,
-  Loader2,
-  ShieldCheck,
   KeyRound,
 } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
@@ -39,40 +37,6 @@ export function ApplicationSuccess() {
   const [assessmentLoading, setAssessmentLoading] = useState(true);
 
   const referenceCode = params.get("ref") ?? "";
-  const [pw, setPw] = useState("");
-  const [pwState, setPwState] = useState<"idle" | "busy" | "done" | "error">(
-    "idle",
-  );
-  const [pwMsg, setPwMsg] = useState("");
-
-  const claimPassword = async () => {
-    if (pwState === "busy") return;
-    if (pw.length < 8) {
-      setPwState("error");
-      setPwMsg("Use at least 8 characters.");
-      return;
-    }
-    setPwState("busy");
-    setPwMsg("");
-    try {
-      const res = await fetch(`${API_BASE}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          applicationId,
-          password: pw,
-        }),
-      });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error || "Could not set password.");
-      setPwState("done");
-      setPwMsg("Password saved — you can sign in with it anytime.");
-    } catch (err) {
-      setPwState("error");
-      setPwMsg(err instanceof Error ? err.message : "Something went wrong.");
-    }
-  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -89,6 +53,7 @@ export function ApplicationSuccess() {
       return;
     }
     const qs = new URLSearchParams({ email });
+    if (referenceCode) qs.set("ref", referenceCode);
     if (jobSlug) qs.set("job", jobSlug);
     fetch(
       `${API_BASE}/api/assessments/${encodeURIComponent(applicationId)}?${qs}`,
@@ -159,44 +124,19 @@ export function ApplicationSuccess() {
           {/* Left column — main content */}
           <main className="success-col-main">
             {/* Password card */}
-            {applicationId && email && pwState !== "done" && (
+            {applicationId && email && (
               <section className="card-block">
                 <div className="card-block-head">
                   <KeyRound size={18} />
                   <h3>Secure your candidate portal</h3>
                 </div>
                 <p className="card-block-desc">
-                  Create a secure password for <strong>{email}</strong> to
-                  access your candidate portal at your convenience — your magic
-                  link will continue to work as a backup sign-in method.
+                  Request a sign-in email link for <strong>{email}</strong>.
+                  Once your email is verified, you can set an optional password
+                  inside your candidate portal.
                 </p>
-                {pwState === "error" && <p className="form-error">{pwMsg}</p>}
-                <div className="password-row">
-                  <input
-                    type="password"
-                    value={pw}
-                    onChange={(e) => setPw(e.target.value)}
-                    placeholder="Minimum 8 characters"
-                    autoComplete="new-password"
-                    disabled={pwState === "busy"}
-                  />
-                  <button
-                    onClick={claimPassword}
-                    disabled={pwState === "busy" || pw.length < 8}
-                  >
-                    {pwState === "busy" ? (
-                      <Loader2 size={15} className="spin" />
-                    ) : null}
-                    Save
-                  </button>
-                </div>
+                <Link href="/login" className="button button-blue">Sign in to your portal</Link>
               </section>
-            )}
-            {pwState === "done" && (
-              <div className="password-done-banner">
-                <ShieldCheck size={16} />
-                <span>{pwMsg}</span> <Link href="/login">Sign in</Link>
-              </div>
             )}
 
             {/* Skills check CTA */}

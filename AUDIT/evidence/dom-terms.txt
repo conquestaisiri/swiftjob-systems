@@ -1,0 +1,74 @@
+- banner:
+  - navigation "Main navigation":
+    - link "SwiftJob SwiftJob":
+      - /url: /
+      - img "SwiftJob"
+      - generic: SwiftJob
+    - button "Open navigation":
+- main:
+  - link "SwiftJob":
+    - /url: /
+  - text: /Terms of Service
+  - heading "Terms of Service" [level=1]
+  - paragraph: "Last updated: August 2026"
+  - paragraph: These terms govern your use of swiftjob.payservice.top — including browsing roles, applying, being referred, completing skills checks, and using the candidate portal.
+  - heading "1. Eligibility" [level=2]
+  - paragraph: You must be legally able to work the hours the role requires and be at least 18 years old to apply. All current roles are fully remote; you are responsible for having a suitable computer and internet connection, which our optional setup checks help confirm.
+  - heading "2. Applications are free — always" [level=2]
+  - paragraph: "SwiftJob never charges candidates any fee at any stage: not to apply, not for training, not for equipment \"processing\", not for anything. Anyone asking you to pay in our name is defrauding you — please report it to us immediately."
+  - heading "3. Honest applications" [level=2]
+  - paragraph: You agree the information you submit is accurate and yours. Skills-check results are one input our team considers; submitting false information, or having someone else complete your checks, means we must withdraw any offer.
+  - heading "4. Offers and employment" [level=2]
+  - paragraph: An application, referral, or shortlisting is not a guarantee of work. Employment (or contracting) begins only when you and the relevant party sign written documents. Pay rate, schedule, and conditions are stated in those documents before you commit to anything.
+  - heading "5. Private briefings and referral links" [level=2]
+  - paragraph: Referral briefing pages and any personal links are intended solely for the person they were sent to. Do not share them publicly. We may expire links that are posted publicly or abused.
+  - heading "6. Acceptable use" [level=2]
+  - paragraph: Don't attempt to break into, overload, scrape, or interfere with the service; don't misrepresent who you are; don't use automated tools to mass-apply. We may suspend access for abuse.
+  - heading "7. No warranty, limited liability" [level=2]
+  - paragraph: The service is provided "as is". To the maximum extent permitted by law, SwiftJob is not liable for indirect or consequential losses arising from use of this website. Nothing here limits liability that cannot be limited by law.
+  - heading "8. Changes" [level=2]
+  - paragraph: We may update these terms as the service evolves; the date above shows the current version. Material changes affecting active applicants will be communicated by email.
+  - paragraph:
+    - text: Questions about this page? Email us at
+    - link "support@swiftjob.payservice.top":
+      - /url: mailto:support@swiftjob.payservice.top
+    - text: and a real person will respond.
+- contentinfo:
+  - link "SwiftJob home":
+    - /url: /
+    - generic: SwiftJob
+  - paragraph: People for the work ahead - across every kind of role.
+  - link "careers@swiftjob.payservice.top":
+    - /url: mailto:careers@swiftjob.payservice.top
+  - generic: Explore
+  - link "What we do":
+    - /url: /#work
+  - link "How it works":
+    - /url: /#process
+  - link "Careers":
+    - /url: /careers
+  - link "Contact":
+    - /url: /#contact
+  - link "Terms":
+    - /url: /terms
+  - link "Privacy":
+    - /url: /privacy
+  - generic: For professionals
+  - link "Browse open roles":
+    - /url: /careers
+  - link "Candidate access":
+    - /url: /login
+  - link "Candidate support":
+    - /url: mailto:support@swiftjob.payservice.top
+  - generic: For organizations
+  - paragraph: Need dependable people for the work ahead?
+  - link "Talk to SwiftJob":
+    - /url: /#contact
+    - text: Talk to SwiftJob
+  - generic: (c) 2026 SwiftJob. All rights reserved.
+  - generic: 100% Remote · Global team
+  - link "LinkedIn":
+    - /url: https://www.linkedin.com
+    - text: LinkedIn
+- region "Notifications (F8)":
+  - list

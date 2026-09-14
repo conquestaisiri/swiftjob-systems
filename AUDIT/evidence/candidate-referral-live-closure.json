@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-13",
+  "status": "PASS",
+  "production": {
+    "profileGet": 200,
+    "referralList": 200,
+    "referralCreate": 201,
+    "publicHandoff": 200,
+    "adminCandidateReferralList": 200,
+    "unauthorizedReferralList": 401,
+    "invalidPublicReferral": 404
+  },
+  "browser": {
+    "magicLinkSession": "PASS",
+    "profilePage": "PASS",
+    "referralsPage": "PASS",
+    "roleSpecificLink": "PASS",
+    "generalLinkRange": "PASS",
+    "desktopVisual": "PASS",
+    "mobile390Visual": "PASS",
+    "temporaryDataCleanup": "PASS"
+  },
+  "notes": [
+    "Role-specific Captioner / Subtitler referral displayed the expected $40 reward.",
+    "Public referral handoff preserved the referral attribution query parameter.",
+    "The authorized mailbox inbox-placement and end-to-end email sequence remain separate coverage items."
+  ]
+}
