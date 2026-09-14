@@ -200,3 +200,13 @@ credential was intentionally left unchanged.
 
 Machine-readable evidence for this run is in
 `AUDIT/evidence/current-live-verification-2026-09-13.json`.
+
+## Accessibility continuation — 2026-09-14
+
+A fresh live DOM/accessibility-state scan covered the homepage, careers list,
+representative job/application form, candidate login, legal pages, assessment
+error state, application-success state, and 404 state. Every route had exactly
+one H1; control names, image alt text, link names, and IDs all passed. The
+careers Engineering filter and candidate Password-tab state were exercised
+without submitting data. Evidence is in
+`AUDIT/evidence/accessibility-state-scan-2026-09-14.json`.
