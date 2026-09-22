@@ -39,9 +39,9 @@ export function CandidatePasswordForm({ token, onSessionChanged }: {
 
   return (
     <details className="card-block">
-      <summary>Set or change your portal password</summary>
+      <summary>Create a password for faster sign-in</summary>
       <p id="portal-password-help" className="card-block-desc">
-        Your email is verified. You can add an optional password here, or keep signing in with email links.
+        Your candidate account is ready. Add an optional password for faster sign-in, or keep using secure email links. This does not change your applications or assessment progress.
       </p>
       <form onSubmit={submit}>
         <label htmlFor="portal-password">New password</label>

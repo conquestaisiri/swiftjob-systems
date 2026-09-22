@@ -12,7 +12,7 @@ export function SiteFooter() {
             className="site-footer-wordmark"
             aria-label="SwiftJob home"
           >
-            <img src="/swiftjob-mark-light.png?v=supplied-20260912" alt="" className="site-footer-logo" />
+            <img src="/swiftjob-mark-light.svg?v=supplied-20260912" alt="" className="site-footer-logo" />
             <span>SwiftJob</span>
           </Link>
           <p>People for the work ahead - across every kind of role.</p>

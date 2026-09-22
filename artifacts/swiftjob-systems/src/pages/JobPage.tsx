@@ -9,6 +9,7 @@ import {
   Calendar,
   ArrowUpRight,
   ArrowLeft,
+  ArrowRight,
   ChevronRight,
   CheckCircle,
   AlertCircle,
@@ -206,6 +207,7 @@ export function JobPage() {
     "idle" | "submitting" | "error"
   >("idle");
   const [serverError, setServerError] = useState("");
+  const [duplicateApplication, setDuplicateApplication] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const submissionKeyRef = useRef<string | null>(null);
@@ -338,6 +340,7 @@ export function JobPage() {
 
     setSubmitState("submitting");
     setServerError("");
+    setDuplicateApplication(false);
 
     const data = new FormData();
     data.append("position", job.title);
@@ -361,6 +364,7 @@ export function JobPage() {
       });
       const json = await res.json();
       if (!res.ok) {
+        setDuplicateApplication(json.duplicate === true);
         setServerError(
           json.error ?? "An unexpected error occurred. Please try again.",
         );
@@ -1115,6 +1119,11 @@ export function JobPage() {
                 <div className="app-server-error" role="alert">
                   <AlertCircle size={16} />
                   <span>{serverError}</span>
+                  {duplicateApplication && (
+                    <Link href="/login" className="app-server-error-link">
+                      Open candidate portal <ArrowRight size={14} />
+                    </Link>
+                  )}
                 </div>
               )}
 

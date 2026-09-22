@@ -431,6 +431,8 @@ export function JobsAdmin({ token }: { token: string }) {
     () => [...new Set(jobs.map((j) => j.department))].sort(),
     [jobs],
   );
+  const liveCount = jobs.filter((job) => job.isActive).length;
+  const hiddenCount = jobs.length - liveCount;
 
   const loadJobs = async () => {
     setLoading(true);
@@ -538,7 +540,12 @@ export function JobsAdmin({ token }: { token: string }) {
       <div className="admin-header-bar">
         <h1 className="admin-title">Jobs</h1>
         <div className="admin-header-actions-inline">
-          <span className="admin-count">{jobs.length} total</span>
+          <span
+            className="admin-count"
+            title="Total includes both live and hidden jobs"
+          >
+            {jobs.length} total · {liveCount} live · {hiddenCount} hidden
+          </span>
           <button
             className="button button-blue"
             onClick={() => setEditorOpen("new")}

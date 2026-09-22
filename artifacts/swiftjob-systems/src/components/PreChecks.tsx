@@ -14,7 +14,11 @@ import {
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
 export interface PreCheckResult {
-  speed: { downMbps: number | null; pingMs: number | null };
+  speed: {
+    downMbps: number | null;
+    upMbps: number | null;
+    pingMs: number | null;
+  };
   browser: Record<string, unknown>;
   tool: {
     platform: "windows" | "macos" | "other";
@@ -48,10 +52,16 @@ async function measurePing(): Promise<number> {
 export function PreChecks({
   applicationId,
   email,
+  referenceCode,
+  jobTitle,
+  typingRequired,
   onComplete,
 }: {
   applicationId: string;
   email: string;
+  referenceCode: string;
+  jobTitle: string;
+  typingRequired: boolean;
   onComplete: (result: PreCheckResult) => void;
 }) {
   const [stage, setStage] = useState<Stage>("speed");
@@ -62,70 +72,69 @@ export function PreChecks({
   const [upMbps, setUpMbps] = useState<number | null>(null);
   const [pingMs, setPingMs] = useState<number | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const ping = await measurePing();
-        const asset = `${API_BASE}/swiftjob-og.png`;
-        const batches: Promise<unknown>[] = [];
-        const t0 = performance.now();
-        let bytes = 0;
-        for (let b = 0; b < 4; b++) {
-          batches.push(
-            Promise.all(
-              Array.from({ length: 10 }, (_, i) =>
-                fetch(`${asset}?cb=${Date.now()}-${b}-${i}`, {
-                  cache: "no-store",
-                })
-                  .then((r) => r.arrayBuffer())
-                  .then((buf) => {
-                    bytes += buf.byteLength;
-                  }),
-              ),
+  const runSpeedCheck = useCallback(async () => {
+    setSpeedRunning(true);
+    setDownMbps(null);
+    setUpMbps(null);
+    setPingMs(null);
+    try {
+      const ping = await measurePing();
+      const asset = `${API_BASE}/swiftjob-og.png`;
+      const batches: Promise<unknown>[] = [];
+      const t0 = performance.now();
+      let bytes = 0;
+      for (let b = 0; b < 4; b++) {
+        batches.push(
+          Promise.all(
+            Array.from({ length: 10 }, (_, i) =>
+              fetch(`${asset}?cb=${Date.now()}-${b}-${i}`, {
+                cache: "no-store",
+              })
+                .then((r) => r.arrayBuffer())
+                .then((buf) => {
+                  bytes += buf.byteLength;
+                }),
             ),
-          );
-        }
-        await Promise.all(batches);
-        const secs = (performance.now() - t0) / 1000;
-        const mbps = (bytes * 8) / 1e6 / secs;
-        // Upload: POST a ~1 MB random blob, twice, take the better run.
-        const blob = new Blob(
-          [
-            new Uint8Array(1024 * 1024).map(() =>
-              Math.floor(Math.random() * 256),
-            ),
-          ],
-          { type: "application/octet-stream" },
+          ),
         );
-        let up = 0;
-        for (let run = 0; run < 2; run++) {
-          const u0 = performance.now();
-          await fetch(`${API_BASE}/api/tech-check/upload`, {
-            method: "POST",
-            body: blob,
-            cache: "no-store",
-          });
-          const usecs = (performance.now() - u0) / 1000;
-          up = Math.max(up, (1024 * 1024 * 8) / 1e6 / usecs);
-        }
-        if (!cancelled) {
-          setPingMs(ping);
-          setDownMbps(Math.max(0.1, Math.min(2000, mbps)));
-          setUpMbps(Math.max(0.1, Math.min(2000, up)));
-          setSpeedRunning(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setDownMbps(-1); // signal failure
-          setSpeedRunning(false);
-        }
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
+      await Promise.all(batches);
+      const secs = (performance.now() - t0) / 1000;
+      const mbps = (bytes * 8) / 1e6 / secs;
+      // Upload: POST a ~1 MB random blob, twice, take the better run.
+      const blob = new Blob(
+        [
+          new Uint8Array(1024 * 1024).map(() =>
+            Math.floor(Math.random() * 256),
+          ),
+        ],
+        { type: "application/octet-stream" },
+      );
+      let up = 0;
+      for (let run = 0; run < 2; run++) {
+        const u0 = performance.now();
+        await fetch(`${API_BASE}/api/tech-check/upload`, {
+          method: "POST",
+          body: blob,
+          cache: "no-store",
+        });
+        const usecs = (performance.now() - u0) / 1000;
+        up = Math.max(up, (1024 * 1024 * 8) / 1e6 / usecs);
+      }
+      setPingMs(ping);
+      setDownMbps(Math.max(0.1, Math.min(2000, mbps)));
+      setUpMbps(Math.max(0.1, Math.min(2000, up)));
+    } catch {
+      setDownMbps(-1); // signal failure
+      setUpMbps(-1);
+    } finally {
+      setSpeedRunning(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void runSpeedCheck();
+  }, [runSpeedCheck]);
 
   // ---- system / tool ----
   const ua = navigator.userAgent;
@@ -167,7 +176,7 @@ export function PreChecks({
     setIssuing(true);
     setToolError("");
     try {
-      const qs = new URLSearchParams({ applicationId, email });
+      const qs = new URLSearchParams({ applicationId, email, referenceCode });
       const res = await fetch(`${API_BASE}/api/tech-check/token?${qs}`);
       const data = await res.json();
       if (!res.ok || !data.ok)
@@ -183,17 +192,23 @@ export function PreChecks({
     } finally {
       setIssuing(false);
     }
-  }, [applicationId, email]);
+  }, [applicationId, email, referenceCode]);
 
   const downloadTool = async () => {
     setToolError("");
-    // The checker is generated by our API for this one-time token. Do not
+    const downloadWindow = window.open("about:blank", "_blank");
+    // The checker package is generated by our API for this one-time token. Do not
     // redirect candidates to an editable admin URL or an unreviewed binary.
     const issuedToken = await issueToken();
-    if (!issuedToken) return;
+    if (!issuedToken) {
+      downloadWindow?.close();
+      return;
+    }
     const checkerPlatform = platform === "macos" ? "macos" : "windows";
     const downloadUrl = `${API_BASE}/api/tech-check/download/${encodeURIComponent(issuedToken)}?platform=${checkerPlatform}`;
-    window.open(downloadUrl, "_blank", "noopener,noreferrer");
+    if (downloadWindow && !downloadWindow.closed)
+      downloadWindow.location.replace(downloadUrl);
+    else window.location.assign(downloadUrl);
     setDownloaded(true);
   };
   const [downloaded, setDownloaded] = useState(false);
@@ -302,34 +317,35 @@ export function PreChecks({
     setTyped(value.slice(0, TYPING_PASSAGE.length + 80));
   };
 
-  // ---- completion ----
-  useEffect(() => {
-    if (!(stage === "typing" && typingDone && typingStats)) return;
-    // Auto-advance shortly after showing the result.
-    const id = window.setTimeout(() => {
+  const completeTechnicalCheck = useCallback(
+    (typing: PreCheckResult["typing"]) => {
       onComplete({
-        speed: { downMbps, pingMs },
+        speed: { downMbps, upMbps, pingMs },
         browser: browserSpecs,
         tool: {
           platform,
           verified: toolVerified,
           specs: toolSpecs,
         },
-        typing: typingStats,
+        typing,
       });
+    },
+    [downMbps, upMbps, pingMs, browserSpecs, platform, toolVerified, toolSpecs, onComplete],
+  );
+
+  // ---- completion ----
+  useEffect(() => {
+    if (!(stage === "typing" && typingDone && typingStats)) return;
+    // Auto-advance shortly after showing the result.
+    const id = window.setTimeout(() => {
+      completeTechnicalCheck(typingStats);
     }, 1400);
     return () => window.clearTimeout(id);
   }, [
     stage,
     typingDone,
     typingStats,
-    downMbps,
-    pingMs,
-    browserSpecs,
-    platform,
-    toolVerified,
-    toolSpecs,
-    onComplete,
+    completeTechnicalCheck,
   ]);
 
   const Row = ({
@@ -359,21 +375,24 @@ export function PreChecks({
     </li>
   );
 
+  const stages: Stage[] = typingRequired
+    ? ["speed", "system", "typing"]
+    : ["speed", "system"];
+
   return (
     <div className="assessment-card">
       <div className="assessment-icon-wrap">
         <Gauge size={34} strokeWidth={1.6} />
       </div>
-      <div className="assessment-eyebrow">QUICK SETUP CHECKS</div>
+      <div className="assessment-eyebrow">REQUIRED TECHNICAL CHECK</div>
       <h1 className="assessment-heading">
-        Let's check your setup
+        Complete your technical check
         <br />
-        <span>2–3 minutes, once</span>
+        <span>for your {jobTitle} application</span>
       </h1>
       <p className="assessment-lead">
-        Remote work runs on a reliable laptop and connection. These quick checks
-        confirm everything is ready — nothing is installed on your computer by
-        the website itself.
+        Confirm that your connection, browser, and computer are ready for this
+        role. This step is mandatory before we can move your application forward.
       </p>
 
       {/* Stage indicator */}
@@ -385,7 +404,7 @@ export function PreChecks({
           margin: "18px 0 22px",
         }}
       >
-        {(["speed", "system", "typing"] as Stage[]).map((s, i) => {
+        {stages.map((s, i) => {
           const active = s === stage;
           const done =
             (s === "speed" &&
@@ -427,6 +446,14 @@ export function PreChecks({
                   ? `— ${fmtMbps(downMbps)} Mbps`
                   : "— could not measure"}
             </Row>
+            <Row ok={speedRunning ? null : upMbps !== null && upMbps > 0}>
+              Internet upload speed{" "}
+              {speedRunning
+                ? "— measuring…"
+                : upMbps !== null && upMbps > 0
+                  ? `— ${fmtMbps(upMbps)} Mbps`
+                  : "— could not measure"}
+            </Row>
             <Row ok={speedRunning ? null : pingMs !== null}>
               Network response time{" "}
               {speedRunning
@@ -437,13 +464,20 @@ export function PreChecks({
             </Row>
           </ul>
           {!speedRunning && (
-            <button
-              className="button button-blue"
-              style={{ marginTop: 24 }}
-              onClick={() => setStage("system")}
-            >
-              Continue <ArrowRight size={16} />
-            </button>
+            <div className="assessment-actions" style={{ marginTop: 24 }}>
+              <button
+                className="button button-outline"
+                onClick={() => void runSpeedCheck()}
+              >
+                Recheck speed
+              </button>
+              <button
+                className="button button-blue"
+                onClick={() => setStage("system")}
+              >
+                Continue <ArrowRight size={16} />
+              </button>
+            </div>
           )}
         </>
       )}
@@ -459,9 +493,9 @@ export function PreChecks({
               maxWidth: 480,
             }}
           >
-            <Row ok={true}>Browser check passed — we can see your setup</Row>
+            <Row ok={true}>Internet speed test passed — your connection is responding</Row>
             <Row ok={null}>
-              Tech Checker report — one-time download, runs once, then expires
+              Technical check — one-time download, runs once, then expires
             </Row>
           </ul>
 
@@ -485,15 +519,15 @@ export function PreChecks({
             <p
               style={{ fontSize: 12.5, color: "#66706a", margin: "6px 0 12px" }}
             >
-              A tiny one-time file
+              A one-time SwiftJob checker
               {platform === "windows"
-                ? " (.bat)"
+                ? " (.exe package)"
                 : platform === "macos"
                   ? " (.command)"
                   : ""}
-              . Click it after downloading — it reports basic device specs once,
-              then stops working. It does not install software or change your
-              computer.
+              {platform === "macos"
+                ? ". Run it after downloading — it reports basic device details once, then expires. It does not install Windows software."
+                : ". Double-click the package on your Windows PC. The system check runs quietly first, then the normal Windows installer opens for you to review and approve. Your one-time report is sent only after installation completes."}
             </p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <button
@@ -506,7 +540,7 @@ export function PreChecks({
                 ) : (
                   <Download size={15} />
                 )}
-                {downloaded ? "Download again" : "Download checker"}
+                {downloaded ? "Download again" : "Download the checker"}
               </button>
               {downloaded && !toolVerified && <button className="button button-outline" onClick={pollVerify} disabled={verifying}>
                 {verifying ? "Waiting for report…" : "Verify report"}
@@ -558,10 +592,22 @@ export function PreChecks({
           <button
             className="button button-blue"
             style={{ marginTop: 24 }}
-            onClick={() => setStage("typing")}
+            onClick={() => {
+              if (typingRequired) {
+                setStage("typing");
+              } else {
+                completeTechnicalCheck(null);
+              }
+            }}
+            disabled={!toolVerified}
           >
-            Continue <ArrowRight size={16} />
+            {typingRequired ? "Continue" : "Complete check"} <ArrowRight size={16} />
           </button>
+          {!toolVerified && (
+            <p style={{ color: "#8a4a25", fontSize: 13, marginTop: 10 }}>
+              Run the one-time SwiftJob checker and verify the report before continuing. This check is required.
+            </p>
+          )}
         </>
       )}
 
@@ -692,7 +738,7 @@ export function PreChecks({
                 <ShieldCheck size={15} /> Recorded securely with your application
               </p>
               <p style={{ fontSize: 13, color: "#66706a", marginTop: 8 }}>
-                Bringing up your skills check…
+                Bringing up your role assessment…
               </p>
             </>
           )}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { ArrowLeft, Copy, Link2, Loader2, Plus, UserRound, WalletCards } from "lucide-react";
+import { ArrowLeft, Copy, Link2, Loader2, Plus, Trash2, UserRound, WalletCards } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
@@ -62,6 +62,22 @@ export function CandidateReferrals() {
     catch { setError("Copy failed. Select the link and copy it manually."); }
   };
 
+  const revoke = async (row: LinkRow) => {
+    if (!token || !window.confirm(`Revoke the referral link for ${row.jobTitle}? Anyone with the old link will no longer be able to use it.`)) return;
+    setError("");
+    try {
+      const res = await fetch(`${API_BASE}/api/candidate/referrals/${encodeURIComponent(row.code)}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not revoke link");
+      setLinks((current) => current.filter((item) => item.code !== row.code));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not revoke link");
+    }
+  };
+
   const logout = async () => { await fetch(`${API_BASE}/api/auth/logout`, { method: "POST", headers: { Authorization: `Bearer ${token}` } }).catch(() => {}); localStorage.removeItem("candidate_token"); setToken(null); window.location.href = "/login"; };
 
   if (!token) return null;
@@ -77,7 +93,7 @@ export function CandidateReferrals() {
         {loading ? <div className="candidate-loading"><Loader2 size={32} className="animate-spin" /><p>Loading your referral dashboard…</p></div> : <>
           <div className="candidate-stats-grid"><div className="candidate-stat-card"><Link2 size={19} /><strong>{totals.total}</strong><span>Total referrals</span></div><div className="candidate-stat-card"><UserRound size={19} /><strong>{totals.hired}</strong><span>Verified hires</span></div><div className="candidate-stat-card"><WalletCards size={19} /><strong>{money(totals.pendingCents)}</strong><span>Pending rewards</span></div><div className="candidate-stat-card"><WalletCards size={19} /><strong>{money(totals.paidCents)}</strong><span>Paid rewards</span></div></div>
           <section className="candidate-panel"><div className="candidate-panel-heading"><div><h2>Share a referral link</h2><p>Create a link for one role or for any open position.</p></div><div className="candidate-referral-create"><select aria-label="Role for referral link" value={jobSlug} onChange={(e) => setJobSlug(e.target.value)}><option value="">Any open position</option>{jobs.map((job) => <option key={job.slug} value={job.slug}>{job.title}</option>)}</select><button className="button button-blue" onClick={createLink} disabled={saving}><Plus size={16} /> {saving ? "Creating…" : "Create link"}</button></div></div>
-            <div className="candidate-link-list">{links.map((row) => <div className="candidate-link-row" key={row.code}><div><strong>{row.jobTitle}</strong><span>Reward: {rewardLabel(row)}</span><code>{row.url}</code></div><button className="button button-outline button-sm" onClick={() => copy(row)}><Copy size={14} /> {copied === row.code ? "Copied" : "Copy link"}</button></div>)}</div>
+            <div className="candidate-link-list">{links.map((row) => <div className="candidate-link-row" key={row.code}><div><strong>{row.jobTitle}</strong><span>Reward: {rewardLabel(row)}</span><code>{row.url}</code></div><div className="candidate-link-actions"><button className="button button-outline button-sm" onClick={() => copy(row)}><Copy size={14} /> {copied === row.code ? "Copied" : "Copy link"}</button><button className="button button-outline button-sm candidate-link-revoke" onClick={() => revoke(row)}><Trash2 size={14} /> Revoke</button></div></div>)}</div>
           </section>
           <section className="candidate-panel"><div className="candidate-panel-heading"><div><h2>Referral activity</h2><p>Rewards remain pending until SwiftJob verifies the hire.</p></div></div>{referrals.length === 0 ? <p className="candidate-panel-empty">No one has applied through your links yet.</p> : <div className="candidate-referral-table"><div className="candidate-referral-table-head"><span>Candidate</span><span>Role</span><span>Status</span><span>Reward</span></div>{referrals.map((row) => <div className="candidate-referral-table-row" key={row.id}><span>{row.referredEmail || "Candidate"}</span><span>{row.jobSlug || "Open position"}</span><span className="status-badge status-live">{row.status}</span><span>{money(row.rewardCents)} · {row.payoutStatus}</span></div>)}</div>}</section>
         </>}

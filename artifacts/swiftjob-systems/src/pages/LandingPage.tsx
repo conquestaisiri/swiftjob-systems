@@ -167,13 +167,9 @@ export function LandingPage() {
               <i /> Remote staffing, done properly
             </span>
             <h1>
-              Good people.
+              Remote talent.
               <br />
-              <em>Good work.</em>
-              <br />
-              Better
-              <br />
-              matched.
+              <em>For your team.</em>
             </h1>
             <p>
               SwiftJob is a remote-first staffing and BPO partner. We connect
@@ -194,9 +190,6 @@ export function LandingPage() {
             </div>
           </div>
           <div className="landing-v2-hero-art">
-            <div className="landing-v2-art-label">
-              People at work <span>01 / 04</span>
-            </div>
             <figure className="landing-v2-photo landing-v2-photo-a">
               <img
                 src="/wfh-desk.jpg"
@@ -424,11 +417,12 @@ export function LandingPage() {
             </article>
             <article>
               <span>3</span>
-              <h3>Complete your assessment</h3>
+              <h3>Complete the checks for your role</h3>
               <p>
-                Most roles include a short skills check: a quick system check,
-                then questions matched to the job. It takes about 5–10 minutes
-                and auto-saves as you go.
+                Every application includes a compulsory technical check for your
+                computer, connection, and browser. Depending on the role, you
+                may also complete a typing test or a separate role assessment.
+                Your progress saves as you go.
               </p>
             </article>
             <article>
@@ -460,7 +454,7 @@ export function LandingPage() {
             <span className="landing-v2-eyebrow">
               <i /> Start a conversation
             </span>
-            <h2>Tell us about the work.</h2>
+            <h2>Let&apos;s work out the next step.</h2>
             <p>
               Whether you are hiring one person or building a whole team, we
               will help you work out the next practical step.

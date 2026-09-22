@@ -4,6 +4,57 @@ import { getEnv } from "../config";
 export type AssessmentTrack =
   "office" | "technical" | "analytical" | "creative" | "none";
 
+const FALLBACK_TRACK_TITLES: Record<Exclude<AssessmentTrack, "none">, string> = {
+  office: "Role assessment",
+  technical: "Technical assessment",
+  analytical: "Analytical assessment",
+  creative: "Communication assessment",
+};
+
+/** The candidate should always see the actual position they applied for. */
+export function assessmentTitleForJob(
+  jobTitle: string,
+  track: AssessmentTrack,
+): string | null {
+  if (track === "none") return null;
+  const title = jobTitle.trim();
+  return title ? `${title} Assessment` : FALLBACK_TRACK_TITLES[track];
+}
+
+export function assessmentBlurbForJob(
+  jobTitle: string,
+  track: AssessmentTrack,
+): string {
+  if (track === "none") return "";
+  const title = jobTitle.trim() || "this role";
+  return `A short assessment for the ${title} role, matched to the skills and judgement this work requires.`;
+}
+
+/** Typing is part of the technical check only where the role calls for it. */
+export function typingCheckRequiredForRole(input: {
+  title: string;
+  responsibilities?: string[] | null;
+  requiredQualifications?: string[] | null;
+  skills?: string[] | null;
+}): boolean {
+  const roleText = [
+    input.title,
+    ...(input.responsibilities ?? []),
+    ...(input.requiredQualifications ?? []),
+    ...(input.skills ?? []),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return /typing|wpm|transcrib|caption|subtit|data entry|keyboard|chat support|email support|call center|telemark|reception|proofread/.test(
+    roleText,
+  );
+}
+
+export function assessmentQuestionCount(track: AssessmentTrack): number {
+  return track === "none" ? 0 : 4;
+}
+
 export function trackForDepartment(department: string): AssessmentTrack {
   const dept = (department || "").toLowerCase();
   if (dept.includes("on-site") || dept.includes("manual")) return "none";
@@ -45,6 +96,7 @@ export interface AssessmentResult {
   maxScore: number | null;
   completedAt: string | null;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface AssessmentDetail extends AssessmentResult {
@@ -62,6 +114,7 @@ const ROW_TO_RESULT = (row: Record<string, unknown>): AssessmentResult => ({
   maxScore: row.max_score === null ? null : Number(row.max_score),
   completedAt: row.completed_at === null ? null : String(row.completed_at),
   createdAt: String(row.created_at),
+  updatedAt: String(row.updated_at ?? row.created_at),
 });
 
 const ROW_TO_DETAIL = (row: Record<string, unknown>): AssessmentDetail => {
@@ -107,6 +160,13 @@ interface AssessmentRepo {
     score: number | null,
     maxScore: number | null,
   ): Promise<AssessmentResult>;
+  saveDraft(
+    applicationId: string,
+    jobSlug: string,
+    track: AssessmentTrack,
+    systemCheck: unknown,
+    responses: unknown,
+  ): Promise<AssessmentResult>;
 }
 
 export const assessmentRepository: AssessmentRepo = {
@@ -116,7 +176,7 @@ export const assessmentRepository: AssessmentRepo = {
     const sql = neon(DATABASE_URL);
     const rows = await sql(
       `SELECT id, application_id, job_slug, track, status, score, max_score,
-              completed_at, created_at
+              completed_at, created_at, updated_at
        FROM assessments WHERE application_id = $1 LIMIT 1`,
       [applicationId],
     );
@@ -130,7 +190,7 @@ export const assessmentRepository: AssessmentRepo = {
     const sql = neon(DATABASE_URL);
     const rows = await sql(
       `SELECT id, application_id, job_slug, track, status, score, max_score,
-              completed_at, created_at, system_check, responses
+              completed_at, created_at, updated_at, system_check, responses
        FROM assessments WHERE application_id = $1 LIMIT 1`,
       [applicationId],
     );
@@ -146,7 +206,7 @@ export const assessmentRepository: AssessmentRepo = {
     const sql = neon(DATABASE_URL);
     const rows = await sql(
       `SELECT id, application_id, job_slug, track, status, score, max_score,
-              completed_at, created_at
+              completed_at, created_at, updated_at
        FROM assessments WHERE application_id = ANY($1)`,
       [applicationIds],
     );
@@ -186,7 +246,7 @@ export const assessmentRepository: AssessmentRepo = {
              completed_at = now(),
              updated_at = now()
        RETURNING id, application_id, job_slug, track, status, score, max_score,
-                 completed_at, created_at`,
+                 completed_at, created_at, updated_at`,
       [
         applicationId,
         jobSlug,
@@ -195,6 +255,35 @@ export const assessmentRepository: AssessmentRepo = {
         JSON.stringify(responses),
         score,
         maxScore,
+      ],
+    );
+    return ROW_TO_RESULT(rows[0]);
+  },
+
+  async saveDraft(applicationId, jobSlug, track, systemCheck, responses) {
+    const { DATABASE_URL } = getEnv();
+    if (!DATABASE_URL) throw new Error("DATABASE_URL must be set");
+    const sql = neon(DATABASE_URL);
+    const rows = await sql(
+      `INSERT INTO assessments (application_id, job_slug, track, status, system_check,
+                                responses, score, max_score, completed_at)
+       VALUES ($1, $2, $3, 'in_progress', $4, $5, NULL, NULL, NULL)
+       ON CONFLICT (application_id) DO UPDATE
+         SET job_slug = EXCLUDED.job_slug,
+             track = EXCLUDED.track,
+             system_check = CASE WHEN assessments.status = 'completed'
+                                 THEN assessments.system_check ELSE EXCLUDED.system_check END,
+             responses = CASE WHEN assessments.status = 'completed'
+                              THEN assessments.responses ELSE EXCLUDED.responses END,
+             updated_at = now()
+       RETURNING id, application_id, job_slug, track, status, score, max_score,
+                 completed_at, created_at, updated_at`,
+      [
+        applicationId,
+        jobSlug,
+        track,
+        JSON.stringify(systemCheck ?? {}),
+        JSON.stringify(responses ?? {}),
       ],
     );
     return ROW_TO_RESULT(rows[0]);

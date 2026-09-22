@@ -219,18 +219,21 @@ export function CareersPage() {
           aria-label="Remote professionals at work"
         >
           <figure>
-            <img src="/wfh-desk.jpg" alt="Working from a home desk" />
-          </figure>
-          <figure>
             <img
-              src="/work-professional-real.jpg"
-              alt="Team member on a video call"
+              src="/careers-hero-support.jpg"
+              alt="Remote customer support professional working from home with a headset"
             />
           </figure>
           <figure>
             <img
-              src="/work-team-real.jpg"
-              alt="Distributed team collaborating online"
+              src="/careers-hero-home-call.jpg"
+              alt="Professional working remotely from home during a video call"
+            />
+          </figure>
+          <figure>
+            <img
+              src="/careers-hero-team-call.jpg"
+              alt="Laptop showing a remote team video call in a home office"
             />
           </figure>
           <span className="careers-hero-people-note">
@@ -486,8 +489,8 @@ export function CareersPage() {
                 "Each listing explains its working arrangement and hours. You work from your own laptop wherever the listing permits, with hours agreed before you start.",
               ],
               [
-                "What is the skills check?",
-                "A short optional check (5–10 minutes) in your browser: a quick connection and computer setup confirmation, a one-minute typing sample for some roles, and a few questions matched to the job. No pass mark — it helps us understand how you work.",
+                "What checks are required?",
+                "Every application includes a required technology check for your connection, browser, and computer setup. A typing check is shown only when the role requires it. Some roles also include a separate 5–10 minute assessment matched to the work. The portal saves your progress so you can return later.",
               ],
               [
                 "How will I hear back?",

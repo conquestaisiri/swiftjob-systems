@@ -28,7 +28,15 @@ const BRAND = {
   purpleBg: "#E8EFE4",
 };
 
+// Shared dark-mode surface approved for email section banners and table labels.
+// It is intentionally near-white so the dark layout remains readable without
+// losing the SwiftJob green identity.
+const DARK_MODE_MINT = "#EEF9F0";
+const DARK_MODE_MINT_BORDER = "#D5E9D8";
+const DARK_MODE_MINT_TEXT = "#10251D";
+
 const LOGO_PATH = "/swiftjob-logo.png";
+const DARK_LOGO_PATH = "/swiftjob-logo-light.png";
 // Bump when the supplied artwork changes so mail clients cannot reuse an
 // earlier cached logo at the same URL.
 const LOGO_VERSION = "supplied-20260912";
@@ -53,6 +61,10 @@ export function getSupportEmail(): string {
 
 function getLogoUrl(): string {
   return `${getBaseUrl()}${LOGO_PATH}?v=${LOGO_VERSION}`;
+}
+
+function getDarkLogoUrl(): string {
+  return `${getBaseUrl()}${DARK_LOGO_PATH}?v=${LOGO_VERSION}`;
 }
 
 function esc(value: unknown): string {
@@ -178,35 +190,122 @@ function layout(opts: LayoutOptions): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="light">
-  <meta name="supported-color-schemes" content="light">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    .email-body { background: #F7F7F4 !important; color: #253029 !important; }
+    .email-card, .email-surface { background: #FFFFFF !important; border-color: #DFE6DC !important; }
+    .email-message { background: #F7F7F4 !important; border-color: #DFE6DC !important; }
+    .email-content { background: #FFFFFF !important; color: #253029 !important; }
+    .email-section-title { color: #10251D !important; }
+    .email-copy { color: #253029 !important; }
+    .email-muted { color: #66706A !important; }
+    .email-table { border-color: #DFE6DC !important; }
+    .email-table-label { background-color: #F7F7F4 !important; color: #10251D !important; }
+    .email-table-value { background: #FFFFFF !important; color: #253029 !important; }
+    .email-link { color: #49634B !important; }
+    .email-content a:not(.email-button) { color: #49634B !important; }
+    .email-callout-body { color: #253029 !important; }
+    .email-step { color: #253029 !important; }
+    .email-logo-bar { background: #FFFFFF !important; }
+    .email-logo-light-mode { display: inline-block !important; }
+    .email-logo-dark-mode { display: none !important; }
+    .email-button { background: #49634B !important; color: #FFFFFF !important; }
+    /* Gmail iOS fully inverts colors and does not apply prefers-color-scheme.
+       These Gmail-only blend layers preserve the approved label swatch/text. */
+    u + .body .gmail-blend-screen { background: #000000; mix-blend-mode: screen; }
+    u + .body .gmail-blend-difference { background: #000000; mix-blend-mode: difference; }
+    u + .body .email-table-label {
+      background-color: ${DARK_MODE_MINT} !important;
+      background-image: linear-gradient(${DARK_MODE_MINT}, ${DARK_MODE_MINT}) !important;
+    }
+    @media only screen and (max-width: 620px) {
+      .email-shell { padding: 12px 6px !important; }
+      .email-logo-bar, .email-header, .email-content, .email-footer { padding-left: 20px !important; padding-right: 20px !important; }
+      .email-content { padding-top: 24px !important; padding-bottom: 24px !important; }
+    }
+    @media (prefers-color-scheme: dark) {
+      .email-body { background: #0F1713 !important; color: #EFF7F0 !important; }
+      .email-card, .email-content, .email-surface, .email-table-value { background: #17221C !important; border-color: #2E4336 !important; }
+      .email-section-title { color: #DCEBD9 !important; }
+      .email-copy, .email-callout-body, .email-step { color: #EFF7F0 !important; }
+      .email-muted { color: #BAC8BE !important; }
+      .email-table { border-color: #2E4336 !important; }
+      .email-header { background: ${DARK_MODE_MINT} !important; border-bottom: 1px solid ${DARK_MODE_MINT_BORDER} !important; }
+      .email-header h1 { color: ${DARK_MODE_MINT_TEXT} !important; }
+      .email-header p { color: ${BRAND.teal} !important; }
+      .email-table-label { background: ${DARK_MODE_MINT} !important; color: ${DARK_MODE_MINT_TEXT} !important; }
+      .email-link { color: #B9D7B4 !important; }
+      .email-content a:not(.email-button) { color: #B9D7B4 !important; }
+      .email-logo-bar { background: #17221C !important; border-bottom-color: #8BB58D !important; }
+      .email-logo-light-mode { display: none !important; }
+      .email-logo-dark-mode { display: inline-block !important; }
+      .email-button { background: #A9C7A6 !important; color: #10251D !important; }
+      .email-callout { background: #20342A !important; border-left-color: #8BB58D !important; }
+      .email-callout-title { color: #B9D7B4 !important; }
+      .email-callout-warning { background: #3B2F18 !important; border-left-color: #E0A84F !important; }
+      .email-callout-warning .email-callout-title { color: #F3C56E !important; }
+      .email-callout-error { background: #3D2424 !important; border-left-color: #E78E8E !important; }
+      .email-callout-error .email-callout-title { color: #FFB0B0 !important; }
+      .email-content [style*="background: #F7F7F4"]:not(.email-table-label) { background: #203128 !important; }
+      .email-message { background: #203128 !important; border-color: #2E4336 !important; }
+      .email-content [style*="border: 1px solid #DFE6DC"],
+      .email-content [style*="border-top: 1px solid #DFE6DC"] { border-color: #2E4336 !important; }
+      .email-content hr[style*="border-top: 1px solid #DFE6DC"] { border-top-color: #2E4336 !important; }
+      .email-content [style*="color: #66706A"] { color: #BAC8BE !important; }
+      .email-content [style*="color: #10251D"]:not(.email-table-label) { color: #DCEBD9 !important; }
+      .email-content [style*="color: #49634B"] { color: #B9D7B4 !important; }
+    }
+    [data-ogsc] .email-body, [data-ogsb] .email-body { background: #0F1713 !important; color: #EFF7F0 !important; }
+    [data-ogsc] .email-card, [data-ogsb] .email-card,
+    [data-ogsc] .email-content, [data-ogsb] .email-content,
+    [data-ogsc] .email-surface, [data-ogsb] .email-surface { background: #17221C !important; border-color: #2E4336 !important; color: #EFF7F0 !important; }
+    [data-ogsc] .email-header, [data-ogsb] .email-header { background: ${DARK_MODE_MINT} !important; border-bottom-color: ${DARK_MODE_MINT_BORDER} !important; }
+    [data-ogsc] .email-header h1, [data-ogsb] .email-header h1 { color: ${DARK_MODE_MINT_TEXT} !important; }
+    [data-ogsc] .email-header p, [data-ogsb] .email-header p { color: ${BRAND.teal} !important; }
+    [data-ogsc] .email-message, [data-ogsb] .email-message { background: #203128 !important; border-color: #2E4336 !important; }
+    [data-ogsc] .email-logo-bar, [data-ogsb] .email-logo-bar { background: #17221C !important; border-bottom-color: #8BB58D !important; }
+    [data-ogsc] .email-logo-light-mode, [data-ogsb] .email-logo-light-mode { display: none !important; }
+    [data-ogsc] .email-logo-dark-mode, [data-ogsb] .email-logo-dark-mode { display: inline-block !important; }
+    [data-ogsc] .email-copy, [data-ogsb] .email-copy,
+    [data-ogsc] .email-callout-body, [data-ogsb] .email-callout-body,
+    [data-ogsc] .email-step, [data-ogsb] .email-step { color: #EFF7F0 !important; }
+    [data-ogsc] .email-muted, [data-ogsb] .email-muted { color: #BAC8BE !important; }
+    [data-ogsc] .email-section-title, [data-ogsb] .email-section-title { color: #DCEBD9 !important; }
+    [data-ogsc] .email-table, [data-ogsb] .email-table { border-color: #2E4336 !important; }
+    [data-ogsc] .email-table-label, [data-ogsb] .email-table-label { background: ${DARK_MODE_MINT} !important; color: ${DARK_MODE_MINT_TEXT} !important; }
+    [data-ogsc] .email-table-value, [data-ogsb] .email-table-value { background: #17221C !important; color: #EFF7F0 !important; }
+    [data-ogsc] .email-link, [data-ogsb] .email-link,
+    [data-ogsc] .email-content a:not(.email-button), [data-ogsb] .email-content a:not(.email-button) { color: #B9D7B4 !important; }
+  </style>
   <title>${esc(opts.headerTitle)}</title>
 </head>
-<body style="margin:0; padding:0; background:${BRAND.paper}; color-scheme:light; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: ${BRAND.text};">
+<body class="email-body body" bgcolor="${BRAND.paper}" style="margin:0; padding:0; background:${BRAND.paper}; color-scheme:light dark; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: ${BRAND.text};">
   <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">${esc(opts.preheader)}</div>
 
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.paper}; padding: 24px 12px;">
+  <table class="email-shell" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${BRAND.paper}" style="background:${BRAND.paper}; padding: 24px 12px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; background:${BRAND.white}; border-radius: 14px; overflow: hidden; border: 1px solid ${BRAND.border};">
+        <table class="email-card email-surface" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${BRAND.white}" style="max-width: 600px; width: 100%; background:${BRAND.white}; border-radius: 14px; overflow: hidden; border: 1px solid ${BRAND.border};">
           <tr>
-            <td bgcolor="${BRAND.white}" style="background:${BRAND.white}; background-color:${BRAND.white}; padding: 20px 32px; text-align: center; border-bottom: 3px solid ${BRAND.teal};">
-              <img src="${getLogoUrl()}" alt="SwiftJob" width="220" style="max-width: 220px; height: auto; border: 0; display: inline-block;" />
+            <td class="email-logo-bar" bgcolor="${BRAND.white}" style="background:${BRAND.white}; background-color:${BRAND.white}; padding: 20px 32px; text-align: center; border-bottom: 3px solid ${BRAND.teal};">
+              <img class="email-logo-light-mode" src="${getLogoUrl()}" alt="SwiftJob" width="220" style="max-width: 220px; height: auto; border: 0;" />
+              <img class="email-logo-dark-mode" src="${getDarkLogoUrl()}" alt="SwiftJob" width="220" style="max-width: 220px; height: auto; border: 0;" />
             </td>
           </tr>
           <tr>
-            <td style="background:${BRAND.navy}; padding: 28px 32px; text-align: center;">
+            <td class="email-header" bgcolor="${BRAND.navy}" style="background:${BRAND.navy}; padding: 28px 32px; text-align: center;">
               <h1 style="margin: 0; color: ${BRAND.white}; font-size: 24px; font-weight: 700; letter-spacing: -0.2px;">${esc(opts.headerTitle)}</h1>
               ${opts.headerSubtitle ? `<p style="margin: 8px 0 0; color: ${BRAND.mint}; font-size: 14px;">${esc(opts.headerSubtitle)}</p>` : ""}
             </td>
           </tr>
           <tr>
-            <td style="padding: 32px;">
+            <td class="email-content email-surface" bgcolor="${BRAND.white}" style="background:${BRAND.white}; padding: 32px;">
               ${opts.content}
             </td>
           </tr>
           <tr>
-            <td style="background:${BRAND.navy}; padding: 24px 32px; text-align: center;">
+            <td class="email-footer" bgcolor="${BRAND.navy}" style="background:${BRAND.navy}; padding: 24px 32px; text-align: center;">
               <p style="margin: 0 0 4px; color: ${BRAND.white}; font-size: 14px; font-weight: 600;">SwiftJob</p>
               <p style="margin: 0 0 12px; color: ${BRAND.mint}; font-size: 12px;">100% remote roles · work from anywhere</p>
               <a href="${getBaseUrl()}" style="color: ${BRAND.mint}; font-size: 12px; text-decoration: underline;">SwiftJob website</a>
@@ -219,6 +318,32 @@ function layout(opts: LayoutOptions): string {
 </body>
 </html>
   `.trim();
+}
+
+/** Shared branded template for administrator-authored messages. */
+export function formatCustomEmailHtml(subject: string, body: string): string {
+  const paragraphs = body
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map(
+      (line) =>
+        `<p class="email-copy" style="margin:0 0 14px;color:${BRAND.text};font-size:15px;line-height:1.7;">${esc(line)}</p>`,
+    )
+    .join("");
+
+  return layout({
+    preheader: subject,
+    headerTitle: subject,
+    headerSubtitle: "A message from SwiftJob",
+    content: `
+      ${paragraphs}
+      <p class="email-muted" style="margin:20px 0 0;color:${BRAND.muted};font-size:12.5px;line-height:1.6;">
+        You received this message from SwiftJob. If you have any questions, contact us at
+        <a class="email-link" href="mailto:${esc(getSupportEmail())}" style="color:${BRAND.teal};">${esc(getSupportEmail())}</a>.
+      </p>
+    `,
+  });
 }
 
 function callout(
@@ -235,9 +360,9 @@ function callout(
     };
   const s = styles[kind];
   return `
-    <div style="background:${s.bg}; border-left: 4px solid ${s.border}; border-radius: 8px; padding: 16px 20px; margin: 20px 0;">
-      <p style="margin: 0 0 4px; color: ${s.title}; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;">${esc(title)}</p>
-      <div style="margin: 0; font-size: 14px; color: ${BRAND.text};">${body}</div>
+    <div class="email-callout email-callout-${kind}" style="background:${s.bg}; border-left: 4px solid ${s.border}; border-radius: 8px; padding: 16px 20px; margin: 20px 0;">
+      <p class="email-callout-title" style="margin: 0 0 4px; color: ${s.title}; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;">${esc(title)}</p>
+      <div class="email-callout-body" style="margin: 0; font-size: 14px; color: ${BRAND.text};">${body}</div>
     </div>`;
 }
 
@@ -246,21 +371,21 @@ function primaryButton(href: string, label: string): string {
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 24px 0;">
       <tr>
         <td align="center">
-          <a href="${esc(href)}" style="display: inline-block; background:${BRAND.teal}; color: ${BRAND.white}; padding: 14px 36px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; letter-spacing: 0.2px;">${esc(label)}</a>
+          <a class="email-button" href="${esc(href)}" style="display: inline-block; background:${BRAND.teal}; color: ${BRAND.white}; padding: 14px 36px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; letter-spacing: 0.2px;">${esc(label)}</a>
         </td>
       </tr>
     </table>`;
 }
 
 function sectionTitle(text: string): string {
-  return `<h2 style="margin: 28px 0 12px; color: ${BRAND.navy}; font-size: 16px; font-weight: 700;">${esc(text)}</h2>`;
+  return `<h2 class="email-section-title" style="margin: 28px 0 12px; color: ${BRAND.navy}; font-size: 16px; font-weight: 700;">${esc(text)}</h2>`;
 }
 
 function stepList(steps: string[]): string {
   const items = steps
     .map(
       (s, i) => `
-      <li style="margin-bottom: 10px; font-size: 14px; color: ${BRAND.text};">
+      <li class="email-step" style="margin-bottom: 10px; font-size: 14px; color: ${BRAND.text};">
         <span style="display: inline-block; width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 50%; background:${BRAND.teal}; color: ${BRAND.white}; font-size: 12px; font-weight: 700; margin-right: 10px;">${i + 1}</span>${s}
       </li>`,
     )
@@ -278,17 +403,18 @@ function footerNote(): string {
 }
 
 function infoRow(label: string, value: string): string {
+  const gmailStableLabel = `<div class="gmail-blend-screen"><div class="gmail-blend-difference">${esc(label)}</div></div>`;
   return `
     <tr>
-      <td style="padding: 10px 16px; border-top: 1px solid ${BRAND.border}; width: 40%; font-weight: 600; color: ${BRAND.navy}; font-size: 13px; background: ${BRAND.paper}; vertical-align: top;">${esc(label)}</td>
-      <td style="padding: 10px 16px; border-top: 1px solid ${BRAND.border}; font-size: 13px; color: ${BRAND.text}; vertical-align: top;">${value}</td>
+      <td class="email-table-label" style="padding: 10px 16px; border-top: 1px solid ${BRAND.border}; width: 40%; font-weight: 600; color: ${BRAND.navy}; font-size: 13px; background: ${BRAND.paper}; background-image: linear-gradient(${DARK_MODE_MINT}, ${DARK_MODE_MINT}); vertical-align: top;">${gmailStableLabel}</td>
+      <td class="email-table-value" style="padding: 10px 16px; border-top: 1px solid ${BRAND.border}; font-size: 13px; color: ${BRAND.text}; vertical-align: top;">${value}</td>
     </tr>`;
 }
 
 function infoTable(rows: Array<[string, string]>): string {
   const body = rows.map(([label, value]) => infoRow(label, value)).join("");
   return `
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; margin: 16px 0; border: 1px solid ${BRAND.border}; border-radius: 8px; overflow: hidden;">
+    <table class="email-table" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; margin: 16px 0; border: 1px solid ${BRAND.border}; border-radius: 8px; overflow: hidden;">
       ${body}
     </table>`;
 }
@@ -465,23 +591,26 @@ function formatConfirmationHtml(data: {
       "info",
       "What happens next",
       `
-      Our recruitment team reviews applications within <strong>3–5 business days</strong>. If your profile matches the role, we'll contact you to arrange the next steps.
+      Your application is received. There are just a few steps left: open your candidate portal and complete the required technical check, then complete the role assessment if one is shown. Completing these steps helps us process your application.
     `,
     )}
+
+    ${primaryButton(`${getBaseUrl()}/login`, "Open your candidate portal")}
 
     ${sectionTitle("The hiring process")}
     ${stepList([
       `<strong>Application review</strong> — We evaluate your experience, skills, and fit for the role.`,
-      `<strong>Skills check</strong> — A short optional check matched to the position, completed in your browser.`,
+      `<strong>Technical check</strong> — Confirm your connection, browser, and computer are ready for this role.`,
+      `<strong>Role assessment</strong> — Complete the assessment shown for this role, if one is required.`,
       `<strong>Team review &amp; feedback</strong> — Our recruitment team reaches out directly with the outcome and next steps.`,
       `<strong>Offer &amp; onboarding</strong> — Successful candidates receive a formal offer and a fully remote start.`,
     ])}
 
     ${callout(
       "success",
-      "What you need to do now",
+      "Continue your application",
       `
-      Nothing right now. We'll email you as soon as your status changes. To keep things moving, make sure your contact details stay up to date and keep an eye on your inbox (including spam/junk).
+      Open your candidate portal to see the next step for this application. You can stop and return later; your saved progress stays attached to your application. We'll email you as soon as your application status changes.
     `,
     )}
   `;
@@ -625,14 +754,14 @@ function formatStatusUpdateHtml(data: {
 // ============================================
 // Contact notification (HR)
 // ============================================
-function formatContactHtml(data: {
+export function formatContactHtml(data: {
   firstName: string;
   email: string;
   interest: string;
   message: string;
 }): string {
   const content = `
-    <p style="margin: 0 0 12px; font-size: 15px;">A new message was submitted through the contact form on the SwiftJob website.</p>
+    <p class="email-copy" style="margin: 0 0 12px; font-size: 15px;">A new message was submitted through the contact form on the SwiftJob website.</p>
 
     ${infoTable([
       ["Name", esc(data.firstName)],
@@ -644,7 +773,7 @@ function formatContactHtml(data: {
     ])}
 
     ${sectionTitle("Message")}
-    <p style="background: ${BRAND.paper}; padding: 14px 16px; border-radius: 8px; border: 1px solid ${BRAND.border}; white-space: pre-wrap; margin: 0; font-size: 13px;">${esc(data.message)}</p>
+    <p class="email-copy email-message" style="background: ${BRAND.paper}; padding: 14px 16px; border-radius: 8px; border: 1px solid ${BRAND.border}; white-space: pre-wrap; margin: 0; font-size: 13px;">${esc(data.message)}</p>
 
     ${callout(
       "info",
@@ -675,7 +804,7 @@ function formatMagicLinkHtml(data: {
     : "Hi there,";
   const content = `
     <p style="margin: 0 0 12px; font-size: 15px;">${greeting}</p>
-    <p style="margin: 0 0 12px; font-size: 15px;">You requested a secure sign-in link for your SwiftJob candidate portal. Click the button below to sign in and view your applications.</p>
+    <p style="margin: 0 0 12px; font-size: 15px;">You requested a secure sign-in link for your SwiftJob candidate portal. Click the button below to open your candidate account, view your applications, and continue the next steps shown there.</p>
 
     ${primaryButton(data.linkUrl, "Sign in to my portal")}
 
@@ -691,7 +820,8 @@ function formatMagicLinkHtml(data: {
     ${stepList([
       `Click the button above (or the link below).`,
       `You'll be signed in automatically — no password needed.`,
-      `You'll land on your applications page where you can view your status.`,
+      `You'll land on your applications page where you can view your status and continue any saved next step for each application.`,
+      `Your account is ready after email verification. You can create a password inside the portal, but a password is optional.`,
     ])}
 
     <p style="font-size: 13px; color: ${BRAND.muted}; word-break: break-all; margin: 16px 0 0;">If the button doesn't work, copy this link into your browser:<br><a href="${esc(data.linkUrl)}" style="color: ${BRAND.teal};">${esc(data.linkUrl)}</a></p>

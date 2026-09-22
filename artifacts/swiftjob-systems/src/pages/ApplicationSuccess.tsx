@@ -20,9 +20,17 @@ interface AssessmentStatus {
   applicationId: string;
   jobSlug: string;
   jobTitle: string;
+  assessmentTitle: string | null;
+  assessmentBlurb: string;
   needsAssessment: boolean;
+  assessmentRequired: boolean;
   track: string;
   status: string;
+  techCheck: {
+    required: boolean;
+    status: "not_started" | "in_progress" | "completed";
+    typingRequired: boolean;
+  };
   result: { score: number; maxScore: number; completedAt: string } | null;
 }
 
@@ -73,10 +81,16 @@ export function ApplicationSuccess() {
     return () => {
       cancelled = true;
     };
-  }, [applicationId, email, jobSlug]);
+  }, [applicationId, email, jobSlug, referenceCode]);
 
-  const showAssessmentCta =
-    assessment?.needsAssessment && assessment.status !== "completed";
+  const assessmentLink = `/assessment?id=${encodeURIComponent(applicationId)}&email=${encodeURIComponent(email)}&ref=${encodeURIComponent(referenceCode)}&job=${encodeURIComponent(jobSlug)}`;
+  const showTechCheckCta = Boolean(
+    assessment?.techCheck.required && assessment.techCheck.status !== "completed",
+  );
+  const showAssessmentCta = Boolean(
+    assessment?.assessmentRequired && assessment.needsAssessment &&
+      assessment.techCheck.status === "completed",
+  );
 
   const shortId = applicationId
     ? applicationId.split("-")[0].toUpperCase()
@@ -89,7 +103,7 @@ export function ApplicationSuccess() {
       description="Thank you for applying to SwiftJob."
     >
       <div className="success-page-full">
-        {/* Hero band — full width with image */}
+        {/* Text-only confirmation hero; no stock photo is used here. */}
         <div className="success-hero-band">
           <div className="success-hero-content">
             <CheckCircle
@@ -102,20 +116,14 @@ export function ApplicationSuccess() {
               Thank you — your application for <strong>{position}</strong> has
               been securely received. Our recruitment team will carefully review
               your submission and contact you within{" "}
-              <strong>3–5 business days</strong> regarding next steps. No
-              further action is required at this time.
+              <strong>3–5 business days</strong> regarding next steps. Before
+              we review your application, complete the next step below. You can
+              pause and continue from your candidate portal later.
             </p>
             <div className="success-ref-pill">
               <span className="ref-label-sm">Reference</span>
               <code className="ref-code-sm">{displayRef}</code>
             </div>
-          </div>
-          <div className="success-hero-image">
-            <img
-              src="/wfh-desk.jpg"
-              alt="Professional working remotely from home"
-              loading="eager"
-            />
           </div>
         </div>
 
@@ -131,29 +139,47 @@ export function ApplicationSuccess() {
                   <h3>Secure your candidate portal</h3>
                 </div>
                 <p className="card-block-desc">
-                  Request a sign-in email link for <strong>{email}</strong>.
-                  Once your email is verified, you can set an optional password
-                  inside your candidate portal.
+                  We have created your candidate record. Sign in with a secure
+                  email link using <strong>{email}</strong> to track this
+                  application, continue the required steps, and optionally
+                  create a password for faster access.
                 </p>
                 <Link href="/login" className="button button-blue">Sign in to your portal</Link>
               </section>
             )}
 
-            {/* Skills check CTA */}
+            {/* Required technology check */}
+            {showTechCheckCta && (
+              <section className="skills-cta-card skills-cta-card--required">
+                <ClipboardCheck size={24} />
+                <div className="skills-cta-text">
+                  <h3>Complete your technical check</h3>
+                  <p>
+                    Confirm the computer, connection, and browser you plan to
+                    use for your {position} application. It takes about 2–3
+                    minutes, and you can continue later.
+                  </p>
+                </div>
+                <Link href={assessmentLink}>
+                  Continue <ArrowRight size={14} />
+                </Link>
+              </section>
+            )}
+
+            {/* Role-specific assessment CTA */}
             {showAssessmentCta && (
               <section className="skills-cta-card">
                 <ClipboardCheck size={24} />
                 <div className="skills-cta-text">
-                  <h3>Quick skills check (optional)</h3>
+                  <h3>{assessment?.assessmentTitle ?? `${position} assessment`}</h3>
                   <p>
-                    Boost your application — takes about 5\u20138 minutes. No
-                    pass mark, no time limit.
+                    This assessment is matched to the {position} role. It takes
+                    about 5–10 minutes and can be continued later from your
+                    portal.
                   </p>
                 </div>
-                <Link
-                  href={`/assessment?id=${encodeURIComponent(applicationId)}&email=${encodeURIComponent(email)}&job=${encodeURIComponent(jobSlug)}`}
-                >
-                  Start now <ArrowRight size={14} />
+                <Link href={assessmentLink}>
+                  Continue assessment <ArrowRight size={14} />
                 </Link>
               </section>
             )}
@@ -170,13 +196,13 @@ export function ApplicationSuccess() {
                   ],
                   [
                     "02",
-                    "Skills Check",
-                    "Complete the optional skills check above to strengthen your application.",
+                    "Technical Check",
+                    "Complete the required technical check so we can confirm your setup is ready for the role.",
                   ],
                   [
                     "03",
-                    "Team Review & Feedback",
-                    "If your profile matches, we reach out directly by email \u2014 no interviews.",
+                    "Role Assessment",
+                    "If this role uses an assessment, it will be matched to the work and shown after the technology check.",
                   ],
                   [
                     "04",

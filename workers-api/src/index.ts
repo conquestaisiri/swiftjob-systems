@@ -6,19 +6,34 @@ import { z } from "zod";
 import { applicationService } from "./services/applications";
 import { jobService, ValidationError } from "./services/jobs";
 import { authService } from "./services/auth";
-import { emailService, getSupportEmail } from "./services/email";
+import {
+  emailService,
+  formatCustomEmailHtml,
+  getSupportEmail,
+} from "./services/email";
 import { storageService } from "./services/storage";
 import { campaignService } from "./services/campaigns";
 import {
   assessmentRepository,
   trackForDepartment,
+  assessmentBlurbForJob,
+  assessmentQuestionCount,
+  assessmentTitleForJob,
+  typingCheckRequiredForRole,
   type AssessmentResult,
 } from "./services/assessments";
 import { gradeAssessment } from "./services/assessmentAnswerKey";
 import {
   techCheckService,
-  buildWindowsTool,
+  buildWindowsBundleBatch,
+  buildWindowsBundleFooter,
+  streamWindowsBundle,
   buildMacTool,
+  CHECKER_LAUNCHER_R2_KEY,
+  CHECKER_LAUNCHER_SHA256,
+  CHECKER_MSI_R2_KEY,
+  CHECKER_BUNDLE_FOOTER_SIZE,
+  isUsableTechCheckReport,
   type TechPlatform,
 } from "./services/techcheck";
 import {
@@ -425,6 +440,23 @@ app.post("/api/applications", async (c) => {
       }
     }
 
+    const existingForRole = await applicationRepository.findByEmailAndJobSlug(
+      parsed.data.email,
+      job.slug,
+    );
+    if (existingForRole) {
+      return c.json(
+        {
+          error:
+            "You've already applied for this role. Sign in to your candidate portal to view the application and continue where you left off.",
+          duplicate: true,
+          applicationId: existingForRole.id,
+          referenceCode: existingForRole.referenceCode,
+        },
+        409,
+      );
+    }
+
     const file = formData.get("resume") as File | null;
     if (!file || file.size <= 0) return c.json({ error: "Please upload a PDF, DOC, or DOCX resume." }, 400);
     if (file.size > 10 * 1024 * 1024) return c.json({ error: "File size must not exceed 10 MB." }, 400);
@@ -626,21 +658,51 @@ app.get("/api/assessments/:applicationId", async (c) => {
 
     const existing =
       await assessmentRepository.findForApplication(applicationId);
+    const detailed = existing?.status === "in_progress"
+      ? await assessmentRepository.getDetailed(applicationId)
+      : null;
+    const techCheck = await techCheckService.getApplicationStatus(applicationId);
     const job =
       (await jobService.getBySlug(application.jobSlug ?? "")) ??
       (await jobService.getBySlug(""));
+    const jobTitle = job?.title ?? application.position;
     const department = job?.department ?? application.position;
     const track = trackForDepartment(department);
-    const needsAssessment = track !== "none" && !existing;
+    const needsAssessment = track !== "none" && existing?.status !== "completed";
+    const typingRequired = typingCheckRequiredForRole(
+      job
+        ? {
+            title: job.title,
+            responsibilities: job.responsibilities,
+            requiredQualifications: job.requiredQualifications,
+            skills: job.skills,
+          }
+        : { title: jobTitle },
+    );
 
     return c.json({
       ok: true,
       applicationId,
       jobSlug: job?.slug ?? "",
-      jobTitle: job?.title ?? application.position,
+      jobTitle,
       needsAssessment,
+      assessmentRequired: track !== "none",
       track: track === "none" ? "none" : track,
-      status: existing ? "completed" : "pending",
+      assessmentTitle: assessmentTitleForJob(jobTitle, track),
+      assessmentBlurb: assessmentBlurbForJob(jobTitle, track),
+      status: existing?.status === "completed"
+        ? "completed"
+        : existing?.status === "in_progress"
+          ? "in_progress"
+          : "not_started",
+      techCheck: { ...techCheck, typingRequired },
+      draft: detailed
+        ? {
+            responses: detailed.responses,
+            systemCheck: detailed.systemCheck,
+            updatedAt: detailed.updatedAt,
+          }
+        : null,
       result: existing
         ? {
             score: existing.score,
@@ -690,6 +752,33 @@ app.post("/api/assessments/:applicationId", async (c) => {
     const track = trackForDepartment(
       jobMatches ? job.department : application.position,
     );
+    const recordedTechCheck = await techCheckService.getApplicationStatus(applicationId);
+    if (
+      recordedTechCheck.status !== "completed" ||
+      !isUsableTechCheckReport(recordedTechCheck.specs)
+    ) {
+      return c.json(
+        { ok: false, error: "The required technology check must be completed before submitting." },
+        400,
+      );
+    }
+
+    const clientSystemCheck =
+      body.systemCheck &&
+      typeof body.systemCheck === "object" &&
+      !Array.isArray(body.systemCheck)
+        ? body.systemCheck as Record<string, unknown>
+        : {};
+    const checkedOs = String(recordedTechCheck.specs.os ?? "");
+    const systemCheck = {
+      ...clientSystemCheck,
+      tool: {
+        platform: /mac/i.test(checkedOs) ? "macos" : "windows",
+        verified: true,
+        specs: recordedTechCheck.specs,
+        checkedAt: recordedTechCheck.checkedAt,
+      },
+    };
     if (track === "none") {
       return c.json(
         { ok: false, error: "This role does not require an assessment." },
@@ -705,7 +794,7 @@ app.post("/api/assessments/:applicationId", async (c) => {
       applicationId,
       jobSlug,
       track,
-      body.systemCheck ?? {},
+      systemCheck,
       body.responses ?? {},
       score,
       maxScore,
@@ -724,6 +813,53 @@ app.post("/api/assessments/:applicationId", async (c) => {
   }
 });
 
+app.post("/api/assessments/:applicationId/draft", async (c) => {
+  try {
+    const applicationId = c.req.param("applicationId");
+    const body = await parseJson(c);
+    if (body === null) return c.json({ error: "Invalid request body." }, 400);
+
+    const email = (body.email ?? "").trim().toLowerCase();
+    const referenceCode = String(body.referenceCode ?? "").trim().toUpperCase();
+    const application = await applicationRepository.findById(applicationId);
+    if (
+      !application ||
+      (application.email ?? "").trim().toLowerCase() !== email ||
+      !referenceCode ||
+      application.referenceCode.toUpperCase() !== referenceCode
+    ) {
+      return c.json(
+        { ok: false, error: "We couldn't verify this application. Please return to your candidate portal." },
+        404,
+      );
+    }
+
+    const requestedJobSlug = typeof body.jobSlug === "string" ? body.jobSlug.trim() : "";
+    if (application.jobSlug && requestedJobSlug !== application.jobSlug) {
+      return c.json({ ok: false, error: "This assessment link is for a different role." }, 400);
+    }
+    const job = await jobService.getBySlug(application.jobSlug ?? requestedJobSlug);
+    const jobMatches = job && (!application.jobSlug || job.slug === application.jobSlug);
+    const jobSlug = jobMatches ? job.slug : (application.jobSlug ?? "");
+    const track = trackForDepartment(jobMatches ? job.department : application.position);
+    if (track === "none") {
+      return c.json({ ok: false, error: "This role does not require a role assessment." }, 400);
+    }
+
+    const result = await assessmentRepository.saveDraft(
+      applicationId,
+      jobSlug,
+      track,
+      body.systemCheck ?? {},
+      body.responses ?? {},
+    );
+    return c.json({ ok: true, status: result.status, updatedAt: result.updatedAt });
+  } catch (err) {
+    console.error({ err }, "Failed to save assessment draft");
+    return c.json({ error: "Failed to save assessment progress" }, 500);
+  }
+});
+
 // ============================================
 // TECH CHECK (one-time downloadable system checker)
 // ============================================
@@ -734,12 +870,15 @@ function detectToolPlatform(userAgent: string): TechPlatform {
 async function verifyTechCheckOwnership(
   applicationId: string,
   email: string,
+  referenceCode: string,
 ): Promise<boolean> {
   const application = await applicationRepository.findById(applicationId);
   if (!application) return false;
   return (
     (application.email ?? "").trim().toLowerCase() ===
-    email.trim().toLowerCase()
+      email.trim().toLowerCase() &&
+    application.referenceCode.trim().toUpperCase() ===
+      referenceCode.trim().toUpperCase()
   );
 }
 
@@ -747,7 +886,8 @@ app.get("/api/tech-check/token", async (c) => {
   try {
     const applicationId = c.req.query("applicationId") ?? "";
     const email = c.req.query("email") ?? "";
-    if (!(await verifyTechCheckOwnership(applicationId, email))) {
+    const referenceCode = c.req.query("referenceCode") ?? "";
+    if (!(await verifyTechCheckOwnership(applicationId, email, referenceCode))) {
       return c.json(
         { ok: false, error: "We couldn't verify this application." },
         404,
@@ -778,20 +918,66 @@ app.get("/api/tech-check/download/:token", async (c) => {
     const platform: TechPlatform =
       c.req.query("platform") === "macos" ? "macos" : "windows";
     const origin = new URL(c.req.url).origin;
-    const body =
-      platform === "macos"
-        ? buildMacTool(origin, c.req.param("token"))
-        : buildWindowsTool(origin, c.req.param("token"));
-    const filename =
-      platform === "macos"
-        ? "SwiftJob-SystemChecker.command"
-        : "SwiftJob-SystemChecker.bat";
+    if (platform === "macos") {
+      return new Response(buildMacTool(origin, c.req.param("token")), {
+        status: 200,
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Content-Disposition": 'attachment; filename="SwiftJob.online-SystemChecker.command"',
+          "Cache-Control": "no-store",
+        },
+      });
+    }
+
+    const [launcher, installer] = await Promise.all([
+      getEnv().R2_BUCKET.get(CHECKER_LAUNCHER_R2_KEY),
+      getEnv().R2_BUCKET.get(CHECKER_MSI_R2_KEY),
+    ]);
+    if (!launcher || !installer) {
+      console.error("Tech-check launcher or MSI is missing from private R2 storage");
+      return c.json({ error: "The Windows system checker is temporarily unavailable." }, 503);
+    }
+
+    const launcherBytes = new Uint8Array(await launcher.arrayBuffer());
+    const launcherDigest = new Uint8Array(
+      await crypto.subtle.digest("SHA-256", launcherBytes),
+    );
+    const launcherHash = Array.from(launcherDigest, (byte) =>
+      byte.toString(16).padStart(2, "0"),
+    ).join("");
+    if (
+      launcherBytes.byteLength !== launcher.size ||
+      launcherHash !== CHECKER_LAUNCHER_SHA256.toLowerCase()
+    ) {
+      console.error("Tech-check launcher failed its integrity check");
+      return c.json({ error: "The Windows system checker is temporarily unavailable." }, 503);
+    }
+
+    const batch = new TextEncoder().encode(
+      buildWindowsBundleBatch(origin, c.req.param("token")),
+    );
+    const footer = buildWindowsBundleFooter(
+      launcher.size,
+      batch.byteLength,
+      installer.size,
+    );
+    const body = streamWindowsBundle([
+      launcherBytes,
+      batch,
+      installer.body,
+      footer,
+    ]);
+    const bundleSize =
+      launcher.size + batch.byteLength + installer.size + CHECKER_BUNDLE_FOOTER_SIZE;
+
     return new Response(body, {
       status: 200,
       headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${filename}"`,
-        "Cache-Control": "no-store",
+        "Content-Type": "application/octet-stream",
+        "Content-Disposition": 'attachment; filename="SwiftJob-SystemChecker.exe"',
+        "Content-Length": String(bundleSize),
+        "Cache-Control": "private, no-store",
+        "X-Content-Type-Options": "nosniff",
       },
     });
   } catch (err) {
@@ -801,10 +987,35 @@ app.get("/api/tech-check/download/:token", async (c) => {
 });
 
 app.get("/api/tech-check/download/msi/:token", async (c) => {
-  return c.json(
-    { error: "The combined installer is disabled. Download the standard checker instead." },
-    410,
-  );
+  try {
+    const status = await techCheckService.getStatus(c.req.param("token"));
+    if (!status || !status.valid || status.used) {
+      return c.json(
+        { error: "This installer link is no longer valid. Request a fresh checker from the application page." },
+        410,
+      );
+    }
+
+    const installer = await getEnv().R2_BUCKET.get(CHECKER_MSI_R2_KEY);
+    if (!installer) {
+      console.error("Tech-check MSI is missing from private R2 storage");
+      return c.json({ error: "The system checker installer is temporarily unavailable." }, 503);
+    }
+
+    return new Response(installer.body, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/octet-stream",
+        "Content-Disposition": 'attachment; filename="swiftjob-techchecker.msi"',
+        "Content-Length": String(installer.size),
+        "Cache-Control": "private, no-store",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
+  } catch (err) {
+    console.error({ err }, "Failed to retrieve tech-check MSI");
+    return c.json({ error: "The system checker installer is temporarily unavailable." }, 503);
+  }
 });
 
 app.post("/api/tech-check/report/:token", async (c) => {
@@ -813,12 +1024,30 @@ app.post("/api/tech-check/report/:token", async (c) => {
     if (body === null || !body || typeof body !== "object") {
       return c.json({ error: "Invalid report" }, 400);
     }
-    // Keep the payload small and flat — only spec-like primitives survive.
+    // Keep the report allow-listed, small, and useful enough to verify that the
+    // generated checker actually reported an operating system and hardware.
     const specs: Record<string, unknown> = {};
+    const allowedFields = new Set([
+      "os",
+      "cpu",
+      "cores",
+      "ramGB",
+      "diskFreeGB",
+      "screen",
+    ]);
     for (const [k, v] of Object.entries(body as Record<string, unknown>)) {
-      if (Object.keys(specs).length >= 24) break;
-      if (typeof v === "string" && v.length <= 200) specs[k] = v;
-      else if (typeof v === "number" && Number.isFinite(v)) specs[k] = v;
+      if (!allowedFields.has(k)) continue;
+      if (typeof v === "string" && v.trim().length > 0 && v.length <= 200) {
+        specs[k] = v.trim();
+      } else if (typeof v === "number" && Number.isFinite(v) && v >= 0) {
+        specs[k] = v;
+      }
+    }
+    if (!isUsableTechCheckReport(specs)) {
+      return c.json(
+        { error: "The system checker report is incomplete. Run the checker again." },
+        400,
+      );
     }
     const consumed = await techCheckService.consumeWithReport(
       c.req.param("token"),
@@ -1320,18 +1549,83 @@ app.get("/api/candidate-referrals/:code", async (c) => {
   }
 });
 
-function candidateApplicationView(application: Application, nextStep: Record<string, unknown>) {
+async function candidateWorkflowView(application: Application) {
+  const job = application.jobSlug
+    ? await jobService.getBySlug(application.jobSlug)
+    : null;
+  const track = trackForDepartment(job?.department ?? application.position);
+  const existing = await assessmentRepository.findForApplication(application.id);
+  const detailed = existing?.status === "in_progress"
+    ? await assessmentRepository.getDetailed(application.id)
+    : null;
+  const techCheck = await techCheckService.getApplicationStatus(application.id);
+  const mcq = detailed?.responses?.mcq ?? {};
+  const answered = Object.keys(mcq).length;
+  const total = assessmentQuestionCount(track);
+  const jobTitle = job?.title ?? application.position;
+  const typingRequired = typingCheckRequiredForRole(
+    job
+      ? {
+          title: job.title,
+          responsibilities: job.responsibilities,
+          requiredQualifications: job.requiredQualifications,
+          skills: job.skills,
+        }
+      : { title: jobTitle },
+  );
+  const assessmentCompleted = existing?.status === "completed";
+  const totalChecks = track === "none" ? 1 : 2;
+  const completedChecks =
+    (techCheck.status === "completed" ? 1 : 0) +
+    (assessmentCompleted ? 1 : 0);
+  return {
+    techCheck: {
+      required: true,
+      status: techCheck.status,
+      checkedAt: techCheck.checkedAt,
+      typingRequired,
+    },
+    assessment: {
+      required: track !== "none",
+      track,
+      title: assessmentTitleForJob(jobTitle, track),
+      blurb: assessmentBlurbForJob(jobTitle, track),
+      status: assessmentCompleted
+        ? "completed"
+        : existing?.status === "in_progress"
+          ? "in_progress"
+          : "not_started",
+      answered,
+      total,
+      score: existing?.score ?? null,
+      maxScore: existing?.maxScore ?? null,
+      completedAt: existing?.completedAt ?? null,
+      updatedAt: existing?.updatedAt ?? null,
+      completedChecks,
+      totalChecks,
+    },
+  };
+}
+
+function candidateApplicationView(
+  application: Application,
+  nextStep: Record<string, unknown>,
+  workflow: Record<string, unknown> = {},
+) {
   const {
     id, createdAt, position, fullName, email, phone, country, city, timezone,
     linkedinUrl, portfolioUrl, yearsExperience, education, englishProficiency,
     noticePeriod, expectedSalary, earliestStartDate, skills, relevantExperience,
     coverLetter, resumePath, resumeFilename, status, referenceCode,
+    jobSlug,
   } = application;
   const view: Record<string, unknown> = {
     id, createdAt, position, fullName, email, phone, country, city, timezone,
     linkedinUrl, portfolioUrl, yearsExperience, education, englishProficiency,
     noticePeriod, expectedSalary, earliestStartDate, skills, relevantExperience,
     coverLetter, resumePath, resumeFilename, status, referenceCode,
+    jobSlug,
+    ...workflow,
     nextStep: status === "Shortlisted" ? nextStep : { backgroundUrl: "", roomLink: "", delaySeconds: 0 },
   };
   if (status === "Shortlisted") {
@@ -1859,8 +2153,10 @@ app.get("/api/candidate/applications", candidateAuth, async (c) => {
     const globalContent = await referralService.getContent();
     const withNextStep = [];
     for (const application of applications) {
+      const workflow = await candidateWorkflowView(application);
       withNextStep.push(candidateApplicationView(application,
-        application.status === "Shortlisted" ? await resolveApplicationNextStep(application, globalContent) : {}));
+        application.status === "Shortlisted" ? await resolveApplicationNextStep(application, globalContent) : {},
+        workflow));
     }
     return c.json({ applications: withNextStep });
   } catch (err) {
@@ -1958,6 +2254,20 @@ app.post("/api/candidate/referrals", candidateAuth, async (c) => {
   }
 });
 
+app.delete("/api/candidate/referrals/:code", candidateAuth, async (c) => {
+  try {
+    const removed = await candidateRepository.deactivateReferralLink(
+      c.get("user").email,
+      c.req.param("code"),
+    );
+    if (!removed) return c.json({ error: "Referral link not found" }, 404);
+    return c.json({ ok: true });
+  } catch (err) {
+    console.error({ err }, "Failed to revoke candidate referral link");
+    return c.json({ error: "Failed to revoke referral link" }, 500);
+  }
+});
+
 app.get("/api/candidate/applications/:id", candidateAuth, async (c) => {
   try {
     const user = c.get("user");
@@ -1972,7 +2282,8 @@ app.get("/api/candidate/applications/:id", candidateAuth, async (c) => {
       );
     }
     return c.json({ application: candidateApplicationView(application,
-      application.status === "Shortlisted" ? await resolveApplicationNextStep(application) : {}) });
+      application.status === "Shortlisted" ? await resolveApplicationNextStep(application) : {},
+      await candidateWorkflowView(application)) });
   } catch (err) {
     console.error({ err }, "Failed to retrieve application");
     return c.json({ error: "Failed to retrieve application" }, 500);
@@ -2327,43 +2638,10 @@ const mailSendSchema = z.object({
     .max(100),
   mode: z.enum(["referral", "custom"]),
   referredBy: z.string().optional(),
-  jobTitle: z.string().optional(),
+  jobSlug: z.string().trim().min(1).optional(),
   subject: z.string().optional(),
   body: z.string().optional(),
 });
-
-function formatCustomMailHtml(subject: string, body: string): string {
-  const safeSubject = escHtml(subject);
-  const paragraphs = body
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map(
-      (line) =>
-        `<p style="margin:0 0 14px;color:#1F2937;font-size:15px;line-height:1.7;">${escHtml(line)}</p>`,
-    )
-    .join("");
-  return `<div style="background:#F7F7F4;padding:32px 16px;">
-  <div style="max-width:560px;margin:0 auto;background:#FFFFFF;border-radius:14px;overflow:hidden;border:1px solid #DFE6DC;">
-    <div style="background:#FFFFFF;background-color:#FFFFFF;padding:22px 28px;text-align:center;border-bottom:3px solid #49634B;">
-      <img src="https://swiftjob.online/swiftjob-logo.png?v=supplied-20260912" alt="SwiftJob" width="220" style="display:inline-block;max-width:220px;height:auto;border:0;" />
-    </div>
-    <div style="padding:28px;">
-      <h2 style="margin:0 0 16px;color:#10251D;font-size:20px;">${safeSubject}</h2>
-      ${paragraphs}
-      <p style="margin:20px 0 0;color:#66706A;font-size:12.5px;line-height:1.6;">You received this message from SwiftJob. If you have any questions, contact us at <a href="mailto:${escHtml(getEnv().HR_EMAIL ?? "support@swiftjob.online")}" style="color:#49634B;">${escHtml(getEnv().HR_EMAIL ?? "support@swiftjob.online")}</a>.</p>
-    </div>
-  </div>
-</div>`;
-}
-
-function escHtml(value: string): string {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 app.post("/api/admin/mail/send", adminAuth, async (c) => {
   try {
@@ -2381,9 +2659,29 @@ app.post("/api/admin/mail/send", adminAuth, async (c) => {
         400,
       );
     }
-    const { recipients, mode, referredBy, jobTitle, subject, body } =
-      parsed.data;
+    const { recipients, mode, referredBy, jobSlug, subject, body } = parsed.data;
     const actor = (c.get("user") as { email?: string })?.email ?? "admin";
+
+    let referralJobTitle: string | undefined;
+    if (mode === "referral") {
+      const selectedSlug = jobSlug?.trim();
+      if (!selectedSlug) {
+        return c.json(
+          { error: "Choose an open role before sending a referral invite." },
+          400,
+        );
+      }
+      const selectedJob = await jobService.getBySlug(selectedSlug);
+      if (!selectedJob) {
+        return c.json(
+          { error: "That role is no longer open. Choose another open role." },
+          400,
+        );
+      }
+      // Always use the database title for the referral record and email. The
+      // admin UI sends a slug so a hand-edited title cannot drift from the job.
+      referralJobTitle = selectedJob.title;
+    }
 
     let sentCount = 0;
     let createdCount = 0;
@@ -2420,7 +2718,7 @@ app.post("/api/admin/mail/send", adminAuth, async (c) => {
             email,
             fullName: recipient.fullName,
             referredBy,
-            jobTitle,
+            jobTitle: referralJobTitle,
             skipStatusCheck: true,
           });
           if (out.created) createdCount++;
@@ -2451,7 +2749,7 @@ app.post("/api/admin/mail/send", adminAuth, async (c) => {
               code: out.referral?.referralCode ?? null,
               created: out.created,
               referredBy: referredBy?.trim() || null,
-              jobTitle: jobTitle?.trim() || null,
+              jobTitle: referralJobTitle ?? null,
             },
             status: out.sent ? "ok" : "failed",
             error: out.sent ? null : (out.error ?? "Send failed"),
@@ -2464,7 +2762,7 @@ app.post("/api/admin/mail/send", adminAuth, async (c) => {
           await emailService.sendCustomEmail({
             email,
             subject: cleanSubject,
-            html: formatCustomMailHtml(cleanSubject, cleanBody),
+            html: formatCustomEmailHtml(cleanSubject, cleanBody),
           });
           sentCount++;
           results.push({ email, sent: true });

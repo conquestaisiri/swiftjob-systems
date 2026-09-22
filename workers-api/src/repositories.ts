@@ -118,6 +118,24 @@ export const applicationRepository = {
       .orderBy(desc(applications.createdAt));
   },
 
+  async findByEmailAndJobSlug(
+    email: string,
+    jobSlug: string,
+  ): Promise<Application | undefined> {
+    const db = getDb();
+    const [result] = await db
+      .select()
+      .from(applications)
+      .where(
+        and(
+          sql`lower(${applications.email}) = ${email.toLowerCase().trim()}`,
+          eq(applications.jobSlug, jobSlug),
+        ),
+      )
+      .limit(1);
+    return result;
+  },
+
   async findBySubmissionKey(submissionKey: string): Promise<Application | undefined> {
     const db = getDb();
     const [result] = await db
@@ -472,6 +490,19 @@ export const candidateRepository = {
     return db.select().from(candidateReferralLinks)
       .where(and(eq(candidateReferralLinks.ownerEmail, ownerEmail.toLowerCase().trim()), eq(candidateReferralLinks.active, true)))
       .orderBy(desc(candidateReferralLinks.createdAt));
+  },
+
+  async deactivateReferralLink(ownerEmail: string, code: string): Promise<boolean> {
+    const db = getDb();
+    const result = await db.update(candidateReferralLinks)
+      .set({ active: false })
+      .where(and(
+        eq(candidateReferralLinks.ownerEmail, ownerEmail.toLowerCase().trim()),
+        eq(candidateReferralLinks.code, code.trim().toUpperCase()),
+        eq(candidateReferralLinks.active, true),
+      ))
+      .returning({ id: candidateReferralLinks.id });
+    return result.length > 0;
   },
 
   async findReferralLink(code: string): Promise<CandidateReferralLink | undefined> {
