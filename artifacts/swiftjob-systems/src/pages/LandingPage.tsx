@@ -161,7 +161,7 @@ export function LandingPage() {
       </header>
 
       <main>
-        <section className="landing-v2-hero">
+        <section className="landing-v2-hero landing-v2-hero-centered">
           <div className="landing-v2-hero-copy">
             <span className="landing-v2-eyebrow">
               <i /> Remote staffing, done properly
@@ -189,7 +189,11 @@ export function LandingPage() {
               </Link>
             </div>
           </div>
-          <div className="landing-v2-hero-art">
+          <div
+            className="landing-v2-hero-art"
+            role="group"
+            aria-label="Remote professionals working from home"
+          >
             <figure className="landing-v2-photo landing-v2-photo-a">
               <img
                 src="/wfh-desk.jpg"
@@ -211,11 +215,6 @@ export function LandingPage() {
                 alt="A remote team laughing together over laptops"
               />
             </figure>
-            <div className="landing-v2-art-card">
-              <span>One partner</span>
-              <strong>for every remote role.</strong>
-              <small>100% Remote · Global talent</small>
-            </div>
           </div>
         </section>
 

@@ -93,10 +93,12 @@ export function PrivacyPolicy() {
           and only at the relevant stage of hiring.
         </li>
         <li>
-          We do not install software on your computer. The optional System
-          Checker is a small script you choose to download; you can read exactly
-          what it collects in the section above, and it stops working after one
-          run.
+          We never install software without your approval. The required
+          one-time System Checker collects basic device details. On Windows, it
+          runs the system check first, then opens a separate installer for you
+          to review; you can cancel it, and the report is submitted only after
+          the installer completes. On macOS, the checker reports basic device
+          details once and does not install Windows software.
         </li>
       </ul>
 

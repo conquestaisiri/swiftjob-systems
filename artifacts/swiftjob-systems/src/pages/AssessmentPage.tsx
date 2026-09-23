@@ -614,7 +614,7 @@ export function AssessmentPage() {
                 <ShieldCheck size={18} />
                 <span>
                   {techCheckPending
-                    ? "This check is mandatory before we can move your application forward. It reports basic setup details and does not change your computer."
+                    ? "This check is mandatory before we can move your application forward. On Windows, the checker runs first, then opens a separate installer for you to review. Your report is sent only after the installer completes."
                     : "There is no pass mark and no time limit. Answer honestly — the goal is to help our team understand how you work."}
                 </span>
               </div>

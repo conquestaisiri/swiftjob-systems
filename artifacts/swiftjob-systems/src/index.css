@@ -9894,3 +9894,116 @@ h2 {
   .candidate-form-full { grid-column: auto; }
   .candidate-form-actions { align-items: flex-start; flex-direction: column; }
 }
+
+/* Centered landing hero with an editorial photo row beneath the message. */
+.landing-v2-hero.landing-v2-hero-centered {
+  width: min(100% - 64px, 1280px);
+  padding: 54px 0 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+  text-align: center;
+}
+.landing-v2-hero-centered .landing-v2-hero-copy {
+  width: 100%;
+  max-width: 940px;
+}
+.landing-v2-hero-centered .landing-v2-eyebrow {
+  justify-content: center;
+}
+.landing-v2-hero-centered h1 {
+  max-width: 100%;
+  margin: 20px auto 16px;
+  font-size: clamp(3.25rem, 6.2vw, 5.8rem);
+  line-height: 0.96;
+  white-space: normal;
+}
+.landing-v2-hero-centered .landing-v2-hero-copy > p {
+  max-width: 760px;
+  margin: 0 auto 24px;
+  font-size: 16px;
+}
+.landing-v2-hero-centered .landing-v2-hero-actions {
+  justify-content: center;
+}
+.landing-v2-hero-centered .landing-v2-hero-art {
+  width: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: 20px;
+  perspective: none;
+}
+.landing-v2-hero-centered .landing-v2-photo {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  height: clamp(240px, 20.5vw, 300px);
+  margin: 0;
+  box-sizing: border-box;
+  border: 7px solid rgba(255, 255, 255, 0.92);
+  border-radius: 5px;
+  transform: none;
+  animation: none;
+  will-change: auto;
+  box-shadow: 0 20px 44px rgba(25, 26, 24, 0.12);
+}
+.landing-v2-hero-centered .landing-v2-photo-b {
+  height: clamp(260px, 22vw, 320px);
+}
+.landing-v2-hero-centered .landing-v2-photo-a,
+.landing-v2-hero-centered .landing-v2-photo-c {
+  margin-top: 28px;
+}
+.landing-v2-hero-centered .landing-v2-photo:hover {
+  transform: translateY(-4px);
+  transition: transform 0.25s ease;
+}
+
+@media (max-width: 760px) {
+  .landing-v2-hero.landing-v2-hero-centered {
+    width: calc(100% - 32px);
+    padding: 48px 0 58px;
+    gap: 32px;
+  }
+  .landing-v2-hero-centered .landing-v2-hero-copy,
+  .landing-v2-hero-centered .landing-v2-hero-copy > p {
+    width: 100%;
+    max-width: 100%;
+  }
+  .landing-v2-hero-centered h1 {
+    margin: 21px auto 18px;
+    font-size: clamp(3rem, 11.8vw, 4.4rem);
+    line-height: 0.98;
+    overflow-wrap: normal;
+  }
+  .landing-v2-hero-centered .landing-v2-hero-copy > p {
+    font-size: 14px;
+  }
+  .landing-v2-hero-centered .landing-v2-hero-actions {
+    justify-content: center;
+  }
+  .landing-v2-hero-centered .landing-v2-hero-art {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .landing-v2-hero-centered .landing-v2-photo-a {
+    grid-column: 1 / -1;
+    height: 230px;
+    margin: 0;
+  }
+  .landing-v2-hero-centered .landing-v2-photo-b,
+  .landing-v2-hero-centered .landing-v2-photo-c {
+    height: 148px;
+    margin: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-v2-hero-centered .landing-v2-photo,
+  .landing-v2-hero-centered .landing-v2-photo img {
+    transition: none;
+  }
+}
