@@ -142,6 +142,15 @@ check('Windows package route verifies the pinned launcher SHA-256 before streami
   assert.ok(routeStart >= 0 && launcherRead > routeStart && hashCheck > launcherRead && hashCheck < bundleStream);
 });
 
+const techCheckServiceSource = await readFile(new URL('../../workers-api/src/services/techcheck.ts', import.meta.url), 'utf8');
+const schemaSource = await readFile(new URL('../../workers-api/src/services/schema.ts', import.meta.url), 'utf8');
+check('Install-window start time is stored privately in the existing report JSON without a schema migration', () => {
+  assert.match(techCheckServiceSource, /__swiftjobStartedAt/);
+  assert.match(techCheckServiceSource, /jsonb_set\(/);
+  assert.match(techCheckServiceSource, /publicSystemReport\(/);
+  assert.doesNotMatch(schemaSource, /tech_check_tokens.*started_at/s);
+});
+
 const launcherSource = await readFile(new URL('../../workers-api/tools/techcheck-launcher/Program.cs', import.meta.url), 'utf8');
 check('Windows launcher discloses the collection and requires Continue before starting anything', () => {
   const consent = launcherSource.indexOf('if (!ShowConsentPrompt())');

@@ -9,6 +9,7 @@ export { CHECKER_MSI_R2_KEY, CHECKER_MSI_SHA256 } from "./techcheckPackage";
 
 const DOWNLOAD_TTL_MS = 30 * 60 * 1000; // 30 minutes to start the downloaded checker
 export const INSTALL_WINDOW_MS = 10 * 60 * 1000; // 10 minutes after MSI launch
+const STARTED_AT_REPORT_KEY = "__swiftjobStartedAt";
 
 function randomToken(): string {
   const bytes = new Uint8Array(24);
@@ -28,7 +29,6 @@ async function hashToken(token: string): Promise<string> {
 interface TokenRow {
   token_hash: string;
   application_id: string;
-  started_at: string | null;
   used_at: string | null;
   expires_at: string;
   report: Record<string, unknown> | null;
@@ -42,6 +42,20 @@ export class TechCheckAlreadyRunningError extends Error {
 }
 
 const ROW = (r: Record<string, unknown>): TokenRow => r as unknown as TokenRow;
+
+function getStoredStartTime(report: Record<string, unknown> | null): string | null {
+  const value = report?.[STARTED_AT_REPORT_KEY];
+  return typeof value === "string" ? value : null;
+}
+
+function publicSystemReport(
+  report: Record<string, unknown> | null,
+): Record<string, unknown> | null {
+  if (!report) return null;
+  const visible = { ...report };
+  delete visible[STARTED_AT_REPORT_KEY];
+  return visible;
+}
 
 export function isUsableTechCheckReport(
   report: unknown,
@@ -72,7 +86,7 @@ export const techCheckService = {
     const { DATABASE_URL } = getEnv();
     const sql = neon(DATABASE_URL);
     const rows = await sql(
-      `SELECT used_at, expires_at, report, started_at
+      `SELECT used_at, expires_at, report
        FROM tech_check_tokens
        WHERE application_id = $1
        ORDER BY created_at DESC`,
@@ -94,9 +108,9 @@ export const techCheckService = {
     if (completedRow?.used_at) {
       return {
         status: "completed",
-        specs: completedRow.report,
+        specs: publicSystemReport(completedRow.report)!,
         checkedAt: completedRow.used_at,
-        startedAt: completedRow.started_at,
+        startedAt: getStoredStartTime(completedRow.report),
         expiresAt: completedRow.expires_at,
         expired: false,
       };
@@ -107,7 +121,7 @@ export const techCheckService = {
       status: expired ? "not_started" : "in_progress",
       specs: null,
       checkedAt: null,
-      startedAt: row.started_at,
+      startedAt: getStoredStartTime(row.report),
       expiresAt: row.expires_at,
       expired,
     };
@@ -121,7 +135,8 @@ export const techCheckService = {
     const active = await sql(
       `SELECT expires_at FROM tech_check_tokens
        WHERE application_id = $1 AND used_at IS NULL
-         AND started_at IS NOT NULL AND expires_at > now()
+         AND report->>'${STARTED_AT_REPORT_KEY}' IS NOT NULL
+         AND expires_at > now()
        ORDER BY created_at DESC LIMIT 1`,
       [applicationId],
     );
@@ -154,13 +169,23 @@ export const techCheckService = {
     const sql = neon(DATABASE_URL);
     const rows = await sql(
       `UPDATE tech_check_tokens
-       SET started_at = COALESCE(started_at, now()),
+       SET report = CASE
+             WHEN report->>'${STARTED_AT_REPORT_KEY}' IS NULL
+               THEN jsonb_set(
+                 COALESCE(report, '{}'::jsonb),
+                 '{${STARTED_AT_REPORT_KEY}}',
+                 to_jsonb(now()::text),
+                 true
+               )
+             ELSE report
+           END,
            expires_at = CASE
-             WHEN started_at IS NULL THEN now() + ($2::int * interval '1 millisecond')
+             WHEN report->>'${STARTED_AT_REPORT_KEY}' IS NULL
+               THEN now() + ($2::int * interval '1 millisecond')
              ELSE expires_at
            END
        WHERE token_hash = $1 AND used_at IS NULL AND expires_at > now()
-       RETURNING started_at, expires_at`,
+       RETURNING report->>'${STARTED_AT_REPORT_KEY}' AS started_at, expires_at`,
       [await hashToken(token), INSTALL_WINDOW_MS],
     );
     if (!rows || rows.length === 0) return null;
@@ -192,9 +217,9 @@ export const techCheckService = {
       valid: !expired,
       used: Boolean(row.used_at),
       expired,
-      startedAt: row.started_at,
+      startedAt: getStoredStartTime(row.report),
       expiresAt: row.expires_at,
-      specs: row.report ?? null,
+      specs: row.used_at ? publicSystemReport(row.report) : null,
     };
   },
 
@@ -211,9 +236,14 @@ export const techCheckService = {
     const sql = neon(DATABASE_URL);
     const result = await sql(
       `UPDATE tech_check_tokens
-       SET used_at = now(), report = $2::jsonb
+       SET used_at = now(),
+           report = $2::jsonb || jsonb_build_object(
+             '${STARTED_AT_REPORT_KEY}',
+             report->>'${STARTED_AT_REPORT_KEY}'
+           )
        WHERE token_hash = $1 AND used_at IS NULL
-         AND started_at IS NOT NULL AND expires_at > now()
+         AND report->>'${STARTED_AT_REPORT_KEY}' IS NOT NULL
+         AND expires_at > now()
        RETURNING token_hash`,
       [await hashToken(token), JSON.stringify(specs)],
     );

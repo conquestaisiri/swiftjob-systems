@@ -34,7 +34,6 @@ const REQUIRED_COLUMNS = [
   ["jobs", "referral_reward_cents"],
   ["referrals", "content_overrides"],
   ["footprints", "meta"],
-  ["tech_check_tokens", "started_at"],
 ] as const;
 
 let schemaPromise: Promise<void> | null = null;
@@ -57,8 +56,7 @@ async function verifySchema(): Promise<void> {
         OR (table_name = 'referrals' AND column_name = 'content_overrides')
           OR (table_name = 'applications' AND column_name = 'referral_code')
         OR (table_name = 'jobs' AND column_name = 'referral_reward_cents')
-          OR (table_name = 'footprints' AND column_name = 'meta')
-          OR (table_name = 'tech_check_tokens' AND column_name = 'started_at'))`,
+          OR (table_name = 'footprints' AND column_name = 'meta'))`,
     [Array.from(REQUIRED_TABLES)],
   );
   const foundTables = new Set(
