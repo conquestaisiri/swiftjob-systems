@@ -73,19 +73,6 @@ export const applicationService = {
         applicationId: application.id,
         position: application.position,
         fullName: application.fullName,
-        email: application.email,
-        phone: application.phone,
-        country: application.country,
-        city: application.city,
-        linkedinUrl: application.linkedinUrl || undefined,
-        portfolioUrl: application.portfolioUrl || undefined,
-        yearsExperience: application.yearsExperience,
-        education: application.education,
-        englishProficiency: application.englishProficiency,
-        noticePeriod: application.noticePeriod,
-        expectedSalary: application.expectedSalary,
-        earliestStartDate: application.earliestStartDate,
-        skills: application.skills,
       });
       notification = true;
     } catch (error) {
@@ -135,7 +122,6 @@ export const applicationService = {
     id: string,
     status: ApplicationStatus,
     options?: {
-      notes?: string;
       meetLink?: string | null;
       interviewInstructions?: string | null;
       meetingKey?: string | null;
@@ -149,7 +135,6 @@ export const applicationService = {
     if (!application) return null;
 
     const {
-      notes,
       meetLink,
       interviewInstructions,
       meetingKey,
@@ -187,10 +172,7 @@ export const applicationService = {
           fullName: application.fullName,
           position: application.position,
           status,
-          applicationId: application.id,
           referenceCode: application.referenceCode,
-          notes,
-          isShortlistUpdate: status === "Shortlisted",
         }),
       )) !== null;
     }

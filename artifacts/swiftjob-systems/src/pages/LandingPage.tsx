@@ -46,7 +46,7 @@ const steps = [
   [
     "02",
     "Meet a vetted shortlist",
-    "We source, screen, and skills-check remote candidates, then share a focused shortlist with context on each person.",
+    "We source and screen remote candidates, then share a focused shortlist with context on each person.",
   ],
   [
     "03",

@@ -97,10 +97,15 @@ function getHrEmail(): string {
   return (getEnv().HR_EMAIL ?? "").trim();
 }
 
-function htmlToText(html: string): string {
+export function htmlToText(html: string): string {
   return html
     .replace(/<style[\s\S]*?<\/style>/gi, "")
     .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(
+      /<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi,
+      (_, href: string, label: string) =>
+        `${label.replace(/<[^>]+>/g, "")} (${href.replace(/&amp;/gi, "&")})`,
+    )
     .replace(/<br\s*\/?>(\r?\n)?/gi, "\n")
     .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, "\n")
     .replace(/<[^>]+>/g, "")
@@ -206,7 +211,14 @@ function layout(opts: LayoutOptions): string {
     .email-link { color: #49634B !important; }
     .email-content a:not(.email-button) { color: #49634B !important; }
     .email-callout-body { color: #253029 !important; }
+    .email-callout-info, .email-callout-success { background: #E8EFE4 !important; }
+    .email-callout-warning { background: #FEF3C7 !important; }
+    .email-callout-error { background: #FEE2E2 !important; }
     .email-step { color: #253029 !important; }
+    .email-status-box { background: #F7F7F4 !important; border-color: #DFE6DC !important; }
+    .email-status-label { color: #66706A !important; }
+    .email-status-value { color: #253029 !important; }
+    .email-code { background: #F7F7F4 !important; color: #253029 !important; }
     .email-logo-bar { background: #FFFFFF !important; }
     .email-logo-light-mode { display: inline-block !important; }
     .email-logo-dark-mode { display: none !important; }
@@ -242,13 +254,21 @@ function layout(opts: LayoutOptions): string {
       .email-logo-dark-mode { display: inline-block !important; }
       .email-button { background: #A9C7A6 !important; color: #10251D !important; }
       .email-callout { background: #20342A !important; border-left-color: #8BB58D !important; }
-      .email-callout-title { color: #B9D7B4 !important; }
+      .email-callout-info, .email-callout-success { background: #20342A !important; }
       .email-callout-warning { background: #3B2F18 !important; border-left-color: #E0A84F !important; }
-      .email-callout-warning .email-callout-title { color: #F3C56E !important; }
       .email-callout-error { background: #3D2424 !important; border-left-color: #E78E8E !important; }
+      .email-callout-title { color: #B9D7B4 !important; }
+      .email-callout-warning .email-callout-title { color: #F3C56E !important; }
       .email-callout-error .email-callout-title { color: #FFB0B0 !important; }
       .email-content [style*="background: #F7F7F4"]:not(.email-table-label) { background: #203128 !important; }
       .email-message { background: #203128 !important; border-color: #2E4336 !important; }
+      .email-status-box { background: #203128 !important; border-color: #2E4336 !important; }
+      .email-status-label { color: #BAC8BE !important; }
+      .email-status-value, .email-status-reviewing { color: #EFF7F0 !important; }
+      .email-status-shortlisted { color: #D6C7FF !important; }
+      .email-status-rejected { color: #FFB0B0 !important; }
+      .email-status-hired { color: #B9E5D8 !important; }
+      .email-code { background: #203128 !important; color: #EFF7F0 !important; }
       .email-content [style*="border: 1px solid #DFE6DC"],
       .email-content [style*="border-top: 1px solid #DFE6DC"] { border-color: #2E4336 !important; }
       .email-content hr[style*="border-top: 1px solid #DFE6DC"] { border-top-color: #2E4336 !important; }
@@ -264,6 +284,21 @@ function layout(opts: LayoutOptions): string {
     [data-ogsc] .email-header h1, [data-ogsb] .email-header h1 { color: ${DARK_MODE_MINT_TEXT} !important; }
     [data-ogsc] .email-header p, [data-ogsb] .email-header p { color: ${BRAND.teal} !important; }
     [data-ogsc] .email-message, [data-ogsb] .email-message { background: #203128 !important; border-color: #2E4336 !important; }
+    [data-ogsc] .email-status-box, [data-ogsb] .email-status-box { background: #203128 !important; border-color: #2E4336 !important; }
+    [data-ogsc] .email-status-label, [data-ogsb] .email-status-label { color: #BAC8BE !important; }
+    [data-ogsc] .email-status-value, [data-ogsb] .email-status-value,
+    [data-ogsc] .email-status-reviewing, [data-ogsb] .email-status-reviewing { color: #EFF7F0 !important; }
+    [data-ogsc] .email-status-shortlisted, [data-ogsb] .email-status-shortlisted { color: #D6C7FF !important; }
+    [data-ogsc] .email-status-rejected, [data-ogsb] .email-status-rejected { color: #FFB0B0 !important; }
+    [data-ogsc] .email-status-hired, [data-ogsb] .email-status-hired { color: #B9E5D8 !important; }
+    [data-ogsc] .email-code, [data-ogsb] .email-code { background: #203128 !important; color: #EFF7F0 !important; }
+    [data-ogsc] .email-callout, [data-ogsb] .email-callout { background: #20342A !important; border-left-color: #8BB58D !important; }
+    [data-ogsc] .email-callout-title, [data-ogsb] .email-callout-title { color: #B9D7B4 !important; }
+    [data-ogsc] .email-callout-warning, [data-ogsb] .email-callout-warning { background: #3B2F18 !important; border-left-color: #E0A84F !important; }
+    [data-ogsc] .email-callout-warning .email-callout-title, [data-ogsb] .email-callout-warning .email-callout-title { color: #F3C56E !important; }
+    [data-ogsc] .email-callout-error, [data-ogsb] .email-callout-error { background: #3D2424 !important; border-left-color: #E78E8E !important; }
+    [data-ogsc] .email-callout-error .email-callout-title, [data-ogsb] .email-callout-error .email-callout-title { color: #FFB0B0 !important; }
+    [data-ogsc] .email-button, [data-ogsb] .email-button { background: #A9C7A6 !important; color: #10251D !important; }
     [data-ogsc] .email-logo-bar, [data-ogsb] .email-logo-bar { background: #17221C !important; border-bottom-color: #8BB58D !important; }
     [data-ogsc] .email-logo-light-mode, [data-ogsb] .email-logo-light-mode { display: none !important; }
     [data-ogsc] .email-logo-dark-mode, [data-ogsb] .email-logo-dark-mode { display: inline-block !important; }
@@ -289,8 +324,8 @@ function layout(opts: LayoutOptions): string {
         <table class="email-card email-surface" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${BRAND.white}" style="max-width: 600px; width: 100%; background:${BRAND.white}; border-radius: 14px; overflow: hidden; border: 1px solid ${BRAND.border};">
           <tr>
             <td class="email-logo-bar" bgcolor="${BRAND.white}" style="background:${BRAND.white}; background-color:${BRAND.white}; padding: 20px 32px; text-align: center; border-bottom: 3px solid ${BRAND.teal};">
-              <img class="email-logo-light-mode" src="${getLogoUrl()}" alt="SwiftJob" width="220" style="max-width: 220px; height: auto; border: 0;" />
-              <img class="email-logo-dark-mode" src="${getDarkLogoUrl()}" alt="SwiftJob" width="220" style="max-width: 220px; height: auto; border: 0;" />
+              <img class="email-logo-light-mode" src="${getLogoUrl()}" alt="SwiftJob" width="220" style="display:inline-block;max-width:220px;height:auto;border:0;" />
+              <img class="email-logo-dark-mode" src="${getDarkLogoUrl()}" alt="SwiftJob" width="220" style="display:none;max-width:220px;height:auto;border:0;" />
             </td>
           </tr>
           <tr>
@@ -307,7 +342,7 @@ function layout(opts: LayoutOptions): string {
           <tr>
             <td class="email-footer" bgcolor="${BRAND.navy}" style="background:${BRAND.navy}; padding: 24px 32px; text-align: center;">
               <p style="margin: 0 0 4px; color: ${BRAND.white}; font-size: 14px; font-weight: 600;">SwiftJob</p>
-              <p style="margin: 0 0 12px; color: ${BRAND.mint}; font-size: 12px;">100% remote roles · work from anywhere</p>
+              <p style="margin: 0 0 12px; color: ${BRAND.mint}; font-size: 12px;">Remote opportunities with SwiftJob</p>
               <a href="${getBaseUrl()}" style="color: ${BRAND.mint}; font-size: 12px; text-decoration: underline;">SwiftJob website</a>
             </td>
           </tr>
@@ -381,27 +416,6 @@ function sectionTitle(text: string): string {
   return `<h2 class="email-section-title" style="margin: 28px 0 12px; color: ${BRAND.navy}; font-size: 16px; font-weight: 700;">${esc(text)}</h2>`;
 }
 
-function stepList(steps: string[]): string {
-  const items = steps
-    .map(
-      (s, i) => `
-      <li class="email-step" style="margin-bottom: 10px; font-size: 14px; color: ${BRAND.text};">
-        <span style="display: inline-block; width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 50%; background:${BRAND.teal}; color: ${BRAND.white}; font-size: 12px; font-weight: 700; margin-right: 10px;">${i + 1}</span>${s}
-      </li>`,
-    )
-    .join("");
-  return `<ol style="margin: 0; padding: 0; list-style: none;">${items}</ol>`;
-}
-
-function footerNote(): string {
-  return `
-    <hr style="border: none; border-top: 1px solid ${BRAND.border}; margin: 28px 0;">
-    <p style="color: ${BRAND.muted}; font-size: 12px; margin: 0; text-align: center;">
-      This is an automated message from SwiftJob. You're receiving it because you either applied for a role or requested a sign-in link.<br>
-      Questions? Reply to this email or write to <a href="mailto:${getSupportEmail()}" style="color: ${BRAND.teal};">${getSupportEmail()}</a>.
-    </p>`;
-}
-
 function infoRow(label: string, value: string): string {
   const gmailStableLabel = `<div class="gmail-blend-screen"><div class="gmail-blend-difference">${esc(label)}</div></div>`;
   return `
@@ -425,7 +439,7 @@ function infoTable(rows: Array<[string, string]>): string {
 // ============================================
 // Referral click notification (HR/admin)
 // ============================================
-function formatReferralClickHtml(data: {
+export function formatReferralClickHtml(data: {
   fullName: string;
   referredBy?: string | null;
   position: string;
@@ -433,11 +447,20 @@ function formatReferralClickHtml(data: {
   deviceType: string;
   clickedAt: Date;
 }): string {
-  const deviceLabel =
-    data.deviceType === "mobile" ? "Mobile phone" : "PC / laptop";
-  const deviceColor = data.deviceType === "mobile" ? "#B45309" : BRAND.green;
+  const isMobile = data.deviceType === "mobile";
+  const isDesktop = /^(desktop|laptop|pc)$/i.test(data.deviceType);
+  const deviceLabel = isMobile
+    ? "Mobile phone"
+    : isDesktop
+      ? "PC / laptop"
+      : "Device not identified";
+  const deviceColor = isMobile
+    ? "#B45309"
+    : isDesktop
+      ? BRAND.green
+      : BRAND.muted;
   const content = `
-    <p style="margin: 0 0 12px; font-size: 15px;">A referred lead just clicked <em>continue</em> on their private invitation page.</p>
+    <p class="email-copy" style="margin:0 0 12px;color:${BRAND.text};font-size:15px;line-height:1.7;">A referred lead clicked continue on their invitation page.</p>
 
     ${infoTable([
       ["Name", esc(data.fullName)],
@@ -449,7 +472,7 @@ function formatReferralClickHtml(data: {
       ],
       [
         "Device",
-        `<span style="font-weight:700; color:${deviceColor};">${deviceLabel}</span>`,
+        `<span class="email-status-value" style="font-weight:700;color:${deviceColor};">${deviceLabel}</span>`,
       ],
       [
         "Clicked",
@@ -458,20 +481,26 @@ function formatReferralClickHtml(data: {
     ])}
 
     ${
-      data.deviceType === "mobile"
+      isMobile
         ? callout(
             "warning",
             "Mobile device",
             `This click came from a ${deviceLabel}. The next step was <strong>blocked</strong> for them and they were asked to continue on a desktop/laptop. If this lead used a phone, they will open the page again from their PC — you may see a second click shortly.`,
           )
-        : callout(
+        : isDesktop
+        ? callout(
             "success",
             "Laptop confirmed",
             `This lead is on a <strong>${deviceLabel}</strong> and was allowed through to the next step.`,
           )
+        : callout(
+            "info",
+            "Device not identified",
+            "The click was recorded, but the device could not be confirmed from the available browser signal.",
+          )
     }
 
-    <p style="font-size: 13px; color: ${BRAND.muted}; margin: 8px 0 0;">Manage this referral in the <a href="${getBaseUrl()}/admin" style="color: ${BRAND.teal};">admin dashboard</a>.</p>
+    <p class="email-muted" style="font-size:13px;color:${BRAND.muted};margin:8px 0 0;">Manage this referral in the <a class="email-link" href="${getBaseUrl()}/admin" style="color:${BRAND.teal};">admin dashboard</a>.</p>
   `;
   return layout({
     preheader: `Referral click: ${data.fullName} (${deviceLabel})`,
@@ -481,69 +510,22 @@ function formatReferralClickHtml(data: {
   });
 }
 
-interface ApplicationEmailData {
+export interface ApplicationEmailData {
   applicationId: string;
   position: string;
   fullName: string;
-  email: string;
-  phone: string;
-  country: string;
-  city: string;
-  linkedinUrl?: string;
-  portfolioUrl?: string;
-  yearsExperience: string;
-  education: string;
-  englishProficiency: string;
-  noticePeriod: string;
-  expectedSalary: string;
-  earliestStartDate: string;
-  skills: string;
 }
 
-function formatApplicationHtml(data: ApplicationEmailData): string {
-  const rows: Array<[string, string]> = [
-    ["Full name", esc(data.fullName)],
-    [
-      "Email",
-      `<a href="mailto:${esc(data.email)}" style="color: ${BRAND.teal};">${esc(data.email)}</a>`,
-    ],
-    ["Phone", esc(data.phone)],
-    ["Location", `${esc(data.city)}, ${esc(data.country)}`],
-    ["Years of experience", esc(data.yearsExperience)],
-    ["Education", esc(data.education)],
-    ["English proficiency", esc(data.englishProficiency)],
-    ["Notice period", esc(data.noticePeriod)],
-    ["Expected salary", esc(data.expectedSalary)],
-    ["Earliest start date", esc(data.earliestStartDate)],
-  ];
-  if (data.linkedinUrl)
-    rows.push([
-      "LinkedIn",
-      `<a href="${esc(data.linkedinUrl)}" style="color: ${BRAND.teal};">${esc(data.linkedinUrl)}</a>`,
-    ]);
-  if (data.portfolioUrl)
-    rows.push([
-      "Portfolio",
-      `<a href="${esc(data.portfolioUrl)}" style="color: ${BRAND.teal};">${esc(data.portfolioUrl)}</a>`,
-    ]);
-
+export function formatApplicationHtml(data: ApplicationEmailData): string {
   const content = `
-    <p style="margin: 0 0 8px; font-size: 15px;">A new application has been submitted through the SwiftJob careers portal.</p>
-
-    ${callout("info", "Position", `<strong style="font-size: 15px;">${esc(data.position)}</strong>`)}
-    ${infoTable(rows)}
-
-    ${sectionTitle("Skills")}
-    <p style="background: ${BRAND.paper}; padding: 14px 16px; border-radius: 8px; border: 1px solid ${BRAND.border}; white-space: pre-wrap; margin: 0; font-size: 13px;">${esc(data.skills)}</p>
-
-    ${sectionTitle("Your next steps")}
-    <p style="font-size: 14px; margin: 0 0 8px;">Please review this application and update its status in the admin dashboard.</p>
-    <ol style="margin: 0; padding-left: 20px; font-size: 14px; color: ${BRAND.text};">
-      <li style="margin-bottom: 8px;">Review the candidate's profile and resume.</li>
-      <li style="margin-bottom: 8px;">Use <strong>Reviewing</strong> while evaluating the application; <strong>Shortlisted</strong> advances the candidate and unlocks the role assessment; <strong>Rejected</strong> closes the application.</li>
-      <li style="margin-bottom: 8px;">Status changes normally email the candidate. The Shortlist dialog lets you review or turn off that notification before saving.</li>
-    </ol>
-    <p style="font-size: 13px; color: ${BRAND.muted}; margin: 8px 0 0;">Open the <a href="${getBaseUrl()}/admin" style="color: ${BRAND.teal};">admin dashboard</a> to review this application.</p>
+    <p class="email-copy" style="margin:0 0 16px;color:${BRAND.text};font-size:15px;line-height:1.7;">A new application is ready for review.</p>
+    ${infoTable([
+      ["Candidate", esc(data.fullName)],
+      ["Role", esc(data.position)],
+      ["Application ID", esc(data.applicationId)],
+    ])}
+    <p class="email-muted" style="margin:0 0 16px;color:${BRAND.muted};font-size:13px;line-height:1.6;">The candidate's application and resume are available in the authorized admin record.</p>
+    ${primaryButton(`${getBaseUrl()}/admin/applications?search=${encodeURIComponent(data.applicationId)}`, "Review application")}
   `;
 
   return layout({
@@ -557,62 +539,22 @@ function formatApplicationHtml(data: ApplicationEmailData): string {
 // ============================================
 // Applicant confirmation
 // ============================================
-function formatConfirmationHtml(data: {
+export function formatConfirmationHtml(data: {
   position: string;
   fullName: string;
   applicationId: string;
   referenceCode?: string;
 }): string {
   const referenceBlock = data.referenceCode
-    ? `
-      ${sectionTitle("Your reference code")}
-      <div style="background: ${BRAND.paper}; border: 2px dashed ${BRAND.teal}; border-radius: 8px; padding: 16px; text-align: center; margin: 16px 0;">
-        <code style="font-size: 20px; font-weight: 700; color: ${BRAND.teal}; letter-spacing: 2px;">${esc(data.referenceCode)}</code>
-      </div>
-      <p style="font-size: 13px; color: ${BRAND.muted}; margin: 0;">Keep this code handy — quote it whenever you contact us and we'll find your application straight away.</p>`
+    ? `<p class="email-muted" style="margin:16px 0 0;color:${BRAND.muted};font-size:13px;line-height:1.6;">Reference: <strong class="email-code" style="background:${BRAND.paper};padding:3px 8px;border-radius:4px;color:${BRAND.text};">${esc(data.referenceCode)}</strong></p>`
     : "";
 
   const content = `
-    <p style="margin: 0 0 12px; font-size: 15px;">Hi <strong>${esc(data.fullName)}</strong>,</p>
-    <p style="margin: 0 0 12px; font-size: 15px;">Thank you for applying to the <strong>${esc(data.position)}</strong> position at SwiftJob. We've received your application successfully.</p>
-
-    ${sectionTitle("Your application")}
-    ${infoTable([
-      [
-        "Application ID",
-        `<code style="background: ${BRAND.paper}; padding: 2px 8px; border-radius: 4px;">${esc(data.applicationId)}</code>`,
-      ],
-      ["Position", esc(data.position)],
-      ["Submitted", "Received and queued for review"],
-    ])}
+    <p class="email-copy" style="margin:0 0 12px;color:${BRAND.text};font-size:15px;line-height:1.7;">Hi <strong>${esc(data.fullName)}</strong>,</p>
+    <p class="email-copy" style="margin:0 0 12px;color:${BRAND.text};font-size:15px;line-height:1.7;">We received your application for <strong>${esc(data.position)}</strong>. Our team aims to review it within 2–3 business days and will email you when its status changes.</p>
+    ${callout("info", "What to do now", "Sign in to your candidate portal to complete the required technical check. If your application advances, any role assessment will appear there after the technical check is complete. Your progress is saved.")}
+    ${primaryButton(`${getBaseUrl()}/login`, "Open candidate portal")}
     ${referenceBlock}
-
-    ${callout(
-      "info",
-      "What happens next",
-      `
-      Your application has been received for review. Our team aims to review applications within 2–3 business days. You can sign in to your candidate portal to view your application and complete its technical check. A role assessment, if required, is unlocked only if our recruitment team advances your application; we’ll email you when there is an update.
-    `,
-    )}
-
-    ${primaryButton(`${getBaseUrl()}/login`, "Open your candidate portal")}
-
-    ${sectionTitle("The hiring process")}
-    ${stepList([
-      `<strong>Application review</strong> — We evaluate your experience, skills, and fit for the role.`,
-      `<strong>Technical check</strong> — Confirm your connection, browser, and computer are ready for this role.`,
-      `<strong>Role assessment</strong> — If required, it becomes available in your portal only after the recruitment team advances your application.`,
-      `<strong>Team review &amp; feedback</strong> — Our recruitment team reaches out directly with the outcome and next steps.`,
-      `<strong>Offer &amp; onboarding</strong> — Successful candidates receive a formal offer and a fully remote start.`,
-    ])}
-
-    ${callout(
-      "success",
-      "Continue your application",
-      `
-      Open your candidate portal to see the next step for this application. You can stop and return later; your saved progress stays attached to your application. We'll email you as soon as your application status changes.
-    `,
-    )}
   `;
 
   return layout({
@@ -628,7 +570,6 @@ function formatConfirmationHtml(data: {
 // ============================================
 interface StatusDetail {
   message: string;
-  meaning: string;
   nextSteps: string;
   color: string;
 }
@@ -636,110 +577,63 @@ interface StatusDetail {
 const STATUS_DETAILS: Record<string, StatusDetail> = {
   Reviewing: {
     color: "#1D4ED8",
-    message:
-      "Your application is currently being reviewed by our recruitment team.",
-    meaning:
-      "We've confirmed your application looks promising and are taking a closer look at your experience and skills against the role.",
-    nextSteps:
-      "You don't need to do anything right now. Our team aims to review applications within 2–3 business days. We'll email you when your status changes.",
+    message: "Your application is being reviewed by our recruitment team.",
+    nextSteps: "No action is needed right now. We will email you when there is an update.",
   },
   Shortlisted: {
     color: "#6D28D9",
     message: "Your application has moved to the next stage.",
-    meaning:
-      "The recruitment team has advanced your application. Your candidate portal now shows the next step for this role.",
-    nextSteps:
-      "Sign in to your candidate portal. Complete the technical check if it is still outstanding, then complete the role assessment if one is required for this position. You can save your progress and return later.",
+    nextSteps: "Sign in to your candidate portal to see the next step. Any required role assessment becomes available after you complete the technical check. Your progress is saved.",
   },
   Rejected: {
     color: "#B91C1C",
     message: "Thank you for your interest in this role.",
-    meaning:
-      "After careful consideration, we've decided to move forward with other candidates whose profiles more closely match the role.",
-    nextSteps:
-      "We genuinely appreciate the time you invested. Please keep an eye on our careers page — we post new roles regularly and would welcome your application again in the future.",
+    nextSteps: "We have decided to move forward with other candidates for this role. Thank you for the time you invested in applying.",
   },
   Hired: {
     color: "#0F766E",
-    message: "Congratulations — we're delighted to offer you the position!",
-    meaning:
-      "You're now part of the SwiftJob team. We're excited to have you onboard.",
-    nextSteps:
-      "Our team will reach out shortly with your offer details, start date, and onboarding steps. Watch your inbox and be ready to provide any requested documents.",
+    message: "Your application has been marked as hired.",
+    nextSteps: "Our team will contact you with the next steps.",
   },
 };
 
-function formatStatusUpdateHtml(data: {
+export function formatStatusUpdateHtml(data: {
   fullName: string;
   position: string;
-  applicationId: string;
   status: string;
   message: string;
   referenceCode?: string;
-  notes?: string;
-  isShortlistUpdate?: boolean;
 }): string {
   const detail = STATUS_DETAILS[data.status];
   const statusColor = detail?.color ?? BRAND.teal;
-  const notesBlock = data.notes
-    ? callout("warning", "Notes from our team", esc(data.notes))
-    : "";
+  const statusClass = ({
+    Reviewing: "reviewing",
+    Shortlisted: "shortlisted",
+    Rejected: "rejected",
+    Hired: "hired",
+  } as Record<string, string>)[data.status] ?? "other";
 
   const referenceBlock = data.referenceCode
-    ? `<p style="font-size: 13px; color: ${BRAND.muted}; margin-top: 12px;"><strong>Reference code:</strong> <code style="background: ${BRAND.paper}; padding: 3px 8px; border-radius: 4px; font-size: 14px;">${esc(data.referenceCode)}</code></p>`
+    ? `<p class="email-muted" style="font-size:13px;color:${BRAND.muted};margin:16px 0 0;">Reference: <strong class="email-code" style="background:${BRAND.paper};padding:3px 8px;border-radius:4px;color:${BRAND.text};">${esc(data.referenceCode)}</strong></p>`
     : "";
 
   const statusBox = `
-    <div style="background: ${BRAND.paper}; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; border: 1px solid ${BRAND.border};">
-      <p style="margin: 0 0 6px; color: ${BRAND.muted}; font-size: 12px; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600;">Application status</p>
-      <p style="margin: 0; font-size: 26px; font-weight: 700; color: ${statusColor};">${esc(data.status)}</p>
+    <div class="email-status-box" style="background:${BRAND.paper};border-radius:8px;padding:20px;margin:20px 0;text-align:center;border:1px solid ${BRAND.border};">
+      <p class="email-status-label" style="margin:0 0 6px;color:${BRAND.muted};font-size:12px;text-transform:uppercase;letter-spacing:0.6px;font-weight:600;">Application status</p>
+      <p class="email-status-value email-status-${statusClass}" style="margin:0;font-size:24px;font-weight:700;color:${statusColor};">${esc(data.status)}</p>
     </div>`;
 
   const nextSteps = detail
     ? callout("info", "What happens next", detail.nextSteps)
     : callout("info", "What happens next", esc(data.message));
 
-  const shortlistBlock = data.isShortlistUpdate
-    ? callout(
-        "success",
-        "You've moved to the next stage",
-        `
-        Your application for <strong>${esc(data.position)}</strong> has been advanced by the recruitment team. Sign in to your candidate portal to see the next step. If this role requires an assessment, it is now available there after your technical check is complete.
-      `,
-      )
-    : "";
-
-  const securityBlock = data.isShortlistUpdate
-    ? callout(
-        "warning",
-        "Stay safe — official communication only",
-        `
-        SwiftJob will <strong>only</strong> ever contact you from official SwiftJob email addresses and through your secure candidate portal. We will never ask you for money, payment, or sensitive personal information. If you receive anything suspicious, do not click links — just ignore it.
-      `,
-      )
-    : "";
-
   const content = `
-    <p style="margin: 0 0 12px; font-size: 15px;">Hi <strong>${esc(data.fullName)}</strong>,</p>
-    <p style="margin: 0 0 4px; font-size: 15px;">There's an update on your application for <strong>${esc(data.position)}</strong>.</p>
-    <p style="margin: 0 0 12px; font-size: 13px; color: ${BRAND.muted};">Application ID: <code style="background: ${BRAND.paper}; padding: 2px 8px; border-radius: 4px;">${esc(data.applicationId)}</code></p>
-
+    <p class="email-copy" style="margin:0 0 12px;color:${BRAND.text};font-size:15px;line-height:1.7;">Hi <strong>${esc(data.fullName)}</strong>,</p>
+    <p class="email-copy" style="margin:0 0 12px;color:${BRAND.text};font-size:15px;line-height:1.7;">There is an update on your application for <strong>${esc(data.position)}</strong>.</p>
     ${statusBox}
-
-    <p style="font-size: 15px; margin: 0 0 8px;"><strong>${esc(detail?.message ?? data.message)}</strong></p>
-    ${detail ? `<p style="font-size: 14px; margin: 0;">${esc(detail.meaning)}</p>` : ""}
-
-    ${shortlistBlock}
-
-    ${notesBlock}
-
+    <p class="email-copy" style="margin:0 0 12px;color:${BRAND.text};font-size:15px;line-height:1.7;"><strong>${esc(detail?.message ?? data.message)}</strong></p>
     ${nextSteps}
-
-    ${securityBlock}
-
-    ${sectionTitle("View your application")}
-    <p style="font-size: 14px; margin: 0 0 12px;">Sign in to your candidate portal to see your full application, status history, and any instructions we've shared with you.</p>
-    ${primaryButton(`${getBaseUrl()}/login`, "Open my candidate portal")}
+    ${primaryButton(`${getBaseUrl()}/login`, "View application")}
     ${referenceBlock}
   `;
 
@@ -795,7 +689,7 @@ export function formatContactHtml(data: {
 // ============================================
 // Magic link
 // ============================================
-function formatMagicLinkHtml(data: {
+export function formatMagicLinkHtml(data: {
   linkUrl: string;
   fullName?: string;
 }): string {
@@ -803,32 +697,12 @@ function formatMagicLinkHtml(data: {
     ? `Hi <strong>${esc(data.fullName)}</strong>,`
     : "Hi there,";
   const content = `
-    <p style="margin: 0 0 12px; font-size: 15px;">${greeting}</p>
-    <p style="margin: 0 0 12px; font-size: 15px;">You requested a secure sign-in link for your SwiftJob candidate portal. Click the button below to open your candidate account, view your applications, and continue the next steps shown there.</p>
-
+    <p class="email-copy" style="margin:0 0 12px;color:${BRAND.text};font-size:15px;line-height:1.7;">${greeting}</p>
+    <p class="email-copy" style="margin:0 0 12px;color:${BRAND.text};font-size:15px;line-height:1.7;">Use this one-time link to sign in to your candidate portal and view your applications.</p>
     ${primaryButton(data.linkUrl, "Sign in to my portal")}
-
-    ${callout(
-      "warning",
-      "This link expires in 15 minutes",
-      `
-      For your security, this link is single-use and valid for <strong>15 minutes</strong>. If it expires, simply request a new one on the sign-in page.
-    `,
-    )}
-
-    ${sectionTitle("How signing in works")}
-    ${stepList([
-      `Click the button above (or the link below).`,
-      `You'll be signed in automatically — no password needed.`,
-      `You'll land on your applications page where you can view your status and continue any saved next step for each application.`,
-      `Your account is ready after email verification. You can create a password inside the portal, but a password is optional.`,
-    ])}
-
-    <p style="font-size: 13px; color: ${BRAND.muted}; word-break: break-all; margin: 16px 0 0;">If the button doesn't work, copy this link into your browser:<br><a href="${esc(data.linkUrl)}" style="color: ${BRAND.teal};">${esc(data.linkUrl)}</a></p>
-
-    <hr style="border: none; border-top: 1px solid ${BRAND.border}; margin: 24px 0;">
-
-    <p style="font-size: 13px; color: ${BRAND.muted}; margin: 0;">If you didn't request this link, you can safely ignore this email — no action is needed.</p>
+    ${callout("warning", "Expires in 15 minutes", "This link can be used once. If it expires, request a new sign-in link.")}
+    <p class="email-muted" style="font-size:13px;color:${BRAND.muted};word-break:break-all;margin:16px 0 0;">If the button does not work, copy this link into your browser:<br><a class="email-link" href="${esc(data.linkUrl)}" style="color:${BRAND.teal};">${esc(data.linkUrl)}</a></p>
+    <p class="email-muted" style="font-size:13px;color:${BRAND.muted};margin:16px 0 0;">If you did not request this link, you can ignore this email.</p>
   `;
 
   return layout({
@@ -842,7 +716,7 @@ function formatMagicLinkHtml(data: {
 // ============================================
 // Referral invitation
 // ============================================
-function formatReferralInvitationHtml(data: {
+export function formatReferralInvitationHtml(data: {
   fullName: string;
   referredBy?: string | null;
   position: string;
@@ -858,16 +732,16 @@ function formatReferralInvitationHtml(data: {
     data.content.emailBody ??
     "You've been referred and we'd love for you to review this opportunity.";
   const content = `
-    <p style="margin: 0 0 12px; font-size: 15px;">${esc(data.content.emailGreeting ?? `Hi ${data.fullName},`)}</p>
-    <p style="margin: 0 0 4px; font-size: 15px; white-space: pre-wrap;">${esc(body)}</p>
+    <p class="email-copy" style="margin:0 0 12px;color:${BRAND.text};font-size:15px;line-height:1.7;">${esc(data.content.emailGreeting ?? `Hi ${data.fullName},`)}</p>
+    <p class="email-copy" style="margin:0 0 4px;color:${BRAND.text};font-size:15px;line-height:1.7;white-space:pre-wrap;">${esc(body)}</p>
 
     ${primaryButton(data.referralUrl, data.content.emailCtaLabel ?? "Open my briefing")}
 
-    <p style="font-size: 14px; margin: 0 0 12px; white-space: pre-wrap;">${esc(data.content.emailClosing ?? "When you're ready, just follow the steps inside.")}</p>
+    <p class="email-copy" style="font-size:14px;color:${BRAND.text};line-height:1.7;margin:0 0 12px;white-space:pre-wrap;">${esc(data.content.emailClosing ?? "When you're ready, just follow the steps inside.")}</p>
 
     <hr style="border: none; border-top: 1px solid ${BRAND.border}; margin: 24px 0;">
-    <p style="font-size: 13px; color: ${BRAND.muted}; margin: 0;">
-      This briefing is private to you. If you have any questions or run into any technical problem, contact <a href="mailto:${getSupportEmail()}" style="color: ${BRAND.teal};">${getSupportEmail()}</a> and they will respond ASAP to rectify it.
+    <p class="email-muted" style="font-size:13px;color:${BRAND.muted};margin:0;">
+      This invitation is intended for you. Questions? Reply to this email or contact <a class="email-link" href="mailto:${esc(getSupportEmail())}" style="color: ${BRAND.teal};">${esc(getSupportEmail())}</a>.
     </p>
   `;
 
@@ -879,14 +753,30 @@ function formatReferralInvitationHtml(data: {
   });
 }
 
-function interpolateText(
-  template: string,
-  vars: Record<string, string>,
-): string {
-  return template.replace(
-    /\{(name|position|referredBy|code|hrEmail)\}/g,
-    (_, key: string) => vars[key] ?? "",
-  );
+export function formatTechCheckCompletionHtml(data: {
+  applicationId: string;
+  referenceCode: string;
+  fullName: string;
+  position: string;
+}): string {
+  const adminUrl = `${getBaseUrl()}/admin/applications?search=${encodeURIComponent(data.applicationId)}`;
+  const content = `
+    <p class="email-copy" style="margin:0 0 16px;color:${BRAND.text};font-size:15px;line-height:1.7;">A candidate has completed the technical check.</p>
+    ${infoTable([
+      ["Candidate", esc(data.fullName)],
+      ["Role", esc(data.position)],
+      ["Reference", esc(data.referenceCode)],
+      ["Application ID", esc(data.applicationId)],
+    ])}
+    ${primaryButton(adminUrl, "Review application")}
+    <p class="email-muted" style="margin:16px 0 0;color:${BRAND.muted};font-size:12.5px;line-height:1.6;">The full report is available only in the authorized application record.</p>
+  `;
+  return layout({
+    preheader: `${data.fullName} completed the technical check for ${data.position}`,
+    headerTitle: "Technical Check Completed",
+    headerSubtitle: `${data.fullName} — ${data.position}`,
+    content,
+  });
 }
 
 // ============================================
@@ -928,10 +818,7 @@ export const emailService = {
     fullName: string;
     position: string;
     status: string;
-    applicationId: string;
     referenceCode?: string;
-    notes?: string;
-    isShortlistUpdate?: boolean;
   }): Promise<void> {
     const detail = STATUS_DETAILS[data.status];
     const message =
@@ -959,33 +846,13 @@ export const emailService = {
     applicationId: string;
     referenceCode: string;
     fullName: string;
-    email: string;
     position: string;
   }): Promise<void> {
-    const adminUrl = `${getBaseUrl()}/admin/applications?search=${encodeURIComponent(data.referenceCode)}`;
-    const content = `
-      <p class="email-copy" style="margin:0 0 16px;color:${BRAND.text};font-size:15px;line-height:1.7;">A candidate has completed the technical check for an application.</p>
-      ${infoTable([
-        ["Candidate", esc(data.fullName)],
-        ["Email", `<a href="mailto:${esc(data.email)}" style="color:${BRAND.teal};">${esc(data.email)}</a>`],
-        ["Role", esc(data.position)],
-        ["Reference", esc(data.referenceCode)],
-        ["Application ID", esc(data.applicationId)],
-      ])}
-      ${primaryButton(adminUrl, "Review application")}
-      <p class="email-muted" style="margin:16px 0 0;color:${BRAND.muted};font-size:12.5px;line-height:1.6;">Device specifications are available only in the authorized application record.</p>
-    `;
-
     await sendEmail({
       from: getFromAddress(),
       to: getHrEmail(),
       subject: `Technical check completed: ${data.position} — ${data.fullName} (${data.referenceCode})`,
-      html: layout({
-        preheader: `${data.fullName} completed the technical check for ${data.position}`,
-        headerTitle: "Technical Check Completed",
-        headerSubtitle: `${data.fullName} — ${data.position}`,
-        content,
-      }),
+      html: formatTechCheckCompletionHtml(data),
     });
   },
 

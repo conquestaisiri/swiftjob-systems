@@ -1338,7 +1338,6 @@ app.post("/api/tech-check/report/:token", async (c) => {
               applicationId: application.id,
               referenceCode: application.referenceCode,
               fullName: application.fullName,
-              email: application.email,
               position: application.position,
             }),
           );
@@ -2140,7 +2139,6 @@ app.patch("/api/admin/applications/:id/status", adminAuth, async (c) => {
     }
     const {
       status,
-      notes,
       meetLink,
       interviewInstructions,
       meetingKey,
@@ -2150,7 +2148,6 @@ app.patch("/api/admin/applications/:id/status", adminAuth, async (c) => {
       notifyCandidate,
     } = body as {
       status: string;
-      notes?: string;
       meetLink?: string | null;
       interviewInstructions?: string | null;
       meetingKey?: string | null;
@@ -2220,7 +2217,6 @@ app.patch("/api/admin/applications/:id/status", adminAuth, async (c) => {
       c.req.param("id"),
       status as ApplicationStatus,
       {
-        notes,
         meetLink,
         interviewInstructions,
         meetingKey,

@@ -49,6 +49,7 @@ jobs:
           node AUDIT/runtime/auth-regression.mjs
           node AUDIT/runtime/application-regression.mjs
           node AUDIT/runtime/techcheck-regression.mjs
+          pnpm --filter @workspace/scripts exec tsx --test ../shared/mail-recipients.test.ts ../shared/application-questions.test.ts ../workers-api/src/services/assessmentAccess.test.ts ../workers-api/src/services/email.test.ts
 
   build-frontend:
     name: Build Frontend
