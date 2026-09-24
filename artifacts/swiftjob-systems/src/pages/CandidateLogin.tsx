@@ -15,8 +15,12 @@ import { useTurnstile } from "@/lib/turnstile";
 type Mode = "magic" | "password";
 
 export function CandidateLogin() {
+  const loginParams = new URLSearchParams(window.location.search);
+  const cameFromApplication =
+    loginParams.get("from") === "application";
+  const emailFromQuery = loginParams.get("email") ?? "";
   const [mode, setMode] = useState<Mode>("magic");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(emailFromQuery);
   const [password, setPassword] = useState("");
   const [state, setState] = useState<
     "idle" | "submitting" | "success" | "error"
@@ -96,7 +100,7 @@ export function CandidateLogin() {
   };
 
   return (
-    <SiteLayout title="Sign In — SwiftJob">
+    <SiteLayout title="Candidate Portal — SwiftJob">
       <div className="auth-shell">
         <div className="auth-card reveal is-visible">
           <div className="auth-header">
@@ -117,10 +121,16 @@ export function CandidateLogin() {
                 className="candidate-logo"
               />
             </div>
-            <h1>Sign in to your candidate portal</h1>
+            <h1>
+              {cameFromApplication
+                ? "Secure your candidate portal"
+                : "Access your candidate portal"}
+            </h1>
             <p>
               {mode === "magic"
-                ? "We'll email you a secure sign-in link — no password needed."
+                ? cameFromApplication
+                  ? "We’ve prefilled the email you applied with. Send yourself a secure sign-in link to verify ownership and view this application in your portal."
+                  : "Enter the email you used to apply. We'll send a secure link; first-time candidates verify their email to activate portal access."
                 : "Use the password you set in your candidate portal."}
             </p>
           </div>
@@ -182,6 +192,7 @@ export function CandidateLogin() {
                   <Mail size={18} className="input-icon" />
                   <input
                     id="email"
+                    name="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -242,6 +253,7 @@ export function CandidateLogin() {
                   <Mail size={18} className="input-icon" />
                   <input
                     id="email-pw"
+                    name="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}

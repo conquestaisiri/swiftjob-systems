@@ -21,6 +21,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { fetchJobBySlug } from "@/lib/jobsApi";
 import type { Job } from "@/data/jobs";
 import { parseDateOnly } from "@/lib/utils";
+import { applicationQuestionsForJob } from "@/lib/applicationQuestions";
 
 const TIMEZONES = [
   "UTC-12:00",
@@ -199,7 +200,16 @@ export function JobPage() {
   const [loadError, setLoadError] = useState("");
 
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
+  const [roleAnswers, setRoleAnswers] = useState<Record<string, string>>({});
+  const [roleAnswerErrors, setRoleAnswerErrors] = useState<Record<string, string>>({});
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [savedResume, setSavedResume] = useState<{
+    applicationId: string;
+    filename: string;
+  } | null>(null);
+  const [useSavedResume, setUseSavedResume] = useState(false);
+  const [candidateAccountEmail, setCandidateAccountEmail] = useState("");
+  const [profilePrefilled, setProfilePrefilled] = useState(false);
   const [errors, setErrors] = useState<Partial<FormData & { resume: string }>>(
     {},
   );
@@ -211,8 +221,13 @@ export function JobPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const submissionKeyRef = useRef<string | null>(null);
+  const roleQuestions = job
+    ? applicationQuestionsForJob(job.slug, job.title, job.applicationQuestions)
+    : [];
 
   useEffect(() => {
+    setRoleAnswers({});
+    setRoleAnswerErrors({});
     let cancelled = false;
     setLoading(true);
     setLoadError("");
@@ -230,6 +245,72 @@ export function JobPage() {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("candidate_token");
+    if (!token) {
+      setSavedResume(null);
+      setUseSavedResume(false);
+      setCandidateAccountEmail("");
+      setProfilePrefilled(false);
+      return;
+    }
+
+    let cancelled = false;
+    fetch("/api/candidate/profile", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (response) => {
+        if (response.status === 401) {
+          localStorage.removeItem("candidate_token");
+          window.dispatchEvent(new Event("candidate-session-change"));
+          return null;
+        }
+        if (!response.ok) return null;
+        return response.json();
+      })
+      .then((data) => {
+        if (!data || cancelled) return;
+        const profile = data.profile ?? {};
+        const defaults = data.applicationDefaults ?? {};
+        setCandidateAccountEmail(data.email ?? "");
+        setSavedResume(data.savedResume ?? null);
+        setProfilePrefilled(
+          [
+            ...Object.values(profile),
+            ...Object.values(defaults),
+            data.savedResume?.filename,
+          ].some((value) => typeof value === "string" && value.trim().length > 0),
+        );
+        setForm((current) => ({
+          ...current,
+          fullName: current.fullName || profile.fullName || defaults.fullName || "",
+          email: data.email || current.email,
+          phone: current.phone || profile.phone || defaults.phone || "",
+          country: current.country || profile.country || defaults.country || "",
+          city: current.city || profile.city || defaults.city || "",
+          timezone: current.timezone || profile.timezone || defaults.timezone || "",
+          linkedinUrl: current.linkedinUrl || profile.linkedinUrl || defaults.linkedinUrl || "",
+          portfolioUrl: current.portfolioUrl || profile.portfolioUrl || defaults.portfolioUrl || "",
+          yearsExperience: current.yearsExperience || defaults.yearsExperience || "",
+          education: current.education || profile.education || defaults.education || "",
+          englishProficiency: current.englishProficiency || defaults.englishProficiency || "",
+          noticePeriod: current.noticePeriod || defaults.noticePeriod || "",
+          expectedSalary: current.expectedSalary || defaults.expectedSalary || "",
+          earliestStartDate: current.earliestStartDate || defaults.earliestStartDate || "",
+          skills: current.skills || profile.skills || defaults.skills || "",
+          relevantExperience: current.relevantExperience || profile.experienceSummary || defaults.relevantExperience || "",
+        }));
+      })
+      .catch(() => {
+        // Account prefill is optional; the public application remains usable
+        // if the candidate API is temporarily unavailable.
+      });
+
     return () => {
       cancelled = true;
     };
@@ -302,6 +383,7 @@ export function JobPage() {
 
   const validate = (): boolean => {
     const newErrors: Partial<FormData & { resume: string }> = {};
+    const newRoleAnswerErrors: Record<string, string> = {};
     const required: (keyof FormData)[] = [
       "fullName",
       "email",
@@ -316,8 +398,6 @@ export function JobPage() {
       "expectedSalary",
       "earliestStartDate",
       "skills",
-      "relevantExperience",
-      "coverLetter",
     ];
     for (const field of required) {
       if (!form[field].trim()) newErrors[field] = "This field is required.";
@@ -325,9 +405,17 @@ export function JobPage() {
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       newErrors.email = "Please enter a valid email address.";
     }
-    if (!resumeFile) newErrors.resume = "Please upload your CV or resume.";
+    if (!resumeFile && !useSavedResume) {
+      newErrors.resume = "Upload a CV or select the CV saved in your candidate account.";
+    }
+    for (const question of roleQuestions) {
+      if (question.required && !roleAnswers[question.id]?.trim()) {
+        newRoleAnswerErrors[question.id] = "Please answer this role-specific question.";
+      }
+    }
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setRoleAnswerErrors(newRoleAnswerErrors);
+    return Object.keys(newErrors).length === 0 && Object.keys(newRoleAnswerErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -348,18 +436,38 @@ export function JobPage() {
     (Object.entries(form) as [string, string][]).forEach(([k, v]) =>
       data.append(k, v),
     );
+    data.append(
+      "roleAnswers",
+      JSON.stringify(
+        roleQuestions.map((question) => ({
+          id: question.id,
+          answer: roleAnswers[question.id] ?? "",
+        })),
+      ),
+    );
     const campaignSlug =
       new URLSearchParams(window.location.search).get("campaign") ?? "";
     if (campaignSlug) data.append("campaignSlug", campaignSlug);
     if (/^SJREF-[A-Z0-9]{8}$/.test(referralCode)) data.append("referralCode", referralCode);
-    if (resumeFile) data.append("resume", resumeFile);
+    if (useSavedResume && savedResume) {
+      data.append("savedResumeApplicationId", savedResume.applicationId);
+    } else if (resumeFile) {
+      data.append("resume", resumeFile);
+    }
 
     try {
       const submissionKey = submissionKeyRef.current ?? crypto.randomUUID();
       submissionKeyRef.current = submissionKey;
+      const headers: Record<string, string> = {
+        "Idempotency-Key": submissionKey,
+      };
+      if (useSavedResume) {
+        const candidateToken = localStorage.getItem("candidate_token");
+        if (candidateToken) headers.Authorization = `Bearer ${candidateToken}`;
+      }
       const res = await fetch("/api/applications", {
         method: "POST",
-        headers: { "Idempotency-Key": submissionKey },
+        headers,
         body: data,
       });
       const json = await res.json();
@@ -472,25 +580,6 @@ export function JobPage() {
                     <span>Share this role from your candidate account. The reward is paid after the referred candidate is hired and verified.</span>
                   </div>
                 )}
-              </section>
-
-              {/* About SwiftJob */}
-              <section className="job-section">
-                <h2>About SwiftJob</h2>
-                <p>
-                  SwiftJob is a remote-first staffing and BPO partner. We find
-                  and vet professionals for support, admin, technical, and
-                  back-office roles, then manage the employment side—contracts,
-                  payroll, compliance, and ongoing support—so our clients can
-                  focus on the work.
-                </p>
-                <p>
-                  We build remote teams worldwide and serve businesses in
-                  technology, financial services,
-                  e-commerce, healthcare, logistics, retail, and more. When you
-                  work with us, we aim to be a partner for the long term—not
-                  just a one-off placement.
-                </p>
               </section>
 
               {/* Responsibilities */}
@@ -700,6 +789,13 @@ export function JobPage() {
               noValidate
               className="application-form"
             >
+              {profilePrefilled && (
+                <div className="application-profile-prefill" role="status">
+                  Some details are filled from your candidate profile. Review
+                  them before submitting; your answers here will be saved to
+                  this application.
+                </div>
+              )}
               {/* Personal Information */}
               <div className="form-section-title">Personal information</div>
               <div className="app-form-grid">
@@ -730,9 +826,13 @@ export function JobPage() {
                     type="email"
                     value={form.email}
                     onChange={set("email")}
+                    readOnly={Boolean(candidateAccountEmail)}
                     placeholder="you@example.com"
                     className={errors.email ? "has-error" : ""}
                   />
+                  {candidateAccountEmail && (
+                    <span className="app-field-hint">Verified candidate account email</span>
+                  )}
                   {errors.email && (
                     <span className="field-error">
                       <AlertCircle size={12} /> {errors.email}
@@ -1014,51 +1114,71 @@ export function JobPage() {
                 </div>
               </div>
 
-              {/* Long-form fields */}
-              <div className="form-section-title">Your background</div>
-              <div className="app-field app-field-full">
-                <label htmlFor="application-relevant-experience">
-                  Relevant experience <span className="req">*</span>
-                </label>
-                <textarea
-                  id="application-relevant-experience"
-                  value={form.relevantExperience}
-                  onChange={set("relevantExperience")}
-                  rows={5}
-                  placeholder="Briefly describe your most relevant experience for this role — specific roles, responsibilities, or achievements that demonstrate your fit."
-                  className={errors.relevantExperience ? "has-error" : ""}
-                />
-                {errors.relevantExperience && (
-                  <span className="field-error">
-                    <AlertCircle size={12} /> {errors.relevantExperience}
-                  </span>
-                )}
-              </div>
-              <div className="app-field app-field-full">
-                <label htmlFor="application-cover-letter">
-                  Cover letter <span className="req">*</span>
-                </label>
-                <textarea
-                  id="application-cover-letter"
-                  value={form.coverLetter}
-                  onChange={set("coverLetter")}
-                  rows={6}
-                  placeholder="Tell us why you are interested in this role and what you would bring to the team. A thoughtful, specific cover letter strengthens your application."
-                  className={errors.coverLetter ? "has-error" : ""}
-                />
-                {errors.coverLetter && (
-                  <span className="field-error">
-                    <AlertCircle size={12} /> {errors.coverLetter}
-                  </span>
-                )}
+              <div className="form-section-title">Questions for this role</div>
+              <p className="application-role-question-intro">
+                The opening question is tailored to this role; the remaining prompts focus on its work area. Your answers are saved with this application instead of a generic cover letter.
+              </p>
+              <div className="application-role-questions">
+                {roleQuestions.map((question, index) => (
+                  <div className="app-field app-field-full" key={question.id}>
+                    <label htmlFor={`application-role-question-${question.id}`}>
+                      {question.prompt}{" "}
+                      {question.required ? <span className="req">*</span> : <span className="opt">(optional)</span>}
+                    </label>
+                    <textarea
+                      id={`application-role-question-${question.id}`}
+                      value={roleAnswers[question.id] ?? ""}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setRoleAnswers((current) => ({ ...current, [question.id]: value }));
+                        setRoleAnswerErrors((current) => {
+                          if (!current[question.id]) return current;
+                          const next = { ...current };
+                          delete next[question.id];
+                          return next;
+                        });
+                      }}
+                      rows={index === 0 ? 4 : 3}
+                      maxLength={5000}
+                      placeholder="Use a specific example where possible."
+                      className={roleAnswerErrors[question.id] ? "has-error" : ""}
+                      aria-invalid={Boolean(roleAnswerErrors[question.id])}
+                    />
+                    {roleAnswerErrors[question.id] && (
+                      <span className="field-error">
+                        <AlertCircle size={12} /> {roleAnswerErrors[question.id]}
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
 
               {/* Resume Upload */}
               <div className="form-section-title">Resume / CV</div>
               <div className="app-field app-field-full">
                 <label htmlFor="application-resume">
-                  Upload your CV or resume <span className="req">*</span>
+                  Choose your CV or resume <span className="req">*</span>
                 </label>
+                {savedResume && (
+                  <label className="application-saved-resume">
+                    <input
+                      type="checkbox"
+                      checked={useSavedResume}
+                      onChange={(event) => {
+                        const selected = event.target.checked;
+                        setUseSavedResume(selected);
+                        if (selected) {
+                          setResumeFile(null);
+                          if (fileInputRef.current) fileInputRef.current.value = "";
+                          setErrors((current) => ({ ...current, resume: undefined }));
+                        }
+                      }}
+                    />
+                    <span>
+                      Use saved CV <strong>{savedResume.filename}</strong>
+                    </span>
+                  </label>
+                )}
                 <div
                   className={`upload-drop-zone ${resumeFile ? "has-file" : ""} ${errors.resume ? "has-error" : ""}`}
                   onClick={() => fileInputRef.current?.click()}
@@ -1069,7 +1189,23 @@ export function JobPage() {
                     if (f) handleFileSelect(f);
                   }}
                 >
-                  {resumeFile ? (
+                  {useSavedResume && savedResume ? (
+                    <div className="upload-file-info">
+                      <CheckCircle size={18} />
+                      <span>Using saved CV: {savedResume.filename}</span>
+                      <button
+                        type="button"
+                        className="upload-remove"
+                        aria-label="Stop using saved CV"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setUseSavedResume(false);
+                        }}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ) : resumeFile ? (
                     <div className="upload-file-info">
                       <Upload size={18} />
                       <span>{resumeFile.name}</span>
@@ -1177,6 +1313,7 @@ export function JobPage() {
       return;
     }
     setResumeFile(file);
+    setUseSavedResume(false);
     setErrors((prev) => {
       const n = { ...prev };
       delete n.resume;

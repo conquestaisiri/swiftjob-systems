@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import {
   CheckCircle,
   Mail,
+  Lock,
   ArrowUpRight,
   ArrowLeft,
   ClipboardCheck,
@@ -24,6 +25,7 @@ interface AssessmentStatus {
   assessmentBlurb: string;
   needsAssessment: boolean;
   assessmentRequired: boolean;
+  assessmentAvailable: boolean;
   track: string;
   status: string;
   techCheck: {
@@ -88,7 +90,7 @@ export function ApplicationSuccess() {
     assessment?.techCheck.required && assessment.techCheck.status !== "completed",
   );
   const showAssessmentCta = Boolean(
-    assessment?.assessmentRequired && assessment.needsAssessment &&
+    assessment?.assessmentAvailable && assessment.assessmentRequired && assessment.needsAssessment &&
       assessment.techCheck.status === "completed",
   );
 
@@ -114,11 +116,11 @@ export function ApplicationSuccess() {
             <h1 className="success-h1">Application received</h1>
             <p className="success-sub">
               Thank you — your application for <strong>{position}</strong> has
-              been securely received. Our recruitment team will carefully review
-              your submission and contact you within{" "}
-              <strong>3–5 business days</strong> regarding next steps. Before
-              we review your application, complete the next step below. You can
-              pause and continue from your candidate portal later.
+              been securely received. Our recruitment team will review your
+              submission and email you when there is an update. You can secure
+              your candidate portal and complete the technical check there;
+              any role assessment is unlocked only if the team advances your
+              application.
             </p>
             <div className="success-ref-pill">
               <span className="ref-label-sm">Reference</span>
@@ -136,15 +138,20 @@ export function ApplicationSuccess() {
               <section className="card-block">
                 <div className="card-block-head">
                   <KeyRound size={18} />
-                  <h3>Secure your candidate portal</h3>
+                  <h3>Set up your candidate portal</h3>
                 </div>
                 <p className="card-block-desc">
-                  We have created your candidate record. Sign in with a secure
-                  email link using <strong>{email}</strong> to track this
-                  application, continue the required steps, and optionally
-                  create a password for faster access.
+                  Your application is saved. Verify access with a secure email
+                  link using <strong>{email}</strong> to open your portal and
+                  track this application. You can optionally create a password
+                  after verifying your email.
                 </p>
-                <Link href="/login" className="button button-blue">Sign in to your portal</Link>
+                <Link
+                  href={`/login?email=${encodeURIComponent(email)}&from=application`}
+                  className="button button-blue"
+                >
+                  Verify email and open portal
+                </Link>
               </section>
             )}
 
@@ -184,6 +191,20 @@ export function ApplicationSuccess() {
               </section>
             )}
 
+            {assessment?.assessmentRequired && !assessment.assessmentAvailable && (
+              <section className="skills-cta-card">
+                <Lock size={22} />
+                <div className="skills-cta-text">
+                  <h3>Role assessment — available if you advance</h3>
+                  <p>
+                    The recruitment team will unlock the role-specific
+                    assessment if your application moves to the next stage.
+                    We’ll email you when it is available in your portal.
+                  </p>
+                </div>
+              </section>
+            )}
+
             {/* What happens next */}
             <section className="next-steps-section">
               <h2>What happens next</h2>
@@ -192,7 +213,7 @@ export function ApplicationSuccess() {
                   [
                     "01",
                     "Application Review",
-                    "Our team reviews every application. Typically 3\u20135 business days.",
+                    "Our team aims to review applications within 2–3 business days and will email you when there is an update.",
                   ],
                   [
                     "02",
@@ -202,7 +223,7 @@ export function ApplicationSuccess() {
                   [
                     "03",
                     "Role Assessment",
-                    "If this role uses an assessment, it will be matched to the work and shown after the technology check.",
+                    "If this role uses an assessment, it becomes available in your portal only after the recruitment team advances your application.",
                   ],
                   [
                     "04",

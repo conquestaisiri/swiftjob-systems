@@ -540,8 +540,8 @@ function formatApplicationHtml(data: ApplicationEmailData): string {
     <p style="font-size: 14px; margin: 0 0 8px;">Please review this application and update its status in the admin dashboard.</p>
     <ol style="margin: 0; padding-left: 20px; font-size: 14px; color: ${BRAND.text};">
       <li style="margin-bottom: 8px;">Review the candidate's profile and resume.</li>
-      <li style="margin-bottom: 8px;">Set an initial status (<strong>Reviewing</strong>, <strong>Shortlisted</strong>, or <strong>Rejected</strong>).</li>
-      <li style="margin-bottom: 8px;">The candidate is notified automatically whenever you change the status.</li>
+      <li style="margin-bottom: 8px;">Use <strong>Reviewing</strong> while evaluating the application; <strong>Shortlisted</strong> advances the candidate and unlocks the role assessment; <strong>Rejected</strong> closes the application.</li>
+      <li style="margin-bottom: 8px;">Status changes normally email the candidate. The Shortlist dialog lets you review or turn off that notification before saving.</li>
     </ol>
     <p style="font-size: 13px; color: ${BRAND.muted}; margin: 8px 0 0;">Open the <a href="${getBaseUrl()}/admin" style="color: ${BRAND.teal};">admin dashboard</a> to review this application.</p>
   `;
@@ -591,7 +591,7 @@ function formatConfirmationHtml(data: {
       "info",
       "What happens next",
       `
-      Your application is received. There are just a few steps left: open your candidate portal and complete the required technical check, then complete the role assessment if one is shown. Completing these steps helps us process your application.
+      Your application has been received for review. Our team aims to review applications within 2–3 business days. You can sign in to your candidate portal to view your application and complete its technical check. A role assessment, if required, is unlocked only if our recruitment team advances your application; we’ll email you when there is an update.
     `,
     )}
 
@@ -601,7 +601,7 @@ function formatConfirmationHtml(data: {
     ${stepList([
       `<strong>Application review</strong> — We evaluate your experience, skills, and fit for the role.`,
       `<strong>Technical check</strong> — Confirm your connection, browser, and computer are ready for this role.`,
-      `<strong>Role assessment</strong> — Complete the assessment shown for this role, if one is required.`,
+      `<strong>Role assessment</strong> — If required, it becomes available in your portal only after the recruitment team advances your application.`,
       `<strong>Team review &amp; feedback</strong> — Our recruitment team reaches out directly with the outcome and next steps.`,
       `<strong>Offer &amp; onboarding</strong> — Successful candidates receive a formal offer and a fully remote start.`,
     ])}
@@ -641,15 +641,15 @@ const STATUS_DETAILS: Record<string, StatusDetail> = {
     meaning:
       "We've confirmed your application looks promising and are taking a closer look at your experience and skills against the role.",
     nextSteps:
-      "You don't need to do anything right now. We typically complete the review within 3–5 business days. We'll email you the moment your status changes.",
+      "You don't need to do anything right now. Our team aims to review applications within 2–3 business days. We'll email you when your status changes.",
   },
   Shortlisted: {
     color: "#6D28D9",
-    message: "Congratulations — you've been shortlisted!",
+    message: "Your application has moved to the next stage.",
     meaning:
-      "You're moving forward in the process. Your profile stood out and we'd like to get to know you better.",
+      "The recruitment team has advanced your application. Your candidate portal now shows the next step for this role.",
     nextSteps:
-      "Our recruitment team will be in touch shortly by email with the next steps — nothing to schedule or prepare. You can also track your application status anytime in your candidate portal.",
+      "Sign in to your candidate portal. Complete the technical check if it is still outstanding, then complete the role assessment if one is required for this position. You can save your progress and return later.",
   },
   Rejected: {
     color: "#B91C1C",
@@ -702,9 +702,9 @@ function formatStatusUpdateHtml(data: {
   const shortlistBlock = data.isShortlistUpdate
     ? callout(
         "success",
-        "You've been shortlisted",
+        "You've moved to the next stage",
         `
-        Congratulations — you've been shortlisted for <strong>${esc(data.position)}</strong>. Our recruitment team will contact you directly by email with the next steps. You can also track your application status anytime in your secure candidate portal.
+        Your application for <strong>${esc(data.position)}</strong> has been advanced by the recruitment team. Sign in to your candidate portal to see the next step. If this role requires an assessment, it is now available there after your technical check is complete.
       `,
       )
     : "";
@@ -952,6 +952,40 @@ export const emailService = {
       to: getHrEmail(),
       subject: `New Application: ${data.position} — ${data.fullName} (${data.applicationId})`,
       html: formatApplicationHtml(data),
+    });
+  },
+
+  async sendTechCheckCompletionNotification(data: {
+    applicationId: string;
+    referenceCode: string;
+    fullName: string;
+    email: string;
+    position: string;
+  }): Promise<void> {
+    const adminUrl = `${getBaseUrl()}/admin/applications?search=${encodeURIComponent(data.referenceCode)}`;
+    const content = `
+      <p class="email-copy" style="margin:0 0 16px;color:${BRAND.text};font-size:15px;line-height:1.7;">A candidate has completed the technical check for an application.</p>
+      ${infoTable([
+        ["Candidate", esc(data.fullName)],
+        ["Email", `<a href="mailto:${esc(data.email)}" style="color:${BRAND.teal};">${esc(data.email)}</a>`],
+        ["Role", esc(data.position)],
+        ["Reference", esc(data.referenceCode)],
+        ["Application ID", esc(data.applicationId)],
+      ])}
+      ${primaryButton(adminUrl, "Review application")}
+      <p class="email-muted" style="margin:16px 0 0;color:${BRAND.muted};font-size:12.5px;line-height:1.6;">Device specifications are available only in the authorized application record.</p>
+    `;
+
+    await sendEmail({
+      from: getFromAddress(),
+      to: getHrEmail(),
+      subject: `Technical check completed: ${data.position} — ${data.fullName} (${data.referenceCode})`,
+      html: layout({
+        preheader: `${data.fullName} completed the technical check for ${data.position}`,
+        headerTitle: "Technical Check Completed",
+        headerSubtitle: `${data.fullName} — ${data.position}`,
+        content,
+      }),
     });
   },
 

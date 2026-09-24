@@ -12,13 +12,9 @@ import {
 } from "lucide-react";
 import { handleAdminUnauthorized, isUnauthorized } from "@/lib/adminAuth";
 import type { Job } from "@/data/jobs";
+import { parseMailRecipients } from "@/lib/mailRecipients";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
-
-interface ParsedRecipient {
-  email: string;
-  fullName?: string;
-}
 
 interface PickItem {
   id: string;
@@ -41,35 +37,6 @@ interface SendResponse {
   results: SendResult[];
 }
 
-function parseRecipients(text: string): ParsedRecipient[] {
-  const out: ParsedRecipient[] = [];
-  const seen = new Set<string>();
-  for (const raw of text.split(/\r?\n/)) {
-    const line = raw.trim();
-    if (!line) continue;
-    const match = line.match(
-      /^(?:"?([^"<]+)"?\s*<([^>]+)>|([^<\s]+@[^>\s]+))$/,
-    );
-    let email = "";
-    let name = "";
-    if (match) {
-      email = (match[2] || match[3] || "").trim().toLowerCase();
-      name = (match[1] || "").replace(/"/g, "").trim();
-    } else {
-      const parts = line.split(/\s+/);
-      const last = parts[parts.length - 1] ?? "";
-      if (last.includes("@")) {
-        email = last.toLowerCase().replace(/[<>,"']/g, "");
-        name = parts.slice(0, -1).join(" ");
-      }
-    }
-    if (!email || !email.includes("@") || seen.has(email)) continue;
-    seen.add(email);
-    out.push({ email, fullName: name || undefined });
-  }
-  return out;
-}
-
 export function MailAdmin({ token }: { token: string }) {
   const [recipientsText, setRecipientsText] = useState("");
   const [mode, setMode] = useState<"referral" | "custom">("referral");
@@ -84,7 +51,8 @@ export function MailAdmin({ token }: { token: string }) {
   const [result, setResult] = useState<SendResponse | null>(null);
   const [picking, setPicking] = useState<"contacts" | "referrals" | null>(null);
 
-  const recipients = parseRecipients(recipientsText);
+  const recipientParse = parseMailRecipients(recipientsText);
+  const recipients = recipientParse.recipients;
 
   useEffect(() => {
     if (mode !== "referral") return;
@@ -131,6 +99,12 @@ export function MailAdmin({ token }: { token: string }) {
     setResult(null);
     if (recipients.length === 0) {
       setError("Enter at least one email address.");
+      return;
+    }
+    if (recipientParse.invalidLines.length > 0) {
+      setError(
+        `Fix ${recipientParse.invalidLines.length} invalid recipient line${recipientParse.invalidLines.length === 1 ? "" : "s"} before sending.`,
+      );
       return;
     }
     if (recipients.length > 100) {
@@ -215,16 +189,44 @@ export function MailAdmin({ token }: { token: string }) {
           <div className="admin-panel">
             <h3 className="admin-panel-title">Recipients</h3>
             <p className="admin-panel-hint">
-              One per line — plain email, or &quot;Name &lt;email&gt;&quot;. You
-              can also pick people from your database below.
+              One recipient per line — email, &quot;Name &lt;email&gt;&quot;, or
+              &quot;Name email&quot;. You can also pick people from your database.
             </p>
             <textarea
               value={recipientsText}
               onChange={(e) => setRecipientsText(e.target.value)}
               placeholder={"name@example.com\nJane Smith <jane@example.com>"}
-              rows={5}
-              className="filter-input admin-input"
+              rows={6}
+              aria-label="Email recipients, one per line"
+              className="filter-input admin-input mail-recipient-input"
             />
+            {recipientParse.invalidLines.length > 0 && (
+              <div className="mail-recipient-validation invalid" role="alert">
+                <strong>
+                  {recipientParse.invalidLines.length} invalid line
+                  {recipientParse.invalidLines.length === 1 ? "" : "s"} — sending is disabled until corrected.
+                </strong>
+                <ul>
+                  {recipientParse.invalidLines.slice(0, 4).map((line, index) => (
+                    <li key={`${index}-${line}`}>{line}</li>
+                  ))}
+                  {recipientParse.invalidLines.length > 4 && (
+                    <li>And {recipientParse.invalidLines.length - 4} more.</li>
+                  )}
+                </ul>
+              </div>
+            )}
+            {recipientParse.duplicateEmails.length > 0 && (
+              <p className="mail-recipient-validation duplicate" role="status">
+                {recipientParse.duplicateEmails.length} duplicate address
+                {recipientParse.duplicateEmails.length === 1 ? "" : "es"} will be sent only once.
+              </p>
+            )}
+            {recipients.length > 100 && (
+              <p className="mail-recipient-validation invalid" role="alert">
+                The limit is 100 unique recipients per send. Remove at least {recipients.length - 100}.
+              </p>
+            )}
             <div className="mail-pick-actions">
               <button
                 className="button button-outline button-sm"
@@ -241,11 +243,16 @@ export function MailAdmin({ token }: { token: string }) {
             </div>
             {recipients.length > 0 && (
               <div className="recipient-chips">
-                {recipients.map((r) => (
+                {recipients.slice(0, 8).map((r) => (
                   <span key={r.email} className="recipient-chip">
                     {r.fullName ? `${r.fullName} <${r.email}>` : r.email}
                   </span>
                 ))}
+                {recipients.length > 8 && (
+                  <span className="recipient-chip recipient-chip-more">
+                    +{recipients.length - 8} more in the list above
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -344,7 +351,12 @@ export function MailAdmin({ token }: { token: string }) {
             <div className="mail-send-row">
               <button
                 onClick={handleSend}
-                disabled={sending}
+                disabled={
+                  sending ||
+                  recipients.length === 0 ||
+                  recipientParse.invalidLines.length > 0 ||
+                  recipients.length > 100
+                }
                 className="button button-blue"
               >
                 {sending ? (
@@ -422,7 +434,7 @@ export function MailAdmin({ token }: { token: string }) {
           onClose={() => setPicking(null)}
           onAdd={(items) => {
             const seen = new Set(
-              parseRecipients(recipientsText).map((r) => r.email),
+              parseMailRecipients(recipientsText).recipients.map((r) => r.email),
             );
             const additions = items
               .filter((i) => i.email && !seen.has(i.email.toLowerCase()))

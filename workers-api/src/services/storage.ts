@@ -84,6 +84,39 @@ export const storageService = {
     };
   },
 
+  async duplicate(key: string, originalName?: string | null): Promise<UploadResult> {
+    if (!/^resumes\/[A-Za-z0-9._() -]+$/.test(key) || key.includes("..")) {
+      throw new Error("The saved resume reference is invalid.");
+    }
+    const object = await getEnv().R2_BUCKET.get(key);
+    if (!object) throw new Error("The saved resume is no longer available.");
+
+    const filename =
+      originalName ||
+      object.customMetadata?.originalName ||
+      key.slice(key.lastIndexOf("/") + 1);
+    const extension = getExtension(filename);
+    const inferredMime =
+      extension === ".pdf"
+        ? "application/pdf"
+        : extension === ".doc"
+          ? "application/msword"
+          : extension === ".docx"
+            ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            : "";
+    const file = {
+      buffer: await object.arrayBuffer(),
+      originalname: filename,
+      mimetype: object.httpMetadata?.contentType || inferredMime,
+      size: object.size,
+    };
+    const validation = this.validateFile(file);
+    if (!validation.valid) {
+      throw new Error(validation.error ?? "The saved resume could not be verified.");
+    }
+    return this.upload(file);
+  },
+
   async delete(key: string): Promise<void> {
     const bucket = getEnv().R2_BUCKET;
     await bucket.delete(key);

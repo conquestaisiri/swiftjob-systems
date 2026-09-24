@@ -482,7 +482,7 @@ export function CareersPage() {
             {[
               [
                 "Is this really free?",
-                "Yes — applying, skills checks, onboarding, everything. SwiftJob is paid by the companies we staff, never by candidates. We will never ask you for money at any stage.",
+                "Yes. Applying, the technical check, any role assessment, and onboarding are free for candidates. SwiftJob is paid by the companies we staff. We will never ask you for money at any stage.",
               ],
               [
                 "Are these jobs actually remote?",
@@ -494,7 +494,7 @@ export function CareersPage() {
               ],
               [
                 "How will I hear back?",
-                "Your candidate portal shows your status in real time. Our team also emails you directly at each step — typically within 3–5 business days.",
+                "Your candidate portal shows your application status. Our team aims to review applications within 2–3 business days and emails you when there is an update.",
               ],
               [
                 "What do I need?",

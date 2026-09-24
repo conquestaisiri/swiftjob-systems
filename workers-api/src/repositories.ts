@@ -1360,7 +1360,12 @@ export const footprintRepository = {
       | "download"
       | "blocked"
       | "background"
-      | "roomRevealed";
+      | "roomRevealed"
+      | "techCheckCompleted"
+      | "statusChanged"
+      | "applicationSubmitted"
+      | "assessmentStarted"
+      | "assessmentCompleted";
     device: string;
     userAgent?: string;
     meta?: Record<string, unknown> | null;

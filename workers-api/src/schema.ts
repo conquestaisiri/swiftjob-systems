@@ -10,6 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
+import type { ApplicationAnswer, ApplicationQuestion } from "../../shared/application-questions";
 
 export const applicationStatusEnum = pgEnum("application_status", [
   "New",
@@ -56,6 +57,7 @@ export const applications = pgTable("applications", {
   submissionKey: text("submission_key").unique(),
   jobSlug: text("job_slug"),
   referralCode: text("referral_code"),
+  roleAnswers: jsonb("role_answers").$type<ApplicationAnswer[]>().notNull().default(sql`'[]'::jsonb`),
 });
 
 export const insertApplicationSchema = z.object({
@@ -76,11 +78,16 @@ export const insertApplicationSchema = z.object({
   expectedSalary: z.string().min(1),
   earliestStartDate: z.string().date(),
   skills: z.string().min(1),
-  relevantExperience: z.string().min(1),
-  coverLetter: z.string().min(1),
+  relevantExperience: z.string().max(5000).optional().default(""),
+  coverLetter: z.string().max(5000).optional().default(""),
   campaignSlug: z.string().max(80).optional().nullable(),
   submissionKey: z.string().min(16).max(128).optional().nullable(),
   referralCode: z.string().trim().regex(/^SJREF-[A-Z0-9]{8}$/).optional().nullable(),
+  roleAnswers: z.array(z.object({
+    id: z.string().min(1).max(80),
+    prompt: z.string().min(1).max(240),
+    answer: z.string().max(5000),
+  })).optional(),
 });
 
 export type Application = typeof applications.$inferSelect;
@@ -126,6 +133,7 @@ export const jobs = pgTable("jobs", {
     .defaultNow()
     .notNull(),
   referralRewardCents: integer("referral_reward_cents"),
+  applicationQuestions: jsonb("application_questions").$type<ApplicationQuestion[]>().notNull().default(sql`'[]'::jsonb`),
 });
 
 export type Job = typeof jobs.$inferSelect;

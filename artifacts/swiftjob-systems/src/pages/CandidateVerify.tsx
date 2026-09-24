@@ -35,7 +35,7 @@ export function CandidateVerify() {
         localStorage.setItem("candidate_token", data.token);
         setEmail(data.email);
         setState("success");
-        setMessage("Welcome back! Redirecting to your applications...");
+        setMessage("Your email is verified. Redirecting to your applications...");
 
         // Redirect to applications page after a short delay
         setTimeout(() => {
@@ -93,7 +93,8 @@ export function CandidateVerify() {
               <div className="success-icon">
                 <CheckCircle size={48} strokeWidth={1.5} />
               </div>
-              <h2>Welcome back, {email}</h2>
+              <h2>Your candidate portal is ready</h2>
+              <p className="auth-verified-email">{email}</p>
               <p>{message}</p>
               <Link
                 href="/candidate/applications"

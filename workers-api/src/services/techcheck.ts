@@ -228,9 +228,9 @@ export const techCheckService = {
   async consumeWithReport(
     token: string,
     specs: Record<string, unknown>,
-  ): Promise<boolean> {
+  ): Promise<string | null> {
     if (!/^[a-f0-9]{48}$/i.test(token) || !isUsableTechCheckReport(specs)) {
-      return false;
+      return null;
     }
     const { DATABASE_URL } = getEnv();
     const sql = neon(DATABASE_URL);
@@ -244,10 +244,12 @@ export const techCheckService = {
        WHERE token_hash = $1 AND used_at IS NULL
          AND report->>'${STARTED_AT_REPORT_KEY}' IS NOT NULL
          AND expires_at > now()
-       RETURNING token_hash`,
+       RETURNING application_id`,
       [await hashToken(token), JSON.stringify(specs)],
     );
-    return Boolean(result && result.length > 0);
+    return result?.[0]?.application_id
+      ? String(result[0].application_id)
+      : null;
   },
 };
 

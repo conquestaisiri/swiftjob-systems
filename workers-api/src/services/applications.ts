@@ -1,4 +1,4 @@
-import { applicationRepository } from "../repositories";
+import { applicationRepository, footprintRepository } from "../repositories";
 import { storageService } from "./storage";
 import { emailService } from "./email";
 import type { ApplicationStatus, CreateApplicationInput } from "../schema";
@@ -16,10 +16,19 @@ export const applicationService = {
       mimetype: string;
       size: number;
     },
+    savedResume?: { path: string; filename: string | null },
   ) {
-    let resumePath: string | null = null;
-    let resumeFilename: string | null = null;
+    let resumePath: string | null = savedResume?.path ?? null;
+    let resumeFilename: string | null = savedResume?.filename ?? null;
 
+    if (savedResume) {
+      const copiedResume = await storageService.duplicate(
+        savedResume.path,
+        savedResume.filename,
+      );
+      resumePath = copiedResume.key;
+      resumeFilename = copiedResume.filename;
+    }
     if (resumeFile) {
       const uploadResult = await storageService.upload(resumeFile);
       resumePath = uploadResult.key;
@@ -27,7 +36,26 @@ export const applicationService = {
     }
 
     try {
-      return await applicationRepository.create({ ...input, resumePath, resumeFilename });
+      const application = await applicationRepository.create({
+        ...input,
+        resumePath,
+        resumeFilename,
+      });
+      try {
+        await footprintRepository.record({
+          subjectType: "candidate",
+          subjectId: application.id,
+          event: "applicationSubmitted",
+          device: "candidate",
+          meta: { position: application.position },
+        });
+      } catch (timelineError) {
+        console.error(
+          { timelineError, applicationId: application.id },
+          "Application was saved but its timeline event could not be recorded",
+        );
+      }
+      return application;
     } catch (error) {
       if (resumePath) {
         try { await storageService.delete(resumePath); }
@@ -151,8 +179,9 @@ export const applicationService = {
     );
     if (!updated) return null;
 
+    let notificationSent = false;
     if (shouldNotify) {
-      await this.trySend("status update email", () =>
+      notificationSent = (await this.trySend("status update email", () =>
         emailService.sendStatusUpdate({
           email: application.email,
           fullName: application.fullName,
@@ -163,10 +192,44 @@ export const applicationService = {
           notes,
           isShortlistUpdate: status === "Shortlisted",
         }),
-      );
+      )) !== null;
     }
 
-    return applicationRepository.findById(id);
+    if (status !== application.status) {
+      try {
+        await footprintRepository.record({
+          subjectType: "candidate",
+          subjectId: application.id,
+          event: "statusChanged",
+          device: "admin",
+          meta: {
+            fromStatus: application.status,
+            toStatus: status,
+            notificationRequested: shouldNotify,
+            notificationSent,
+          },
+        });
+      } catch (error) {
+        // The status update has already been saved. A timeline write failure
+        // must be visible in logs without turning a successful update into a
+        // false API failure that an admin might retry.
+        console.error(
+          { error, applicationId: application.id, fromStatus: application.status, toStatus: status },
+          "Application status was saved but its timeline event could not be recorded",
+        );
+      }
+    }
+
+    const updatedApplication = await applicationRepository.findById(id);
+    if (!updatedApplication) return null;
+
+    return {
+      application: updatedApplication,
+      notification: {
+        requested: shouldNotify,
+        sent: notificationSent,
+      },
+    };
   },
 
   async deleteApplication(id: string) {

@@ -175,7 +175,7 @@ export function TermsOfService() {
 
       <H2>3. Honest applications</H2>
       <p className="legal-p">
-        You agree the information you submit is accurate and yours. Skills-check
+        You agree the information you submit is accurate and yours. Role-assessment
         results are one input our team considers; submitting false information,
         or having someone else complete your checks, means we must withdraw any
         offer.

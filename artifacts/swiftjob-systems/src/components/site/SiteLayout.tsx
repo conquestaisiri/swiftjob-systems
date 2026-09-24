@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
-import { ArrowUp, ArrowUpRight, ChevronRight, Menu, X } from "lucide-react";
+import { ArrowUp, ArrowUpRight, ChevronRight, Menu, UserRound, X } from "lucide-react";
 import { SiteFooter } from "@/components/site/SiteFooter";
 
 const NAV_ITEMS = [
@@ -20,6 +20,7 @@ interface SiteLayoutProps {
 export function SiteLayout({ children, title, description }: SiteLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showTop, setShowTop] = useState(false);
+  const [candidateSignedIn, setCandidateSignedIn] = useState(false);
   const [location] = useLocation();
 
   useEffect(() => {
@@ -89,6 +90,19 @@ export function SiteLayout({ children, title, description }: SiteLayoutProps) {
     window.scrollTo(0, 0);
   }, [location]);
 
+  useEffect(() => {
+    const syncCandidateSession = () => {
+      setCandidateSignedIn(Boolean(localStorage.getItem("candidate_token")));
+    };
+    syncCandidateSession();
+    window.addEventListener("storage", syncCandidateSession);
+    window.addEventListener("candidate-session-change", syncCandidateSession);
+    return () => {
+      window.removeEventListener("storage", syncCandidateSession);
+      window.removeEventListener("candidate-session-change", syncCandidateSession);
+    };
+  }, [location]);
+
   return (
     <div className="site-shell">
       <header className="nav-wrap">
@@ -123,10 +137,13 @@ export function SiteLayout({ children, title, description }: SiteLayoutProps) {
           <div className="nav-actions">
             <a
               className="nav-login"
-              href="/login"
+              href={candidateSignedIn ? "/candidate/applications" : "/login"}
               data-testid="link-professionals"
+              aria-label={candidateSignedIn ? "Open candidate portal" : "Candidate access"}
             >
-              Candidate access <ArrowUpRight size={14} />
+              {candidateSignedIn ? <span className="candidate-nav-avatar"><UserRound size={15} /></span> : null}
+              {candidateSignedIn ? "My account" : "Candidate access"}
+              <ArrowUpRight size={14} />
             </a>
             <a
               className="button button-dark button-small"
@@ -154,8 +171,11 @@ export function SiteLayout({ children, title, description }: SiteLayoutProps) {
                 <ChevronRight size={17} />
               </a>
             ))}
-            <a href="/login" onClick={() => setMobileOpen(false)}>
-              Candidate access <ChevronRight size={17} />
+            <a
+              href={candidateSignedIn ? "/candidate/applications" : "/login"}
+              onClick={() => setMobileOpen(false)}
+            >
+              {candidateSignedIn ? "My account" : "Candidate access"} <ChevronRight size={17} />
             </a>
             <a
               href="/#contact"
@@ -170,7 +190,7 @@ export function SiteLayout({ children, title, description }: SiteLayoutProps) {
 
       <main style={{ paddingTop: "64px" }}>{children}</main>
 
-      <SiteFooter />
+      <SiteFooter candidateSignedIn={candidateSignedIn} />
 
       {showTop && (
         <button

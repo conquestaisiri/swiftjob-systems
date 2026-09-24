@@ -1,5 +1,10 @@
 import { jobRepository } from "../repositories";
 import type { CreateJobInput, Job } from "../schema";
+import {
+  applicationQuestionsForJob,
+  normalizeApplicationQuestionOverrides,
+} from "../../../shared/application-questions";
+import { enrichBoilerplateRoleContent } from "../../../shared/role-content";
 
 const REQUIRED_FIELDS = [
   "title",
@@ -38,6 +43,31 @@ function toList(value: unknown): string[] {
   return [];
 }
 
+const CURRENT_TECH_CHECK_STEP =
+  "Complete the technical check in your candidate portal. A role assessment, if required, is unlocked only after the recruitment team advances your application.";
+
+function normalizeHiringProcess(steps: string[]): string[] {
+  return steps.map((step) =>
+    /^(?:short )?skills check in your browser\b/i.test(step.trim())
+      ? CURRENT_TECH_CHECK_STEP
+      : step,
+  );
+}
+
+function presentJob(job: Job): Job {
+  const roleContent = enrichBoilerplateRoleContent(job);
+  return {
+    ...job,
+    ...roleContent,
+    hiringProcess: normalizeHiringProcess(job.hiringProcess),
+    applicationQuestions: applicationQuestionsForJob(
+      job.slug,
+      job.title,
+      job.applicationQuestions,
+    ),
+  };
+}
+
 function toBoolean(value: unknown, fallback = false): boolean {
   if (typeof value === "boolean") return value;
   if (typeof value === "number") return value === 1;
@@ -69,6 +99,7 @@ export interface NormalizedJob {
   benefits: string[];
   workingHours: string;
   hiringProcess: string[];
+  applicationQuestions: ReturnType<typeof applicationQuestionsForJob>;
   isActive: boolean;
   referralRewardCents: number | null;
 }
@@ -96,6 +127,12 @@ function normalizeInput(body: Record<string, unknown>): NormalizedJob {
     throw new ValidationError("postedDate must be a valid date");
   }
   const isActive = body.isActive === undefined ? true : toBoolean(body.isActive);
+  let applicationQuestions;
+  try {
+    applicationQuestions = normalizeApplicationQuestionOverrides(body.applicationQuestions);
+  } catch (error) {
+    throw new ValidationError(error instanceof Error ? error.message : "Role-specific questions are invalid.");
+  }
   let referralRewardCents: number | null = null;
   if (body.referralRewardCents !== undefined && body.referralRewardCents !== null && String(body.referralRewardCents).trim() !== "") {
     const amount = Number(body.referralRewardCents);
@@ -124,7 +161,8 @@ function normalizeInput(body: Record<string, unknown>): NormalizedJob {
     softwareTools: toList(body.softwareTools),
     benefits: toList(body.benefits),
     workingHours: String(body.workingHours).trim(),
-    hiringProcess: toList(body.hiringProcess),
+    hiringProcess: normalizeHiringProcess(toList(body.hiringProcess)),
+    applicationQuestions,
     isActive,
     referralRewardCents,
   };
@@ -134,19 +172,21 @@ export class ValidationError extends Error {}
 
 export const jobService = {
   async listPublic(): Promise<Job[]> {
-    return jobRepository.findAll(false);
+    return (await jobRepository.findAll(false)).map(presentJob);
   },
 
   async getBySlug(slug: string): Promise<Job | undefined> {
-    return jobRepository.findBySlug(slug, false);
+    const job = await jobRepository.findBySlug(slug, false);
+    return job ? presentJob(job) : undefined;
   },
 
   async listAdmin(): Promise<Job[]> {
-    return jobRepository.findAll(true);
+    return (await jobRepository.findAll(true)).map(presentJob);
   },
 
   async getById(id: string): Promise<Job | undefined> {
-    return jobRepository.findById(id);
+    const job = await jobRepository.findById(id);
+    return job ? presentJob(job) : undefined;
   },
 
   async create(body: Record<string, unknown>): Promise<Job> {
@@ -155,7 +195,7 @@ export const jobService = {
     if (existing) {
       throw new ValidationError("A job with this slug already exists");
     }
-    return jobRepository.create(normalized as CreateJobInput);
+    return presentJob(await jobRepository.create(normalized as CreateJobInput));
   },
 
   async update(
@@ -174,7 +214,8 @@ export const jobService = {
       }
     }
 
-    return jobRepository.update(id, normalized as CreateJobInput);
+    const updated = await jobRepository.update(id, normalized as CreateJobInput);
+    return updated ? presentJob(updated) : undefined;
   },
 
   async delete(id: string): Promise<boolean> {

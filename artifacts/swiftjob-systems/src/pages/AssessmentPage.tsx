@@ -32,6 +32,7 @@ interface LoadPayload {
   assessmentBlurb: string;
   needsAssessment: boolean;
   assessmentRequired: boolean;
+  assessmentAvailable: boolean;
   track: AssessmentTrack;
   status: string;
   techCheck: {
@@ -54,6 +55,7 @@ type Step =
   | "questions"
   | "submitting"
   | "done"
+  | "locked"
   | "error";
 
 interface DraftSave {
@@ -121,10 +123,12 @@ export function AssessmentPage() {
           }
           if (json.techCheck?.status !== "completed") {
             setStep("intro");
-          } else if (json.track === "none" || !json.needsAssessment) {
-            setStep("done");
+          } else if (json.assessmentRequired && !json.assessmentAvailable) {
+            setStep("locked");
           } else if (json.status === "completed" && json.result) {
             setResult(json.result);
+            setStep("done");
+          } else if (json.track === "none" || !json.needsAssessment) {
             setStep("done");
           } else {
             setStep("intro");
@@ -293,6 +297,13 @@ export function AssessmentPage() {
       );
       const json = await res.json();
       if (!res.ok) {
+        if (json.code === "assessment_locked") {
+          setPayload((current) => current
+            ? { ...current, assessmentAvailable: false, needsAssessment: false, status: "locked" }
+            : current);
+          setStep("locked");
+          return;
+        }
         setSubmitError(
           json.error ?? "We could not save your assessment. Please try again.",
         );
@@ -405,6 +416,32 @@ export function AssessmentPage() {
     );
   }
 
+  if (step === "locked") {
+    return (
+      <SiteLayout
+        title="Application review — SwiftJob"
+        description="Your role assessment will be available if your application advances."
+      >
+        <div className="assessment-shell">
+          <div className="assessment-card">
+            <div className="assessment-icon-wrap"><Lock size={36} strokeWidth={1.6} /></div>
+            <div className="assessment-eyebrow">NEXT STAGE</div>
+            <h1 className="assessment-heading">Your application is under review</h1>
+            <p className="assessment-lead">
+              Your technical check is saved. The role-specific assessment will
+              unlock here if the recruitment team advances your application.
+              We’ll email you when there is an update.
+            </p>
+            <div className="assessment-actions">
+              <a href="/candidate/applications" className="button button-blue">View my applications</a>
+              <a href="/careers" className="button button-dark">View positions</a>
+            </div>
+          </div>
+        </div>
+      </SiteLayout>
+    );
+  }
+
   if (step === "done") {
     const alreadyDone = result !== null;
     const techOnlyDone = !alreadyDone && !payload.assessmentRequired;
@@ -480,8 +517,10 @@ export function AssessmentPage() {
               if (payload.result) {
                 setResult(payload.result);
                 setStep("done");
-              } else if (payload.assessmentRequired && config) {
+              } else if (payload.assessmentAvailable && payload.assessmentRequired && config) {
                 setStep("questions");
+              } else if (payload.assessmentRequired) {
+                setStep("locked");
               } else {
                 setStep("done");
               }

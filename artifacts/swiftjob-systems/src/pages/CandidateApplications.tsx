@@ -14,6 +14,7 @@ import {
   ArrowRight,
   ArrowUpRight,
   ClipboardCheck,
+  Lock,
   Video,
   CheckCircle2,
   Laptop,
@@ -86,7 +87,7 @@ function StatusBadge({
         STATUS_COLORS[status] || "bg-gray-100 text-gray-800"
       } ${className}`}
     >
-      {status}
+      {status === "Shortlisted" ? "Moved to next stage" : status}
     </span>
   );
 }
@@ -112,6 +113,7 @@ interface Application {
   skills: string;
   relevantExperience: string;
   coverLetter: string;
+  roleAnswers?: { id: string; prompt: string; answer: string }[] | null;
   resumePath: string | null;
   resumeFilename: string | null;
   status: string;
@@ -125,9 +127,10 @@ interface Application {
   };
   assessment?: {
     required: boolean;
+    available: boolean;
     track: string;
     title: string | null;
-    status: "not_started" | "in_progress" | "completed";
+    status: "locked" | "not_started" | "in_progress" | "completed";
     answered: number;
     total: number;
     score: number | null;
@@ -163,8 +166,13 @@ const NEXT_STEPS: Record<
   },
   Reviewing: {
     title: "Your application is in review",
-    body: "Our recruitment team is taking a closer look at your experience and skills against the role. Reviews typically take 5–7 business days — we'll email you the moment your status changes.",
+    body: "Our recruitment team is taking a closer look at your experience and skills against the role. The team aims to review applications within 2–3 business days — we'll email you when your status changes.",
     tone: "blue",
+  },
+  Shortlisted: {
+    title: "You've moved to the next stage",
+    body: "Your candidate portal shows the next step for this role. Complete the technical check if it is outstanding, then complete the role assessment if one is required.",
+    tone: "green",
   },
   Rejected: {
     title: "Thank you for your interest",
@@ -531,7 +539,7 @@ function CandidateChecksPanel({ application }: { application: Application }) {
         <div className="candidate-checks-panel-body">
           <span className="candidate-checks-eyebrow">NEXT REQUIRED STEP</span>
           <h3>Complete your technical check</h3>
-          <p>Confirm the computer, connection, and browser you plan to use for this application. You can continue to the role assessment afterward or return later.</p>
+          <p>Confirm the computer, connection, and browser you plan to use for this application. If the recruitment team advances you, any role assessment will appear here as a separate next step.</p>
           <Link href={assessmentUrl} className="button button-blue">
             {techCheck?.status === "in_progress" ? "Continue your check" : "Complete your check"} <ArrowRight size={15} />
           </Link>
@@ -549,6 +557,20 @@ function CandidateChecksPanel({ application }: { application: Application }) {
           <h3>Your application checks are complete</h3>
           <p>Your technical check is attached to this application. Our team can now review it.</p>
           <span className="candidate-checks-progress">1 of 1 check complete</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!assessment.available) {
+    return (
+      <div className="candidate-checks-panel">
+        <div className="candidate-checks-panel-icon"><Lock size={22} /></div>
+        <div className="candidate-checks-panel-body">
+          <span className="candidate-checks-eyebrow">NEXT STAGE</span>
+          <h3>Role assessment not unlocked yet</h3>
+          <p>Your technical check is saved. The recruitment team will unlock the role-specific assessment if your application advances, and will email you when there is an update.</p>
+          <span className="candidate-checks-progress">Technical check recorded</span>
         </div>
       </div>
     );
@@ -702,18 +724,33 @@ function ApplicationDetail({
 
       <section className="candidate-detail-section">
         <h3>Skills &amp; experience</h3>
+        {application.roleAnswers?.length ? (
+          <div className="detail-group">
+            <h4>Your answers for this role</h4>
+            {application.roleAnswers.map((item) => (
+              <div className="application-role-answer" key={item.id}>
+                <strong>{item.prompt}</strong>
+                <p className="detail-text">{item.answer}</p>
+              </div>
+            ))}
+          </div>
+        ) : null}
         <div className="detail-group">
           <h4>Skills</h4>
           <p className="detail-text">{application.skills}</p>
         </div>
-        <div className="detail-group">
-          <h4>Relevant Experience</h4>
-          <p className="detail-text">{application.relevantExperience}</p>
-        </div>
-        <div className="detail-group">
-          <h4>Cover Letter</h4>
-          <p className="detail-text">{application.coverLetter}</p>
-        </div>
+        {application.relevantExperience?.trim() && (
+          <div className="detail-group">
+            <h4>Relevant Experience</h4>
+            <p className="detail-text">{application.relevantExperience}</p>
+          </div>
+        )}
+        {application.coverLetter?.trim() && (
+          <div className="detail-group">
+            <h4>Cover Letter</h4>
+            <p className="detail-text">{application.coverLetter}</p>
+          </div>
+        )}
       </section>
 
       <section className="candidate-detail-section">

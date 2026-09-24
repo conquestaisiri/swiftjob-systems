@@ -11,6 +11,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import type { Job } from "@/data/jobs";
+import type { ApplicationQuestion } from "@/lib/applicationQuestions";
 import { parseDateOnly } from "@/lib/utils";
 import { handleAdminUnauthorized, isUnauthorized } from "@/lib/adminAuth";
 
@@ -52,7 +53,9 @@ function toForm(job: Job): FormState {
   const form: FormState = {};
   for (const key of Object.keys(job) as (keyof Job)[]) {
     const value = job[key];
-    if (Array.isArray(value)) {
+    if (key === "applicationQuestions" && Array.isArray(value)) {
+      form[key] = (value as ApplicationQuestion[]).map((question) => question.prompt).join("\n");
+    } else if (Array.isArray(value)) {
       form[key] = value.join("\n");
     } else {
       form[key] = String(value ?? "");
@@ -82,6 +85,7 @@ const EMPTY_FORM: FormState = {
   benefits: "",
   workingHours: "",
   hiringProcess: "",
+  applicationQuestions: "",
   isActive: "true",
 };
 
@@ -133,7 +137,12 @@ function JobEditor({
     try {
       const payload: Record<string, unknown> = {};
       for (const key of Object.keys(form)) {
-        if ((LIST_FIELDS as readonly string[]).includes(key)) {
+        if (key === "applicationQuestions") {
+          payload[key] = form[key]
+            .split(/\r?\n/)
+            .map((prompt, index) => ({ id: `custom-${index + 1}`, prompt: prompt.trim(), required: true }))
+            .filter((question) => question.prompt);
+        } else if ((LIST_FIELDS as readonly string[]).includes(key)) {
           payload[key] = form[key]
             .split("\n")
             .map((v) => v.trim())
@@ -384,6 +393,21 @@ function JobEditor({
             {textarea("softwareTools", 4)}
             {textarea("benefits", 4)}
             {textarea("hiringProcess", 5)}
+            <div className="job-editor-field job-editor-field-full">
+              <label>
+                Role-specific application questions{" "}
+                <span className="opt">(one per line, up to 6)</span>
+              </label>
+              <textarea
+                value={form.applicationQuestions ?? ""}
+                onChange={set("applicationQuestions")}
+                rows={5}
+                placeholder="Leave blank to use questions tailored to this role category. Add custom prompts here to override them."
+              />
+              <span className="job-editor-help">
+                Applicants must answer each listed question. Keep prompts focused on skills and experience needed for this position.
+              </span>
+            </div>
           </div>
 
           <div className="modal-footer">

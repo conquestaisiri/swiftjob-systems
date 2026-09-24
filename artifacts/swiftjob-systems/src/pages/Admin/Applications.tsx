@@ -65,6 +65,7 @@ interface Application {
   skills: string;
   relevantExperience: string;
   coverLetter: string;
+  roleAnswers?: { id: string; prompt: string; answer: string }[] | null;
   resumePath: string | null;
   resumeFilename: string | null;
   status: string;
@@ -115,6 +116,7 @@ interface FootprintEvent {
   event: string;
   device: string;
   userAgent: string | null;
+  meta?: Record<string, unknown> | null;
   createdAt: string;
 }
 
@@ -133,6 +135,11 @@ const EVENT_LABELS: Record<string, string> = {
   proceed: "Proceeded to next step",
   download: "Downloaded resume",
   blocked: "Blocked (mobile attempt)",
+  techCheckCompleted: "Completed technical check",
+  statusChanged: "Application status changed",
+  applicationSubmitted: "Application submitted",
+  assessmentStarted: "Started role assessment",
+  assessmentCompleted: "Completed role assessment",
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -156,18 +163,28 @@ interface ApplicationsProps {
   token: string;
 }
 
+interface StatusNotice {
+  tone: "success" | "warning" | "neutral";
+  message: string;
+}
+
 export function Applications({ token }: ApplicationsProps) {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState(
+    () => new URLSearchParams(window.location.search).get("search") ?? "",
+  );
+  const [search, setSearch] = useState(
+    () => new URLSearchParams(window.location.search).get("search") ?? "",
+  );
   const [statusFilter, setStatusFilter] = useState("");
   const [footprintFilter, setFootprintFilter] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [statusNotice, setStatusNotice] = useState<StatusNotice | null>(null);
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
   const [shortlistApp, setShortlistApp] = useState<Application | null>(null);
   const [timelineFor, setTimelineFor] = useState<Application | null>(null);
@@ -240,6 +257,7 @@ export function Applications({ token }: ApplicationsProps) {
     },
   ) => {
     setUpdatingStatus(appId);
+    setStatusNotice(null);
     try {
       const res = await fetch(
         `${API_BASE}/api/admin/applications/${appId}/status`,
@@ -273,8 +291,34 @@ export function Applications({ token }: ApplicationsProps) {
         },
       );
 
-      if (!res.ok) throw new Error("Failed to update status");
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update status");
+      }
+      const emailResult = data.notification as
+        | { requested?: boolean; sent?: boolean }
+        | undefined;
+      if (!emailResult) {
+        setStatusNotice({
+          tone: "neutral",
+          message: "Status saved. Email delivery confirmation was not provided by the API.",
+        });
+      } else if (!emailResult.requested) {
+        setStatusNotice({
+          tone: "neutral",
+          message: `Status saved as ${newStatus}. No candidate email was sent.`,
+        });
+      } else if (emailResult.sent) {
+        setStatusNotice({
+          tone: "success",
+          message: `Status saved as ${newStatus}; the candidate email was sent.`,
+        });
+      } else {
+        setStatusNotice({
+          tone: "warning",
+          message: `Status saved as ${newStatus}, but the candidate email could not be sent. Check the email service before retrying.`,
+        });
+      }
       setApplications((prev) =>
         prev.map((a) =>
           a.id === appId
@@ -364,6 +408,22 @@ export function Applications({ token }: ApplicationsProps) {
         </div>
       )}
 
+      {statusNotice && (
+        <div
+          className={`admin-status-notice ${statusNotice.tone}`}
+          role="status"
+        >
+          <span>{statusNotice.message}</span>
+          <button
+            type="button"
+            onClick={() => setStatusNotice(null)}
+            aria-label="Dismiss status update notice"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
       <div className="admin-filters">
         <div className="filter-group">
           <div className="search-wrapper">
@@ -432,7 +492,7 @@ export function Applications({ token }: ApplicationsProps) {
                   <th>Applied</th>
                   <th>Status</th>
                   <th>Footprint</th>
-                  <th>Skills Check</th>
+                  <th>Role assessment</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -599,8 +659,8 @@ export function Applications({ token }: ApplicationsProps) {
                               // A stray click must not fire a live rejection.
                               const warn =
                                 next === "Rejected"
-                                  ? `Set this application to Rejected and EMAIL the candidate a rejection notice?`
-                                  : `Change status to "${next}" and EMAIL the candidate an update?`;
+                                  ? `Change ${app.fullName}'s application from ${app.status} to Rejected and email them a rejection notice?`
+                                  : `Change ${app.fullName}'s application from ${app.status} to ${next} and email them a status update?`;
                               if (!window.confirm(warn)) {
                                 e.target.value = app.status;
                                 return;
@@ -703,17 +763,48 @@ export function Applications({ token }: ApplicationsProps) {
                           </span>
                         </div>
                         <div className="footprint-timeline-meta">
-                          Device detected:{" "}
-                          <strong>
-                            {ev.device === "mobile"
-                              ? "📱 Mobile/tablet"
-                              : "💻 PC/laptop"}
-                          </strong>
-                          {ev.userAgent && (
-                            <span className="footprint-time">
-                              {" "}
-                              · UA: {ev.userAgent}
-                            </span>
+                          {ev.event === "statusChanged" ? (
+                            <>
+                              Status: {" "}
+                              <strong>
+                                {typeof ev.meta?.fromStatus === "string"
+                                  ? ev.meta.fromStatus
+                                  : "Previous status"}
+                                {" → "}
+                                {typeof ev.meta?.toStatus === "string"
+                                  ? ev.meta.toStatus
+                                  : "Updated"}
+                              </strong>
+                              {" · "}
+                              {ev.meta?.notificationRequested === true
+                                ? ev.meta.notificationSent === true
+                                  ? "Candidate email sent"
+                                  : "Candidate email failed"
+                                : "Candidate email not requested"}
+                            </>
+                          ) : ev.event === "applicationSubmitted" ? (
+                            <>Role: <strong>{String(ev.meta?.position ?? "Application received")}</strong></>
+                          ) : ev.event === "assessmentCompleted" ? (
+                            <>Role assessment submitted for review.</>
+                          ) : ev.event === "assessmentStarted" ? (
+                            <>Assessment in progress{typeof ev.meta?.track === "string" ? ` · ${ev.meta.track} track` : ""}.</>
+                          ) : ev.device === "checker" ? (
+                            <>Source: <strong>SwiftJob System Checker</strong></>
+                          ) : (
+                            <>
+                              Device detected:{" "}
+                              <strong>
+                                {ev.device === "mobile"
+                                  ? "📱 Mobile/tablet"
+                                  : "💻 PC/laptop"}
+                              </strong>
+                              {ev.userAgent && (
+                                <span className="footprint-time">
+                                  {" "}
+                                  · UA: {ev.userAgent}
+                                </span>
+                              )}
+                            </>
                           )}
                         </div>
                       </div>
@@ -826,13 +917,13 @@ function ApplicationModal({
         }
         const data = await res.json();
         if (!res.ok)
-          throw new Error(data.error || "Failed to load skills check");
+          throw new Error(data.error || "Failed to load role assessment");
         if (!cancelled) setAssessmentDetail(data.assessment ?? null);
       })
       .catch((err) => {
         if (!cancelled)
           setAssessmentError(
-            err instanceof Error ? err.message : "Failed to load skills check",
+            err instanceof Error ? err.message : "Failed to load role assessment",
           );
       })
       .finally(() => {
@@ -904,7 +995,7 @@ function ApplicationModal({
             className={activeTab === "assessment" ? "active" : ""}
             onClick={() => setActiveTab("assessment")}
           >
-            Skills Check
+            Role assessment
           </button>
         </div>
 
@@ -992,17 +1083,34 @@ function ApplicationModal({
           {activeTab === "details" && (
             <div className="modal-section">
               <div className="detail-group">
+                <h4>Questions for this role</h4>
+                {application.roleAnswers?.length ? (
+                  application.roleAnswers.map((item) => (
+                    <div className="application-role-answer" key={item.id}>
+                      <strong>{item.prompt}</strong>
+                      <p className="detail-text">{item.answer}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="detail-text">No role-specific answers were recorded with this application.</p>
+                )}
+              </div>
+              <div className="detail-group">
                 <h4>Skills</h4>
                 <p className="detail-text">{application.skills}</p>
               </div>
-              <div className="detail-group">
-                <h4>Relevant Experience</h4>
-                <p className="detail-text">{application.relevantExperience}</p>
-              </div>
-              <div className="detail-group">
-                <h4>Cover Letter</h4>
-                <p className="detail-text">{application.coverLetter}</p>
-              </div>
+              {application.relevantExperience?.trim() && (
+                <div className="detail-group">
+                  <h4>Relevant Experience</h4>
+                  <p className="detail-text">{application.relevantExperience}</p>
+                </div>
+              )}
+              {application.coverLetter?.trim() && (
+                <div className="detail-group">
+                  <h4>Cover Letter</h4>
+                  <p className="detail-text">{application.coverLetter}</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -1045,7 +1153,7 @@ function ApplicationModal({
               {assessmentLoading ? (
                 <div className="admin-loading" style={{ padding: 30 }}>
                   <Loader2 size={28} className="animate-spin" />
-                  <p>Loading skills check...</p>
+                  <p>Loading role assessment...</p>
                 </div>
               ) : assessmentError ? (
                 <div className="admin-alert">
@@ -1055,9 +1163,9 @@ function ApplicationModal({
               ) : !assessmentDetail ? (
                 <div className="no-resume">
                   <FileText size={48} className="text-slate-300" />
-                  <h4>No skills check submitted</h4>
+                  <h4>No role assessment submitted</h4>
                   <p className="text-slate-500">
-                    The candidate has not completed their skills check yet.
+                    A role assessment appears here after the candidate is advanced and submits it.
                   </p>
                 </div>
               ) : (
@@ -1121,7 +1229,7 @@ function AssessmentDetailView({ detail }: { detail: AssessmentDetail }) {
     <div className="assessment-detail">
       <div className="assessment-detail-head">
         <div>
-          <h4>{config?.title ?? "Skills Check"}</h4>
+          <h4>{config?.title ?? "Role Assessment"}</h4>
           {config?.blurb && <p className="text-slate-500">{config.blurb}</p>}
         </div>
         <div className="assessment-score-box">
@@ -1224,7 +1332,7 @@ function AssessmentDetailView({ detail }: { detail: AssessmentDetail }) {
         </>
       ) : (
         <p className="text-slate-500">
-          No answer details were recorded for this skills check.
+          No answer details were recorded for this role assessment.
         </p>
       )}
     </div>
@@ -1282,8 +1390,8 @@ function ShortlistModal({
           <div>
             <h2>
               {isEdit
-                ? `Edit shortlist for ${application.fullName}`
-                : `Shortlist ${application.fullName}`}
+                ? `Edit next-stage details for ${application.fullName}`
+                : `Advance ${application.fullName} to the next stage`}
             </h2>
             <span className="modal-position">{application.position}</span>
           </div>
@@ -1298,6 +1406,17 @@ function ShortlistModal({
               <div className="admin-alert">
                 <AlertCircle size={18} />
                 <span>{error}</span>
+              </div>
+            )}
+
+            {!isEdit && (
+              <div className="mb-4 p-4 border border-emerald-200 rounded-lg bg-emerald-50">
+                <strong className="block text-sm text-emerald-900">This advances the application</strong>
+                <p className="mt-1 text-sm text-emerald-800">
+                  Saving the status as Shortlisted unlocks the role assessment
+                  in the candidate portal once the technical check is complete.
+                  The candidate can also receive an email about this next step.
+                </p>
               </div>
             )}
 
@@ -1336,12 +1455,12 @@ function ShortlistModal({
               />
               <span>
                 <span className="block text-sm font-medium text-slate-800">
-                  Email this candidate
+                  Email this candidate about the next stage
                 </span>
                 <span className="block text-xs text-slate-500 mt-0.5">
                   {isEdit
                     ? "Sends the candidate an email update about their status."
-                    : "Sends the candidate an email letting them know they've been shortlisted."}
+                    : "Sends a next-stage update and points them to the candidate portal."}
                 </span>
               </span>
             </label>

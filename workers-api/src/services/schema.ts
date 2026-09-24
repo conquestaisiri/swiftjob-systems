@@ -31,7 +31,9 @@ const REQUIRED_COLUMNS = [
   ["applications", "submission_key"],
   ["applications", "campaign_slug"],
   ["applications", "referral_code"],
+  ["applications", "role_answers"],
   ["jobs", "referral_reward_cents"],
+  ["jobs", "application_questions"],
   ["referrals", "content_overrides"],
   ["footprints", "meta"],
 ] as const;
@@ -52,10 +54,10 @@ async function verifySchema(): Promise<void> {
      SELECT 'column' AS kind, table_name || '.' || column_name AS name
        FROM information_schema.columns
       WHERE table_schema = 'public'
-        AND ((table_name = 'applications' AND column_name IN ('job_slug', 'submission_key', 'campaign_slug'))
+        AND ((table_name = 'applications' AND column_name IN ('job_slug', 'submission_key', 'campaign_slug', 'role_answers'))
         OR (table_name = 'referrals' AND column_name = 'content_overrides')
           OR (table_name = 'applications' AND column_name = 'referral_code')
-        OR (table_name = 'jobs' AND column_name = 'referral_reward_cents')
+        OR (table_name = 'jobs' AND column_name IN ('referral_reward_cents', 'application_questions'))
           OR (table_name = 'footprints' AND column_name = 'meta'))`,
     [Array.from(REQUIRED_TABLES)],
   );

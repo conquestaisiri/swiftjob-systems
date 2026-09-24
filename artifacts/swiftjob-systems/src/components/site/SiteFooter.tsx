@@ -2,7 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 import { Link } from "wouter";
 import { CAREERS_EMAIL, SUPPORT_EMAIL } from "@/lib/contact";
 
-export function SiteFooter() {
+export function SiteFooter({ candidateSignedIn = false }: { candidateSignedIn?: boolean }) {
   return (
     <footer className="site-footer">
       <div className="site-footer-inner">
@@ -34,7 +34,9 @@ export function SiteFooter() {
         <div className="site-footer-column">
           <span className="site-footer-label">For professionals</span>
           <Link href="/careers">Browse open roles</Link>
-          <Link href="/login">Candidate access</Link>
+          <Link href={candidateSignedIn ? "/candidate/applications" : "/login"}>
+            {candidateSignedIn ? "My candidate portal" : "Candidate access"}
+          </Link>
           <a href={`mailto:${SUPPORT_EMAIL}`}>Candidate support</a>
         </div>
 

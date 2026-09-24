@@ -22,6 +22,7 @@ import {
   typingCheckRequiredForRole,
   type AssessmentResult,
 } from "./services/assessments";
+import { canAccessRoleAssessment } from "./services/assessmentAccess";
 import { gradeAssessment } from "./services/assessmentAnswerKey";
 import {
   techCheckService,
@@ -61,6 +62,7 @@ import {
   type FootprintSummary,
 } from "./repositories";
 import type { Application } from "./schema";
+import { normalizeApplicationAnswers } from "../../shared/application-questions";
 
 type Variables = {
   user: { id: string; email: string; role: string };
@@ -407,8 +409,10 @@ const applicationSchema = z.object({
   expectedSalary: z.string().trim().min(1).max(160),
   earliestStartDate: z.string().date(),
   skills: z.string().trim().min(1).max(2000),
-  relevantExperience: z.string().trim().min(1).max(5000),
-  coverLetter: z.string().trim().min(1).max(5000),
+  relevantExperience: z.string().trim().max(5000).optional().default(""),
+  coverLetter: z.string().trim().max(5000).optional().default(""),
+  savedResumeApplicationId: z.string().uuid().optional(),
+  roleAnswers: z.string().max(40_000).optional(),
   campaignSlug: z.string().trim().max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional(),
   referralCode: z.string().trim().toUpperCase().regex(/^SJREF-[A-Z0-9]{8}$/).optional(),
 });
@@ -482,9 +486,55 @@ app.post("/api/applications", async (c) => {
       );
     }
 
-    const file = formData.get("resume") as File | null;
-    if (!file || file.size <= 0) return c.json({ error: "Please upload a PDF, DOC, or DOCX resume." }, 400);
-    if (file.size > 10 * 1024 * 1024) return c.json({ error: "File size must not exceed 10 MB." }, 400);
+    let roleAnswers;
+    try {
+      roleAnswers = normalizeApplicationAnswers(
+        job.applicationQuestions ?? [],
+        parsed.data.roleAnswers ?? "[]",
+      );
+    } catch (error) {
+      return c.json(
+        { error: error instanceof Error ? error.message : "Please review the role-specific questions." },
+        400,
+      );
+    }
+
+    const savedResumeApplicationId = parsed.data.savedResumeApplicationId;
+    const resumeField = formData.get("resume") as unknown as File | string | null;
+    if (typeof resumeField === "string") {
+      return c.json({ error: "The uploaded resume field is invalid." }, 400);
+    }
+    const file = resumeField;
+    if (file && file.size > 0 && savedResumeApplicationId) {
+      return c.json({ error: "Choose your saved CV or upload a new one, not both." }, 400);
+    }
+    if ((!file || file.size <= 0) && !savedResumeApplicationId) {
+      return c.json({ error: "Please upload a PDF, DOC, or DOCX resume, or choose your saved CV." }, 400);
+    }
+    if (file && file.size > 10 * 1024 * 1024) return c.json({ error: "File size must not exceed 10 MB." }, 400);
+
+    let savedResume: { path: string; filename: string | null } | undefined;
+    if (savedResumeApplicationId) {
+      const token = getCandidateToken(c);
+      const session = token ? await authService.validateSessionToken(token) : null;
+      if (!session?.valid) {
+        return c.json({ error: "Sign in again to use the CV saved in your candidate account." }, 401);
+      }
+      if (session.email !== parsed.data.email.trim().toLowerCase()) {
+        return c.json({ error: "Use the email address for the signed-in candidate account when reusing its CV." }, 403);
+      }
+      const sourceApplication = await applicationRepository.findById(savedResumeApplicationId);
+      if (!sourceApplication || sourceApplication.email.trim().toLowerCase() !== session.email) {
+        return c.json({ error: "The saved CV could not be verified for this account." }, 404);
+      }
+      if (!sourceApplication.resumePath) {
+        return c.json({ error: "The saved CV is no longer available. Upload it again to continue." }, 404);
+      }
+      savedResume = {
+        path: sourceApplication.resumePath,
+        filename: sourceApplication.resumeFilename,
+      };
+    }
     let resumeFile:
       | {
           buffer: ArrayBuffer;
@@ -506,30 +556,26 @@ app.post("/api/applications", async (c) => {
       if (!fileCheck.valid) return c.json({ error: fileCheck.error }, 400);
     }
 
-    const { jobSlug, ...applicationInput } = parsed.data;
+    const {
+      jobSlug,
+      savedResumeApplicationId: _savedResumeApplicationId,
+      roleAnswers: _serializedRoleAnswers,
+      ...applicationInput
+    } = parsed.data;
     const application = await applicationService.create(
-      { ...applicationInput, jobSlug, position: job.title, submissionKey },
+      { ...applicationInput, jobSlug, position: job.title, submissionKey, roleAnswers },
       resumeFile,
+      savedResume,
     );
 
-    // Keep the candidate profile useful immediately after an application and
-    // attach a valid account referral to this application exactly once.
-    try {
-      await candidateRepository.upsertProfile(application.email, {
-        fullName: application.fullName,
-        phone: application.phone,
-        country: application.country,
-        city: application.city,
-        timezone: application.timezone,
-        linkedinUrl: application.linkedinUrl,
-        portfolioUrl: application.portfolioUrl,
-        skills: application.skills,
-        experienceSummary: application.relevantExperience,
-        education: application.education,
-        resumePath: application.resumePath,
-        resumeFilename: application.resumeFilename,
-      });
-      if (parsed.data.referralCode) {
+    // Applications are allowed before sign-in, so don't create or overwrite a
+    // candidate profile from an unverified email address. A candidate who
+    // later signs in through the emailed magic link can see all applications
+    // for that verified address; the profile endpoint can then seed a first
+    // profile from the latest application. Referral attribution is independent
+    // of account verification and remains attached to this application.
+    if (parsed.data.referralCode) {
+      try {
         await candidateRepository.attachApplication({
           code: parsed.data.referralCode,
           referredEmail: application.email,
@@ -537,11 +583,9 @@ app.post("/api/applications", async (c) => {
           jobSlug,
           rewardCents: job.referralRewardCents ?? 4000,
         });
+      } catch (referralError) {
+        console.error({ referralError, applicationId: application.id }, "Referral attribution failed");
       }
-    } catch (profileError) {
-      // Application delivery must not fail after its durable row and resume
-      // have been stored. The profile/referral can be repaired from admin data.
-      console.error({ profileError, applicationId: application.id }, "Profile/referral enrichment failed");
     }
 
     // Keep the Worker alive until the async emails finish sending (isolate may
@@ -681,19 +725,25 @@ app.get("/api/assessments/:applicationId", async (c) => {
       );
     }
 
+    // The role assessment is gated by both the admin's shortlist decision and
+    // the separate, application-bound technical check.
+    const techCheck = await techCheckService.getApplicationStatus(applicationId);
+    const assessmentAvailable = canAccessRoleAssessment(
+      application.status,
+      techCheck.status,
+    );
     const existing =
       await assessmentRepository.findForApplication(applicationId);
-    const detailed = existing?.status === "in_progress"
+    const detailed = assessmentAvailable && existing?.status === "in_progress"
       ? await assessmentRepository.getDetailed(applicationId)
       : null;
-    const techCheck = await techCheckService.getApplicationStatus(applicationId);
     const job =
       (await jobService.getBySlug(application.jobSlug ?? "")) ??
       (await jobService.getBySlug(""));
     const jobTitle = job?.title ?? application.position;
     const department = job?.department ?? application.position;
     const track = trackForDepartment(department);
-    const needsAssessment = track !== "none" && existing?.status !== "completed";
+    const needsAssessment = assessmentAvailable && track !== "none" && existing?.status !== "completed";
     const typingRequired = typingCheckRequiredForRole(
       job
         ? {
@@ -712,14 +762,17 @@ app.get("/api/assessments/:applicationId", async (c) => {
       jobTitle,
       needsAssessment,
       assessmentRequired: track !== "none",
+      assessmentAvailable,
       track: track === "none" ? "none" : track,
       assessmentTitle: assessmentTitleForJob(jobTitle, track),
       assessmentBlurb: assessmentBlurbForJob(jobTitle, track),
-      status: existing?.status === "completed"
-        ? "completed"
-        : existing?.status === "in_progress"
-          ? "in_progress"
-          : "not_started",
+      status: !assessmentAvailable
+        ? "locked"
+        : existing?.status === "completed"
+          ? "completed"
+          : existing?.status === "in_progress"
+            ? "in_progress"
+            : "not_started",
       techCheck: { ...techCheck, typingRequired },
       draft: detailed
         ? {
@@ -728,7 +781,7 @@ app.get("/api/assessments/:applicationId", async (c) => {
             updatedAt: detailed.updatedAt,
           }
         : null,
-      result: existing
+      result: assessmentAvailable && existing
         ? {
             score: existing.score,
             maxScore: existing.maxScore,
@@ -762,6 +815,17 @@ app.post("/api/assessments/:applicationId", async (c) => {
           error: "We couldn't verify this application. Please check your link.",
         },
         404,
+      );
+    }
+
+    if (application.status !== "Shortlisted") {
+      return c.json(
+        {
+          ok: false,
+          code: "assessment_locked",
+          error: "The role assessment becomes available if the recruitment team advances your application. You can still complete your technical check in the candidate portal.",
+        },
+        403,
       );
     }
 
@@ -815,6 +879,9 @@ app.post("/api/assessments/:applicationId", async (c) => {
     // the answer key - a client-supplied score is never trusted.
     const { score, maxScore } = gradeAssessment(track, body.responses ?? {});
 
+    const previousAssessment = await assessmentRepository.findForApplication(
+      applicationId,
+    );
     const result = await assessmentRepository.save(
       applicationId,
       jobSlug,
@@ -824,6 +891,23 @@ app.post("/api/assessments/:applicationId", async (c) => {
       score,
       maxScore,
     );
+
+    if (previousAssessment?.status !== "completed" && result.status === "completed") {
+      try {
+        await footprintRepository.record({
+          subjectType: "candidate",
+          subjectId: applicationId,
+          event: "assessmentCompleted",
+          device: "candidate",
+          meta: { jobSlug, track },
+        });
+      } catch (timelineError) {
+        console.error(
+          { timelineError, applicationId },
+          "Assessment was saved but its timeline event could not be recorded",
+        );
+      }
+    }
 
     return c.json({
       ok: true,
@@ -859,6 +943,32 @@ app.post("/api/assessments/:applicationId/draft", async (c) => {
       );
     }
 
+    if (application.status !== "Shortlisted") {
+      return c.json(
+        {
+          ok: false,
+          code: "assessment_locked",
+          error: "Assessment progress can be saved after the recruitment team advances your application.",
+        },
+        403,
+      );
+    }
+
+    const recordedTechCheck = await techCheckService.getApplicationStatus(applicationId);
+    if (
+      recordedTechCheck.status !== "completed" ||
+      !isUsableTechCheckReport(recordedTechCheck.specs)
+    ) {
+      return c.json(
+        {
+          ok: false,
+          code: "tech_check_required",
+          error: "Complete the technical check before saving role-assessment progress.",
+        },
+        403,
+      );
+    }
+
     const requestedJobSlug = typeof body.jobSlug === "string" ? body.jobSlug.trim() : "";
     if (application.jobSlug && requestedJobSlug !== application.jobSlug) {
       return c.json({ ok: false, error: "This assessment link is for a different role." }, 400);
@@ -871,6 +981,9 @@ app.post("/api/assessments/:applicationId/draft", async (c) => {
       return c.json({ ok: false, error: "This role does not require a role assessment." }, 400);
     }
 
+    const previousAssessment = await assessmentRepository.findForApplication(
+      applicationId,
+    );
     const result = await assessmentRepository.saveDraft(
       applicationId,
       jobSlug,
@@ -878,6 +991,22 @@ app.post("/api/assessments/:applicationId/draft", async (c) => {
       body.systemCheck ?? {},
       body.responses ?? {},
     );
+    if (!previousAssessment && result.status === "in_progress") {
+      try {
+        await footprintRepository.record({
+          subjectType: "candidate",
+          subjectId: applicationId,
+          event: "assessmentStarted",
+          device: "candidate",
+          meta: { jobSlug, track },
+        });
+      } catch (timelineError) {
+        console.error(
+          { timelineError, applicationId },
+          "Assessment progress was saved but its start event could not be recorded",
+        );
+      }
+    }
     return c.json({ ok: true, status: result.status, updatedAt: result.updatedAt });
   } catch (err) {
     console.error({ err }, "Failed to save assessment draft");
@@ -1162,17 +1291,66 @@ app.post("/api/tech-check/report/:token", async (c) => {
         { "Cache-Control": "no-store" },
       );
     }
-    const consumed = await techCheckService.consumeWithReport(
+    const applicationId = await techCheckService.consumeWithReport(
       c.req.param("token"),
       specs,
     );
-    if (!consumed) {
+    if (!applicationId) {
       return c.json(
         { error: "This checker has already been used or has expired." },
         410,
         { "Cache-Control": "no-store" },
       );
     }
+
+    // The one-use token is bound to an application, so the HR notice can be
+    // sent exactly once and identify the right candidate without accepting an
+    // application ID from the report payload. Keep hardware details out of
+    // email; the authorized application record remains the source of truth.
+    c.executionCtx.waitUntil(
+      (async () => {
+        try {
+          const application = await applicationService.getById(applicationId);
+          if (!application) {
+            console.warn(
+              { applicationId },
+              "Technical check was saved, but its application no longer exists; HR notice skipped",
+            );
+            return;
+          }
+          const timelineWrite = footprintRepository
+            .record({
+              subjectType: "candidate",
+              subjectId: application.id,
+              event: "techCheckCompleted",
+              device: "checker",
+              meta: { referenceCode: application.referenceCode },
+            })
+            .catch((timelineError) => {
+              console.error(
+                { timelineError, applicationId },
+                "Technical check was saved, but the candidate timeline event could not be recorded",
+              );
+            });
+          const hrNotice = applicationService.trySend(
+            "technical-check completion notification",
+            () => emailService.sendTechCheckCompletionNotification({
+              applicationId: application.id,
+              referenceCode: application.referenceCode,
+              fullName: application.fullName,
+              email: application.email,
+              position: application.position,
+            }),
+          );
+          await Promise.all([timelineWrite, hrNotice]);
+        } catch (notificationError) {
+          console.error(
+            { notificationError, applicationId },
+            "Technical check was saved, but the HR notification could not be prepared",
+          );
+        }
+      })(),
+    );
     return c.json({ ok: true }, 200, { "Cache-Control": "no-store" });
   } catch (err) {
     console.error({ err }, "Failed to record tech check report");
@@ -1682,11 +1860,17 @@ async function candidateWorkflowView(application: Application) {
     ? await jobService.getBySlug(application.jobSlug)
     : null;
   const track = trackForDepartment(job?.department ?? application.position);
-  const existing = await assessmentRepository.findForApplication(application.id);
+  const techCheck = await techCheckService.getApplicationStatus(application.id);
+  const assessmentAvailable = canAccessRoleAssessment(
+    application.status,
+    techCheck.status,
+  );
+  const existing = assessmentAvailable
+    ? await assessmentRepository.findForApplication(application.id)
+    : null;
   const detailed = existing?.status === "in_progress"
     ? await assessmentRepository.getDetailed(application.id)
     : null;
-  const techCheck = await techCheckService.getApplicationStatus(application.id);
   const mcq = detailed?.responses?.mcq ?? {};
   const answered = Object.keys(mcq).length;
   const total = assessmentQuestionCount(track);
@@ -1701,8 +1885,8 @@ async function candidateWorkflowView(application: Application) {
         }
       : { title: jobTitle },
   );
-  const assessmentCompleted = existing?.status === "completed";
-  const totalChecks = track === "none" ? 1 : 2;
+  const assessmentCompleted = assessmentAvailable && existing?.status === "completed";
+  const totalChecks = track === "none" || !assessmentAvailable ? 1 : 2;
   const completedChecks =
     (techCheck.status === "completed" ? 1 : 0) +
     (assessmentCompleted ? 1 : 0);
@@ -1715,14 +1899,17 @@ async function candidateWorkflowView(application: Application) {
     },
     assessment: {
       required: track !== "none",
+      available: assessmentAvailable,
       track,
       title: assessmentTitleForJob(jobTitle, track),
       blurb: assessmentBlurbForJob(jobTitle, track),
-      status: assessmentCompleted
-        ? "completed"
-        : existing?.status === "in_progress"
-          ? "in_progress"
-          : "not_started",
+      status: !assessmentAvailable
+        ? "locked"
+        : assessmentCompleted
+          ? "completed"
+          : existing?.status === "in_progress"
+            ? "in_progress"
+            : "not_started",
       answered,
       total,
       score: existing?.score ?? null,
@@ -1976,6 +2163,12 @@ app.patch("/api/admin/applications/:id/status", adminAuth, async (c) => {
     if (!validStatuses.includes(status)) {
       return c.json({ error: "Invalid status" }, 400);
     }
+    if (
+      notifyCandidate !== undefined &&
+      typeof notifyCandidate !== "boolean"
+    ) {
+      return c.json({ error: "notifyCandidate must be a boolean" }, 400);
+    }
 
     // Validation failures are client errors - they must return 400 with the
     // reason, not fall through to the generic 500 below.
@@ -2023,7 +2216,7 @@ app.patch("/api/admin/applications/:id/status", adminAuth, async (c) => {
       throw err;
     }
 
-    const application = await applicationService.updateStatus(
+    const result = await applicationService.updateStatus(
       c.req.param("id"),
       status as ApplicationStatus,
       {
@@ -2037,15 +2230,20 @@ app.patch("/api/admin/applications/:id/status", adminAuth, async (c) => {
         notifyCandidate,
       },
     );
-    if (!application) {
+    if (!result) {
       return c.json({ error: "Application not found" }, 404);
     }
 
     console.log(
-      { applicationId: application.id, status },
+      {
+        applicationId: result.application.id,
+        status,
+        candidateEmailRequested: result.notification.requested,
+        candidateEmailSent: result.notification.sent,
+      },
       "Application status updated",
     );
-    return c.json({ application });
+    return c.json(result);
   } catch (err) {
     console.error({ err }, "Failed to update application status");
     return c.json({ error: "Failed to update application status" }, 500);
@@ -2355,8 +2553,8 @@ app.get("/api/candidate/profile", candidateAuth, async (c) => {
   try {
     const email = c.get("user").email;
     let profile = await candidateRepository.getProfile(email);
+    const applications = await applicationService.findByEmail(email);
     if (!profile) {
-      const applications = await applicationService.findByEmail(email);
       const latest = applications[0];
       profile = await candidateRepository.upsertProfile(email, latest ? {
         fullName: latest.fullName,
@@ -2373,7 +2571,52 @@ app.get("/api/candidate/profile", candidateAuth, async (c) => {
         resumeFilename: latest.resumeFilename,
       } : {});
     }
-    return c.json({ profile });
+    const matchingResumeApplication = profile.resumePath
+      ? applications.find((application) => application.resumePath === profile.resumePath)
+      : undefined;
+    const publicProfile = {
+      fullName: profile.fullName,
+      phone: profile.phone,
+      country: profile.country,
+      city: profile.city,
+      timezone: profile.timezone,
+      address: profile.address,
+      linkedinUrl: profile.linkedinUrl,
+      portfolioUrl: profile.portfolioUrl,
+      headline: profile.headline,
+      skills: profile.skills,
+      experienceSummary: profile.experienceSummary,
+      education: profile.education,
+      resumeFilename: profile.resumeFilename,
+    };
+    const latest = applications[0];
+    return c.json({
+      email,
+      profile: publicProfile,
+      applicationDefaults: latest ? {
+        fullName: latest.fullName,
+        phone: latest.phone,
+        country: latest.country,
+        city: latest.city,
+        timezone: latest.timezone,
+        linkedinUrl: latest.linkedinUrl,
+        portfolioUrl: latest.portfolioUrl,
+        yearsExperience: latest.yearsExperience,
+        education: latest.education,
+        englishProficiency: latest.englishProficiency,
+        noticePeriod: latest.noticePeriod,
+        expectedSalary: latest.expectedSalary,
+        earliestStartDate: latest.earliestStartDate,
+        skills: latest.skills,
+        relevantExperience: latest.relevantExperience,
+      } : null,
+      savedResume: matchingResumeApplication && profile.resumeFilename
+        ? {
+            applicationId: matchingResumeApplication.id,
+            filename: profile.resumeFilename,
+          }
+        : null,
+    });
   } catch (err) {
     console.error({ err }, "Failed to retrieve candidate profile");
     return c.json({ error: "Failed to retrieve profile" }, 500);

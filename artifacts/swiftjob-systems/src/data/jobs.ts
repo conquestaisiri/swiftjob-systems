@@ -1,6 +1,8 @@
 // Static copy of live open positions, kept for build-time fallback and typing.
 // Source of truth: the SwiftJob jobs API (POST /api/admin/jobs).
 
+import type { ApplicationQuestion } from "@/lib/applicationQuestions";
+
 export type WorkArrangement = "Remote" | "Hybrid" | "On-site";
 export type EmploymentType = "Full-time" | "Part-time" | "Contract";
 export type ExperienceLevel = "Entry-Level" | "Mid-Level" | "Senior";
@@ -25,6 +27,7 @@ export interface Job {
   benefits: string[];
   workingHours: string;
   hiringProcess: string[];
+  applicationQuestions?: ApplicationQuestion[];
   referralRewardCents?: number | null;
 }
 
@@ -80,7 +83,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -137,7 +140,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -194,7 +197,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40h/week with a few hours crossing time zones with your team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -251,7 +254,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40h/week with a few hours crossing time zones with your team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -308,7 +311,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -365,7 +368,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -421,7 +424,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -477,7 +480,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -533,7 +536,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -589,7 +592,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -645,7 +648,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -702,7 +705,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -759,7 +762,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -815,7 +818,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -871,7 +874,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -928,7 +931,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -985,7 +988,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1042,7 +1045,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1099,7 +1102,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40h/week with a few hours crossing time zones with your team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1156,7 +1159,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40h/week with a few hours crossing time zones with your team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1213,7 +1216,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1270,7 +1273,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1327,7 +1330,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40h/week with a few hours crossing time zones with your team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1383,7 +1386,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1440,7 +1443,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1497,7 +1500,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40h/week with a few hours crossing time zones with your team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1554,7 +1557,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1610,7 +1613,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1667,7 +1670,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40h/week with a few hours crossing time zones with your team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1724,7 +1727,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1781,7 +1784,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1838,7 +1841,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40h/week with a few hours crossing time zones with your team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1895,7 +1898,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -1952,7 +1955,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40h/week with a few hours crossing time zones with your team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2008,7 +2011,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2064,7 +2067,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2120,7 +2123,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2177,7 +2180,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2234,7 +2237,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40h/week with a few hours crossing time zones with your team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2290,7 +2293,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2346,7 +2349,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2402,7 +2405,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2459,7 +2462,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40h/week with a few hours crossing time zones with your team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2516,7 +2519,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40h/week with a few hours crossing time zones with your team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2573,7 +2576,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2629,7 +2632,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2686,7 +2689,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40h/week with a few hours crossing time zones with your team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2742,7 +2745,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, flexible with core hours that overlap your team and clients.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2799,7 +2802,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2856,7 +2859,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40h/week with a few hours crossing time zones with your team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2913,7 +2916,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40h/week with a few hours crossing time zones with your team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -2970,7 +2973,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time. Your weekly schedule aligns with client working hours in your region.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -3038,7 +3041,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible with ~4 hours daily team overlap.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -3101,7 +3104,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, business-hours schedule aligned to US client operations.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -3165,7 +3168,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week. Engagement windows typically cover US morning–afternoon, with some evening flexibility.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -3229,7 +3232,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible schedule aligned to weekly editorial deadlines.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -3294,7 +3297,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible with participation in the shared on-call rotation.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -3360,7 +3363,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible with ~4 hours daily team overlap.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -3423,7 +3426,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible within a day shift. Output-based targets with daily review and feedback.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -3490,7 +3493,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible with ~4 hours daily team overlap.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -3556,7 +3559,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible with participation in the shared on-call rotation.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -3624,7 +3627,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible with on-call rotation shared across the team.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -3691,7 +3694,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible schedule with weekly campaign deadlines.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -3759,7 +3762,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible with ~4 hours daily team overlap (US/EU time zones).",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -3828,7 +3831,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible with ~4 hours daily team overlap across US/EU time zones.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -3893,7 +3896,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible schedule with weekly design requests and deadlines.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -3957,7 +3960,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible within US/EU overlap windows.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -4020,7 +4023,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, business-hours schedule aligned to client operations windows.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -4084,7 +4087,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week with support windows covering US/EU business hours.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -4152,7 +4155,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible schedule with required team overlap of about 4 hours daily.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -4221,7 +4224,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible with ~4 hours daily team overlap.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -4288,7 +4291,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible with ~4 hours daily team overlap.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -4351,7 +4354,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, business-hours schedule with some overlap to client fulfilment windows.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -4416,7 +4419,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week with predictable payroll-cycle deadlines, often in US business hours.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -4482,7 +4485,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible with ~4 hours daily team overlap.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -4546,7 +4549,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week with some overlap across US and EU time zones for interview scheduling.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -4610,7 +4613,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible schedule with research deadlines and report due dates.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -4677,7 +4680,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible schedule with monthly reporting deadlines.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -4740,7 +4743,7 @@ export const JOBS: Job[] = [
     workingHours: "Part-time, 20–30 hours per week, self-managed schedule with per-file turnaround deadlines.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -4805,7 +4808,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible with ~4 hours daily team overlap.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -4870,7 +4873,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week, flexible schedule with per-project deadlines and occasional live-schedule alignment.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -4941,7 +4944,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week. Schedules are matched to client time zones — commonly US Eastern, Pacific, or UK/Europe business hours.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -5012,7 +5015,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week. Hours aligned to the executive's primary time zone (typically US or UK business hours). Occasional flexibility required for urgent matters.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -5080,7 +5083,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week. Shift-based scheduling (morning, afternoon, or evening) matched to client support coverage needs — typically US or UK/European hours.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -5150,7 +5153,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week. Hours aligned to client's customer time zones — primarily US Eastern or Pacific, or EMEA business hours.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -5220,7 +5223,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week. Aligned to client business hours — primarily US or UK/European time zones.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -5290,7 +5293,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week. Aligned to client time zone — primarily US Eastern, Pacific, or Mountain Standard Time.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -5360,7 +5363,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week. Aligned to client sales team hours — typically US Eastern or Pacific time.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -5428,7 +5431,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week. Aligned to client business development hours — typically US Eastern or Pacific time (9 AM–6 PM).",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -5496,7 +5499,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week. Standard business hours aligned to client time zone — typically US or European.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -5566,7 +5569,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week. Aligned to client business hours — primarily US or European time zones.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -5635,7 +5638,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week. Flexible scheduling aligned to client content calendar and campaign needs.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -5705,7 +5708,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week. Aligned to client marketing team hours — typically US or UK business hours.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -5775,7 +5778,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week. Aligned to client business hours and monthly close cycles — typically US or UK time zones.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
@@ -5845,7 +5848,7 @@ export const JOBS: Job[] = [
     workingHours: "Full-time, 40 hours per week. Shift-based scheduling aligned to client platform support hours — typically US or European time zones, with some overlap.",
     hiringProcess: [
       "Submit your application",
-      "Short skills check in your browser (5-10 minutes)",
+      "Complete the technical check in your candidate portal; any required role assessment is unlocked only after the recruitment team advances your application.",
       "Team review of your application",
       "Feedback and next steps from our team",
     ],
