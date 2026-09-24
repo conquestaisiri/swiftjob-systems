@@ -35,7 +35,7 @@ export async function createHarness() {
     throw new Error('External network blocked in audit harness: ' + new URL(url).origin);
   };
   const env = { DATABASE_URL: 'postgresql://audit-local-only', RESEND_API_KEY: 're_audit_synthetic',
-    EMAIL_FROM: 'SwiftJob <team@example.test>', HR_EMAIL: 'hr@example.test', SUPPORT_EMAIL: 'support@example.test',
+    EMAIL_FROM: 'SwiftJob <team@swiftjob.online>', HR_EMAIL: 'hr@example.test', SUPPORT_EMAIL: 'support@example.test',
     JWT_SECRET: 'synthetic-audit-secret-at-least-32-characters', ADMIN_EMAIL: 'admin@example.test',
     ADMIN_PASSWORD: 'SyntheticAdminPassword!42', FRONTEND_URL: 'https://swiftjob.example.test',
     R2_BUCKET: {

@@ -1,5 +1,8 @@
 import { Resend } from "resend";
 import { getEnv } from "../config";
+import { getPublicSiteUrl } from "./siteUrl";
+import { emailUnsubscribeService } from "./emailUnsubscribe";
+export { getPublicSiteUrl } from "./siteUrl";
 
 // ============================================
 // Brand & shared email layout
@@ -38,21 +41,29 @@ const DARK_MODE_MINT_TEXT = "#10251D";
 const EMAIL_LOGO_PATH = "/swiftjob-email-lockup.png";
 // Version the email asset URL to avoid stale copies in mail-client caches.
 const EMAIL_LOGO_VERSION = "white-lockup-20260924";
-const FALLBACK_BASE_URL = "https://swiftjob.online";
 // Last-resort contact address, used only when neither SUPPORT_EMAIL nor
 // HR_EMAIL is configured.
-const FALLBACK_SUPPORT_EMAIL = "support@swiftjob.online";
+const FALLBACK_SUPPORT_EMAIL = "careers@swiftjob.online";
 
 function getBaseUrl(): string {
-  const url = (getEnv().FRONTEND_URL ?? "").trim().replace(/\/$/, "");
-  return url || FALLBACK_BASE_URL;
+  return getPublicSiteUrl();
+}
+
+function addressDomain(address: string): string | null {
+  const bracketed = address.match(/<([^<>]+)>\s*$/);
+  const mailbox = (bracketed?.[1] ?? address).trim();
+  const at = mailbox.lastIndexOf("@");
+  if (at <= 0 || at === mailbox.length - 1) return null;
+  return mailbox.slice(at + 1).toLowerCase();
 }
 
 /** Support address shown to candidates/recipients (SUPPORT_EMAIL > HR_EMAIL). */
 export function getSupportEmail(): string {
+  const candidates = [getEnv().SUPPORT_EMAIL, getHrEmail()];
   return (
-    (getEnv().SUPPORT_EMAIL ?? "").trim() ||
-    getHrEmail() ||
+    candidates
+      .map((address) => (address ?? "").trim())
+      .find((address) => address && addressDomain(address) === "swiftjob.online") ||
     FALLBACK_SUPPORT_EMAIL
   );
 }
@@ -83,8 +94,13 @@ function getResend(): Resend {
   return resendClient;
 }
 
-function getFromAddress(): string {
-  return (getEnv().EMAIL_FROM ?? "").trim();
+export function getFromAddress(): string {
+  const address = (getEnv().EMAIL_FROM ?? "").trim();
+  if (!address) throw new Error("EMAIL_FROM must be set");
+  if (addressDomain(address) !== "swiftjob.online") {
+    throw new Error("EMAIL_FROM must use the verified swiftjob.online domain");
+  }
+  return address;
 }
 
 function getHrEmail(): string {
@@ -118,60 +134,85 @@ async function sendEmail(opts: {
   to: string;
   subject: string;
   html: string;
+  headers?: Record<string, string>;
+  tags?: Array<{ name: string; value: string }>;
 }): Promise<void> {
   const from = getFromAddress();
-  if (!from) {
-    throw new Error("EMAIL_FROM must be set");
-  }
   const maxAttempts = 3;
+  const resend = getResend();
+  // Reuse one provider idempotency key so a network timeout cannot create a
+  // duplicate if Resend accepted the first attempt before the connection failed.
+  const idempotencyKey = crypto.randomUUID();
+  const retryableProviderErrors = new Set([
+    "rate_limit_exceeded",
+    "application_error",
+    "internal_server_error",
+  ]);
   let lastError: Error | null = null;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    let shouldRetry = true;
     try {
-      const { data, error } = await getResend().emails.send({
+      const { data, error } = await resend.emails.send({
         ...opts,
         text: htmlToText(opts.html),
         from,
         // Replies go to the support inbox instead of the send-only address.
         replyTo: getSupportEmail(),
-      });
+      }, { idempotencyKey });
       if (error) {
         lastError = new Error(`${error.name}: ${error.message}`);
+        shouldRetry = retryableProviderErrors.has(error.name);
         console.warn(
-          { error, to: opts.to, subject: opts.subject, attempt },
-          "Email send attempt failed",
+          { errorName: error.name, attempt },
+          shouldRetry ? "Transient email send failure" : "Permanent email send failure",
         );
       } else {
-        console.log(
-          { id: data?.id, to: opts.to, subject: opts.subject },
-          "Email sent",
-        );
+        console.log({ id: data?.id, attempt }, "Email sent");
         return;
       }
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
       console.warn(
-        {
-          to: opts.to,
-          subject: opts.subject,
-          attempt,
-          error: lastError.message,
-        },
-        "Email send threw (retrying)",
+        { attempt, errorName: lastError.name },
+        "Email transport error (retrying with the same idempotency key)",
       );
     }
-    if (attempt < maxAttempts) {
-      // Exponential backoff: 500ms, 1000ms before the last retry.
-      await new Promise((resolve) =>
-        setTimeout(resolve, 500 * 2 ** (attempt - 1)),
-      );
-    }
+    if (!shouldRetry || attempt === maxAttempts) break;
+    // Bounded exponential backoff gives the provider a chance to recover.
+    await new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** (attempt - 1)));
   }
   throw (
     lastError ??
     new Error(
-      `Failed to send email to ${opts.to} after ${maxAttempts} attempts`,
+      `Email delivery failed after ${maxAttempts} attempts`,
     )
   );
+}
+
+async function prepareOutreach(email: string): Promise<{
+  unsubscribeUrl: string;
+  headers: Record<string, string>;
+}> {
+  if (await emailUnsubscribeService.isUnsubscribed(email)) {
+    throw new Error("Recipient has unsubscribed from optional SwiftJob outreach");
+  }
+  const unsubscribeUrl = await emailUnsubscribeService.createLink(email);
+  return {
+    unsubscribeUrl,
+    headers: {
+      "List-Unsubscribe": `<${unsubscribeUrl}>`,
+      "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+    },
+  };
+}
+
+function outreachUnsubscribeLine(unsubscribeUrl?: string): string {
+  if (!unsubscribeUrl) return "";
+  return `
+    <p class="email-muted" style="margin:12px 0 0;color:${BRAND.muted};font-size:12px;line-height:1.6;">
+      This is an optional SwiftJob invitation. <a class="email-link" href="${esc(unsubscribeUrl)}" style="color:${BRAND.teal};text-decoration:underline;">Unsubscribe from outreach</a>.
+    </p>
+  `;
 }
 
 interface LayoutOptions {
@@ -344,7 +385,11 @@ function layout(opts: LayoutOptions): string {
 }
 
 /** Shared branded template for administrator-authored messages. */
-export function formatCustomEmailHtml(subject: string, body: string): string {
+export function formatCustomEmailHtml(
+  subject: string,
+  body: string,
+  unsubscribeUrl?: string,
+): string {
   const paragraphs = body
     .split(/\r?\n/)
     .map((line) => line.trim())
@@ -365,6 +410,7 @@ export function formatCustomEmailHtml(subject: string, body: string): string {
         You received this message from SwiftJob. If you have any questions, contact us at
         <a class="email-link" href="mailto:${esc(getSupportEmail())}" style="color:${BRAND.teal};">${esc(getSupportEmail())}</a>.
       </p>
+      ${outreachUnsubscribeLine(unsubscribeUrl)}
     `,
   });
 }
@@ -709,6 +755,7 @@ export function formatReferralInvitationHtml(data: {
   referredBy?: string | null;
   position: string;
   referralUrl: string;
+  unsubscribeUrl?: string;
   content: {
     emailGreeting?: string;
     emailBody?: string;
@@ -731,6 +778,7 @@ export function formatReferralInvitationHtml(data: {
     <p class="email-muted" style="font-size:13px;color:${BRAND.muted};margin:0;">
       This invitation is intended for you. Questions? Reply to this email or contact <a class="email-link" href="mailto:${esc(getSupportEmail())}" style="color: ${BRAND.teal};">${esc(getSupportEmail())}</a>.
     </p>
+    ${outreachUnsubscribeLine(data.unsubscribeUrl)}
   `;
 
   return layout({
@@ -782,6 +830,7 @@ export const emailService = {
       to: getHrEmail(),
       subject: `New contact message: ${data.firstName} (${data.interest})`,
       html: formatContactHtml(data),
+      tags: [{ name: "category", value: "contact_notification" }],
     });
   },
 
@@ -798,6 +847,7 @@ export const emailService = {
         linkUrl: data.linkUrl,
         fullName: data.fullName,
       }),
+      tags: [{ name: "category", value: "candidate_sign_in" }],
     });
   },
 
@@ -818,6 +868,7 @@ export const emailService = {
       to: data.email,
       subject: `Application Update: ${data.position} — ${data.status}`,
       html: formatStatusUpdateHtml({ ...data, message }),
+      tags: [{ name: "category", value: "application_status" }],
     });
   },
 
@@ -827,6 +878,7 @@ export const emailService = {
       to: getHrEmail(),
       subject: `New Application: ${data.position} — ${data.fullName} (${data.applicationId})`,
       html: formatApplicationHtml(data),
+      tags: [{ name: "category", value: "application_notification" }],
     });
   },
 
@@ -841,6 +893,7 @@ export const emailService = {
       to: getHrEmail(),
       subject: `Technical check completed: ${data.position} — ${data.fullName} (${data.referenceCode})`,
       html: formatTechCheckCompletionHtml(data),
+      tags: [{ name: "category", value: "tech_check" }],
     });
   },
 
@@ -856,6 +909,7 @@ export const emailService = {
       to: data.email,
       subject: `Application Received: ${data.position} at SwiftJob`,
       html: formatConfirmationHtml(data),
+      tags: [{ name: "category", value: "application_confirmation" }],
     });
   },
 
@@ -872,6 +926,7 @@ export const emailService = {
     closing: string;
   }): Promise<void> {
     const position = data.jobTitle ?? "this role";
+    const outreach = await prepareOutreach(data.email);
     await sendEmail({
       from: getFromAddress(),
       to: data.email,
@@ -881,6 +936,7 @@ export const emailService = {
         referredBy: data.referredBy,
         position,
         referralUrl: `${getBaseUrl()}/referral/${data.referralCode}`,
+        unsubscribeUrl: outreach.unsubscribeUrl,
         content: {
           emailGreeting: data.greeting,
           emailBody: data.body,
@@ -888,19 +944,24 @@ export const emailService = {
           emailClosing: data.closing,
         },
       }),
+      headers: outreach.headers,
+      tags: [{ name: "category", value: "referral_invitation" }],
     });
   },
 
   async sendCustomEmail(data: {
     email: string;
     subject: string;
-    html: string;
+    body: string;
   }): Promise<void> {
+    const outreach = await prepareOutreach(data.email);
     await sendEmail({
       from: getFromAddress(),
       to: data.email,
       subject: data.subject,
-      html: data.html,
+      html: formatCustomEmailHtml(data.subject, data.body, outreach.unsubscribeUrl),
+      headers: outreach.headers,
+      tags: [{ name: "category", value: "admin_outreach" }],
     });
   },
 
@@ -924,6 +985,7 @@ export const emailService = {
         deviceType: data.deviceType,
         clickedAt: data.clickedAt,
       }),
+      tags: [{ name: "category", value: "referral_click" }],
     });
   },
 };

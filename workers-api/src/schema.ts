@@ -371,3 +371,15 @@ export const activities = pgTable("activities", {
 
 export type Activity = typeof activities.$inferSelect;
 export type CreateActivityInput = typeof activities.$inferInsert;
+
+// Suppression is intentionally scoped to optional outreach mail. Transactional
+// application and account messages do not consult this table.
+export const emailUnsubscriptions = pgTable("email_unsubscriptions", {
+  email: text("email").primaryKey(),
+  source: text("source").notNull().default("outreach_link"),
+  unsubscribedAt: timestamp("unsubscribed_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export type EmailUnsubscription = typeof emailUnsubscriptions.$inferSelect;

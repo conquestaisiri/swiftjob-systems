@@ -49,7 +49,8 @@ jobs:
           node AUDIT/runtime/auth-regression.mjs
           node AUDIT/runtime/application-regression.mjs
           node AUDIT/runtime/techcheck-regression.mjs
-          pnpm --filter @workspace/scripts exec tsx --test ../shared/mail-recipients.test.ts ../shared/application-questions.test.ts ../workers-api/src/services/assessmentAccess.test.ts ../workers-api/src/services/adminLogin.test.ts ../workers-api/src/services/email.test.ts
+          node AUDIT/runtime/email-unsubscribe-regression.mjs
+          pnpm --filter @workspace/scripts exec tsx --test ../shared/mail-recipients.test.ts ../shared/application-questions.test.ts ../workers-api/src/services/assessmentAccess.test.ts ../workers-api/src/services/adminLogin.test.ts ../workers-api/src/services/email.test.ts ../workers-api/src/services/emailUnsubscribe.test.ts
 
   build-frontend:
     name: Build Frontend
@@ -101,6 +102,56 @@ jobs:
       - name: Install dependencies
         working-directory: ./workers-api
         run: pnpm install --frozen-lockfile
+
+      - name: Ensure a monitoring DMARC record exists for swiftjob.online
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
+            echo "::warning::Cloudflare API token is unavailable; DMARC DNS was not changed."
+            exit 0
+          fi
+
+          auth_header="Authorization: Bearer ${CLOUDFLARE_API_TOKEN}"
+          zones="$(curl --silent --show-error --fail --header "$auth_header" \
+            "https://api.cloudflare.com/client/v4/zones?name=swiftjob.online&status=active" 2>/dev/null || true)"
+          zone_id="$(jq -r '.result[0].id // empty' <<< "$zones" 2>/dev/null || true)"
+          if [ -z "$zone_id" ]; then
+            echo "::warning::The deployment token cannot read the swiftjob.online DNS zone; DMARC remains a DNS-provider action."
+            exit 0
+          fi
+
+          records="$(curl --silent --show-error --fail --header "$auth_header" \
+            "https://api.cloudflare.com/client/v4/zones/${zone_id}/dns_records?type=TXT&name=_dmarc.swiftjob.online" 2>/dev/null || true)"
+          if [ -z "$records" ]; then
+            echo "::warning::The deployment token cannot inspect swiftjob.online DNS records; DMARC remains unchanged."
+            exit 0
+          fi
+          record_count="$(jq -r '.result | length' <<< "$records" 2>/dev/null || printf '0')"
+          if [ "$record_count" -gt 0 ]; then
+            echo "An existing _dmarc.swiftjob.online TXT record was found; it was left unchanged."
+            exit 0
+          fi
+
+          payload="$(jq -n --arg name '_dmarc.swiftjob.online' \
+            --arg content 'v=DMARC1; p=none; adkim=r; aspf=r' \
+            '{type:"TXT",name:$name,content:$content,ttl:3600}')"
+          created="$(curl --silent --show-error --fail --request POST \
+            --header "$auth_header" --header 'Content-Type: application/json' \
+            --data "$payload" \
+            "https://api.cloudflare.com/client/v4/zones/${zone_id}/dns_records" 2>/dev/null || true)"
+          if [ "$(jq -r '.success // false' <<< "$created" 2>/dev/null || true)" = "true" ]; then
+            echo "Created the .online DMARC monitoring record (p=none)."
+          else
+            echo "::warning::Cloudflare DNS write access is unavailable; DMARC record was not created."
+          fi
+
+      - name: Apply email unsubscribe migration
+        working-directory: ./workers-api
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: node migrate.mjs migrations/017_email_unsubscriptions.sql
 
       - name: Publish Worker with wrangler
         working-directory: ./workers-api

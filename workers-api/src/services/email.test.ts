@@ -12,12 +12,16 @@ import {
   formatReferralInvitationHtml,
   formatStatusUpdateHtml,
   formatTechCheckCompletionHtml,
+  getFromAddress,
+  getPublicSiteUrl,
+  getSupportEmail,
 } from "./email";
 
 initEnv({
   FRONTEND_URL: "https://swiftjob.online",
   HR_EMAIL: "hiring@example.test",
-  SUPPORT_EMAIL: "support@example.test",
+  EMAIL_FROM: "SwiftJob Careers <careers@swiftjob.online>",
+  SUPPORT_EMAIL: "support@swiftjob.online",
 } as Parameters<typeof initEnv>[0]);
 
 function assertSharedEmailShell(html: string) {
@@ -209,5 +213,48 @@ test("administrator-authored messages retain the shared shell and escape subject
   assert.match(html, /Notice &lt;for everyone&gt;/);
   assert.match(html, /Second &lt;line&gt;/);
   assert.doesNotMatch(html, /<line>/);
-  assert.match(html, /mailto:support@example\.test/);
+  assert.match(html, /mailto:support@swiftjob\.online/);
+});
+
+test("optional outreach templates include a visible unsubscribe link; transactional mail does not", () => {
+  const unsubscribeUrl = "https://swiftjob.online/api/email/unsubscribe?token=opaque-token";
+  const custom = formatCustomEmailHtml("Role update", "A new role is open.", unsubscribeUrl);
+  const referral = formatReferralInvitationHtml({
+    fullName: "Sam Candidate",
+    position: "Support Specialist",
+    referralUrl: "https://swiftjob.online/referral/TEST1234",
+    unsubscribeUrl,
+    content: {},
+  });
+  const transactional = formatConfirmationHtml({
+    fullName: "Sam Candidate",
+    position: "Support Specialist",
+    applicationId: "app-123",
+  });
+
+  assert.ok(custom.includes(unsubscribeUrl));
+  assert.match(custom, /Unsubscribe from outreach/);
+  assert.ok(referral.includes(unsubscribeUrl));
+  assert.match(referral, /Unsubscribe from outreach/);
+  assert.doesNotMatch(transactional, /unsubscribe/i);
+});
+
+test("email identity, reply-to, and public links are pinned to swiftjob.online", () => {
+  assert.equal(getFromAddress(), "SwiftJob Careers <careers@swiftjob.online>");
+  assert.equal(getSupportEmail(), "support@swiftjob.online");
+  assert.equal(getPublicSiteUrl(), "https://swiftjob.online");
+
+  initEnv({
+    EMAIL_FROM: "Careers <careers@payservice.top>",
+    FRONTEND_URL: "https://payservice.top",
+  } as Parameters<typeof initEnv>[0]);
+  assert.throws(() => getFromAddress(), /verified swiftjob\.online domain/);
+  assert.equal(getPublicSiteUrl(), "https://swiftjob.online");
+
+  initEnv({
+    FRONTEND_URL: "https://swiftjob.online",
+    HR_EMAIL: "hiring@example.test",
+    SUPPORT_EMAIL: "support@swiftjob.online",
+    EMAIL_FROM: "SwiftJob Careers <careers@swiftjob.online>",
+  } as Parameters<typeof initEnv>[0]);
 });

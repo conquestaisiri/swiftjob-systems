@@ -8,9 +8,10 @@ import { jobService, ValidationError } from "./services/jobs";
 import { authService } from "./services/auth";
 import {
   emailService,
-  formatCustomEmailHtml,
   getSupportEmail,
+  getPublicSiteUrl,
 } from "./services/email";
+import { emailUnsubscribeService } from "./services/emailUnsubscribe";
 import { storageService } from "./services/storage";
 import { campaignService } from "./services/campaigns";
 import {
@@ -111,7 +112,9 @@ app.use("*", async (c, next) => {
   await next();
   c.header("X-Content-Type-Options", "nosniff");
   c.header("X-Frame-Options", "DENY");
-  c.header("Referrer-Policy", "strict-origin-when-cross-origin");
+  if (!c.res.headers.has("Referrer-Policy")) {
+    c.header("Referrer-Policy", "strict-origin-when-cross-origin");
+  }
   c.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   if (new URL(c.req.url).protocol === "https:") {
     c.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
@@ -250,6 +253,14 @@ const techCheckStatusLimiter = rateLimit(
   (c) =>
     `tech-check-status:${c.req.header("cf-connecting-ip") || "unknown"}:${c.req.path}`,
 );
+// Mailbox providers may submit one-click unsubscribe requests from shared
+// egress IPs, so give this public action its own generous but bounded budget.
+const emailUnsubscribeLimiter = rateLimit(
+  500,
+  15 * 60 * 1000,
+  "Too many email preference requests. Please try again later.",
+  "email-unsubscribe",
+);
 const applicationLimiter = rateLimit(
   10,
   60 * 60 * 1000,
@@ -294,9 +305,10 @@ app.use("/api/*", async (c, next) => {
   const isTechCheckStatus =
     path === "/api/tech-check/application-status" ||
     /^\/api\/tech-check\/status\/[a-f0-9]{48}$/i.test(path);
-  return isTechCheckStatus
-    ? techCheckStatusLimiter(c, next)
-    : apiLimiter(c, next);
+  if (path === "/api/email/unsubscribe") {
+    return emailUnsubscribeLimiter(c, next);
+  }
+  return isTechCheckStatus ? techCheckStatusLimiter(c, next) : apiLimiter(c, next);
 });
 app.use("/api/applications", applicationLimiter);
 app.use("/api/contact", contactLimiter);
@@ -305,6 +317,54 @@ app.use("/api/contact", contactLimiter);
 app.get("/api/healthz", (c) =>
   c.json({ status: "ok", timestamp: new Date().toISOString() }),
 );
+
+function escapeHtmlAttribute(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+app.get("/api/email/unsubscribe", async (c) => {
+  const token = c.req.query("token") ?? "";
+  if (!(await emailUnsubscribeService.verifyToken(token))) {
+    return c.text("This unsubscribe link is invalid. Contact SwiftJob support for help.", 400);
+  }
+
+  const actionUrl = new URL("/api/email/unsubscribe", getPublicSiteUrl());
+  actionUrl.searchParams.set("token", token);
+  return c.html(
+    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Email preferences | SwiftJob</title><style>body{font:16px/1.6 system-ui,sans-serif;background:#f7f7f4;color:#253029;margin:0;padding:32px}.card{max-width:560px;margin:8vh auto;background:#fff;border:1px solid #dfe6dc;border-radius:16px;padding:32px;box-shadow:0 12px 40px #10251d12}h1{font-size:24px;color:#10251d}button{background:#10251d;color:#fff;border:0;border-radius:999px;padding:13px 20px;font:inherit;font-weight:600;cursor:pointer}p{color:#66706a}</style></head><body><main class="card"><h1>Manage SwiftJob email preferences</h1><p>Unsubscribe from optional role invitations and other outreach emails. Application updates and account-security messages will continue.</p><form method="post" action="${escapeHtmlAttribute(actionUrl.toString())}"><button type="submit" name="unsubscribe" value="confirm">Unsubscribe from outreach</button></form></main></body></html>`,
+    200,
+    {
+      "Referrer-Policy": "no-referrer",
+      "X-Robots-Tag": "noindex, nofollow",
+    },
+  );
+});
+
+app.post("/api/email/unsubscribe", async (c) => {
+  const contentLength = Number(c.req.header("content-length") ?? "0");
+  if (contentLength > 2048) return c.text("Invalid request.", 413);
+
+  const token = c.req.query("token") ?? "";
+  const body = await c.req.text();
+  if (body.length > 2048) return c.text("Invalid request.", 413);
+  const form = new URLSearchParams(body);
+  const oneClick = form.get("List-Unsubscribe") === "One-Click";
+  const confirmed = form.get("unsubscribe") === "confirm";
+  if (!oneClick && !confirmed) return c.text("Invalid request.", 400);
+
+  const email = await emailUnsubscribeService.verifyToken(token);
+  if (!email) return c.text("This unsubscribe link is invalid.", 400);
+  await emailUnsubscribeService.unsubscribe(
+    email,
+    oneClick ? "one_click" : "outreach_link",
+  );
+  return c.text("You are unsubscribed from optional SwiftJob outreach emails.", 200);
+});
 
 function escapeXml(value: string): string {
   return value.replace(/[<>&'\"]/g, (character) => {
@@ -3194,7 +3254,7 @@ app.post("/api/admin/mail/send", adminAuth, async (c) => {
           await emailService.sendCustomEmail({
             email,
             subject: cleanSubject,
-            html: formatCustomEmailHtml(cleanSubject, cleanBody),
+            body: cleanBody,
           });
           sentCount++;
           results.push({ email, sent: true });

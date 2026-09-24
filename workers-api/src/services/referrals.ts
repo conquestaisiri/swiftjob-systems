@@ -5,6 +5,7 @@ import {
   footprintRepository,
 } from "../repositories";
 import { emailService, getSupportEmail } from "./email";
+import { getPublicSiteUrl } from "./siteUrl";
 import type { CreateReferralInput, Referral } from "../schema";
 
 const DEFAULT_REFERRAL_CONTENT: Record<string, string> = {
@@ -136,10 +137,7 @@ const OLD_TO_NEW_CONTENT: Record<string, { old: string[]; next: string }> = {
 };
 
 export function publicReferralUrl(code: string): string {
-  const base = (
-    getEnv().FRONTEND_URL ?? "https://swiftjob.online"
-  ).replace(/\/$/, "");
-  return `${base}/referral/${code}`;
+  return `${getPublicSiteUrl()}/referral/${code}`;
 }
 
 export function interpolate(

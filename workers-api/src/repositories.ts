@@ -16,6 +16,7 @@ import {
   candidateProfiles,
   candidateReferralLinks,
   candidateReferrals,
+  emailUnsubscriptions,
 } from "./schema";
 import {
   eq,
@@ -1582,6 +1583,30 @@ export const activityRepository = {
       .from(activities)
       .where(whereClause);
     return rows[0]?.n ?? 0;
+  },
+};
+
+export const emailUnsubscriptionRepository = {
+  async isUnsubscribed(email: string): Promise<boolean> {
+    const db = getDb();
+    const normalized = email.trim().toLowerCase();
+    const [row] = await db
+      .select({ email: emailUnsubscriptions.email })
+      .from(emailUnsubscriptions)
+      .where(eq(emailUnsubscriptions.email, normalized))
+      .limit(1);
+    return Boolean(row);
+  },
+
+  async unsubscribe(
+    email: string,
+    source: "outreach_link" | "one_click",
+  ): Promise<void> {
+    const db = getDb();
+    await db
+      .insert(emailUnsubscriptions)
+      .values({ email: email.trim().toLowerCase(), source })
+      .onConflictDoNothing();
   },
 };
 

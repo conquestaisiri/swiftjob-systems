@@ -2,6 +2,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { authRepository } from "../repositories";
 import { neon } from "@neondatabase/serverless";
 import { getEnv } from "../config";
+import { getPublicSiteUrl } from "./siteUrl";
 
 const MAGIC_LINK_TTL = 15 * 60 * 1000; // 15 minutes
 const SESSION_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -38,9 +39,9 @@ function getFrontendUrl(): string {
     console.warn(
       "FRONTEND_URL not set - magic links will use the default domain. Set FRONTEND_URL in production.",
     );
-    return "https://swiftjob.online".replace(/\/$/, "");
+    return getPublicSiteUrl();
   }
-  return url.replace(/\/$/, "");
+  return getPublicSiteUrl();
 }
 
 export const authService = {

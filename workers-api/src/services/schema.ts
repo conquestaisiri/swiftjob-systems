@@ -24,6 +24,7 @@ const REQUIRED_TABLES = [
   "candidate_profiles",
   "candidate_referral_links",
   "candidate_referrals",
+  "email_unsubscriptions",
 ] as const;
 
 const REQUIRED_COLUMNS = [
