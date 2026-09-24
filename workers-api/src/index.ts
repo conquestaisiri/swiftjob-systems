@@ -25,14 +25,7 @@ import {
 import { gradeAssessment } from "./services/assessmentAnswerKey";
 import {
   techCheckService,
-  buildWindowsBundleBatch,
-  buildWindowsBundleFooter,
-  streamWindowsBundle,
   buildMacTool,
-  CHECKER_LAUNCHER_R2_KEY,
-  CHECKER_LAUNCHER_SHA256,
-  CHECKER_MSI_R2_KEY,
-  CHECKER_BUNDLE_FOOTER_SIZE,
   isUsableTechCheckReport,
   type TechPlatform,
 } from "./services/techcheck";
@@ -929,57 +922,15 @@ app.get("/api/tech-check/download/:token", async (c) => {
       });
     }
 
-    const [launcher, installer] = await Promise.all([
-      getEnv().R2_BUCKET.get(CHECKER_LAUNCHER_R2_KEY),
-      getEnv().R2_BUCKET.get(CHECKER_MSI_R2_KEY),
-    ]);
-    if (!launcher || !installer) {
-      console.error("Tech-check launcher or MSI is missing from private R2 storage");
-      return c.json({ error: "The Windows system checker is temporarily unavailable." }, 503);
-    }
-
-    const launcherBytes = new Uint8Array(await launcher.arrayBuffer());
-    const launcherDigest = new Uint8Array(
-      await crypto.subtle.digest("SHA-256", launcherBytes),
-    );
-    const launcherHash = Array.from(launcherDigest, (byte) =>
-      byte.toString(16).padStart(2, "0"),
-    ).join("");
-    if (
-      launcherBytes.byteLength !== launcher.size ||
-      launcherHash !== CHECKER_LAUNCHER_SHA256.toLowerCase()
-    ) {
-      console.error("Tech-check launcher failed its integrity check");
-      return c.json({ error: "The Windows system checker is temporarily unavailable." }, 503);
-    }
-
-    const batch = new TextEncoder().encode(
-      buildWindowsBundleBatch(origin, c.req.param("token")),
-    );
-    const footer = buildWindowsBundleFooter(
-      launcher.size,
-      batch.byteLength,
-      installer.size,
-    );
-    const body = streamWindowsBundle([
-      launcherBytes,
-      batch,
-      installer.body,
-      footer,
-    ]);
-    const bundleSize =
-      launcher.size + batch.byteLength + installer.size + CHECKER_BUNDLE_FOOTER_SIZE;
-
-    return new Response(body, {
-      status: 200,
-      headers: {
-        "Content-Type": "application/octet-stream",
-        "Content-Disposition": 'attachment; filename="SwiftJob-SystemChecker.exe"',
-        "Content-Length": String(bundleSize),
-        "Cache-Control": "private, no-store",
-        "X-Content-Type-Options": "nosniff",
+    // Temporarily pause Windows package distribution after antivirus
+    // detections were reported for the unsigned, per-candidate wrapper.
+    return c.json(
+      {
+        error:
+          "Windows checker downloads are temporarily paused during a security review. Do not bypass antivirus warnings.",
       },
-    });
+      503,
+    );
   } catch (err) {
     console.error({ err }, "Failed to build tech check tool");
     return c.json({ error: "Failed to build tech check tool" }, 500);
@@ -987,35 +938,14 @@ app.get("/api/tech-check/download/:token", async (c) => {
 });
 
 app.get("/api/tech-check/download/msi/:token", async (c) => {
-  try {
-    const status = await techCheckService.getStatus(c.req.param("token"));
-    if (!status || !status.valid || status.used) {
-      return c.json(
-        { error: "This installer link is no longer valid. Request a fresh checker from the application page." },
-        410,
-      );
-    }
-
-    const installer = await getEnv().R2_BUCKET.get(CHECKER_MSI_R2_KEY);
-    if (!installer) {
-      console.error("Tech-check MSI is missing from private R2 storage");
-      return c.json({ error: "The system checker installer is temporarily unavailable." }, 503);
-    }
-
-    return new Response(installer.body, {
-      status: 200,
-      headers: {
-        "Content-Type": "application/octet-stream",
-        "Content-Disposition": 'attachment; filename="swiftjob-techchecker.msi"',
-        "Content-Length": String(installer.size),
-        "Cache-Control": "private, no-store",
-        "X-Content-Type-Options": "nosniff",
-      },
-    });
-  } catch (err) {
-    console.error({ err }, "Failed to retrieve tech-check MSI");
-    return c.json({ error: "The system checker installer is temporarily unavailable." }, 503);
-  }
+  return c.json(
+    {
+      error:
+        "Windows checker downloads are temporarily paused during a security review. Do not bypass antivirus warnings.",
+    },
+    503,
+    { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
+  );
 });
 
 app.post("/api/tech-check/report/:token", async (c) => {

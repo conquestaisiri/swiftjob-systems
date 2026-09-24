@@ -14,6 +14,7 @@ import {
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { trackEvent } from "@/lib/tracking";
 import { analyzeDevice, deviceMeta, useDeviceGuard } from "@/lib/deviceGuard";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 import { PreChecks, type PreCheckResult } from "@/components/PreChecks";
 import {
   TRACKS,
@@ -614,7 +615,7 @@ export function AssessmentPage() {
                 <ShieldCheck size={18} />
                 <span>
                   {techCheckPending
-                    ? "This check is mandatory before we can move your application forward. On Windows, the checker runs first, then opens a separate installer for you to review. Your report is sent only after the installer completes."
+                    ? `This check is mandatory before we can move your application forward. Windows checker downloads are temporarily paused while we review security detections. Do not retry old downloads or bypass browser or antivirus warnings. For help, contact ${SUPPORT_EMAIL}.`
                     : "There is no pass mark and no time limit. Answer honestly — the goal is to help our team understand how you work."}
                 </span>
               </div>
