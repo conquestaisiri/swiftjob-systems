@@ -1,0 +1,13 @@
+- generic: SwiftJob.adm
+- heading "Admin login" [level=1]
+- paragraph: Sign in to manage applications, referrals and campaigns
+- generic: Email
+- textbox "your@email.com"
+- generic: Password
+- textbox "Your password"
+- button "Sign In"
+- paragraph:
+  - link "← Back to site":
+    - /url: /
+- region "Notifications (F8)":
+  - list

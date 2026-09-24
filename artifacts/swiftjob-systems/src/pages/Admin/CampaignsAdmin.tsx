@@ -389,7 +389,7 @@ export function CampaignsAdmin() {
     // panel may live on a different domain than the landing pages.
     const base = (
       (import.meta.env.VITE_FRONTEND_URL as string | undefined) ??
-      "https://swiftjob.payservice.top"
+      "https://swiftjob.online"
     ).replace(/\/$/, "");
     const url = `${base}/campaign/${campaign.slug}${campaign.utmSource ? `?utm_source=${encodeURIComponent(campaign.utmSource)}` : ""}`;
     try {

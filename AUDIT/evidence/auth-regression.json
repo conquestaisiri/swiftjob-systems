@@ -1,0 +1,65 @@
+{
+  "environment": "Local PGlite + actual Worker; synthetic email sink; no production access",
+  "results": [
+    {
+      "name": "Valid contact JSON reaches email sink",
+      "status": "PASS"
+    },
+    {
+      "name": "Malformed, null and array JSON return 400",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous password registration cannot create or overwrite accounts",
+      "status": "PASS"
+    },
+    {
+      "name": "Magic-link request reaches synthetic mailbox and verifies once",
+      "status": "PASS"
+    },
+    {
+      "name": "Verified owner can access portal before setting a password",
+      "status": "PASS"
+    },
+    {
+      "name": "Verified user cannot set another email password",
+      "status": "PASS"
+    },
+    {
+      "name": "Verified owner sets password and replaces existing sessions",
+      "status": "PASS"
+    },
+    {
+      "name": "Existing password cannot be overwritten anonymously",
+      "status": "PASS"
+    },
+    {
+      "name": "Wrong password rejected and correct password produces usable Bearer/cookie sessions",
+      "status": "PASS"
+    },
+    {
+      "name": "Password login rate limit blocks repeated attempts per IP without locking another IP",
+      "status": "PASS"
+    },
+    {
+      "name": "Signed tokens with invalid role, email or missing expiry rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Candidate session cannot access admin APIs",
+      "status": "PASS"
+    },
+    {
+      "name": "Malformed candidate cookie is handled without a server error",
+      "status": "PASS"
+    },
+    {
+      "name": "Logout revokes the session and clears the shared cookie",
+      "status": "PASS"
+    },
+    {
+      "name": "Admin login/read still work and admin token is not a candidate session",
+      "status": "PASS"
+    }
+  ]
+}

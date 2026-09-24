@@ -1,0 +1,59 @@
+{
+  "implementation": "Named in-memory buckets in the Worker isolate",
+  "protected_endpoints": {
+    "global": "All /api/* requests: 100 per IP per 15 minutes",
+    "application": "POST /api/applications: 10 per IP per hour",
+    "contact": "POST /api/contact: 20 per IP per hour",
+    "magic_link": "POST /api/auth/magic-link: 5 per IP per 15 minutes",
+    "candidate_password": "POST /api/auth/login-password: 10 per IP per 15 minutes",
+    "candidate_password_change": "POST /api/auth/register: 10 per authenticated email per 15 minutes",
+    "admin_login": "POST /api/admin/login: 10 per IP per 15 minutes",
+    "referral_click": "Referral visit/click: 20 per IP per 15 minutes",
+    "campaign_visit": "Campaign visits: 40 per IP per minute"
+  },
+  "regression": "PASS — auth-regression verifies 10 failed password attempts receive 401, the next receives 429, and a second IP remains usable",
+  "distributed_behavior": "A Worker isolate restart or a different isolate can reset the in-memory bucket; this is a known edge-distribution limitation.",
+  "current_assessment": "VERIFIED — authenticated Cloudflare dashboard shows one active combined edge rule; live contact and admin-stats bursts each produced Cloudflare 429 blocks, and health recovered after cooldown. Fine-grained route windows and isolate-distributed fallback remain Worker responsibilities on the Free plan.",
+  "provider_access": "Cloudflare zone token verification is active; Rulesets and Rate Limiting API reads still return 403 with the supplied tokens.",
+  "owner_action": "For finer-grained or programmatic changes, provide a Cloudflare token with zone Rulesets/Rate Limiting permission; the current combined rule is already configured and live-verified through the authenticated dashboard.",
+  "measuredAt": "2026-09-12T06:38:41.717Z",
+  "account_access": "The supplied account token can read Pages, Worker versions/secrets and R2, but not zone Rulesets/Rate Limiting.",
+  "zone_plan": "Free Website",
+  "minimum_permission_required": "A Cloudflare API token with zone Rulesets/Rate Limiting read and edit permission for payservice.top.",
+  "permission_reference": "Cloudflare's zone rate-limiting API requires Zone WAF Write; account-level rate-limiting rulesets require Account WAF Write or Account Rulesets Write.",
+  "edge_rule": {
+    "source": "Authenticated Cloudflare dashboard",
+    "status": "ACTIVE",
+    "ruleId": "40d6677905834d8ea837a319c2e08587",
+    "name": "SwiftJob Sensitive API Burst Protection",
+    "expression": "(http.request.uri.path eq \"/api/auth/magic-link\" or http.request.uri.path eq \"/api/auth/login-password\" or http.request.uri.path eq \"/api/auth/register\" or http.request.uri.path eq \"/api/admin/login\" or http.request.uri.path eq \"/api/admin/stats\" or http.request.uri.path eq \"/api/admin/applications\" or http.request.uri.path eq \"/api/admin/jobs\" or http.request.uri.path eq \"/api/admin/campaigns\" or http.request.uri.path eq \"/api/admin/mail/send\" or http.request.uri.path eq \"/api/admin/activities\" or http.request.uri.path eq \"/api/admin/referrals\" or http.request.uri.path eq \"/api/admin/referrals/status\" or http.request.uri.path eq \"/api/admin/referrals/content\" or http.request.uri.path eq \"/api/admin/referrals/content/apply\" or http.request.uri.path eq \"/api/admin/referrals/content/reset\" or http.request.uri.path eq \"/api/admin/referrals/send\" or http.request.uri.path eq \"/api/admin/referrals/limit\" or http.request.uri.path eq \"/api/admin/referrals/import\" or http.request.uri.path eq \"/api/admin/referrals/from-contacts\" or http.request.uri.path eq \"/api/admin/footprints\" or http.request.uri.path eq \"/api/admin/contacts\" or http.request.uri.path eq \"/api/admin/contacts/delete-many\" or http.request.uri.path eq \"/api/admin/contacts/import\" or http.request.uri.path eq \"/api/applications\" or http.request.uri.path eq \"/api/contact\")",
+    "characteristic": "IP",
+    "threshold": "10 requests per 10 seconds",
+    "action": "Block",
+    "duration": "10 seconds",
+    "order": "First",
+    "plan": "Free Website"
+  },
+  "live_edge_regression": {
+    "contact": {
+      "endpoint": "/api/contact",
+      "method": "POST",
+      "concurrentRequests": 20,
+      "syntheticInvalidBody": true,
+      "cloudflareBlockResponses": 3,
+      "workerValidationResponses": 17,
+      "cooldownSeconds": 12,
+      "healthAfterCooldown": 200
+    },
+    "admin_stats": {
+      "endpoint": "/api/admin/stats",
+      "method": "GET",
+      "concurrentRequests": 20,
+      "unauthenticated": true,
+      "cloudflareBlockResponses": 3,
+      "workerAuthResponses": 17,
+      "cooldownSeconds": 12,
+      "healthAfterCooldown": 200
+    }
+  }
+}

@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { trackEvent } from "@/lib/tracking";
-import { analyzeDevice, deviceMeta } from "@/lib/deviceGuard";
+import { analyzeDevice, deviceMeta, useDeviceGuard } from "@/lib/deviceGuard";
 import { PreChecks, type PreCheckResult } from "@/components/PreChecks";
 import {
   TRACKS,
@@ -28,10 +28,22 @@ interface LoadPayload {
   applicationId: string;
   jobSlug: string;
   jobTitle: string;
+  assessmentTitle: string | null;
+  assessmentBlurb: string;
   needsAssessment: boolean;
-  techCheckerUrl?: string;
+  assessmentRequired: boolean;
   track: AssessmentTrack;
   status: string;
+  techCheck: {
+    required: boolean;
+    status: "not_started" | "in_progress" | "completed";
+    typingRequired: boolean;
+  };
+  draft: {
+    responses: { mcq?: Record<string, number>; scenario?: string } | null;
+    systemCheck: PreCheckResult | Record<string, unknown> | null;
+    updatedAt: string;
+  } | null;
   result: { score: number; maxScore: number; completedAt: string } | null;
 }
 
@@ -44,11 +56,19 @@ type Step =
   | "done"
   | "error";
 
+interface DraftSave {
+  answers: Record<string, number | undefined>;
+  scenario: string;
+  systemCheck: unknown;
+}
+
 export function AssessmentPage() {
+  const { status: deviceStatus } = useDeviceGuard();
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const applicationId = params.get("id") ?? "";
   const email = params.get("email") ?? "";
   const jobSlug = params.get("job") ?? "";
+  const referenceCode = params.get("ref") ?? "";
 
   const [payload, setPayload] = useState<LoadPayload | null>(null);
   const [loadError, setLoadError] = useState("");
@@ -58,6 +78,9 @@ export function AssessmentPage() {
     {},
   );
   const [scenario, setScenario] = useState("");
+  const draftSaveTimerRef = useRef<number | null>(null);
+  const pendingDraftSaveRef = useRef<DraftSave | null>(null);
+  const draftSaveQueueRef = useRef<Promise<void>>(Promise.resolve());
   const [submitError, setSubmitError] = useState("");
   const [result, setResult] = useState<{
     score: number;
@@ -79,6 +102,7 @@ export function AssessmentPage() {
       return;
     }
     const qs = new URLSearchParams({ email });
+    if (referenceCode) qs.set("ref", referenceCode);
     if (jobSlug) qs.set("job", jobSlug);
     fetch(
       `${API_BASE}/api/assessments/${encodeURIComponent(applicationId)}?${qs}`,
@@ -92,7 +116,12 @@ export function AssessmentPage() {
             return;
           }
           setPayload(json);
-          if (json.track === "none" || !json.needsAssessment) {
+          if (json.draft?.systemCheck) {
+            precheckRef.current = json.draft.systemCheck as PreCheckResult;
+          }
+          if (json.techCheck?.status !== "completed") {
+            setStep("intro");
+          } else if (json.track === "none" || !json.needsAssessment) {
             setStep("done");
           } else if (json.status === "completed" && json.result) {
             setResult(json.result);
@@ -113,43 +142,129 @@ export function AssessmentPage() {
     return () => {
       cancelled = true;
     };
-  }, [applicationId, email, jobSlug]);
+  }, [applicationId, email, jobSlug, referenceCode]);
 
   const config = useMemo(
     () => (payload && payload.track !== "none" ? TRACKS[payload.track] : null),
     [payload],
   );
+  const roleAssessmentTitle =
+    payload?.assessmentTitle ?? config?.title ?? "Role assessment";
 
-  const saveProgress = (next: Record<string, number | undefined>) => {
+  const enqueueDraftSave = (draft: DraftSave): Promise<void> => {
+    if (!payload || !referenceCode) return Promise.resolve();
+    draftSaveQueueRef.current = draftSaveQueueRef.current
+      .catch(() => undefined)
+      .then(async () => {
+        try {
+          await fetch(
+            `${API_BASE}/api/assessments/${encodeURIComponent(applicationId)}/draft`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email,
+                referenceCode,
+                jobSlug: payload.jobSlug,
+                systemCheck: draft.systemCheck,
+                responses: { mcq: draft.answers, scenario: draft.scenario },
+              }),
+            },
+          );
+        } catch {
+          // The local session draft remains available if the network is down.
+        }
+      });
+    return draftSaveQueueRef.current;
+  };
+
+  const scheduleDraftSave = (
+    nextAnswers: Record<string, number | undefined>,
+    nextScenario = scenario,
+    systemCheck: unknown = precheckRef.current ?? {},
+  ) => {
+    pendingDraftSaveRef.current = {
+      answers: nextAnswers,
+      scenario: nextScenario,
+      systemCheck,
+    };
+    if (draftSaveTimerRef.current !== null) {
+      window.clearTimeout(draftSaveTimerRef.current);
+    }
+    draftSaveTimerRef.current = window.setTimeout(() => {
+      draftSaveTimerRef.current = null;
+      const pending = pendingDraftSaveRef.current;
+      pendingDraftSaveRef.current = null;
+      if (pending) void enqueueDraftSave(pending);
+    }, 450);
+  };
+
+  const flushPendingDraftSave = async () => {
+    if (draftSaveTimerRef.current !== null) {
+      window.clearTimeout(draftSaveTimerRef.current);
+      draftSaveTimerRef.current = null;
+    }
+    const pending = pendingDraftSaveRef.current;
+    pendingDraftSaveRef.current = null;
+    if (pending) await enqueueDraftSave(pending);
+    await draftSaveQueueRef.current;
+  };
+
+  const saveProgress = (next: Record<string, number | undefined>, nextScenario = scenario) => {
     setAnswers(next);
     try {
       sessionStorage.setItem(
         `swiftjob_assessment_${applicationId}`,
-        JSON.stringify(next),
+        JSON.stringify({ mcq: next, scenario: nextScenario }),
       );
     } catch {
       // Non-critical.
     }
+    scheduleDraftSave(next, nextScenario);
   };
 
   const handleStart = () => {
-    let stored: Record<string, number | undefined> = {};
+    if (!payload) return;
+    let stored: { mcq: Record<string, number | undefined>; scenario: string } = {
+      mcq: {},
+      scenario: "",
+    };
+    if (payload.draft?.responses) {
+      stored = {
+        mcq: payload.draft.responses.mcq ?? {},
+        scenario: payload.draft.responses.scenario ?? "",
+      };
+    }
     try {
       const raw = sessionStorage.getItem(
         `swiftjob_assessment_${applicationId}`,
       );
-      if (raw) stored = JSON.parse(raw);
+      if (raw && !payload.draft) {
+        const parsed = JSON.parse(raw) as Record<string, unknown>;
+        stored = parsed.mcq
+          ? {
+              mcq: parsed.mcq as Record<string, number | undefined>,
+              scenario: typeof parsed.scenario === "string" ? parsed.scenario : "",
+            }
+          : { mcq: parsed as Record<string, number | undefined>, scenario: "" };
+      }
     } catch {
       // Ignore corrupt storage.
     }
-    setAnswers(stored);
-    setStep(precheckRef.current ? "questions" : "checks");
+    setAnswers(stored.mcq);
+    setScenario(stored.scenario);
+    if (payload.techCheck.status === "completed") {
+      setStep(payload.status === "completed" || !config ? "done" : "questions");
+    } else {
+      setStep("checks");
+    }
   };
 
   const handleSubmit = async () => {
     if (!payload || !config) return;
     setStep("submitting");
     setSubmitError("");
+    await flushPendingDraftSave();
     const { score, maxScore } = scoreResponses(config, answers);
     const responses = {
       mcq: answers,
@@ -163,6 +278,7 @@ export function AssessmentPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email,
+            referenceCode,
             jobSlug: payload.jobSlug,
             systemCheck: {
               sentAt: new Date().toISOString(),
@@ -201,13 +317,48 @@ export function AssessmentPage() {
     }
   };
 
-  if (step === "loading" || !payload) {
+  const computerRequired =
+    step === "checks" ||
+    step === "intro" ||
+    step === "questions" ||
+    step === "submitting";
+  if (computerRequired && deviceStatus !== "desktop") {
+    const title = deviceStatus === "checking"
+      ? "Checking this device"
+      : "Continue on a computer";
+    const message = deviceStatus === "checking"
+      ? "Confirming this device before we open your required check."
+      : "Complete this required step on the laptop or desktop you plan to use for the role. Browser device checks are best-effort and may not identify every phone using desktop-site mode.";
     return (
-      <SiteLayout title="Assessment — SwiftJob">
+      <SiteLayout
+        title={`${title} — SwiftJob`}
+        description="This required application step needs a laptop or desktop computer."
+      >
         <div className="assessment-shell">
-          <div className="assessment-card">
-            <Loader2 size={34} className="spin" />
-            <p className="assessment-loading-text">Loading your assessment…</p>
+          <div
+            className="assessment-card"
+            style={{ maxWidth: 560, textAlign: "center" }}
+          >
+            <div
+              className="assessment-icon-wrap"
+              style={{ margin: "0 auto 20px" }}
+            >
+              <Laptop size={34} strokeWidth={1.6} />
+            </div>
+            <div className="assessment-eyebrow">COMPUTER REQUIRED</div>
+            <h1 className="assessment-heading" style={{ textAlign: "center" }}>
+              {title}
+            </h1>
+            <p className="assessment-lead" style={{ textAlign: "center" }}>
+              {message}
+            </p>
+            {deviceStatus === "mobile" && (
+              <div className="assessment-actions" style={{ justifyContent: "center" }}>
+                <a href="/login" className="button button-blue">
+                  Return to candidate portal
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </SiteLayout>
@@ -228,6 +379,9 @@ export function AssessmentPage() {
             </h1>
             <p className="assessment-lead">{loadError}</p>
             <div className="assessment-actions">
+              <a href="/login" className="button button-blue">
+                Sign in to your candidate portal <ArrowRight size={16} />
+              </a>
               <a href="/careers" className="button button-blue">
                 <ArrowLeft size={16} /> Back to positions
               </a>
@@ -238,12 +392,26 @@ export function AssessmentPage() {
     );
   }
 
+  if (step === "loading" || !payload) {
+    return (
+      <SiteLayout title="Assessment — SwiftJob">
+        <div className="assessment-shell">
+          <div className="assessment-card">
+            <Loader2 size={34} className="spin" />
+            <p className="assessment-loading-text">Loading your assessment…</p>
+          </div>
+        </div>
+      </SiteLayout>
+    );
+  }
+
   if (step === "done") {
     const alreadyDone = result !== null;
+    const techOnlyDone = !alreadyDone && !payload.assessmentRequired;
     return (
       <SiteLayout
         title="Assessment — SwiftJob"
-        description="Your skills check at SwiftJob."
+        description="Your SwiftJob technology check and role assessment."
       >
         <div className="assessment-shell">
           <div className="assessment-card">
@@ -251,15 +419,17 @@ export function AssessmentPage() {
               <CheckCircle2 size={40} strokeWidth={1.6} />
             </div>
             <div className="assessment-eyebrow">
-              {alreadyDone ? "ASSESSMENT RECORDED" : "NO ASSESSMENT REQUIRED"}
+              {alreadyDone ? "ASSESSMENT COMPLETED" : techOnlyDone ? "TECHNICAL CHECK COMPLETED" : "NO ASSESSMENT REQUIRED"}
             </div>
             <h1 className="assessment-heading">
-              {alreadyDone ? "Thank you — that's recorded" : "You're all set"}
+              {alreadyDone ? "Thank you — your assessment is complete" : techOnlyDone ? "Your required technical check is complete" : "You're all set"}
             </h1>
             <p className="assessment-lead">
               {alreadyDone
-                ? `Your skills check for ${payload.jobTitle} has been submitted successfully and attached to your application (${result?.score ?? 0}/${result?.maxScore ?? 0} multiple-choice questions answered correctly). Our recruitment team will review your application together with your results.`
-                : `Your application for ${payload.jobTitle} does not need a skills check. Our recruitment team will review your application and contact you with the next steps.`}
+                ? `Your ${roleAssessmentTitle} has been submitted successfully and attached to your application. You answered ${result?.score ?? 0} of ${result?.maxScore ?? 0} multiple-choice questions correctly. Our recruitment team will review your application together with your results.`
+                : techOnlyDone
+                  ? `Your required technical check for ${payload.jobTitle} has been recorded. This role does not use a separate role assessment, so our recruitment team can now review your application.`
+                  : `Your application for ${payload.jobTitle} does not need a role assessment. Our recruitment team will review your application and contact you with the next steps.`}
             </p>
             <div className="assessment-note">
               <ShieldCheck size={18} />
@@ -272,8 +442,8 @@ export function AssessmentPage() {
               <a href="/careers" className="button button-blue">
                 View more positions
               </a>
-              <a href="/" className="button button-dark">
-                Return to homepage
+              <a href="/login" className="button button-dark">
+                Return to candidate portal
               </a>
             </div>
           </div>
@@ -285,17 +455,36 @@ export function AssessmentPage() {
   if (step === "checks") {
     return (
       <SiteLayout
-        title={`${config?.title ?? "Skills check"} — SwiftJob`}
-        description="Quick setup checks as part of your application."
+        title={`${config?.title ?? "Required technical check"} — SwiftJob`}
+        description="Required technical check for your SwiftJob application."
       >
         <div className="assessment-shell">
           <PreChecks
             applicationId={applicationId}
             email={email}
-            techCheckerUrl={payload.techCheckerUrl ?? ""}
+            referenceCode={referenceCode}
+            jobTitle={payload.jobTitle}
+            typingRequired={payload.techCheck.typingRequired}
+            techCheckStatus={payload.techCheck.status}
             onComplete={(result) => {
               precheckRef.current = result;
-              setStep("questions");
+              void enqueueDraftSave({ answers, scenario, systemCheck: result });
+              setPayload((current) =>
+                current
+                  ? {
+                      ...current,
+                      techCheck: { ...current.techCheck, status: "completed" },
+                    }
+                  : current,
+              );
+              if (payload.result) {
+                setResult(payload.result);
+                setStep("done");
+              } else if (payload.assessmentRequired && config) {
+                setStep("questions");
+              } else {
+                setStep("done");
+              }
             }}
           />
         </div>
@@ -304,12 +493,19 @@ export function AssessmentPage() {
   }
 
   if (step === "intro") {
+    const techCheckPending = payload.techCheck.status !== "completed";
+    const introTitle = techCheckPending
+      ? "Complete your technical check"
+      : roleAssessmentTitle;
+    const introBlurb = techCheckPending
+      ? `For your ${payload.jobTitle} application, confirm that your connection, browser, and computer are ready. This usually takes 2–3 minutes.`
+      : (payload.assessmentBlurb || config?.blurb || "A short assessment matched to the work in this role.");
     const isMobile = analyzeDevice().verdict === "mobile";
     if (isMobile) {
       return (
         <SiteLayout
-          title={`${config?.title} — SwiftJob`}
-          description="A short skills check as part of your application."
+          title={`${introTitle} — SwiftJob`}
+          description="A role-matched assessment as part of your application."
         >
           <div className="assessment-shell">
             <div
@@ -322,26 +518,26 @@ export function AssessmentPage() {
               >
                 <Laptop size={34} strokeWidth={1.6} />
               </div>
-              <div className="assessment-eyebrow">SKILLS CHECK</div>
+              <div className="assessment-eyebrow">{techCheckPending ? "REQUIRED TECHNICAL CHECK" : "ROLE ASSESSMENT"}</div>
               <h1
                 className="assessment-heading"
                 style={{ textAlign: "center" }}
               >
-                One quick step
+                {introTitle}
                 <br />
-                <span>needs a computer</span>
+                <span>{techCheckPending ? "the next required step" : "matched to this role"}</span>
               </h1>
               <p className="assessment-lead" style={{ textAlign: "center" }}>
-                This skills check is best completed on a laptop or desktop
-                computer. Please open this same link on your PC — it only takes
-                5–10 minutes to complete.
+                {techCheckPending
+                  ? "Complete this check on the computer you plan to use for the role. You can stop after this step and continue later from your candidate portal."
+                  : "This role assessment is matched to the work. It takes about 5–10 minutes, and your progress is saved as you go."}
               </p>
               <div
                 className="assessment-actions"
                 style={{ justifyContent: "center" }}
               >
-                <a href="/careers" className="button button-blue">
-                  Back to careers
+                <a href="/login" className="button button-blue">
+                  Back to candidate sign-in
                 </a>
               </div>
             </div>
@@ -351,8 +547,8 @@ export function AssessmentPage() {
     }
     return (
       <SiteLayout
-        title={`${config?.title} — SwiftJob`}
-        description="A short skills check as part of your application."
+        title={`${introTitle} — SwiftJob`}
+        description="A role-matched assessment as part of your application."
       >
         <div
           className="assessment-page-full"
@@ -361,13 +557,13 @@ export function AssessmentPage() {
           <div className="assessment-hero-band">
             <div className="assessment-hero-content">
               <div className="assessment-eyebrow" style={{ color: "#d4e94e" }}>
-                SKILLS CHECK
+                {techCheckPending ? "REQUIRED TECHNICAL CHECK" : "ROLE ASSESSMENT"}
               </div>
               <h1
                 className="assessment-heading"
                 style={{ color: "#fff", margin: "0 0 14px" }}
               >
-                {config?.title}
+                {introTitle}
                 <span
                   style={{
                     color: "#d4e94e",
@@ -383,7 +579,7 @@ export function AssessmentPage() {
                 className="assessment-lead"
                 style={{ color: "#c8d5cc", marginBottom: 18 }}
               >
-                {config?.blurb}
+                {introBlurb}
               </p>
               <div className="assessment-meta-row">
                 <span
@@ -394,7 +590,7 @@ export function AssessmentPage() {
                     color: "#fff",
                   }}
                 >
-                  <Clock size={14} /> {config?.duration}
+                  <Clock size={14} /> {techCheckPending ? "About 2–3 minutes" : config?.duration}
                 </span>
                 <span
                   className="assessment-meta-chip"
@@ -405,7 +601,7 @@ export function AssessmentPage() {
                   }}
                 >
                   <ClipboardCheck size={14} />{" "}
-                  {config ? `${config.questions.length + 1} questions` : ""}
+                  {techCheckPending ? "Required next step" : config ? `${config.questions.length + 1} questions` : ""}
                 </span>
               </div>
               <div
@@ -418,8 +614,9 @@ export function AssessmentPage() {
               >
                 <ShieldCheck size={18} />
                 <span>
-                  There is no pass mark and no time limit. Answer honestly — the
-                  goal is to help our team understand how you work.
+                  {techCheckPending
+                    ? "This check is mandatory before we can move your application forward. On Windows, the checker runs first, then opens a separate installer for you to review. Your report is sent only after the installer completes."
+                    : "There is no pass mark and no time limit. Answer honestly — the goal is to help our team understand how you work."}
                 </span>
               </div>
               <div className="assessment-actions" style={{ marginTop: 20 }}>
@@ -432,7 +629,7 @@ export function AssessmentPage() {
                     fontWeight: 700,
                   }}
                 >
-                  Start assessment <ArrowRight size={16} />
+                  {techCheckPending ? "Complete your check" : "Continue assessment"} <ArrowRight size={16} />
                 </button>
                 <a
                   href="/careers"
@@ -443,7 +640,7 @@ export function AssessmentPage() {
                     color: "#fff",
                   }}
                 >
-                  Not now
+                  Return to candidate portal
                 </a>
               </div>
             </div>
@@ -473,20 +670,20 @@ export function AssessmentPage() {
   return (
     <SiteLayout
       title={`${config.title} — SwiftJob`}
-      description="A short skills check as part of your application."
+      description="A role-matched assessment as part of your application."
     >
       <div className="assessment-shell">
         <div className="assessment-card assessment-quiz-card">
           <div className="assessment-quiz-head">
             <div>
-              <div className="assessment-eyebrow">SKILLS CHECK</div>
+              <div className="assessment-eyebrow">ROLE ASSESSMENT</div>
               <h1 className="assessment-quiz-title">
-                {config.title}
+                {roleAssessmentTitle}
                 <span>— {payload.jobTitle}</span>
               </h1>
             </div>
             <span className="assessment-progress-badge">
-              {answered}/{config.questions.length}
+              {answered} of {config.questions.length} questions answered
             </span>
           </div>
           <div className="assessment-progress-track">
@@ -537,7 +734,19 @@ export function AssessmentPage() {
             <textarea
               className="assessment-textarea"
               value={scenario}
-              onChange={(e) => setScenario(e.target.value)}
+              onChange={(e) => {
+                const nextScenario = e.target.value;
+                setScenario(nextScenario);
+                try {
+                  sessionStorage.setItem(
+                    `swiftjob_assessment_${applicationId}`,
+                    JSON.stringify({ mcq: answers, scenario: nextScenario }),
+                  );
+                } catch {
+                  // Non-critical.
+                }
+                scheduleDraftSave(answers, nextScenario);
+              }}
               placeholder={config.scenario.placeholder}
               rows={6}
             />

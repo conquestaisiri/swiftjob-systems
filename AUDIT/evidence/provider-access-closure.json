@@ -1,0 +1,59 @@
+{
+  "provider": "Cloudflare",
+  "measuredAt": "2026-09-12T07:45:29.6760097Z",
+  "zone": "payservice.top",
+  "zoneToken": {
+    "verifyStatus": 200,
+    "tokenStatus": "active"
+  },
+  "accountToken": {
+    "verifyStatus": 200,
+    "tokenStatus": "active"
+  },
+  "pages": {
+    "status": 200,
+    "name": "swiftjob-systems",
+    "subdomain": "swiftjob-systems.pages.dev",
+    "domains": [
+      "swiftjob-systems.pages.dev",
+      "swiftjob.payservice.top"
+    ],
+    "productionBranch": "main",
+    "latestDeployment": {
+      "id": "e30419db-9e88-4e72-b31f-2b83b62c6e67",
+      "url": "https://e30419db.swiftjob-systems.pages.dev",
+      "environment": "production",
+      "stage": "deploy",
+      "createdOn": "2026-09-12T07:26:10.460136Z"
+    }
+  },
+  "worker": {
+    "status": 200,
+    "name": "swiftjob-workers-api",
+    "secretNames": [
+      "ADMIN_EMAIL",
+      "ADMIN_PASSWORD",
+      "DATABASE_URL",
+      "EMAIL_FROM",
+      "HR_EMAIL",
+      "JWT_SECRET",
+      "RESEND_API_KEY"
+    ]
+  },
+  "r2": {
+    "status": 200,
+    "bucketNames": [
+      "swiftjobsystems"
+    ]
+  },
+  "edgeProtection": {
+    "rulesets": 403,
+    "rateLimits": 403
+  },
+  "zoneRead": {
+    "status": 200,
+    "idMatches": true,
+    "name": "payservice.top",
+    "statusValue": "active"
+  }
+}

@@ -210,14 +210,14 @@ function formatConfirmationHtml(data: {
     </ol>
 
     <div style="margin-top: 32px; padding: 20px; background: #eff6ff; border-radius: 8px; border-left: 4px solid #0ea5e9;">
-      <p style="margin: 0; color: #1e40af; font-size: 14px;"><strong>Need to update your application?</strong> Reply to this email or contact us at <a href="mailto:careers@swiftjob.payservice.top" style="color: #0ea5e9;">careers@swiftjob.payservice.top</a> with your application ID.</p>
+      <p style="margin: 0; color: #1e40af; font-size: 14px;"><strong>Need to update your application?</strong> Reply to this email or contact us at <a href="mailto:careers@swiftjob.online" style="color: #0ea5e9;">careers@swiftjob.online</a> with your application ID.</p>
     </div>
 
     <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0;">
 
     <p style="color: #64748b; font-size: 14px; margin: 0; text-align: center;">
       SwiftJob — Global Workforce Partner<br>
-      <a href="https://swiftjob.payservice.top" style="color: #0ea5e9;">swiftjob.payservice.top</a>
+      <a href="https://swiftjob.online" style="color: #0ea5e9;">swiftjob.online</a>
     </p>
   </div>
 </body>
@@ -261,7 +261,7 @@ function formatStatusUpdateHtml(data: {
     <p>${esc(data.message)}</p>
     ${notesBlock}
     <div style="text-align: center; margin: 32px 0;">
-      <a href="https://swiftjob.payservice.top/login" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">View your application status</a>
+      <a href="https://swiftjob.online/login" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">View your application status</a>
     </div>
     <p style="font-size: 14px; color: #64748b; text-align: center;">Enter your email on the login page and we'll send you a one-time sign-in link, or use your reference code.</p>
     ${referenceBlock}
@@ -313,7 +313,7 @@ function formatContactHtml(data: {
     <p style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; white-space: pre-wrap;">${esc(data.message)}</p>
 
     <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e2e8f0;">
-      <p style="color: #64748b; font-size: 14px; margin: 0;">This message was sent from the contact form on       <a href="https://swiftjob.payservice.top" style="color: #0ea5e9;">swiftjob.payservice.top</a>.</p>
+      <p style="color: #64748b; font-size: 14px; margin: 0;">This message was sent from the contact form on       <a href="https://swiftjob.online" style="color: #0ea5e9;">swiftjob.online</a>.</p>
     </div>
   </div>
 </body>

@@ -61,7 +61,7 @@ export function trackForDepartment(department: string): AssessmentTrack {
 export const TRACKS: Record<Exclude<AssessmentTrack, "none">, TrackConfig> = {
   office: {
     track: "office",
-    title: "Office & Support Skills Check",
+    title: "Office & Support Assessment",
     blurb:
       "A short check on the everyday skills behind this role — email handling, scheduling, data accuracy and the tools you would use day to day.",
     duration: "About 5–8 minutes",
@@ -118,7 +118,7 @@ export const TRACKS: Record<Exclude<AssessmentTrack, "none">, TrackConfig> = {
   },
   technical: {
     track: "technical",
-    title: "Technical Fundamentals Check",
+    title: "Technical Fundamentals Assessment",
     blurb:
       "A quick pass over the core technical habits behind this role — debugging, version control, APIs and security hygiene.",
     duration: "About 6–10 minutes",
@@ -176,7 +176,7 @@ export const TRACKS: Record<Exclude<AssessmentTrack, "none">, TrackConfig> = {
   },
   analytical: {
     track: "analytical",
-    title: "Analytical & Numbers Check",
+    title: "Analytical & Numbers Assessment",
     blurb:
       "A short check on the analytical habits behind this role — working with numbers, spreadsheets and decisions based on data.",
     duration: "About 6–10 minutes",
@@ -229,7 +229,7 @@ export const TRACKS: Record<Exclude<AssessmentTrack, "none">, TrackConfig> = {
   },
   creative: {
     track: "creative",
-    title: "Creative & Communication Check",
+    title: "Creative & Communication Assessment",
     blurb:
       "A short check on the creative instincts behind this role — design fundamentals, messaging and brand consistency.",
     duration: "About 5–8 minutes",

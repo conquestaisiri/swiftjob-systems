@@ -45,7 +45,7 @@ export function PrivacyPolicy() {
         SwiftJob is a remote-first staffing and business process outsourcing
         (BPO) company. We help businesses build remote teams, and we help
         candidates find remote work. This policy explains what information we
-        collect when you use swiftjob.payservice.top, why we collect it, and the
+        collect when you use swiftjob.online, why we collect it, and the
         choices you have.
       </p>
 
@@ -59,18 +59,26 @@ export function PrivacyPolicy() {
         </li>
         <li>
           <strong>Candidate portal activity:</strong> the status of your
-          applications, notes our recruitment team writes about your
-          application, and optional skills-check results.
+            applications, notes our recruitment team writes about your
+            application, required technology-check results, and any role
+            assessment results.
         </li>
         <li>
-          <strong>Skills-check technical data (optional stage):</strong> if you
-          complete the setup checks, we store an estimate of your internet
-          speed, your typing speed and accuracy for one short passage, basic
-          browser-reported details (CPU core count, approximate device memory,
-          screen size, time zone), and — only if you choose to download and run
-          it — the output of the one-time SwiftJob System Checker tool
-          (operating system, processor model, RAM, free disk space). The checker
-          runs once, reports once, and then stops working.
+          <strong>Technology-check technical data (required stage):</strong> for
+          every application, we store an estimate of your internet speed,
+          basic browser-reported details (CPU core count, approximate device
+          memory, screen size, time zone, and language), and the one-time
+          SwiftJob System Checker report. On Windows this includes device type,
+          manufacturer and model, Windows edition/version/build/architecture,
+          processor model, core and logical-processor counts, reported maximum
+          clock speed, installed and available RAM, graphics adapter names and
+          reported driver/memory details, fixed-drive capacity and free space,
+          and an existing Windows System Assessment (WinSAT) score if one is
+          available. The checker does not run a high-load benchmark. It does
+          not collect a computer name, serial number, or user account name.
+          Typing speed and accuracy for one short passage are collected only
+          when the role requires a typing check. The checker is single-use and
+          reports once.
         </li>
         <li>
           <strong>Referral pages:</strong> when you open a private referral
@@ -92,10 +100,13 @@ export function PrivacyPolicy() {
           and only at the relevant stage of hiring.
         </li>
         <li>
-          We do not install software on your computer. The optional System
-          Checker is a small script you choose to download; you can read exactly
-          what it collects in the section above, and it stops working after one
-          run.
+          We never install software without your approval. The required
+          one-time System Checker collects device details. On Windows, the
+          single-file checker runs the system check first, then opens the normal
+          installer for you to review; you decide whether to install, and the
+          report is submitted only after the installer completes. On macOS, the
+          checker reports basic device details once and does not install
+          Windows software.
         </li>
       </ul>
 
@@ -141,8 +152,8 @@ export function TermsOfService() {
   return (
     <LegalShell title="Terms of Service" updated="August 2026">
       <p className="legal-p">
-        These terms govern your use of swiftjob.payservice.top — including
-        browsing roles, applying, being referred, completing skills checks, and
+        These terms govern your use of swiftjob.online — including
+        browsing roles, applying, being referred, completing required checks, and
         using the candidate portal.
       </p>
 

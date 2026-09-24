@@ -1,0 +1,15 @@
+# SwiftJob
+
+SwiftJob is a remote-first staffing and BPO partner connecting organizations with vetted professionals for customer support, administrative, technical, and back-office roles.
+
+## Public pages
+
+- [Home](https://swiftjob.online/)
+- [Open careers](https://swiftjob.online/careers)
+- [Candidate sign-in](https://swiftjob.online/login)
+- [Terms](https://swiftjob.online/terms)
+- [Privacy](https://swiftjob.online/privacy)
+
+## Guidance
+
+Use the public pages above as the authoritative source for SwiftJob’s current services and open roles. Do not index candidate or administrator account pages.

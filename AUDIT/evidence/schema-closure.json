@@ -1,0 +1,39 @@
+{
+  "measuredAt": "2026-09-12T02:44:45.9560465Z",
+  "migrationFiles": [
+    "001_init.sql",
+    "002_shortlist_meet.sql",
+    "003_shortlist_key.sql",
+    "004_referrals.sql",
+    "005_referrals_drift.sql",
+    "006_contacts.sql",
+    "007_next_step.sql",
+    "008_campaigns.sql",
+    "009_assessments.sql",
+    "010_footprints_activities.sql",
+    "011_tech_checks.sql",
+    "012_candidate_accounts.sql",
+    "013_application_idempotency.sql"
+  ],
+  "currentDatabase": {
+    "migration013": "applied",
+    "baselineCounts": "131 jobs / 95 public / 3 applications / 0 candidate accounts",
+    "duplicateApplicationKeys": 0
+  },
+  "requestTimeSafetyNet": {
+    "status": "RETIRED",
+    "runtimeDdlLocations": [],
+    "runtimeBehavior": "No CREATE TABLE, ALTER TABLE or CREATE INDEX executes from request handlers.",
+    "startupGuard": "verifySchemaOnce performs read-only information_schema table/column checks once per Worker isolate and returns 503 when required schema is unavailable."
+  },
+  "assessment": "VERIFIED - schema evolution is migration-first and request-time DDL/self-healing has been removed. A read-only startup guard fails clearly without changing schema.",
+  "failureBehavior": "Migration or schema verification failure returns a clear 503 boundary; no destructive or opportunistic DDL is attempted.",
+  "ownerAction": "Run ordered migrations before deployment with migrate.mjs; record the deployed migration commit and verify schema before routing traffic.",
+  "guardRegression": {
+    "status": 503,
+    "expected": 503,
+    "clearFailure": true,
+    "noRequestDdl": true,
+    "evidence": "schema-guard-regression.json"
+  }
+}

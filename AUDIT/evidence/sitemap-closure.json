@@ -1,0 +1,13 @@
+{
+  "measuredAt": "2026-09-12T01:50:31.7184093Z",
+  "url": "https://swiftjob.payservice.top/sitemap.xml",
+  "status": 200,
+  "contentType": "application/xml; charset=UTF-8",
+  "cacheControl": "no-store",
+  "validXml": true,
+  "publicJobs": 95,
+  "sitemapUrls": 100,
+  "coreUrls": 5,
+  "allLiveJobSlugsPresent": true,
+  "architecture": "Pages _worker proxies /sitemap.xml to Worker GET /api/sitemap.xml; Worker queries jobService.listPublic() on each request; checked-in build sitemap is fallback when API unavailable."
+}

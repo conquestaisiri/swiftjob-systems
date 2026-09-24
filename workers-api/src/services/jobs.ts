@@ -38,6 +38,17 @@ function toList(value: unknown): string[] {
   return [];
 }
 
+function toBoolean(value: unknown, fallback = false): boolean {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value === 1;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "true" || normalized === "1" || normalized === "yes") return true;
+    if (normalized === "false" || normalized === "0" || normalized === "no") return false;
+  }
+  return fallback;
+}
+
 export interface NormalizedJob {
   slug: string;
   title: string;
@@ -59,6 +70,7 @@ export interface NormalizedJob {
   workingHours: string;
   hiringProcess: string[];
   isActive: boolean;
+  referralRewardCents: number | null;
 }
 
 function normalizeInput(body: Record<string, unknown>): NormalizedJob {
@@ -79,7 +91,19 @@ function normalizeInput(body: Record<string, unknown>): NormalizedJob {
     throw new ValidationError("Unable to generate a slug from the title");
   }
 
-  const isActive = body.isActive === undefined ? true : Boolean(body.isActive);
+  const postedDate = String(body.postedDate).trim();
+  if (Number.isNaN(Date.parse(postedDate))) {
+    throw new ValidationError("postedDate must be a valid date");
+  }
+  const isActive = body.isActive === undefined ? true : toBoolean(body.isActive);
+  let referralRewardCents: number | null = null;
+  if (body.referralRewardCents !== undefined && body.referralRewardCents !== null && String(body.referralRewardCents).trim() !== "") {
+    const amount = Number(body.referralRewardCents);
+    if (!Number.isInteger(amount) || amount < 4000 || amount > 10000) {
+      throw new ValidationError("Referral reward must be a whole-dollar amount from $40 to $100");
+    }
+    referralRewardCents = amount;
+  }
 
   return {
     slug,
@@ -90,7 +114,7 @@ function normalizeInput(body: Record<string, unknown>): NormalizedJob {
     experienceLevel: String(body.experienceLevel).trim(),
     experience: String(body.experience).trim(),
     compensation: String(body.compensation).trim(),
-    postedDate: String(body.postedDate).trim(),
+    postedDate,
     summary: String(body.summary).trim(),
     overview: String(body.overview).trim(),
     responsibilities: toList(body.responsibilities),
@@ -102,6 +126,7 @@ function normalizeInput(body: Record<string, unknown>): NormalizedJob {
     workingHours: String(body.workingHours).trim(),
     hiringProcess: toList(body.hiringProcess),
     isActive,
+    referralRewardCents,
   };
 }
 

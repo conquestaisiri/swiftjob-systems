@@ -1,0 +1,83 @@
+{
+  "measuredAt": "2026-09-12T21:20:00Z",
+  "environment": {
+    "customDomain": "https://swiftjob.payservice.top",
+    "pagesProductionDeployment": "https://4160501a.swiftjob-systems.pages.dev",
+    "pagesDeploymentId": "4160501a",
+    "workerVersion": "a57a2143-9121-47f3-8488-fc2af8907f60"
+  },
+  "publicBoundary": {
+    "homepage": "PASS",
+    "careers": "PASS — 95 live positions loaded; all 95 detail links resolved",
+    "searchAndFilters": "PASS — virtual search and Operations filter returned expected subsets",
+    "sampleJobPages": [
+      "/careers/product-manager",
+      "/careers/email-support-specialist",
+      "/careers/online-k12-tutor",
+      "/careers/telehealth-physician",
+      "/careers/virtual-receptionist"
+    ],
+    "invalidRoutes": "PASS — invalid job, referral, campaign, and 404 states render controlled messages",
+    "navigationRoutes": [
+      "/",
+      "/careers",
+      "/login",
+      "/login/confirm",
+      "/candidate/applications",
+      "/assessment",
+      "/careers/apply/success",
+      "/referral/INVALID-QA",
+      "/campaign/INVALID-QA",
+      "/definitely-not-a-page",
+      "/privacy",
+      "/terms"
+    ],
+    "responsiveViewports": [
+      "375x812",
+      "768x1024",
+      "1440x900"
+    ],
+    "responsiveOverflow": "PASS — zero horizontal overflow on sampled public routes",
+    "browserConsole": "PASS — zero error or warning entries on sampled routes",
+    "images": "PASS — lazy-loaded public images completed with zero broken images",
+    "preparedApplicationFormScreenshot": "AUDIT/evidence/controlled-application-form.png"
+  },
+  "liveDataAndCopy": {
+    "publicStats": {
+      "openJobs": 95,
+      "applicationsProcessed": 3,
+      "countriesReached": 2
+    },
+    "careersCopy": "PASS — displays 95 open positions and the requested Worldwide label; no stale country-count claim",
+    "jobCopy": "PASS — displays the requested Worldwide wording and the grammatically correct 'and serve businesses in' sentence",
+    "referralContent": "PASS — global and stale per-referral 28-country overrides removed through admin content APIs",
+    "productionVerification": [
+      "https://swiftjob.payservice.top/careers?qa=stats2",
+      "https://swiftjob.payservice.top/careers/virtual-receptionist?qa=copy3"
+    ]
+  },
+  "publicApiSmoke": {
+    "healthAndCatalog": "PASS — /api/public-stats, /api/jobs, and a live job return 200 JSON",
+    "controlledErrors": "PASS — invalid campaign/referral return 404 JSON; invalid auth token returns 401 JSON",
+    "sitemapAndRobots": "PASS — /sitemap.xml returns XML; /robots.txt returns 200",
+    "headers": "PASS — API responses include no-store, nosniff, strict-origin referrer policy, and HSTS where applied"
+  },
+  "sourceVerification": {
+    "typecheck": "PASS — pnpm run typecheck",
+    "frontendBuild": "PASS — Vite production build",
+    "gitDiffCheck": "PASS",
+    "changes": [
+      "Careers and job pages now use the requested Worldwide wording instead of a numeric country claim",
+      "Referral seed and legacy replacement copy no longer claim 28+ countries",
+      "Corrected the live job-page sentence joining after the stats fallback"
+    ]
+  },
+  "pendingActionGates": [
+    "Controlled synthetic application submission still awaits action-time confirmation",
+    "Production admin browser sign-in still awaits action-time confirmation",
+    "Candidate magic-link send, referral send, and any cleanup/deletion require action-time confirmation",
+    "Chrome DevTools MCP is unavailable for Core Web Vitals and full assistive-technology measurement",
+    "Historical Supabase credential rotation and fine-grained Cloudflare rate-limit permission remain owner-side gates"
+  ],
+  "status": "PARTIALLY VERIFIED — public site and deployed copy pass; side-effecting application/admin/email tests remain gated"
+}

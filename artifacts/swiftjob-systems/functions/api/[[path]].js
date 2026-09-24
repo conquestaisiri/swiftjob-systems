@@ -23,14 +23,24 @@ export async function onRequest(context) {
 
   const resp = await fetch(target.toString(), init);
   const respHeaders = new Headers(resp.headers);
-  respHeaders.set("Access-Control-Allow-Origin", "*");
+  const requestOrigin = context.request.headers.get("Origin");
+  let sameOrigin = false;
+  if (requestOrigin) {
+    try {
+      sameOrigin = new URL(requestOrigin).origin === url.origin;
+    } catch {
+      sameOrigin = false;
+    }
+  }
+  respHeaders.set("Access-Control-Allow-Origin", sameOrigin ? requestOrigin : url.origin);
+  respHeaders.set("Vary", "Origin");
   respHeaders.set(
     "Access-Control-Allow-Methods",
     "GET,POST,PATCH,PUT,DELETE,OPTIONS",
   );
   respHeaders.set(
     "Access-Control-Allow-Headers",
-    "Content-Type, Authorization",
+    "Content-Type, Authorization, Idempotency-Key",
   );
 
   return new Response(resp.body, {

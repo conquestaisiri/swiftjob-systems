@@ -1,0 +1,69 @@
+{
+  "measuredAt": "2026-09-12T03:10:00Z",
+  "environment": "Production Pages deployment 014b6028.swiftjob-systems.pages.dev browser viewport capability",
+  "routes": [
+    "/",
+    "/careers",
+    "/careers/product-manager",
+    "/login",
+    "/admin/login"
+  ],
+  "widths": [
+    390,
+    430,
+    768,
+    1024,
+    1280,
+    1440
+  ],
+  "checks": {
+    "bodyOverflow": false,
+    "consoleErrors": 0,
+    "consoleWarnings": 0,
+    "routeWidthSamples": 30
+  },
+  "latestDeployment": "e30419db.swiftjob-systems.pages.dev",
+  "latestSettledRun": {
+    "environment": "Production custom domain in settled external Edge browser",
+    "routes": ["/", "/careers", "/login", "/terms"],
+    "widths": [390, 768, 1440],
+    "routeWidthSamples": 12,
+    "bodyOverflow": false,
+    "missingImageAlt": 0,
+    "siteOriginConsoleErrors": 0,
+    "lazyRouteDataSettled": true
+  },
+  "note": "Homepage client marquee children intentionally extend outside the clipped animation track; document/body scroll width remained within viewport at every sample.",
+  "matrix": [
+    {
+      "width": 390,
+      "bodyOverflow": false,
+      "maxObservedDocumentWidth": 390
+    },
+    {
+      "width": 430,
+      "bodyOverflow": false,
+      "maxObservedDocumentWidth": 430
+    },
+    {
+      "width": 768,
+      "bodyOverflow": false,
+      "maxObservedDocumentWidth": 768
+    },
+    {
+      "width": 1024,
+      "bodyOverflow": false,
+      "maxObservedDocumentWidth": 1024
+    },
+    {
+      "width": 1280,
+      "bodyOverflow": false,
+      "maxObservedDocumentWidth": 1280
+    },
+    {
+      "width": 1440,
+      "bodyOverflow": false,
+      "maxObservedDocumentWidth": 1440
+    }
+  ]
+}

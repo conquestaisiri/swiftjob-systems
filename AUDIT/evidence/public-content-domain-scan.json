@@ -1,0 +1,812 @@
+{
+  "checkedAt": "2026-09-13T19:11:39.579Z",
+  "origin": "https://swiftjob.online",
+  "sitemapUrl": "https://swiftjob.online/sitemap.xml",
+  "urlCount": 100,
+  "failureCount": 0,
+  "legacyDomainPageCount": 0,
+  "retiredCopyPageCount": 0,
+  "failures": [],
+  "results": [
+    {
+      "url": "https://swiftjob.online/",
+      "status": 200,
+      "ms": 184,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers",
+      "status": 200,
+      "ms": 535,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/login",
+      "status": 200,
+      "ms": 514,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/legal",
+      "status": 200,
+      "ms": 486,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/privacy",
+      "status": 200,
+      "ms": 539,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/captioner-subtitler",
+      "status": 200,
+      "ms": 482,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/outbound-telemarketer",
+      "status": 200,
+      "ms": 506,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/data-verification-specialist",
+      "status": 200,
+      "ms": 479,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/survey-micro-task-specialist",
+      "status": 200,
+      "ms": 185,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/email-support-specialist",
+      "status": 200,
+      "ms": 181,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/inbound-customer-service-rep",
+      "status": 200,
+      "ms": 187,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/proofreader",
+      "status": 200,
+      "ms": 178,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/online-k12-tutor",
+      "status": 200,
+      "ms": 188,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/dropshipping-store-manager",
+      "status": 200,
+      "ms": 196,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/ecommerce-store-assistant",
+      "status": 200,
+      "ms": 187,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/general-virtual-assistant",
+      "status": 200,
+      "ms": 188,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/grant-writer",
+      "status": 200,
+      "ms": 208,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/salesforce-administrator",
+      "status": 200,
+      "ms": 188,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/instructional-designer",
+      "status": 200,
+      "ms": 170,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/technical-writer",
+      "status": 200,
+      "ms": 176,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/front-end-web-developer",
+      "status": 200,
+      "ms": 180,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/qa-software-tester",
+      "status": 200,
+      "ms": 190,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/paid-ads-ppc-specialist",
+      "status": 200,
+      "ms": 187,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/financial-analyst",
+      "status": 200,
+      "ms": 187,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/medical-coding-specialist",
+      "status": 200,
+      "ms": 182,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/operations-analyst",
+      "status": 200,
+      "ms": 229,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/back-end-developer",
+      "status": 200,
+      "ms": 176,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/scrum-master-agile-coach",
+      "status": 200,
+      "ms": 181,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/cloud-architect",
+      "status": 200,
+      "ms": 192,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/ml-ai-engineer",
+      "status": 200,
+      "ms": 232,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/senior-fullstack-engineer",
+      "status": 200,
+      "ms": 228,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/penetration-tester",
+      "status": 200,
+      "ms": 216,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/systems-administrator",
+      "status": 200,
+      "ms": 207,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/seo-director-manager",
+      "status": 200,
+      "ms": 183,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/product-manager",
+      "status": 200,
+      "ms": 177,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/business-analyst",
+      "status": 200,
+      "ms": 234,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/solutions-architect",
+      "status": 200,
+      "ms": 217,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/clinical-research-associate",
+      "status": 200,
+      "ms": 182,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/actuary",
+      "status": 200,
+      "ms": 180,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/telehealth-physician",
+      "status": 200,
+      "ms": 182,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/corporate-counsel",
+      "status": 200,
+      "ms": 189,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/quant-analyst",
+      "status": 200,
+      "ms": 183,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/director-of-remote-operations",
+      "status": 200,
+      "ms": 173,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/cto-fractional",
+      "status": 200,
+      "ms": 203,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/director-of-engineering",
+      "status": 200,
+      "ms": 202,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/ceo-fractional",
+      "status": 200,
+      "ms": 176,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/teleradiologist",
+      "status": 200,
+      "ms": 180,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/head-of-growth",
+      "status": 200,
+      "ms": 181,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/staff-software-engineer",
+      "status": 200,
+      "ms": 193,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/search-engine-ai-evaluator",
+      "status": 200,
+      "ms": 193,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/data-entry-clerk",
+      "status": 200,
+      "ms": 184,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/general-audio-transcriber",
+      "status": 200,
+      "ms": 183,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/online-content-moderator",
+      "status": 200,
+      "ms": 178,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/ai-data-annotator-labeler",
+      "status": 200,
+      "ms": 174,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/chat-support-representative",
+      "status": 200,
+      "ms": 183,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/virtual-receptionist",
+      "status": 200,
+      "ms": 181,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/lead-generation-assistant",
+      "status": 200,
+      "ms": 190,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/billing-specialist",
+      "status": 200,
+      "ms": 215,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/cybersecurity-analyst",
+      "status": 200,
+      "ms": 207,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/qa-engineer",
+      "status": 200,
+      "ms": 184,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/it-support-specialist",
+      "status": 200,
+      "ms": 206,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/data-annotation-specialist",
+      "status": 200,
+      "ms": 191,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/content-writer",
+      "status": 200,
+      "ms": 181,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/transcriptionist",
+      "status": 200,
+      "ms": 183,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/graphic-designer",
+      "status": 200,
+      "ms": 220,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/video-editor",
+      "status": 200,
+      "ms": 180,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/research-assistant",
+      "status": 200,
+      "ms": 167,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/community-manager",
+      "status": 200,
+      "ms": 179,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/email-marketing-specialist",
+      "status": 200,
+      "ms": 223,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/seo-specialist",
+      "status": 200,
+      "ms": 219,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/recruiting-coordinator",
+      "status": 200,
+      "ms": 217,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/payroll-specialist",
+      "status": 200,
+      "ms": 213,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/devops-engineer",
+      "status": 200,
+      "ms": 196,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/frontend-developer",
+      "status": 200,
+      "ms": 167,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/data-analyst",
+      "status": 200,
+      "ms": 183,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/hr-assistant",
+      "status": 200,
+      "ms": 195,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/order-processing-specialist",
+      "status": 200,
+      "ms": 179,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/backend-developer",
+      "status": 200,
+      "ms": 178,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/full-stack-developer",
+      "status": 200,
+      "ms": 185,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/inventory-management-assistant",
+      "status": 200,
+      "ms": 198,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/junior-software-developer",
+      "status": 200,
+      "ms": 171,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/database-administrator",
+      "status": 200,
+      "ms": 209,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/mobile-app-developer",
+      "status": 200,
+      "ms": 207,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/machine-learning-engineer",
+      "status": 200,
+      "ms": 176,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/ui-ux-designer",
+      "status": 200,
+      "ms": 187,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/data-engineer",
+      "status": 200,
+      "ms": 187,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/virtual-assistant",
+      "status": 200,
+      "ms": 183,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/executive-assistant",
+      "status": 200,
+      "ms": 177,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/customer-support-specialist",
+      "status": 200,
+      "ms": 222,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/customer-success-representative",
+      "status": 200,
+      "ms": 190,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/administrative-coordinator",
+      "status": 200,
+      "ms": 188,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/real-estate-operations-associate",
+      "status": 200,
+      "ms": 174,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/lead-generation-specialist",
+      "status": 200,
+      "ms": 195,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/appointment-setter",
+      "status": 200,
+      "ms": 194,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/data-entry-specialist",
+      "status": 200,
+      "ms": 193,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/project-coordinator",
+      "status": 200,
+      "ms": 234,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/social-media-assistant",
+      "status": 200,
+      "ms": 182,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/marketing-assistant",
+      "status": 200,
+      "ms": 191,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/bookkeeper",
+      "status": 200,
+      "ms": 187,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    },
+    {
+      "url": "https://swiftjob.online/careers/technical-support-representative",
+      "status": 200,
+      "ms": 169,
+      "contentType": "text/html; charset=utf-8",
+      "hasTitle": true,
+      "legacyMatches": []
+    }
+  ]
+}

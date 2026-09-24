@@ -1,17 +1,15 @@
 import { useState, useCallback, useEffect } from "react";
 
 // ============================================================================
-// Device guard — decides, with high confidence and against every common spoof
-// trick (request-desktop-site UA/width, extensions, VPNs, emulation), whether
-// the visitor is really on a PC/laptop.
+// Device signals drive the required-check UI gate. Browser signals are
+// best-effort rather than tamper-proof; the server separately requires a
+// recorded, one-time system-check report before accepting a role assessment.
 //
-// Strategy: you cannot fake the PHYSICS of a phone.
-//   - A real phone/tablet has a coarse primary pointer, no hover capability,
-//     and a multi-touch screen — "desktop site" mode changes NONE of these.
-//   - Chrome's userAgentData (where present) reports real hardware and is not
-//     spoofed by desktop mode; navigator.platform also stays truthful.
-//   - Any real finger tap fires a touchstart/pointerdown with pointerType
-//     'touch' — a mouse cannot fake that, and we re-verify on every event.
+// Browser signals are a best-effort usability gate, not device attestation.
+// User-agent, pointer, and viewport signals can be masked or virtualized by a
+// browser, remote desktop, accessibility software, or device setting. The
+// server separately requires a valid one-time system-check report, but that
+// report is not cryptographic proof of the physical device running the page.
 // ============================================================================
 
 export type DeviceVerdict = "desktop" | "mobile";
@@ -51,9 +49,9 @@ export function installRuntimeListeners(): void {
 }
 
 /**
- * Full analysis of the current device. Returns a verdict, the individual
- * signals (for audit/logging), the weighted score, and the "hard" reasons that
- * by themselves prove a mobile device.
+ * Full analysis of the current device. Returns a best-effort verdict and the
+ * individual browser signals for audit/logging. Some phones are detectable in
+ * desktop-site mode, but this cannot be guaranteed.
  */
 export function analyzeDevice(): {
   verdict: DeviceVerdict;
@@ -86,7 +84,7 @@ export function analyzeDevice(): {
   }
   if (mouseSeen) score -= 3;
 
-  // --- Unspoofable platform truth -------------------------------------------
+  // --- User-agent platform hints (can be masked) ----------------------------
   const uaData = nav.userAgentData;
   signals.uaDataSupported = !!uaData;
   if (uaData?.mobile === true) {
@@ -119,7 +117,7 @@ export function analyzeDevice(): {
   signals.vibrateSupport = typeof nav.vibrate === "function";
   if (typeof nav.vibrate === "function") score += 3;
 
-  // --- Physical pointer capabilities (immune to desktop-site mode) ----------
+  // --- Pointer capability hints (may be masked or virtualized) --------------
   const q = (m: string) =>
     typeof window.matchMedia === "function" ? window.matchMedia(m) : null;
 
@@ -173,8 +171,8 @@ export function analyzeDevice(): {
   const innerWidth = window.innerWidth || 0;
   signals.innerWidth = innerWidth;
 
-  // The "request desktop site" signature: the layout viewport becomes wider
-  // than the physical screen, which only ever happens in mobile desktop mode.
+  // A wider layout viewport can indicate mobile desktop-site mode, but is not
+  // unique to phones and must only contribute a weak heuristic score.
   if (screenWidth > 0 && innerWidth > screenWidth && screenWidth < 900) {
     signals.desktopModeSignature = true;
     score += 5;
@@ -208,10 +206,7 @@ export function deviceMeta(): Record<string, unknown> {
 }
 
 /**
- * React hook: keeps a live verdict, re-verifying on every pointer/touch event,
- * focus, and on a short interval so any spoof trick gets caught the moment it
- * happens. The gate UI must not enable the continue link until status is
- * "desktop".
+ * React hook: keeps the device verdict current for the required-check blocker.
  */
 export function useDeviceGuard(): {
   status: GuardStatus;

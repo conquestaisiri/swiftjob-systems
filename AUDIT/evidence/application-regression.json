@@ -1,0 +1,33 @@
+{
+  "environment": "Local PGlite + actual Worker; synthetic email sink; no production access",
+  "results": [
+    {
+      "name": "Unknown position rejected before any write",
+      "status": "PASS"
+    },
+    {
+      "name": "Closed position rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Missing resume rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Mismatched extension and content rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Valid PDF creates one application and two captured messages",
+      "status": "PASS"
+    },
+    {
+      "name": "Replayed submission returns the original application without duplicate writes or email",
+      "status": "PASS"
+    },
+    {
+      "name": "Stored candidate view does not expose private room data before shortlist",
+      "status": "PASS"
+    }
+  ]
+}

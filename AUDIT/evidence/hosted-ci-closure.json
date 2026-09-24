@@ -1,0 +1,22 @@
+{
+  "measuredAt": "2026-09-12T19:01:00Z",
+  "provider": "GitHub Actions",
+  "repository": "conquestaisiri/swiftjob-systems",
+  "pullRequest": {
+    "number": 1,
+    "url": "https://github.com/conquestaisiri/swiftjob-systems/pull/1",
+    "head": "cfbc3659a33d5fc672ed9858859fe0e966a2bd51"
+  },
+  "run": {
+    "id": 34712839036,
+    "url": "https://github.com/conquestaisiri/swiftjob-systems/actions/runs/34712839036",
+    "conclusion": "success",
+    "checks": {
+      "TypeCheck": "pass",
+      "Build Frontend": "pass",
+      "Deploy Worker API": "skipped_on_pull_request",
+      "Deploy Frontend to Cloudflare Pages": "skipped_on_pull_request"
+    }
+  },
+  "scope": "Hosted workspace typecheck, isolated workflow regressions and production frontend build passed. Production deployment jobs remain gated to the main branch."
+}

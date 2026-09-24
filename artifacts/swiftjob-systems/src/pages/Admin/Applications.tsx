@@ -26,6 +26,7 @@ import { parseDateOnly } from "@/lib/utils";
 import { API_BASE } from "@/lib/adminApi";
 import { handleAdminUnauthorized } from "@/lib/adminAuth";
 import { TRACKS, type AssessmentTrack } from "@/lib/assessmentTracks";
+import { formatSystemSpecEntries, getTechCheckSpecs } from "@/lib/systemSpecs";
 
 const STATUS_COLORS: Record<string, string> = {
   New: "#6366f1",
@@ -233,7 +234,6 @@ export function Applications({ token }: ApplicationsProps) {
       meetLink?: string | null;
       interviewInstructions?: string | null;
       meetingKey?: string | null;
-      backgroundUrl?: string | null;
       roomLink?: string | null;
       nextStepDelay?: number | null;
       notifyCandidate?: boolean;
@@ -259,9 +259,6 @@ export function Applications({ token }: ApplicationsProps) {
               : {}),
             ...(opts?.meetingKey !== undefined
               ? { meetingKey: opts.meetingKey }
-              : {}),
-            ...(opts?.backgroundUrl !== undefined
-              ? { backgroundUrl: opts.backgroundUrl }
               : {}),
             ...(opts?.roomLink !== undefined
               ? { roomLink: opts.roomLink }
@@ -1116,6 +1113,9 @@ function AssessmentDetailView({ detail }: { detail: AssessmentDetail }) {
     detail.maxScore && detail.score !== null
       ? Math.round((detail.score / detail.maxScore) * 100)
       : null;
+  const systemSpecEntries = formatSystemSpecEntries(
+    getTechCheckSpecs(detail.systemCheck),
+  );
 
   return (
     <div className="assessment-detail">
@@ -1137,6 +1137,35 @@ function AssessmentDetailView({ detail }: { detail: AssessmentDetail }) {
           : `Status: ${detail.status.replace("_", " ")}`}
         {detail.jobSlug ? ` · ${detail.jobSlug}` : ""}
       </p>
+
+      {systemSpecEntries.length > 0 && (
+        <section
+          className="assessment-question"
+          aria-labelledby="tech-check-system-specs-heading"
+          style={{ marginTop: 18 }}
+        >
+          <h5 id="tech-check-system-specs-heading">
+            Technical check — system specifications
+          </h5>
+          <dl
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              gap: "12px 20px",
+              margin: 0,
+            }}
+          >
+            {systemSpecEntries.map(({ label, value }) => (
+              <div key={label}>
+                <dt className="text-slate-500 text-sm">{label}</dt>
+                <dd className="text-slate-800 text-sm" style={{ margin: "2px 0 0", overflowWrap: "anywhere" }}>
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
 
       {config && detail.responses ? (
         <>
@@ -1210,15 +1239,11 @@ function ShortlistModal({
   application: Application;
   onClose: () => void;
   onConfirm: (opts: {
-    backgroundUrl: string;
     nextStepDelay: number | null;
     notifyCandidate: boolean;
   }) => void;
 }) {
   const isEdit = application.status === "Shortlisted";
-  const [backgroundUrl, setBackgroundUrl] = useState(
-    application.backgroundUrl ?? "",
-  );
   const [nextStepDelay, setNextStepDelay] = useState(
     application.nextStepDelay ? String(application.nextStepDelay) : "",
   );
@@ -1229,12 +1254,6 @@ function ShortlistModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    const bg = backgroundUrl.trim();
-    if (bg && !/^https?:\/\//i.test(bg)) {
-      setError("The background link must start with http:// or https://");
-      return;
-    }
 
     let delay: number | null = null;
     if (nextStepDelay.trim()) {
@@ -1248,7 +1267,6 @@ function ShortlistModal({
 
     setSubmitting(true);
     onConfirm({
-      backgroundUrl: bg,
       nextStepDelay: delay,
       notifyCandidate,
     });
@@ -1288,23 +1306,6 @@ function ShortlistModal({
                 <label className="block text-sm font-medium text-slate-700">
                   Next step (optional — applies to this candidate only)
                 </label>
-              </div>
-              <div className="mb-3">
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Background website{" "}
-                  <span className="text-slate-400">(optional)</span>
-                </label>
-                <input
-                  type="url"
-                  value={backgroundUrl}
-                  onChange={(e) => setBackgroundUrl(e.target.value)}
-                  placeholder="https://… — loaded silently in the background"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <p className="text-xs text-slate-400 mt-1">
-                  Loaded silently while the candidate waits. Leave blank to use
-                  the app-wide default (Settings → Next step).
-                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">

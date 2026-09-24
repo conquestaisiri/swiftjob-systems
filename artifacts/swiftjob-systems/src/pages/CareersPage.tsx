@@ -21,7 +21,6 @@ import {
   type Job,
 } from "@/data/jobs";
 import { fetchJobs } from "@/lib/jobsApi";
-import { fetchPublicStats } from "@/lib/campaignApi";
 import { parseDateOnly } from "@/lib/utils";
 import { CAREERS_EMAIL } from "@/lib/contact";
 
@@ -31,6 +30,7 @@ function formatDate(iso: string) {
   // postedDate is date-only; parse at LOCAL midnight so timezones don't turn
   // "today" into "yesterday" (same treatment as the job detail sidebar).
   const d = parseDateOnly(iso);
+  if (Number.isNaN(d.getTime())) return "Date unavailable";
   const now = new Date();
   now.setHours(0, 0, 0, 0);
   const diffDays = Math.floor(
@@ -41,13 +41,15 @@ function formatDate(iso: string) {
   if (diffDays < 7) return `${diffDays} days ago`;
   if (diffDays < 14) return "1 week ago";
   if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  return `${Math.floor(diffDays / 30)} months ago`;
+  const months = Math.floor(diffDays / 30);
+  return `${months} month${months === 1 ? "" : "s"} ago`;
 }
 
 function JobCard({ job }: { job: Job }) {
+  const referralCode = new URLSearchParams(window.location.search).get("ref");
   return (
     <Link
-      href={`/careers/${job.slug}`}
+      href={`/careers/${job.slug}${referralCode ? `?ref=${encodeURIComponent(referralCode)}` : ""}`}
       className="job-card"
       data-testid={`job-card-${job.slug}`}
     >
@@ -103,7 +105,6 @@ export function CareersPage() {
   const [workArrangement, setWorkArrangement] = useState("");
   const [visibleCount, setVisibleCount] = useState(JOBS_PER_PAGE);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [countriesDisplay, setCountriesDisplay] = useState<string>("28");
 
   useEffect(() => {
     let cancelled = false;
@@ -122,11 +123,6 @@ export function CareersPage() {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-    // Admin-editable stat copy (Settings → "Countries hired from" number).
-    fetchPublicStats().then((stats) => {
-      if (cancelled || !stats?.countriesDisplay) return;
-      setCountriesDisplay(stats.countriesDisplay);
-    });
     return () => {
       cancelled = true;
     };
@@ -182,7 +178,7 @@ export function CareersPage() {
   return (
     <SiteLayout
       title="Remote Careers — SwiftJob"
-      description="Explore open remote positions at SwiftJob. 100% work-from-home roles across customer support, virtual assistance, data, IT, finance, and marketing — with real companies and fair pay."
+      description="Explore open remote positions at SwiftJob across customer support, virtual assistance, data, IT, finance, and marketing — with clear role details and transparent pay."
     >
       {/* Hero */}
       <section className="careers-hero section-dark">
@@ -200,9 +196,9 @@ export function CareersPage() {
             <em>remote roles.</em>
           </h1>
           <p className="careers-hero-sub reveal">
-            Every position below is a real, open, 100% remote job with a clear
-            description and a simple way to apply. Work from home on a laptop,
-            with training and support from day one.
+            Positions below are active listings with clear requirements,
+            working arrangements, compensation, and a simple way to apply.
+            Training and support are explained during the hiring process.
           </p>
           <div className="careers-hero-stats reveal">
             <span>
@@ -214,7 +210,7 @@ export function CareersPage() {
             </span>
             <span className="stat-sep">·</span>
             <span>
-              <strong>{countriesDisplay}</strong> countries
+              <strong>Worldwide</strong>
             </span>
           </div>
         </div>
@@ -223,18 +219,21 @@ export function CareersPage() {
           aria-label="Remote professionals at work"
         >
           <figure>
-            <img src="/wfh-desk.jpg" alt="Working from a home desk" />
-          </figure>
-          <figure>
             <img
-              src="/work-professional-real.jpg"
-              alt="Team member on a video call"
+              src="/careers-hero-support.jpg"
+              alt="Remote customer support professional working from home with a headset"
             />
           </figure>
           <figure>
             <img
-              src="/work-team-real.jpg"
-              alt="Distributed team collaborating online"
+              src="/careers-hero-home-call.jpg"
+              alt="Professional working remotely from home during a video call"
+            />
+          </figure>
+          <figure>
+            <img
+              src="/careers-hero-team-call.jpg"
+              alt="Laptop showing a remote team video call in a home office"
             />
           </figure>
           <span className="careers-hero-people-note">
@@ -284,11 +283,12 @@ export function CareersPage() {
           {filtersOpen && (
             <div className="careers-filters">
               <div className="filter-group">
-                <label>
+                <label htmlFor="careers-department">
                   Department
                   <ChevronDown size={13} />
                 </label>
                 <select
+                  id="careers-department"
                   value={department}
                   onChange={(e) => {
                     setDepartment(e.target.value);
@@ -304,11 +304,12 @@ export function CareersPage() {
                 </select>
               </div>
               <div className="filter-group">
-                <label>
+                <label htmlFor="careers-employment-type">
                   Employment type
                   <ChevronDown size={13} />
                 </label>
                 <select
+                  id="careers-employment-type"
                   value={employmentType}
                   onChange={(e) => {
                     setEmploymentType(e.target.value);
@@ -324,11 +325,12 @@ export function CareersPage() {
                 </select>
               </div>
               <div className="filter-group">
-                <label>
+                <label htmlFor="careers-experience-level">
                   Experience level
                   <ChevronDown size={13} />
                 </label>
                 <select
+                  id="careers-experience-level"
                   value={experienceLevel}
                   onChange={(e) => {
                     setExperienceLevel(e.target.value);
@@ -344,11 +346,12 @@ export function CareersPage() {
                 </select>
               </div>
               <div className="filter-group">
-                <label>
+                <label htmlFor="careers-work-arrangement">
                   Work arrangement
                   <ChevronDown size={13} />
                 </label>
                 <select
+                  id="careers-work-arrangement"
                   value={workArrangement}
                   onChange={(e) => {
                     setWorkArrangement(e.target.value);
@@ -483,11 +486,11 @@ export function CareersPage() {
               ],
               [
                 "Are these jobs actually remote?",
-                "Every listing is 100% remote. You work from your own laptop, wherever you are, with hours agreed before you start.",
+                "Each listing explains its working arrangement and hours. You work from your own laptop wherever the listing permits, with hours agreed before you start.",
               ],
               [
-                "What is the skills check?",
-                "A short optional check (5–10 minutes) in your browser: a quick connection and computer setup confirmation, a one-minute typing sample for some roles, and a few questions matched to the job. No pass mark — it helps us understand how you work.",
+                "What checks are required?",
+                "Every application includes a required technology check for your connection, browser, and computer setup. A typing check is shown only when the role requires it. Some roles also include a separate 5–10 minute assessment matched to the work. The portal saves your progress so you can return later.",
               ],
               [
                 "How will I hear back?",

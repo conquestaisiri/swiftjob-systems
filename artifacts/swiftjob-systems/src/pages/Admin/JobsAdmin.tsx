@@ -70,6 +70,7 @@ const EMPTY_FORM: FormState = {
   experienceLevel: "Entry-Level",
   experience: "",
   compensation: "",
+  referralRewardCents: "8000",
   postedDate: "",
   summary: "",
   overview: "",
@@ -302,6 +303,19 @@ function JobEditor({
                 />
               </div>
               <div className="job-editor-field">
+                <label>Referral reward <span className="opt">$40–$100</span></label>
+                <input
+                  type="number"
+                  min="40"
+                  max="100"
+                  step="1"
+                  value={form.referralRewardCents ? String(Number(form.referralRewardCents) / 100) : ""}
+                  onChange={(e) => setForm((f) => ({ ...f, referralRewardCents: e.target.value ? String(Number(e.target.value) * 100) : "" }))}
+                  placeholder="e.g. 80"
+                />
+                <span className="job-editor-help">Paid after a referred candidate is hired and verified.</span>
+              </div>
+              <div className="job-editor-field">
                 <label>
                   Posted date <span className="req">*</span>
                 </label>
@@ -417,6 +431,8 @@ export function JobsAdmin({ token }: { token: string }) {
     () => [...new Set(jobs.map((j) => j.department))].sort(),
     [jobs],
   );
+  const liveCount = jobs.filter((job) => job.isActive).length;
+  const hiddenCount = jobs.length - liveCount;
 
   const loadJobs = async () => {
     setLoading(true);
@@ -524,7 +540,12 @@ export function JobsAdmin({ token }: { token: string }) {
       <div className="admin-header-bar">
         <h1 className="admin-title">Jobs</h1>
         <div className="admin-header-actions-inline">
-          <span className="admin-count">{jobs.length} total</span>
+          <span
+            className="admin-count"
+            title="Total includes both live and hidden jobs"
+          >
+            {jobs.length} total · {liveCount} live · {hiddenCount} hidden
+          </span>
           <button
             className="button button-blue"
             onClick={() => setEditorOpen("new")}
@@ -560,6 +581,7 @@ export function JobsAdmin({ token }: { token: string }) {
                 <th>Position</th>
                 <th>Department</th>
                 <th>Compensation</th>
+                <th>Referral</th>
                 <th>Posted</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -580,6 +602,11 @@ export function JobsAdmin({ token }: { token: string }) {
                   <td>
                     <div className="position-experience">
                       {job.compensation}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="position-experience">
+                      {typeof job.referralRewardCents === "number" ? `$${Math.round(job.referralRewardCents / 100)}` : "—"}
                     </div>
                   </td>
                   <td className="date-cell">

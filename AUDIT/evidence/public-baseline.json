@@ -1,0 +1,89 @@
+[
+  {
+    "path": "/api/healthz",
+    "status": 200,
+    "ms": 1174,
+    "contentType": "application/json",
+    "cacheControl": "no-store",
+    "securityHeaders": {
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "content-security-policy": null,
+      "strict-transport-security": "max-age=31536000; includeSubDomains",
+      "x-frame-options": "DENY"
+    }
+  },
+  {
+    "path": "/api/jobs",
+    "status": 200,
+    "ms": 1039,
+    "contentType": "application/json",
+    "cacheControl": "no-store",
+    "securityHeaders": {
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "content-security-policy": null,
+      "strict-transport-security": "max-age=31536000; includeSubDomains",
+      "x-frame-options": "DENY"
+    },
+    "jobCount": 95
+  },
+  {
+    "path": "/api/admin/stats",
+    "status": 401,
+    "ms": 170,
+    "contentType": "application/json",
+    "cacheControl": "no-store",
+    "securityHeaders": {
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "content-security-policy": null,
+      "strict-transport-security": "max-age=31536000; includeSubDomains",
+      "x-frame-options": "DENY"
+    }
+  },
+  {
+    "path": "/api/candidate/applications",
+    "status": 401,
+    "ms": 1073,
+    "contentType": "application/json",
+    "cacheControl": "no-store",
+    "securityHeaders": {
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "content-security-policy": null,
+      "strict-transport-security": "max-age=31536000; includeSubDomains",
+      "x-frame-options": "DENY"
+    }
+  },
+  {
+    "path": "/robots.txt",
+    "status": 200,
+    "ms": 183,
+    "contentType": "text/plain; charset=utf-8",
+    "cacheControl": "public, max-age=0, must-revalidate",
+    "securityHeaders": {
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "content-security-policy": null,
+      "strict-transport-security": null,
+      "x-frame-options": "DENY"
+    },
+    "body": "User-agent: *\nAllow: /\nSitemap: https://swiftjob.online/sitemap.xml\n"
+  },
+  {
+    "path": "/sitemap.xml",
+    "status": 200,
+    "ms": 890,
+    "contentType": "application/xml; charset=UTF-8",
+    "cacheControl": "no-store",
+    "securityHeaders": {
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "content-security-policy": null,
+      "strict-transport-security": "max-age=31536000; includeSubDomains",
+      "x-frame-options": "DENY"
+    },
+    "validXml": true
+  }
+]

@@ -115,7 +115,7 @@ export function LandingPage() {
       <header className="landing-v2-header">
         <div className="landing-v2-nav">
           <Link href="/" className="landing-v2-brand">
-            <img src="/swiftjob-mark.svg" alt="SwiftJob" />
+            <img src="/swiftjob-mark.png?v=supplied-20260912" alt="SwiftJob" />
             <span>SwiftJob</span>
           </Link>
           <nav className="landing-v2-links" aria-label="Primary navigation">
@@ -125,7 +125,7 @@ export function LandingPage() {
             <a href="#contact">Contact</a>
           </nav>
           <div className="landing-v2-actions">
-            <Link href="/careers" className="landing-v2-login">
+            <Link href="/login" className="landing-v2-login">
               Candidate access <ArrowUpRight size={14} />
             </Link>
             <a href="#contact" className="landing-v2-button">
@@ -149,6 +149,7 @@ export function LandingPage() {
               How it works
             </a>
             <Link href="/careers">Careers</Link>
+            <Link href="/login">Candidate access</Link>
             <a href="#contact" onClick={() => setMobileOpen(false)}>
               Contact
             </a>
@@ -160,19 +161,15 @@ export function LandingPage() {
       </header>
 
       <main>
-        <section className="landing-v2-hero">
+        <section className="landing-v2-hero landing-v2-hero-centered">
           <div className="landing-v2-hero-copy">
             <span className="landing-v2-eyebrow">
               <i /> Remote staffing, done properly
             </span>
             <h1>
-              Good people.
+              Remote talent.
               <br />
-              <em>Good work.</em>
-              <br />
-              Better
-              <br />
-              matched.
+              <em>For your team.</em>
             </h1>
             <p>
               SwiftJob is a remote-first staffing and BPO partner. We connect
@@ -192,14 +189,18 @@ export function LandingPage() {
               </Link>
             </div>
           </div>
-          <div className="landing-v2-hero-art">
-            <div className="landing-v2-art-label">
-              People at work <span>01 / 04</span>
-            </div>
+          <div
+            className="landing-v2-hero-art"
+            role="group"
+            aria-label="Remote professionals working from home"
+          >
             <figure className="landing-v2-photo landing-v2-photo-a">
               <img
                 src="/wfh-desk.jpg"
                 alt="A professional taking a call while working from home"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
               />
             </figure>
             <figure className="landing-v2-photo landing-v2-photo-b">
@@ -214,11 +215,6 @@ export function LandingPage() {
                 alt="A remote team laughing together over laptops"
               />
             </figure>
-            <div className="landing-v2-art-card">
-              <span>One partner</span>
-              <strong>for every remote role.</strong>
-              <small>100% Remote · Global talent</small>
-            </div>
           </div>
         </section>
 
@@ -420,11 +416,12 @@ export function LandingPage() {
             </article>
             <article>
               <span>3</span>
-              <h3>Complete your assessment</h3>
+              <h3>Complete the checks for your role</h3>
               <p>
-                Most roles include a short skills check: a quick system check,
-                then questions matched to the job. It takes about 5–10 minutes
-                and auto-saves as you go.
+                Every application includes a compulsory technical check for your
+                computer, connection, and browser. Depending on the role, you
+                may also complete a typing test or a separate role assessment.
+                Your progress saves as you go.
               </p>
             </article>
             <article>
@@ -456,7 +453,7 @@ export function LandingPage() {
             <span className="landing-v2-eyebrow">
               <i /> Start a conversation
             </span>
-            <h2>Tell us about the work.</h2>
+            <h2>Let&apos;s work out the next step.</h2>
             <p>
               Whether you are hiring one person or building a whole team, we
               will help you work out the next practical step.

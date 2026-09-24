@@ -80,7 +80,11 @@ export function AdminLogin() {
       <div className="w-full max-w-md">
         <div className="admin-login-card">
           <div className="text-center mb-8">
-            <div className="admin-login-brand">SwiftJob.adm</div>
+            <div className="admin-login-brand">
+              <img src="/swiftjob-mark.png?v=supplied-20260912" alt="SwiftJob" />
+              <span>SwiftJob</span>
+              <span className="admin-login-brand-area">admin</span>
+            </div>
             <h1 className="text-2xl font-bold text-slate-900">Admin login</h1>
             <p className="text-slate-500 mt-2">
               Sign in to manage applications, referrals and campaigns
@@ -115,7 +119,7 @@ export function AdminLogin() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label htmlFor="admin-email" className="block text-sm font-medium text-slate-700 mb-1">
                 Email
               </label>
               <input
@@ -135,7 +139,7 @@ export function AdminLogin() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label htmlFor="admin-password" className="block text-sm font-medium text-slate-700 mb-1">
                 Password
               </label>
               <input

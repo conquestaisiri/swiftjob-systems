@@ -1,0 +1,14 @@
+{
+  "date": "2026-09-13",
+  "environment": "Production swiftjob.online; read-only admin listing",
+  "status": "PASS",
+  "unauthorized": 401,
+  "login": 200,
+  "list": 200,
+  "count": 0,
+  "browserVisual": "PASS",
+  "browserRoutes": [
+    "/admin",
+    "/admin/candidate-referrals"
+  ]
+}

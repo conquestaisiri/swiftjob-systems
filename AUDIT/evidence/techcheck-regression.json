@@ -1,0 +1,149 @@
+{
+  "environment": "Synthetic executable-bundle fixtures only; no real MSI access, execution, installation, external upload, or production access",
+  "results": [
+    {
+      "name": "Windows package is one self-contained executable bundle, not an archive",
+      "status": "PASS"
+    },
+    {
+      "name": "Windows package protocol is versioned and the launcher key is content-addressed",
+      "status": "PASS"
+    },
+    {
+      "name": "Windows checker collects detailed hardware, OS, storage, and available WinSAT data",
+      "status": "PASS"
+    },
+    {
+      "name": "Windows runner uses its collect/submit steps and does not run a stress benchmark",
+      "status": "PASS"
+    },
+    {
+      "name": "Windows runner rejects malformed one-time tokens",
+      "status": "PASS"
+    },
+    {
+      "name": "Detailed hardware report is rendered as readable candidate/admin rows",
+      "status": "PASS"
+    },
+    {
+      "name": "Generated checker source does not bypass execution policy or collect hostnames",
+      "status": "PASS"
+    },
+    {
+      "name": "MSI is no longer offered as an independent token download",
+      "status": "PASS"
+    },
+    {
+      "name": "Checker package endpoint still rejects invalid or expired tokens",
+      "status": "PASS"
+    },
+    {
+      "name": "Windows package route verifies the pinned launcher SHA-256 before streaming the bundle",
+      "status": "PASS"
+    },
+    {
+      "name": "Windows launcher discloses the collection and requires Continue before starting anything",
+      "status": "PASS"
+    },
+    {
+      "name": "Windows launcher starts the installation window, scans concurrently with visible MSI, and reports only after success",
+      "status": "PASS"
+    },
+    {
+      "name": "Windows launcher provides the report path expected by the generated checker batch",
+      "status": "PASS"
+    },
+    {
+      "name": "Candidate page auto-polls, shows specs only after receipt, and has no manual verify/continue control",
+      "status": "PASS"
+    },
+    {
+      "name": "Bundle endpoint ignores metadata and fails closed when R2 launcher bytes do not match the pinned hash",
+      "status": "PASS"
+    },
+    {
+      "name": "Checker token issuance verifies candidate ownership and returns no-store responses",
+      "status": "PASS"
+    },
+    {
+      "name": "Token issuance no longer accepts PII-bearing GET URLs",
+      "status": "PASS"
+    },
+    {
+      "name": "A token cannot submit hardware before its installer start event",
+      "status": "PASS"
+    },
+    {
+      "name": "Unstarted report is rejected without storing specifications",
+      "status": "PASS"
+    },
+    {
+      "name": "Starting the checker sets a ten-minute server deadline",
+      "status": "PASS"
+    },
+    {
+      "name": "Repeated starts are idempotent and cannot extend the deadline",
+      "status": "PASS"
+    },
+    {
+      "name": "Application status exposes running state but withholds specs until report receipt",
+      "status": "PASS"
+    },
+    {
+      "name": "A running candidate check cannot be invalidated by issuing a second token",
+      "status": "PASS"
+    },
+    {
+      "name": "A second candidate can start a separate token at the same time",
+      "status": "PASS"
+    },
+    {
+      "name": "A ten-minute, five-second status-poll run stays under its dedicated limiter",
+      "status": "PASS"
+    },
+    {
+      "name": "A successful, started report is stored against its candidate token",
+      "status": "PASS"
+    },
+    {
+      "name": "Report receipt responses are explicitly non-cacheable",
+      "status": "PASS"
+    },
+    {
+      "name": "Admin application detail can retrieve the completed technical-check specs",
+      "status": "PASS"
+    },
+    {
+      "name": "Concurrent reports remain isolated between applications",
+      "status": "PASS"
+    },
+    {
+      "name": "Application status rejects mismatched candidate identity without returning another report",
+      "status": "PASS"
+    },
+    {
+      "name": "A one-time token rejects duplicate reports",
+      "status": "PASS"
+    },
+    {
+      "name": "A report arriving after the ten-minute deadline is rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Expired token status contains no specifications",
+      "status": "PASS"
+    },
+    {
+      "name": "A downloaded but unstarted link cannot begin after its 30-minute launch expiry",
+      "status": "PASS"
+    },
+    {
+      "name": "An expired unstarted link exposes no device report and can be retried with a fresh link",
+      "status": "PASS"
+    },
+    {
+      "name": "Candidate can request a new one-time link after an unstarted link expires",
+      "status": "PASS"
+    }
+  ]
+}

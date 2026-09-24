@@ -1,5 +1,9 @@
 import { Client } from 'pg';
-const client = new Client({ connectionString: 'postgresql://postgres.yfymijkhcbdubjawsngq:%24Conquest_2003@aws-0-eu-central-1.pooler.supabase.com:5432/postgres?uselibpqcompat=true&sslmode=require' });
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error('DATABASE_URL must be set before running this retired migration helper.');
+}
+const client = new Client({ connectionString });
 
 async function run() {
   await client.connect();

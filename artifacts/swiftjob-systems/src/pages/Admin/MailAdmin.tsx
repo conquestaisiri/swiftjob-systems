@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { handleAdminUnauthorized, isUnauthorized } from "@/lib/adminAuth";
+import type { Job } from "@/data/jobs";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -73,7 +74,9 @@ export function MailAdmin({ token }: { token: string }) {
   const [recipientsText, setRecipientsText] = useState("");
   const [mode, setMode] = useState<"referral" | "custom">("referral");
   const [referredBy, setReferredBy] = useState("");
-  const [jobTitle, setJobTitle] = useState("");
+  const [jobSlug, setJobSlug] = useState("");
+  const [availableJobs, setAvailableJobs] = useState<Job[]>([]);
+  const [jobsLoading, setJobsLoading] = useState(false);
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
@@ -82,6 +85,46 @@ export function MailAdmin({ token }: { token: string }) {
   const [picking, setPicking] = useState<"contacts" | "referrals" | null>(null);
 
   const recipients = parseRecipients(recipientsText);
+
+  useEffect(() => {
+    if (mode !== "referral") return;
+    let cancelled = false;
+    setJobsLoading(true);
+    fetch(`${API_BASE}/api/admin/jobs`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (res) => {
+        if (isUnauthorized(res)) {
+          handleAdminUnauthorized();
+          return null;
+        }
+        if (!res.ok) throw new Error("Failed to load open roles.");
+        return (await res.json()) as {
+          jobs?: Array<Job & { isActive?: boolean }>;
+        };
+      })
+      .then((data) => {
+        if (!cancelled && data) {
+          setAvailableJobs(
+            (data.jobs ?? []).filter((job) => job.isActive !== false),
+          );
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setAvailableJobs([]);
+          setError(
+            err instanceof Error ? err.message : "Failed to load open roles.",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setJobsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [mode]);
 
   const handleSend = async () => {
     setError("");
@@ -92,6 +135,10 @@ export function MailAdmin({ token }: { token: string }) {
     }
     if (recipients.length > 100) {
       setError("Maximum 100 recipients per send.");
+      return;
+    }
+    if (mode === "referral" && !jobSlug) {
+      setError("Choose an open role before sending a referral invite.");
       return;
     }
     // Custom mode needs a real subject and body — without this the server
@@ -119,7 +166,7 @@ export function MailAdmin({ token }: { token: string }) {
           recipients,
           mode,
           referredBy: referredBy.trim() || undefined,
-          jobTitle: jobTitle.trim() || undefined,
+          jobSlug: mode === "referral" ? jobSlug : undefined,
           subject: subject.trim() || undefined,
           body,
         }),
@@ -140,6 +187,12 @@ export function MailAdmin({ token }: { token: string }) {
       setSending(false);
     }
   };
+
+  const duplicateOnly =
+    result &&
+    result.sent === 0 &&
+    result.failed.length > 0 &&
+    result.failed.every((item) => item.error === "Already sent");
 
   return (
     <>
@@ -235,14 +288,28 @@ export function MailAdmin({ token }: { token: string }) {
                   </div>
                   <div className="mb-1">
                     <label className="admin-field-label">
-                      Job title <span className="opt">(optional)</span>
+                      Job for this invitation <span className="req">*</span>
                     </label>
-                    <input
-                      value={jobTitle}
-                      onChange={(e) => setJobTitle(e.target.value)}
-                      placeholder="e.g. Virtual Assistant"
+                    <select
+                      required
+                      value={jobSlug}
+                      onChange={(e) => setJobSlug(e.target.value)}
+                      disabled={jobsLoading}
                       className="filter-input admin-input"
-                    />
+                    >
+                      <option value="">
+                        {jobsLoading ? "Loading open roles…" : "Select an open role"}
+                      </option>
+                      {availableJobs.map((job) => (
+                        <option key={job.slug} value={job.slug}>
+                          {job.title}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="admin-panel-hint">
+                      The selected open role is saved with the referral and used
+                      in the invitation email.
+                    </p>
                   </div>
                 </div>
               </>
@@ -304,7 +371,9 @@ export function MailAdmin({ token }: { token: string }) {
                 <>
                   <AlertCircle size={16} /> Delivery result —{" "}
                   {result.sent === 0
-                    ? "nothing was sent"
+                    ? duplicateOnly
+                      ? "no new messages sent"
+                      : "nothing was sent"
                     : "partially delivered"}
                 </>
               )}
@@ -332,7 +401,11 @@ export function MailAdmin({ token }: { token: string }) {
                       )}
                     </span>
                     {r.error && (
-                      <span className="mail-result-error">{r.error}</span>
+                      <span className="mail-result-error">
+                        {r.error === "Already sent"
+                          ? "Already sent — duplicate invitation prevented"
+                          : r.error}
+                      </span>
                     )}
                   </li>
                 ))}

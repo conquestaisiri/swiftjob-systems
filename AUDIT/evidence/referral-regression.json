@@ -1,0 +1,25 @@
+{
+  "environment": "Local PGlite + actual Worker; synthetic email sink; no production access",
+  "results": [
+    {
+      "name": "Application with a valid role referral creates one attributed reward",
+      "status": "PASS"
+    },
+    {
+      "name": "Repeated application does not create a second referral reward",
+      "status": "PASS"
+    },
+    {
+      "name": "Self-referral is ignored",
+      "status": "PASS"
+    },
+    {
+      "name": "Admin can verify a hire and then mark the reward paid",
+      "status": "PASS"
+    },
+    {
+      "name": "General referral links expose a range instead of a misleading fixed reward",
+      "status": "PASS"
+    }
+  ]
+}

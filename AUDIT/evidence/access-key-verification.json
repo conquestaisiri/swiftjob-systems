@@ -1,0 +1,33 @@
+{
+  "measuredAt": "2026-09-12T17:12:00Z",
+  "scope": "owner-supplied account access keys",
+  "storedFiles": [
+    "C:/Users/USER/Desktop/SWIFTJOB-ALL-ACCOUNT-ACCESS-KEYS.env",
+    ".secrets/SWIFTJOB/swiftjob-all-account-access-keys.local.env"
+  ],
+  "valuesPrinted": false,
+  "checks": {
+    "supabase": {
+      "status": "PASS",
+      "endpoint": "https://api.supabase.com/v1/projects",
+      "projectCount": 1,
+      "projectRef": "yfymijkhcbdubjawsngq",
+      "projectStatus": "ACTIVE_HEALTHY",
+      "decision": "Token is valid for the historical Supabase project. Current production remains on Neon; no database switch was made."
+    },
+    "neon": {
+      "status": "PASS",
+      "endpoint": "https://console.neon.tech/api/v2/users/me",
+      "tokenAuthenticated": true,
+      "projectList": "ORG_ID_REQUIRED",
+      "decision": "Token authenticates to the owner Neon account. The active production DATABASE_URL remains the verified Neon endpoint."
+    },
+    "resend": {
+      "userSuppliedKey": "FAIL_INVALID_API_KEY",
+      "existingProjectKey": "PASS",
+      "endpoint": "https://api.resend.com/domains",
+      "verifiedDomain": "payservice.top",
+      "decision": "The supplied rnd_ key is invalid at Resend and was not installed into production. The existing verified project key remains active so mail delivery is not interrupted."
+    }
+  }
+}

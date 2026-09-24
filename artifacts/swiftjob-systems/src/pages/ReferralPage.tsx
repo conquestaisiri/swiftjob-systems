@@ -228,13 +228,6 @@ export function ReferralPage() {
     roomNote: content.roomNote,
   };
 
-  const fireBackground = async () => {
-    // Best-effort; the stopwatch must not wait on the network.
-    fetch(`${API_BASE}/api/referrals/${encodeURIComponent(code)}/background`, {
-      method: "POST",
-    }).catch(() => {});
-  };
-
   const fireReveal = async (): Promise<string> => {
     try {
       const res = await fetch(
@@ -482,14 +475,13 @@ export function ReferralPage() {
         </div>
       </div>
 
-      {/* Next-step flow — silent background load, then the room link */}
+      {/* Next-step flow — a transparent wait, then the room link */}
       {hasNextStepFlow && nextStep && (
         <NextStepFlow
           open={flowOpen}
           onClose={() => setFlowOpen(false)}
           config={{ ...nextStep, roomLink: "" }}
           copy={flowCopy}
-          onBackground={fireBackground}
           fetchRoomLink={fireReveal}
         />
       )}

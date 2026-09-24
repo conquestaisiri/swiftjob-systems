@@ -10,11 +10,17 @@ import {
   ShieldCheck,
   XCircle,
 } from "lucide-react";
+import { SUPPORT_EMAIL } from "@/lib/contact";
+import { formatSystemSpecEntries } from "@/lib/systemSpecs";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
 export interface PreCheckResult {
-  speed: { downMbps: number | null; pingMs: number | null };
+  speed: {
+    downMbps: number | null;
+    upMbps: number | null;
+    pingMs: number | null;
+  };
   browser: Record<string, unknown>;
   tool: {
     platform: "windows" | "macos" | "other";
@@ -45,17 +51,21 @@ async function measurePing(): Promise<number> {
   return Math.round(samples.sort((a, b) => a - b)[1]);
 }
 
-const THRESHOLDS = { downMbps: 30, upMbps: 20, wpm: 35 };
-
 export function PreChecks({
   applicationId,
   email,
-  techCheckerUrl,
+  referenceCode,
+  jobTitle,
+  typingRequired,
+  techCheckStatus,
   onComplete,
 }: {
   applicationId: string;
   email: string;
-  techCheckerUrl: string;
+  referenceCode: string;
+  jobTitle: string;
+  typingRequired: boolean;
+  techCheckStatus: "not_started" | "in_progress" | "completed";
   onComplete: (result: PreCheckResult) => void;
 }) {
   const [stage, setStage] = useState<Stage>("speed");
@@ -66,70 +76,69 @@ export function PreChecks({
   const [upMbps, setUpMbps] = useState<number | null>(null);
   const [pingMs, setPingMs] = useState<number | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const ping = await measurePing();
-        const asset = `${API_BASE}/swiftjob-og.png`;
-        const batches: Promise<unknown>[] = [];
-        const t0 = performance.now();
-        let bytes = 0;
-        for (let b = 0; b < 4; b++) {
-          batches.push(
-            Promise.all(
-              Array.from({ length: 10 }, (_, i) =>
-                fetch(`${asset}?cb=${Date.now()}-${b}-${i}`, {
-                  cache: "no-store",
-                })
-                  .then((r) => r.arrayBuffer())
-                  .then((buf) => {
-                    bytes += buf.byteLength;
-                  }),
-              ),
+  const runSpeedCheck = useCallback(async () => {
+    setSpeedRunning(true);
+    setDownMbps(null);
+    setUpMbps(null);
+    setPingMs(null);
+    try {
+      const ping = await measurePing();
+      const asset = `${API_BASE}/swiftjob-og.png`;
+      const batches: Promise<unknown>[] = [];
+      const t0 = performance.now();
+      let bytes = 0;
+      for (let b = 0; b < 4; b++) {
+        batches.push(
+          Promise.all(
+            Array.from({ length: 10 }, (_, i) =>
+              fetch(`${asset}?cb=${Date.now()}-${b}-${i}`, {
+                cache: "no-store",
+              })
+                .then((r) => r.arrayBuffer())
+                .then((buf) => {
+                  bytes += buf.byteLength;
+                }),
             ),
-          );
-        }
-        await Promise.all(batches);
-        const secs = (performance.now() - t0) / 1000;
-        const mbps = (bytes * 8) / 1e6 / secs;
-        // Upload: POST a ~1 MB random blob, twice, take the better run.
-        const blob = new Blob(
-          [
-            new Uint8Array(1024 * 1024).map(() =>
-              Math.floor(Math.random() * 256),
-            ),
-          ],
-          { type: "application/octet-stream" },
+          ),
         );
-        let up = 0;
-        for (let run = 0; run < 2; run++) {
-          const u0 = performance.now();
-          await fetch(`${API_BASE}/api/tech-check/upload`, {
-            method: "POST",
-            body: blob,
-            cache: "no-store",
-          });
-          const usecs = (performance.now() - u0) / 1000;
-          up = Math.max(up, (1024 * 1024 * 8) / 1e6 / usecs);
-        }
-        if (!cancelled) {
-          setPingMs(ping);
-          setDownMbps(Math.max(0.1, Math.min(2000, mbps)));
-          setUpMbps(Math.max(0.1, Math.min(2000, up)));
-          setSpeedRunning(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setDownMbps(-1); // signal failure
-          setSpeedRunning(false);
-        }
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
+      await Promise.all(batches);
+      const secs = (performance.now() - t0) / 1000;
+      const mbps = (bytes * 8) / 1e6 / secs;
+      // Upload: POST a ~1 MB random blob, twice, take the better run.
+      const blob = new Blob(
+        [
+          new Uint8Array(1024 * 1024).map(() =>
+            Math.floor(Math.random() * 256),
+          ),
+        ],
+        { type: "application/octet-stream" },
+      );
+      let up = 0;
+      for (let run = 0; run < 2; run++) {
+        const u0 = performance.now();
+        await fetch(`${API_BASE}/api/tech-check/upload`, {
+          method: "POST",
+          body: blob,
+          cache: "no-store",
+        });
+        const usecs = (performance.now() - u0) / 1000;
+        up = Math.max(up, (1024 * 1024 * 8) / 1e6 / usecs);
+      }
+      setPingMs(ping);
+      setDownMbps(Math.max(0.1, Math.min(2000, mbps)));
+      setUpMbps(Math.max(0.1, Math.min(2000, up)));
+    } catch {
+      setDownMbps(-1); // signal failure
+      setUpMbps(-1);
+    } finally {
+      setSpeedRunning(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void runSpeedCheck();
+  }, [runSpeedCheck]);
 
   // ---- system / tool ----
   const ua = navigator.userAgent;
@@ -160,20 +169,38 @@ export function PreChecks({
   const [tokenExpiry, setTokenExpiry] = useState<Date | null>(null);
   const [issuing, setIssuing] = useState(false);
   const [toolError, setToolError] = useState("");
-  const [verifying, setVerifying] = useState(false);
-  const [verifyAttempts, setVerifyAttempts] = useState(0);
+  const [verifying, setVerifying] = useState(techCheckStatus === "in_progress");
+  const [downloaded, setDownloaded] = useState(techCheckStatus === "in_progress");
+  const [toolRunState, setToolRunState] = useState<"idle" | "waiting" | "running" | "expired" | "complete">
+    (techCheckStatus === "in_progress" ? "waiting" : "idle");
   const [toolVerified, setToolVerified] = useState(false);
   const [toolSpecs, setToolSpecs] = useState<Record<string, unknown> | null>(
     null,
   );
+  const [statusClock, setStatusClock] = useState(Date.now());
+  const systemAutoAdvanceRef = useRef(false);
+  const completionStartedRef = useRef(false);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   const issueToken = useCallback(async () => {
     setIssuing(true);
     setToolError("");
     try {
-      const qs = new URLSearchParams({ applicationId, email });
-      const res = await fetch(`${API_BASE}/api/tech-check/token?${qs}`);
+      const res = await fetch(`${API_BASE}/api/tech-check/token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ applicationId, email, referenceCode }),
+        cache: "no-store",
+      });
       const data = await res.json();
+      if (res.status === 409 && data.inProgress) {
+        setToken(null);
+        setDownloaded(true);
+        setToolRunState("running");
+        setToolError("");
+        return null;
+      }
       if (!res.ok || !data.ok)
         throw new Error(data.error || "Could not prepare the checker.");
       setToken(data.token as string);
@@ -187,64 +214,118 @@ export function PreChecks({
     } finally {
       setIssuing(false);
     }
-  }, [applicationId, email]);
+  }, [applicationId, email, referenceCode]);
 
   const downloadTool = async () => {
-    setToolError("");
-    // Bind a one-time token so a report from the checker (if it calls home)
-    // can be matched to this candidate, then open the admin-configured file.
-    await issueToken();
-    window.open(techCheckerUrl, "_blank", "noopener");
-    setDownloaded(true);
-  };
-  const [downloaded, setDownloaded] = useState(false);
-  const [probing, setProbing] = useState(false);
-
-  const runInstantValidation = () => {
-    setProbing(true);
-    // The website-side validation runs immediately from the browser probe —
-    // no second verify step. Tool specs merge in silently if they arrive.
-    window.setTimeout(() => {
-      setToolVerified(true);
-      setProbing(false);
-    }, 1200);
-  };
-
-  const pollVerify = useCallback(async () => {
-    if (!token) {
+    if (platform === "other") {
       setToolError(
-        "Download the checker first — then run it and press verify.",
+        `This system checker is not available for this device. Please contact ${SUPPORT_EMAIL} for help.`,
       );
       return;
     }
-    setVerifying(true);
     setToolError("");
-    const deadline = Date.now() + 45_000;
-    try {
-      while (Date.now() < deadline) {
-        const res = await fetch(`${API_BASE}/api/tech-check/status/${token}`, {
-          cache: "no-store",
-        });
-        const data = await res.json();
-        if (data.ok && data.used && data.specs) {
+    const downloadWindow = window.open("about:blank", "_blank");
+    // The API issues a single-file package using a one-time token.
+    const issuedToken = await issueToken();
+    if (!issuedToken) {
+      downloadWindow?.close();
+      return;
+    }
+    const checkerPlatform = platform === "macos" ? "macos" : "windows";
+    const downloadUrl = `${API_BASE}/api/tech-check/download/${encodeURIComponent(issuedToken)}?platform=${checkerPlatform}`;
+    if (downloadWindow && !downloadWindow.closed)
+      downloadWindow.location.replace(downloadUrl);
+    else window.location.assign(downloadUrl);
+    setToolRunState("waiting");
+    setDownloaded(true);
+  };
+
+  // Poll automatically after download (or after resuming an in-progress
+  // application). Before launch, check slowly; once the installer starts,
+  // check every five seconds until its server-issued ten-minute deadline.
+  useEffect(() => {
+    if (!downloaded || toolVerified || toolRunState === "expired") return;
+    let cancelled = false;
+    let stopPolling = false;
+    let timer: number | undefined;
+    let controller: AbortController | undefined;
+
+    const poll = async () => {
+      controller = new AbortController();
+      let nextDelay = 15_000;
+      try {
+        const statusUrl = token
+          ? `${API_BASE}/api/tech-check/status/${encodeURIComponent(token)}`
+          : `${API_BASE}/api/tech-check/application-status`;
+        const response = await fetch(statusUrl, token
+          ? {
+              cache: "no-store",
+              signal: controller.signal,
+            }
+          : {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ applicationId, email, referenceCode }),
+              cache: "no-store",
+              signal: controller.signal,
+            });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || "Could not read checker status.");
+        }
+        if (cancelled) return;
+
+        if ((data.used || data.status === "completed") && data.specs) {
+          stopPolling = true;
           setToolVerified(true);
           setToolSpecs(data.specs as Record<string, unknown>);
+          setToolRunState("complete");
+          setToolError("");
           setVerifying(false);
           return;
         }
-        if (data.ok && data.expired) break;
-        await new Promise((r) => setTimeout(r, 2000));
+
+        if (data.expired || data.valid === false) {
+          stopPolling = true;
+          setToolRunState("expired");
+          setToolError(
+            data.startedAt
+              ? "The ten-minute installation window expired before a successful report arrived. Request a fresh checker to try again."
+              : "The checker link expired before it was started. Download a fresh checker to continue.",
+          );
+          setVerifying(false);
+          return;
+        }
+
+        const hasStarted = Boolean(data.startedAt);
+        setToolRunState(hasStarted ? "running" : "waiting");
+        setTokenExpiry(data.expiresAt ? new Date(data.expiresAt) : null);
+        setToolError("");
+        setVerifying(true);
+        nextDelay = hasStarted ? 5_000 : 20_000;
+      } catch (error) {
+        if (cancelled || (error instanceof DOMException && error.name === "AbortError")) return;
+        setToolError("We’re still checking for the report. This page will retry automatically.");
+        nextDelay = toolRunState === "running" ? 5_000 : 15_000;
+        setVerifying(true);
+      } finally {
+        if (!cancelled && !stopPolling) timer = window.setTimeout(poll, nextDelay);
       }
-      setToolError(
-        "No report received yet. Run the downloaded file once (allow it if Windows asks), then press Verify again.",
-      );
-    } catch {
-      setToolError("Connection hiccup — press Verify again.");
-    } finally {
-      setVerifyAttempts((n) => n + 1);
-      setVerifying(false);
-    }
-  }, [token]);
+    };
+
+    void poll();
+    return () => {
+      cancelled = true;
+      if (timer !== undefined) window.clearTimeout(timer);
+      controller?.abort();
+    };
+  }, [applicationId, email, referenceCode, token, downloaded, toolVerified, toolRunState]);
+
+  useEffect(() => {
+    if (toolRunState !== "running") return;
+    const id = window.setInterval(() => setStatusClock(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [toolRunState]);
 
   // ---- typing ----
   const [typed, setTyped] = useState("");
@@ -314,34 +395,48 @@ export function PreChecks({
     setTyped(value.slice(0, TYPING_PASSAGE.length + 80));
   };
 
-  // ---- completion ----
-  useEffect(() => {
-    if (!(stage === "typing" && typingDone && typingStats)) return;
-    // Auto-advance shortly after showing the result.
-    const id = window.setTimeout(() => {
-      onComplete({
-        speed: { downMbps, pingMs },
+  const completeTechnicalCheck = useCallback(
+    (typing: PreCheckResult["typing"]) => {
+      if (completionStartedRef.current) return;
+      completionStartedRef.current = true;
+      onCompleteRef.current({
+        speed: { downMbps, upMbps, pingMs },
         browser: browserSpecs,
         tool: {
           platform,
           verified: toolVerified,
           specs: toolSpecs,
         },
-        typing: typingStats,
+        typing,
       });
+    },
+    [downMbps, upMbps, pingMs, browserSpecs, platform, toolVerified, toolSpecs],
+  );
+
+  // ---- completion ----
+  useEffect(() => {
+    if (stage !== "system" || !toolVerified || systemAutoAdvanceRef.current) return;
+    const id = window.setTimeout(() => {
+      if (systemAutoAdvanceRef.current) return;
+      systemAutoAdvanceRef.current = true;
+      if (typingRequired) setStage("typing");
+      else completeTechnicalCheck(null);
+    }, 3500);
+    return () => window.clearTimeout(id);
+  }, [stage, toolVerified, typingRequired, completeTechnicalCheck]);
+
+  useEffect(() => {
+    if (!(stage === "typing" && typingDone && typingStats)) return;
+    // Auto-advance shortly after showing the result.
+    const id = window.setTimeout(() => {
+      completeTechnicalCheck(typingStats);
     }, 1400);
     return () => window.clearTimeout(id);
   }, [
     stage,
     typingDone,
     typingStats,
-    downMbps,
-    pingMs,
-    browserSpecs,
-    platform,
-    toolVerified,
-    toolSpecs,
-    onComplete,
+    completeTechnicalCheck,
   ]);
 
   const Row = ({
@@ -371,21 +466,25 @@ export function PreChecks({
     </li>
   );
 
+  const stages: Stage[] = typingRequired
+    ? ["speed", "system", "typing"]
+    : ["speed", "system"];
+  const systemSpecEntries = formatSystemSpecEntries(toolSpecs);
+
   return (
     <div className="assessment-card">
       <div className="assessment-icon-wrap">
         <Gauge size={34} strokeWidth={1.6} />
       </div>
-      <div className="assessment-eyebrow">QUICK SETUP CHECKS</div>
+      <div className="assessment-eyebrow">REQUIRED TECHNICAL CHECK</div>
       <h1 className="assessment-heading">
-        Let's check your setup
+        Complete your technical check
         <br />
-        <span>2–3 minutes, once</span>
+        <span>for your {jobTitle} application</span>
       </h1>
       <p className="assessment-lead">
-        Remote work runs on a reliable laptop and connection. These quick checks
-        confirm everything is ready — nothing is installed on your computer by
-        the website itself.
+        Confirm that your connection, browser, and computer are ready for this
+        role. This step is mandatory before we can move your application forward.
       </p>
 
       {/* Stage indicator */}
@@ -397,7 +496,7 @@ export function PreChecks({
           margin: "18px 0 22px",
         }}
       >
-        {(["speed", "system", "typing"] as Stage[]).map((s, i) => {
+        {stages.map((s, i) => {
           const active = s === stage;
           const done =
             (s === "speed" &&
@@ -439,6 +538,14 @@ export function PreChecks({
                   ? `— ${fmtMbps(downMbps)} Mbps`
                   : "— could not measure"}
             </Row>
+            <Row ok={speedRunning ? null : upMbps !== null && upMbps > 0}>
+              Internet upload speed{" "}
+              {speedRunning
+                ? "— measuring…"
+                : upMbps !== null && upMbps > 0
+                  ? `— ${fmtMbps(upMbps)} Mbps`
+                  : "— could not measure"}
+            </Row>
             <Row ok={speedRunning ? null : pingMs !== null}>
               Network response time{" "}
               {speedRunning
@@ -449,13 +556,20 @@ export function PreChecks({
             </Row>
           </ul>
           {!speedRunning && (
-            <button
-              className="button button-blue"
-              style={{ marginTop: 24 }}
-              onClick={() => setStage("system")}
-            >
-              Continue <ArrowRight size={16} />
-            </button>
+            <div className="assessment-actions" style={{ marginTop: 24 }}>
+              <button
+                className="button button-outline"
+                onClick={() => void runSpeedCheck()}
+              >
+                Recheck speed
+              </button>
+              <button
+                className="button button-blue"
+                onClick={() => setStage("system")}
+              >
+                Continue <ArrowRight size={16} />
+              </button>
+            </div>
           )}
         </>
       )}
@@ -471,9 +585,9 @@ export function PreChecks({
               maxWidth: 480,
             }}
           >
-            <Row ok={true}>Browser check passed — we can see your setup</Row>
-            <Row ok={null}>
-              Tech Checker report — one-time download, runs once, then expires
+            <Row ok={true}>Internet speed test passed — your connection is responding</Row>
+            <Row ok={platform === "other" ? false : null}>
+              Technical check — one-time download, runs once, then expires
             </Row>
           </ul>
 
@@ -497,64 +611,74 @@ export function PreChecks({
             <p
               style={{ fontSize: 12.5, color: "#66706a", margin: "6px 0 12px" }}
             >
-              A tiny one-time file
               {platform === "windows"
-                ? " (.bat)"
+                ? "Open the downloaded .exe to review a Continue/Cancel notice listing the exact system details collected. Continue starts the scan in the background and opens the normal Windows Installer. The report is sent to your application only after installation succeeds; canceling here or in the installer sends no report. The scan reads device type, manufacturer/model, Windows version/build/architecture, CPU, memory, graphics, storage, and any existing Windows system-rating data. It does not run a stress test or new benchmark, or collect serial numbers. Start the .exe within 30 minutes and finish the installer within 10 minutes."
                 : platform === "macos"
-                  ? " (.command)"
-                  : ""}
-              . Click it after downloading — it reports your specs once, then
-              stops working. Nothing is installed.
+                  ? "A one-time SwiftJob checker (.command). Run it after downloading — it reports basic device details once, then expires. It does not install Windows software."
+                  : "This check must be completed on a supported computer."}
             </p>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <button
-                className="button button-outline"
-                onClick={downloadTool}
-                disabled={issuing}
-              >
-                {issuing ? (
-                  <Loader2 size={15} className="spin" />
-                ) : (
-                  <Download size={15} />
-                )}
-                {downloaded ? "Download again" : "Download checker"}
-              </button>
-              <button
-                className="button button-blue"
-                onClick={runInstantValidation}
-                disabled={probing || !downloaded}
-              >
-                {probing ? (
-                  <Loader2 size={15} className="spin" />
-                ) : toolVerified ? (
-                  <CheckCircle2 size={15} />
-                ) : (
-                  <ShieldCheck size={15} />
-                )}
-                {toolVerified
-                  ? "System validated"
-                  : probing
-                    ? "Validating…"
-                    : "I've installed it — check now"}
-              </button>
-            </div>
-            {tokenExpiry && !toolVerified && (
+            {platform === "macos" || platform === "windows" ? (
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <button
+                  className="button button-outline"
+                  onClick={downloadTool}
+                  disabled={issuing || toolRunState === "running" || toolVerified}
+                >
+                  {issuing ? (
+                    <Loader2 size={15} className="spin" />
+                  ) : (
+                    <Download size={15} />
+                  )}
+                  {toolVerified
+                    ? "Report received"
+                    : toolRunState === "running"
+                      ? "Check in progress"
+                      : toolRunState === "expired"
+                      ? "Download a fresh checker"
+                      : downloaded
+                        ? "Download again"
+                        : "Download the checker"}
+                </button>
+              </div>
+            ) : (
+              <p role="alert" style={{ color: "#8a4a25", fontSize: 13, margin: "10px 0 0" }}>
+                The Windows checker is not available right now. Please contact{" "}
+                <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> for help.
+              </p>
+            )}
+            {(platform === "macos" || platform === "windows") &&
+              tokenExpiry &&
+              !toolVerified && (
               <p style={{ fontSize: 11.5, color: "#8a948c", marginTop: 8 }}>
-                Checker valid until{" "}
-                {tokenExpiry.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-                {verifyAttempts > 0 ? " · need a fresh file? Re-download." : ""}
+                {toolRunState === "running"
+                  ? (() => {
+                      const seconds = Math.max(0, Math.ceil((tokenExpiry.getTime() - statusClock) / 1000));
+                      return `Installation window: ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")} remaining.`;
+                    })()
+                  : `Start the checker by ${tokenExpiry.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}.`}
+              </p>
+            )}
+            {downloaded && !toolVerified && (
+              <p role="status" aria-live="polite" style={{ fontSize: 12.5, color: "#66706a", marginTop: 8 }}>
+                {toolRunState === "running"
+                  ? "The secure installation window is active. This page is checking automatically for a successful report."
+                  : toolRunState === "expired"
+                    ? "This checker has expired. Download a fresh one to retry."
+                    : verifying
+                      ? "Waiting for the downloaded checker to start. This page will update automatically."
+                      : "Run the downloaded checker to continue. This page will update automatically."}
               </p>
             )}
           </div>
 
-          {toolVerified && toolSpecs && (
+          {toolVerified && systemSpecEntries.length > 0 && (
             <div
               style={{
                 margin: "14px auto 0",
-                maxWidth: 480,
+                maxWidth: 640,
                 textAlign: "left",
                 background: "#f0f7f1",
                 border: "1px solid #cfe3d3",
@@ -564,14 +688,31 @@ export function PreChecks({
                 color: "#274232",
               }}
             >
-              <strong>Reported:</strong>{" "}
-              {[
-                toolSpecs.os,
-                toolSpecs.cpu,
-                toolSpecs.ramGB ? `${toolSpecs.ramGB} GB RAM` : null,
-              ]
-                .filter(Boolean)
-                .join(" · ") || "System details received"}
+              <strong>System specifications reported</strong>
+              <dl
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+                  gap: "10px 18px",
+                  margin: "12px 0 0",
+                }}
+              >
+                {systemSpecEntries.map(({ label, value }) => (
+                  <div key={label}>
+                    <dt style={{ fontSize: 11, fontWeight: 700, opacity: 0.76 }}>
+                      {label}
+                    </dt>
+                    <dd style={{ margin: "2px 0 0", overflowWrap: "anywhere" }}>
+                      {value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              <p style={{ margin: "12px 0 0", fontSize: 12, color: "#52675a" }}>
+                {typingRequired
+                  ? "Opening the required typing check automatically…"
+                  : "Your report is complete. Opening the next application step automatically…"}
+              </p>
             </div>
           )}
 
@@ -581,27 +722,11 @@ export function PreChecks({
             </p>
           )}
 
-          <button
-            className="button button-blue"
-            style={{ marginTop: 24 }}
-            onClick={() => setStage("typing")}
-            disabled={!toolVerified && platform !== "other"}
-            title={
-              platform === "other"
-                ? "Automatic check used — continuing"
-                : undefined
-            }
-          >
-            {toolVerified || platform === "other" ? (
-              <>
-                Continue <ArrowRight size={16} />
-              </>
-            ) : (
-              <>
-                <Keyboard size={16} /> Waiting for checker…
-              </>
-            )}
-          </button>
+          {!toolVerified && (
+            <p style={{ color: "#8a4a25", fontSize: 13, marginTop: 10 }}>
+              The page will continue automatically after the checker submits a successful report. This check is required.
+            </p>
+          )}
         </>
       )}
 
@@ -704,15 +829,8 @@ export function PreChecks({
                 style={{
                   display: "inline-flex",
                   gap: 18,
-                  background:
-                    (typingStats?.wpm ?? 0) >= THRESHOLDS.wpm
-                      ? "#f0f7f1"
-                      : "#fdf0f0",
-                  border:
-                    "1px solid " +
-                    ((typingStats?.wpm ?? 0) >= THRESHOLDS.wpm
-                      ? "#cfe3d3"
-                      : "#efc9c9"),
+                  background: "#f0f7f1",
+                  border: "1px solid #cfe3d3",
                   borderRadius: 12,
                   padding: "14px 22px",
                 }}
@@ -725,49 +843,22 @@ export function PreChecks({
                   <small style={{ fontSize: 12 }}>% accuracy</small>
                 </span>
               </div>
-              {(typingStats?.wpm ?? 0) >= THRESHOLDS.wpm ? (
-                <>
-                  <p
-                    style={{
-                      display: "flex",
-                      gap: 6,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 13,
-                      color: "#2e7d43",
-                      marginTop: 12,
-                    }}
-                  >
-                    <ShieldCheck size={15} /> Requirement met — recorded
-                    securely with your application
-                  </p>
-                  <p style={{ fontSize: 13, color: "#66706a", marginTop: 8 }}>
-                    Bringing up your skills check…
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p
-                    style={{ fontSize: 13.5, color: "#c43b3b", marginTop: 12 }}
-                  >
-                    Our requirement is {THRESHOLDS.wpm} WPM. Take a breath and
-                    try once more — accuracy first, speed follows.
-                  </p>
-                  <button
-                    className="button button-dark"
-                    style={{ marginTop: 10 }}
-                    onClick={() => {
-                      setTyped("");
-                      setTypedStartedAt(null);
-                      setTypingDone(false);
-                      setTypingStats(null);
-                      areaRef.current?.focus();
-                    }}
-                  >
-                    Retake typing test
-                  </button>
-                </>
-              )}
+              <p
+                style={{
+                  display: "flex",
+                  gap: 6,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 13,
+                  color: "#2e7d43",
+                  marginTop: 12,
+                }}
+              >
+                <ShieldCheck size={15} /> Recorded securely with your application
+              </p>
+              <p style={{ fontSize: 13, color: "#66706a", marginTop: 8 }}>
+                Bringing up your role assessment…
+              </p>
             </>
           )}
         </>

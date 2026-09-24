@@ -1,0 +1,9 @@
+{
+  "name": "swiftjob-audit-runtime",
+  "private": true,
+  "type": "module",
+  "description": "Isolated local PostgreSQL simulation; no production credentials.",
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.8"
+  }
+}

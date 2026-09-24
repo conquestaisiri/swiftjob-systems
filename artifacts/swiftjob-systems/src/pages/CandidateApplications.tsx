@@ -11,7 +11,9 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowLeft,
+  ArrowRight,
   ArrowUpRight,
+  ClipboardCheck,
   Video,
   CheckCircle2,
   Laptop,
@@ -23,6 +25,7 @@ import { format } from "date-fns";
 import { parseDateOnly } from "@/lib/utils";
 import { analyzeDevice, deviceMeta } from "@/lib/deviceGuard";
 import { NextStepFlow } from "@/components/NextStepFlow";
+import { CandidatePasswordForm } from "@/components/CandidatePasswordForm";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -113,6 +116,28 @@ interface Application {
   resumeFilename: string | null;
   status: string;
   referenceCode: string;
+  jobSlug?: string | null;
+  techCheck?: {
+    required: boolean;
+    status: "not_started" | "in_progress" | "completed";
+    checkedAt?: string | null;
+    typingRequired?: boolean;
+  };
+  assessment?: {
+    required: boolean;
+    track: string;
+    title: string | null;
+    status: "not_started" | "in_progress" | "completed";
+    answered: number;
+    total: number;
+    score: number | null;
+    maxScore: number | null;
+    completedAt?: string | null;
+    updatedAt?: string | null;
+    blurb?: string;
+    completedChecks?: number;
+    totalChecks?: number;
+  };
   meetLink: string | null;
   interviewInstructions: string | null;
   meetingKey: string | null;
@@ -161,6 +186,7 @@ export function CandidateApplications() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -207,9 +233,22 @@ export function CandidateApplications() {
     };
   }, [token]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("candidate_token");
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      const response = await fetch(`${API_BASE}/api/auth/logout`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Could not sign out. Please try again.");
+      localStorage.removeItem("candidate_token");
+      window.location.href = "/login";
+    } catch {
+      setError("Could not sign out. Please check your connection and try again.");
+      setSigningOut(false);
+    }
   };
 
   const handleDownloadResume = async (application: Application) => {
@@ -250,18 +289,24 @@ export function CandidateApplications() {
           <div className="container candidate-header-inner">
             <Link href="/" className="candidate-brand">
               <img
-                src="/swiftjob-mark.svg"
+                src="/swiftjob-mark-light.png?v=supplied-20260912"
                 alt="SwiftJob"
                 className="candidate-logo"
               />
             </Link>
             <div className="candidate-header-actions">
               <span className="candidate-user">{countLabel}</span>
+              <nav className="candidate-portal-nav" aria-label="Candidate portal">
+                <Link href="/candidate/applications" className="active">Applications</Link>
+                <Link href="/candidate/profile">Profile</Link>
+                <Link href="/candidate/referrals">Referrals</Link>
+              </nav>
               <button
                 onClick={handleLogout}
+                disabled={signingOut}
                 className="button button-ghost button-sm"
               >
-                <ArrowLeft size={14} /> Sign out
+                <ArrowLeft size={14} /> {signingOut ? "Signing out…" : "Sign out"}
               </button>
             </div>
           </div>
@@ -277,8 +322,10 @@ export function CandidateApplications() {
               </p>
             </div>
 
+            <CandidatePasswordForm token={token} onSessionChanged={setToken} />
+
             {error && (
-              <div className="candidate-alert">
+              <div className="candidate-alert" role="alert">
                 <AlertCircle size={18} />
                 <span>{error}</span>
               </div>
@@ -362,9 +409,8 @@ function NextStepPanel({
     (application.meetLink || application.nextStep?.roomLink)
   ) {
     const nextStep = application.nextStep;
-    // When a room-level link is configured (globally or for this candidate)
-    // the "Start your next step" button reveals the room after a silent
-    // background load + wait. Otherwise keep the direct-open behaviour.
+    // When a room-level link is configured, reveal it after the configured
+    // wait. The flow never performs a silent third-party request.
     const hasFlow = Boolean(nextStep?.roomLink);
 
     const handleOpenBriefing = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -376,16 +422,6 @@ function NextStepPanel({
       }
       recordCandidateFootprint(token, application.id, "proceed");
       window.open(application.meetLink as string, "_blank", "noreferrer");
-    };
-
-    const fireBackground = async () => {
-      fetch(
-        `${API_BASE}/api/candidate/applications/${application.id}/background`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      ).catch(() => {});
     };
 
     return (
@@ -435,7 +471,6 @@ function NextStepPanel({
               roomLink: nextStep.roomLink,
               delaySeconds: nextStep.delaySeconds,
             }}
-            onBackground={fireBackground}
             onRevealed={() =>
               recordCandidateFootprint(token, application.id, "roomRevealed")
             }
@@ -484,6 +519,71 @@ function NextStepPanel({
   );
 }
 
+function CandidateChecksPanel({ application }: { application: Application }) {
+  const techCheck = application.techCheck;
+  const assessment = application.assessment;
+  const assessmentUrl = `/assessment?id=${encodeURIComponent(application.id)}&email=${encodeURIComponent(application.email)}&ref=${encodeURIComponent(application.referenceCode)}&job=${encodeURIComponent(application.jobSlug ?? "")}`;
+
+  if (!techCheck || techCheck.status !== "completed") {
+    return (
+      <div className="candidate-checks-panel candidate-checks-panel--required">
+        <div className="candidate-checks-panel-icon"><Laptop size={22} /></div>
+        <div className="candidate-checks-panel-body">
+          <span className="candidate-checks-eyebrow">NEXT REQUIRED STEP</span>
+          <h3>Complete your technical check</h3>
+          <p>Confirm the computer, connection, and browser you plan to use for this application. You can continue to the role assessment afterward or return later.</p>
+          <Link href={assessmentUrl} className="button button-blue">
+            {techCheck?.status === "in_progress" ? "Continue your check" : "Complete your check"} <ArrowRight size={15} />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!assessment?.required) {
+    return (
+      <div className="candidate-checks-panel candidate-checks-panel--complete">
+        <div className="candidate-checks-panel-icon"><CheckCircle2 size={22} /></div>
+        <div className="candidate-checks-panel-body">
+          <span className="candidate-checks-eyebrow">CHECKS COMPLETE</span>
+          <h3>Your application checks are complete</h3>
+          <p>Your technical check is attached to this application. Our team can now review it.</p>
+          <span className="candidate-checks-progress">1 of 1 check complete</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (assessment.status === "completed") {
+    return (
+      <div className="candidate-checks-panel candidate-checks-panel--complete">
+        <div className="candidate-checks-panel-icon"><CheckCircle2 size={22} /></div>
+        <div className="candidate-checks-panel-body">
+          <span className="candidate-checks-eyebrow">CHECKS COMPLETE</span>
+          <h3>{assessment.title ?? "Role assessment"} completed</h3>
+          <p>Your technical check and role assessment are attached to this application. Our team will review them with your application.</p>
+          <span className="candidate-checks-progress">{assessment.completedChecks ?? 2} of {assessment.totalChecks ?? 2} checks complete</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="candidate-checks-panel">
+      <div className="candidate-checks-panel-icon"><ClipboardCheck size={22} /></div>
+      <div className="candidate-checks-panel-body">
+        <span className="candidate-checks-eyebrow">NEXT REQUIRED STEP</span>
+        <h3>Continue assessment</h3>
+        <p>{assessment.title ?? "Your role assessment"}. {assessment.status === "in_progress" ? `Your saved progress is ${assessment.answered} of ${assessment.total} questions.` : "This assessment is matched to the work in this role."}</p>
+        <span className="candidate-checks-progress">{assessment.completedChecks ?? 1} of {assessment.totalChecks ?? 2} checks complete</span>
+        <Link href={assessmentUrl} className="button button-blue">
+          Continue assessment <ArrowRight size={15} />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 function ApplicationDetail({
   application,
   token,
@@ -520,6 +620,8 @@ function ApplicationDetail({
       </div>
 
       <NextStepPanel application={application} token={token} />
+
+      <CandidateChecksPanel application={application} />
 
       <section className="candidate-detail-section">
         <h3>Contact &amp; background</h3>

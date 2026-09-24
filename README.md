@@ -37,8 +37,10 @@ pnpm dev                              # vite on :5173, proxies /api → :8787
 Migrations live in `workers-api/migrations/` and are applied manually with
 `node workers-api/migrate.mjs <file>` (no applied-version tracking yet — each
 file is idempotent except `001`, whose `CREATE TYPE` assumes a fresh DB).
-As a safety net the Worker also self-heals referral/campaign/assessment schema
-on cold start; migrations remain the source of truth.
+The Worker performs a read-only schema guard once per isolate and fails clearly
+when required migrations are missing; it never changes schema during a request.
+Migrations are the only schema-write contract and must be applied before routing
+traffic to a new deployment.
 
 ## Deploy (CI)
 
@@ -54,6 +56,9 @@ on cold start; migrations remain the source of truth.
 
 - Public: `/` landing · `/careers` · `/careers/:slug` apply · `/assessment` ·
   `/campaign/:slug` · `/referral/:code` private briefing · `/login` candidate magic-link
-- Candidate portal: `/candidate/applications` (status, resume, private room)
+- Candidate portal: `/candidate/applications` (status, resume, private room),
+  `/candidate/profile` (editable candidate profile), and `/candidate/referrals`
+  (account-owned links with role-based $40–$100 rewards and pending/paid tracking)
 - Admin: `/admin` — Overview, Applications (+ Skills Check tab), Jobs,
-  Referrals (send/content editor), Mail, Contacts, Campaigns, Activity, Settings
+  Referrals (send/content editor), Referral rewards (verify hires and approve
+  payouts), Mail, Contacts, Campaigns, Activity, Settings
