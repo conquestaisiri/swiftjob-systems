@@ -39,8 +39,8 @@ import {
   MAX_CHECKER_MSI_BYTES,
   buildWindowsBundleBatch,
   buildWindowsBundleFooter,
+  buildSingleFileZip,
   sha256Hex,
-  streamWindowsBundle,
 } from "./services/techcheckPackage";
 import {
   referralService,
@@ -1061,13 +1061,27 @@ app.get("/api/tech-check/download/:token", async (c) => {
       msi.byteLength,
     );
     const bundleSize =
-      launcher.byteLength + batch.byteLength + msi.byteLength + footer.byteLength;
-    return new Response(streamWindowsBundle([launcher, batch, msi, footer]), {
+      launcher.byteLength +
+      batch.byteLength +
+      msi.byteLength +
+      footer.byteLength;
+    const executable = new Uint8Array(bundleSize);
+    let offset = 0;
+    for (const part of [launcher, batch, msi, footer]) {
+      executable.set(part, offset);
+      offset += part.byteLength;
+    }
+    const archive = buildSingleFileZip(
+      "SwiftJob-SystemChecker.exe",
+      executable,
+    );
+    return new Response(archive, {
       status: 200,
       headers: {
-        "Content-Type": "application/octet-stream",
-        "Content-Disposition": 'attachment; filename="SwiftJob-SystemChecker.exe"',
-        "Content-Length": String(bundleSize),
+        "Content-Type": "application/zip",
+        "Content-Disposition":
+          'attachment; filename="SwiftJob-SystemChecker.zip"',
+        "Content-Length": String(archive.byteLength),
         "Cache-Control": "private, no-store",
         "X-Content-Type-Options": "nosniff",
       },

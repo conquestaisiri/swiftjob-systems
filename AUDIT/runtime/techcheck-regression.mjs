@@ -27,30 +27,101 @@ const footer = checkerPackage.buildWindowsBundleFooter(
   fixtureBatch.byteLength,
   fixtureMsi.byteLength,
 );
-const bundle = new Uint8Array(await new Response(checkerPackage.streamWindowsBundle([
-  fixtureLauncher,
-  fixtureBatch,
-  fixtureMsi,
-  footer,
-])).arrayBuffer());
+const bundle = new Uint8Array(
+  await new Response(
+    checkerPackage.streamWindowsBundle([
+      fixtureLauncher,
+      fixtureBatch,
+      fixtureMsi,
+      footer,
+    ]),
+  ).arrayBuffer(),
+);
+const zip = checkerPackage.buildSingleFileZip(
+  "SwiftJob-SystemChecker.exe",
+  bundle,
+  new Date("2026-09-24T12:00:00.000Z"),
+);
 
-check('Windows package is one self-contained executable bundle, not an archive', () => {
-  assert.notEqual(new DataView(bundle.buffer).getUint32(0, true), 0x04034b50);
-  assert.deepEqual(bundle.subarray(0, fixtureLauncher.length), fixtureLauncher);
-  const batchStart = fixtureLauncher.length;
-  assert.deepEqual(bundle.subarray(batchStart, batchStart + fixtureBatch.length), fixtureBatch);
-  const msiStart = batchStart + fixtureBatch.length;
-  assert.deepEqual(bundle.subarray(msiStart, msiStart + fixtureMsi.length), fixtureMsi);
-  const footerStart = bundle.length - checkerPackage.CHECKER_BUNDLE_FOOTER_SIZE;
-  assert.deepEqual(bundle.subarray(footerStart), footer);
-  const footerView = new DataView(bundle.buffer, footerStart, footer.byteLength);
-  assert.equal(new TextDecoder().decode(bundle.subarray(footerStart, footerStart + 8)), 'SJTCBNDL');
-  assert.equal(footerView.getUint32(8, true), checkerPackage.CHECKER_BUNDLE_VERSION);
-  assert.equal(footerView.getUint32(8, true), 2);
-  assert.equal(footerView.getUint32(12, true), fixtureLauncher.length);
-  assert.equal(footerView.getUint32(16, true), fixtureBatch.length);
-  assert.equal(footerView.getUint32(20, true), fixtureMsi.length);
-});
+check(
+  "The downloaded ZIP contains exactly one self-contained executable",
+  () => {
+    const view = new DataView(zip.buffer, zip.byteOffset, zip.byteLength);
+    assert.equal(view.getUint32(0, true), 0x04034b50);
+    assert.equal(
+      view.getUint16(8, true),
+      0,
+      "entry is stored without recompression",
+    );
+    const nameLength = view.getUint16(26, true);
+    const extraLength = view.getUint16(28, true);
+    const nameStart = 30;
+    const dataStart = nameStart + nameLength + extraLength;
+    const entryName = new TextDecoder().decode(
+      zip.subarray(nameStart, nameStart + nameLength),
+    );
+    const dataLength = view.getUint32(18, true);
+    assert.equal(entryName, "SwiftJob-SystemChecker.exe");
+    assert.deepEqual(zip.subarray(dataStart, dataStart + dataLength), bundle);
+    assert.equal(view.getUint32(dataStart + dataLength, true), 0x02014b50);
+    const endOffset = zip.byteLength - 22;
+    const end = new DataView(zip.buffer, zip.byteOffset + endOffset, 22);
+    assert.equal(end.getUint32(0, true), 0x06054b50);
+    assert.equal(end.getUint16(8, true), 1);
+    assert.equal(end.getUint16(10, true), 1);
+    assert.equal(end.getUint32(16, true), dataStart + dataLength);
+    const knownCrcZip = checkerPackage.buildSingleFileZip(
+      "x.txt",
+      new TextEncoder().encode("123456789"),
+      new Date("2026-09-24T12:00:00.000Z"),
+    );
+    assert.equal(
+      new DataView(knownCrcZip.buffer).getUint32(14, true),
+      0xcbf43926,
+    );
+  },
+);
+
+check(
+  "The executable inside the ZIP embeds the BAT and original MSI with its versioned footer",
+  () => {
+    assert.notEqual(new DataView(bundle.buffer).getUint32(0, true), 0x04034b50);
+    assert.deepEqual(
+      bundle.subarray(0, fixtureLauncher.length),
+      fixtureLauncher,
+    );
+    const batchStart = fixtureLauncher.length;
+    assert.deepEqual(
+      bundle.subarray(batchStart, batchStart + fixtureBatch.length),
+      fixtureBatch,
+    );
+    const msiStart = batchStart + fixtureBatch.length;
+    assert.deepEqual(
+      bundle.subarray(msiStart, msiStart + fixtureMsi.length),
+      fixtureMsi,
+    );
+    const footerStart =
+      bundle.length - checkerPackage.CHECKER_BUNDLE_FOOTER_SIZE;
+    assert.deepEqual(bundle.subarray(footerStart), footer);
+    const footerView = new DataView(
+      bundle.buffer,
+      footerStart,
+      footer.byteLength,
+    );
+    assert.equal(
+      new TextDecoder().decode(bundle.subarray(footerStart, footerStart + 8)),
+      "SJTCBNDL",
+    );
+    assert.equal(
+      footerView.getUint32(8, true),
+      checkerPackage.CHECKER_BUNDLE_VERSION,
+    );
+    assert.equal(footerView.getUint32(8, true), 2);
+    assert.equal(footerView.getUint32(12, true), fixtureLauncher.length);
+    assert.equal(footerView.getUint32(16, true), fixtureBatch.length);
+    assert.equal(footerView.getUint32(20, true), fixtureMsi.length);
+  },
+);
 
 check('Windows package protocol is versioned and the launcher key is content-addressed', () => {
   assert.equal(checkerPackage.CHECKER_BUNDLE_VERSION, 2);
@@ -70,19 +141,31 @@ check('Windows checker collects detailed hardware, OS, storage, and available Wi
   }
 });
 
-check('Windows runner uses its collect/submit steps and does not run a stress benchmark', () => {
-  assert.match(batch, /"collect" goto collect/);
-  assert.match(batch, /"start" goto start/);
-  assert.match(batch, /"submit" goto submit/);
-  assert.match(batch, /api\/tech-check\/start\//);
-  assert.match(batch, /Invoke-RestMethod -Method Post/);
-  assert.match(batch, /WindowStyle Hidden/);
-  assert.match(batch, /Existing Windows System Assessment score/);
-  assert.doesNotMatch(batch, /winsat\.exe\s+(formal|cpu|mem|disk|dwm|d3d)/i);
-  assert.doesNotMatch(batch, /ExecutionPolicy Bypass|computername|hostname/i);
-});
-check('Windows runner rejects malformed one-time tokens', () => {
-  assert.throws(() => checkerPackage.buildWindowsBundleBatch('https://api.example.test', 'not-a-token'));
+check(
+  "Windows runner uses its collect/submit steps and does not run a stress benchmark",
+  () => {
+    assert.match(batch, /"collect" goto collect/);
+    assert.match(batch, /"start" goto start/);
+    assert.match(batch, /"submit" goto submit/);
+    assert.match(batch, /api\/tech-check\/start\//);
+    assert.match(batch, /Invoke-RestMethod -Method Post/);
+    assert.match(batch, /-TimeoutSec 15/);
+    assert.match(batch, /for\(\$attempt=1;\$attempt -le 3;\$attempt\+\+\)/);
+    assert.match(batch, /expired or was already used/);
+    assert.match(batch, /SWIFTJOB_TECHCHECK_ERROR/);
+    assert.match(batch, /WindowStyle Hidden/);
+    assert.match(batch, /Existing Windows System Assessment score/);
+    assert.doesNotMatch(batch, /winsat\.exe\s+(formal|cpu|mem|disk|dwm|d3d)/i);
+    assert.doesNotMatch(batch, /ExecutionPolicy Bypass|computername|hostname/i);
+  },
+);
+check("Windows runner rejects malformed one-time tokens", () => {
+  assert.throws(() =>
+    checkerPackage.buildWindowsBundleBatch(
+      "https://api.example.test",
+      "not-a-token",
+    ),
+  );
 });
 
 const specDisplaySource = await readFile(new URL('../../artifacts/swiftjob-systems/src/lib/systemSpecs.ts', import.meta.url), 'utf8');
@@ -133,14 +216,44 @@ check('MSI is no longer offered as an independent token download', () => assert.
 const invalidPackage = await h.request('/api/tech-check/download/not-a-real-token');
 check('Checker package endpoint still rejects invalid or expired tokens', () => assert.equal(invalidPackage.status, 410));
 
-const workerIndexSource = await readFile(new URL('../../workers-api/src/index.ts', import.meta.url), 'utf8');
-check('Windows package route verifies the pinned launcher SHA-256 before streaming the bundle', () => {
-  const routeStart = workerIndexSource.indexOf('app.get("/api/tech-check/download/:token"');
-  const launcherRead = workerIndexSource.indexOf('launcherObject.arrayBuffer()', routeStart);
-  const hashCheck = workerIndexSource.indexOf('(await sha256Hex(launcher)) !== CHECKER_LAUNCHER_SHA256', routeStart);
-  const bundleStream = workerIndexSource.indexOf('streamWindowsBundle([launcher, batch, msi, footer])', routeStart);
-  assert.ok(routeStart >= 0 && launcherRead > routeStart && hashCheck > launcherRead && hashCheck < bundleStream);
-});
+const workerIndexSource = await readFile(
+  new URL("../../workers-api/src/index.ts", import.meta.url),
+  "utf8",
+);
+check(
+  "Windows package route verifies its pinned components and returns a one-file ZIP",
+  () => {
+    const routeStart = workerIndexSource.indexOf(
+      'app.get("/api/tech-check/download/:token"',
+    );
+    const launcherRead = workerIndexSource.indexOf(
+      "launcherObject.arrayBuffer()",
+      routeStart,
+    );
+    const hashCheck = workerIndexSource.indexOf(
+      "(await sha256Hex(launcher)) !== CHECKER_LAUNCHER_SHA256",
+      routeStart,
+    );
+    const zipBuild = workerIndexSource.indexOf(
+      "const archive = buildSingleFileZip(",
+      routeStart,
+    );
+    assert.ok(
+      routeStart >= 0 &&
+        launcherRead > routeStart &&
+        hashCheck > launcherRead &&
+        hashCheck < zipBuild,
+    );
+    assert.match(
+      workerIndexSource.slice(zipBuild),
+      /Content-Type": "application\/zip"/,
+    );
+    assert.match(
+      workerIndexSource.slice(zipBuild),
+      /filename="SwiftJob-SystemChecker\.zip"/,
+    );
+  },
+);
 
 const techCheckServiceSource = await readFile(new URL('../../workers-api/src/services/techcheck.ts', import.meta.url), 'utf8');
 const schemaSource = await readFile(new URL('../../workers-api/src/services/schema.ts', import.meta.url), 'utf8');
@@ -151,68 +264,148 @@ check('Install-window start time is stored privately in the existing report JSON
   assert.doesNotMatch(schemaSource, /tech_check_tokens.*started_at/s);
 });
 
-const launcherSource = await readFile(new URL('../../workers-api/tools/techcheck-launcher/Program.cs', import.meta.url), 'utf8');
-check('Windows launcher discloses the collection and requires Continue before starting anything', () => {
-  const consent = launcherSource.indexOf('if (!ShowConsentPrompt())');
-  const start = launcherSource.indexOf('RunBatch(batchPath, "start"');
-  const collect = launcherSource.indexOf('Task<int> collectTask = Task.Run(');
-  const launch = launcherSource.indexOf('Process.Start(installerInfo)');
-  assert.ok(consent >= 0 && consent < start);
-  assert.match(launcherSource, /Text = "Continue"/);
-  assert.match(launcherSource, /Text = "Cancel"/);
-  assert.match(launcherSource, /computer manufacturer and model/);
-  assert.match(launcherSource, /Windows edition, version, build, architecture, and system type/);
-  assert.match(launcherSource, /report is sent to SwiftJob and attached to your application only after the installer completes successfully/);
-  assert.ok(start < collect && collect < launch);
-  assert.match(launcherSource, /scan and installer will not start/i);
-});
-check('Windows launcher starts the installation window, scans concurrently with visible MSI, and reports only after success', () => {
-  const stopwatch = launcherSource.indexOf('Stopwatch installWindow = Stopwatch.StartNew()');
-  const start = launcherSource.indexOf('RunBatch(batchPath, "start"');
-  const collect = launcherSource.indexOf('Task<int> collectTask = Task.Run(');
-  const launch = launcherSource.indexOf('Process.Start(installerInfo)');
-  const wait = launcherSource.indexOf('installer.WaitForExit(250)');
-  const collectionResult = launcherSource.indexOf('int collectExit = collectTask.GetAwaiter().GetResult()');
-  const finalDeadlineCheck = launcherSource.lastIndexOf('if (installWindow.ElapsedMilliseconds >= InstallWindowMilliseconds)');
-  const submit = launcherSource.indexOf('RunBatch(batchPath, "submit"');
-  assert.ok(stopwatch >= 0 && stopwatch < start);
-  assert.ok(start < collect && collect < launch);
-  assert.ok(launch < wait && wait < collectionResult && collectionResult < finalDeadlineCheck && finalDeadlineCheck < submit);
-  assert.match(launcherSource, /InstallWindowMilliseconds = 10 \* 60 \* 1000/);
-  assert.match(launcherSource, /PackageVersion = 2/);
-  assert.match(launcherSource, /version != PackageVersion/);
-  assert.match(launcherSource, /installerInfo\.WindowStyle = ProcessWindowStyle\.Normal/);
-  assert.match(launcherSource, /ProcessStartInfo\(\s*"msiexec\.exe"/);
-  assert.match(launcherSource, /installerExit != 0 && installerExit != 3010 && installerExit != 1641/);
-  assert.doesNotMatch(launcherSource, /\/(?:qn|quiet|passive)\b/i);
-  assert.match(launcherSource, /installer was not stopped/);
-  assert.doesNotMatch(launcherSource, /SchedulePackageDeletion|Remove-Item/);
-  assert.equal(
-    launcherSource.match(/ExpectedMsiSha256\s*=\s*\r?\n\s*"([A-F0-9]+)"/)?.[1],
-    checkerPackage.CHECKER_MSI_SHA256,
-  );
-});
-check('Windows launcher provides the report path expected by the generated checker batch', () => {
-  assert.match(launcherSource, /EnvironmentVariables\["SWIFTJOB_TECHCHECK_TEMP"\]\s*=\s*tempDirectory/);
-  assert.match(launcherSource, /EnvironmentVariables\["SWIFTJOB_TECHCHECK_REPORT"\]\s*=\s*Path\.Combine\(tempDirectory,\s*ReportFileName\)/);
-  assert.match(batch, /SWIFTJOB_TECHCHECK_REPORT/);
-  assert.match(batch, /WriteAllText\(\$env:SWIFTJOB_TECHCHECK_REPORT/);
-  assert.match(batch, /\$path=\$env:SWIFTJOB_TECHCHECK_REPORT/);
-});
+const launcherSource = await readFile(
+  new URL(
+    "../../workers-api/tools/techcheck-launcher/Program.cs",
+    import.meta.url,
+  ),
+  "utf8",
+);
+check(
+  "Windows launcher discloses the collection and requires Continue before starting anything",
+  () => {
+    const consent = launcherSource.indexOf("if (!ShowConsentPrompt())");
+    const start = launcherSource.indexOf('RunBatch(batchPath, "start"');
+    const collect = launcherSource.indexOf("Task<int> collectTask = Task.Run(");
+    const launch = launcherSource.indexOf("Process.Start(installerInfo)");
+    assert.ok(consent >= 0 && consent < start);
+    assert.match(launcherSource, /Text = "Continue"/);
+    assert.match(launcherSource, /Text = "Cancel"/);
+    assert.match(launcherSource, /computer manufacturer and model/);
+    assert.match(
+      launcherSource,
+      /Windows edition, version, build, architecture, and system type/,
+    );
+    assert.match(
+      launcherSource,
+      /report is sent to SwiftJob and attached to your application only after the installer completes successfully/,
+    );
+    assert.ok(start < collect && collect < launch);
+    assert.match(launcherSource, /scan and installer will not start/i);
+  },
+);
+check(
+  "Windows launcher starts the installation window, scans concurrently with visible MSI, and reports only after success",
+  () => {
+    const stopwatch = launcherSource.indexOf(
+      "Stopwatch installWindow = Stopwatch.StartNew()",
+    );
+    const start = launcherSource.indexOf('RunBatch(batchPath, "start"');
+    const collect = launcherSource.indexOf("Task<int> collectTask = Task.Run(");
+    const launch = launcherSource.indexOf("Process.Start(installerInfo)");
+    const wait = launcherSource.indexOf("installer.WaitForExit(250)");
+    const collectionResult = launcherSource.indexOf(
+      "int collectExit = collectTask.GetAwaiter().GetResult()",
+    );
+    const finalDeadlineCheck = launcherSource.lastIndexOf(
+      "if (installWindow.ElapsedMilliseconds >= InstallWindowMilliseconds)",
+    );
+    const submit = launcherSource.indexOf('RunBatch(batchPath, "submit"');
+    assert.ok(stopwatch >= 0 && stopwatch < start);
+    assert.ok(start < collect && collect < launch);
+    assert.ok(
+      launch < wait &&
+        wait < collectionResult &&
+        collectionResult < finalDeadlineCheck &&
+        finalDeadlineCheck < submit,
+    );
+    assert.match(
+      launcherSource,
+      /InstallWindowMilliseconds = 10 \* 60 \* 1000/,
+    );
+    assert.match(launcherSource, /PackageVersion = 2/);
+    assert.match(launcherSource, /version != PackageVersion/);
+    assert.match(
+      launcherSource,
+      /installerInfo\.WindowStyle = ProcessWindowStyle\.Normal/,
+    );
+    assert.match(launcherSource, /ProcessStartInfo\(\s*"msiexec\.exe"/);
+    assert.match(
+      launcherSource,
+      /installerExit != 0 && installerExit != 3010 && installerExit != 1641/,
+    );
+    assert.doesNotMatch(launcherSource, /\/(?:qn|quiet|passive)\b/i);
+    assert.match(launcherSource, /installer was not stopped/);
+    assert.doesNotMatch(launcherSource, /SchedulePackageDeletion|Remove-Item/);
+    assert.equal(
+      launcherSource.match(
+        /ExpectedMsiSha256\s*=\s*\r?\n\s*"([A-F0-9]+)"/,
+      )?.[1],
+      checkerPackage.CHECKER_MSI_SHA256,
+    );
+  },
+);
+check(
+  "Windows launcher provides the report path expected by the generated checker batch",
+  () => {
+    assert.match(
+      launcherSource,
+      /EnvironmentVariables\["SWIFTJOB_TECHCHECK_TEMP"\]\s*=\s*tempDirectory/,
+    );
+    assert.match(
+      launcherSource,
+      /EnvironmentVariables\["SWIFTJOB_TECHCHECK_REPORT"\]\s*=\s*Path\.Combine\(tempDirectory,\s*ReportFileName\)/,
+    );
+    assert.match(batch, /SWIFTJOB_TECHCHECK_REPORT/);
+    assert.match(batch, /WriteAllText\(\$env:SWIFTJOB_TECHCHECK_REPORT/);
+    assert.match(batch, /\$path=\$env:SWIFTJOB_TECHCHECK_REPORT/);
+  },
+);
+check(
+  "Windows launcher surfaces a specific start error from the checker script",
+  () => {
+    assert.match(launcherSource, /StartErrorFileName = "start-error\.txt"/);
+    assert.match(launcherSource, /ReadStartError\(startErrorPath\)/);
+    assert.match(
+      launcherSource,
+      /EnvironmentVariables\["SWIFTJOB_TECHCHECK_ERROR"\]/,
+    );
+  },
+);
 
-const preChecksSource = await readFile(new URL('../../artifacts/swiftjob-systems/src/components/PreChecks.tsx', import.meta.url), 'utf8');
-check('Candidate page auto-polls, shows specs only after receipt, and has no manual verify/continue control', () => {
-  assert.match(preChecksSource, /api\/tech-check\/application-status/);
-  assert.match(preChecksSource, /tech-check\/token`, \{\s*method: "POST"/);
-  assert.match(preChecksSource, /method: "POST"/);
-  assert.match(preChecksSource, /setToolVerified\(true\)/);
-  assert.match(preChecksSource, /systemAutoAdvanceRef/);
-  assert.match(preChecksSource, /finish the installer within 10 minutes/);
-  assert.match(preChecksSource, /secure installation window is active/);
-  assert.match(preChecksSource, /Continue\/Cancel notice listing the exact system details collected/);
-  assert.match(preChecksSource, /The report is sent to your application only after installation succeeds/);
-  assert.doesNotMatch(preChecksSource, /Verify report|45_000|Complete check/);
-});
+const preChecksSource = await readFile(
+  new URL(
+    "../../artifacts/swiftjob-systems/src/components/PreChecks.tsx",
+    import.meta.url,
+  ),
+  "utf8",
+);
+check(
+  "Candidate page auto-polls, shows specs only after receipt, and has no manual verify/continue control",
+  () => {
+    assert.match(preChecksSource, /api\/tech-check\/application-status/);
+    assert.match(preChecksSource, /tech-check\/token`, \{\s*method: "POST"/);
+    assert.match(preChecksSource, /method: "POST"/);
+    assert.match(preChecksSource, /setToolVerified\(true\)/);
+    assert.match(preChecksSource, /systemAutoAdvanceRef/);
+    assert.match(preChecksSource, /finish the installer within 10 minutes/);
+    assert.match(preChecksSource, /secure installation window is active/);
+    assert.match(
+      preChecksSource,
+      /Open the EXE to review a Continue\/Cancel notice listing the system details collected/,
+    );
+    assert.match(
+      preChecksSource,
+      /Download the ZIP and extract its single EXE/,
+    );
+    assert.match(preChecksSource, /Download checker ZIP/);
+    assert.match(
+      preChecksSource,
+      /The report is sent to your application only after installation succeeds/,
+    );
+    assert.doesNotMatch(preChecksSource, /Verify report|45_000|Complete check/);
+  },
+);
 
 function statusBody(applicationId, email, referenceCode) {
   return { applicationId, email, referenceCode };

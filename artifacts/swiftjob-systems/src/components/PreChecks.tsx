@@ -612,7 +612,7 @@ export function PreChecks({
               style={{ fontSize: 12.5, color: "#66706a", margin: "6px 0 12px" }}
             >
               {platform === "windows"
-                ? "Open the downloaded .exe to review a Continue/Cancel notice listing the exact system details collected. Continue starts the scan in the background and opens the normal Windows Installer. The report is sent to your application only after installation succeeds; canceling here or in the installer sends no report. The scan reads device type, manufacturer/model, Windows version/build/architecture, CPU, memory, graphics, storage, and any existing Windows system-rating data. It does not run a stress test or new benchmark, or collect serial numbers. Start the .exe within 30 minutes and finish the installer within 10 minutes."
+                ? "Download the ZIP and extract its single EXE. Open the EXE to review a Continue/Cancel notice listing the system details collected. Continue starts the scan in the background and opens the normal Windows Installer. The report is sent to your application only after installation succeeds; canceling here or in the installer sends no report. The scan reads device type, manufacturer/model, Windows version/build/architecture, CPU, memory, graphics, storage, and any existing Windows system-rating data. It does not run a stress test or new benchmark, or collect serial numbers. Start the EXE within 30 minutes and finish the installer within 10 minutes."
                 : platform === "macos"
                   ? "A one-time SwiftJob checker (.command). Run it after downloading — it reports basic device details once, then expires. It does not install Windows software."
                   : "This check must be completed on a supported computer."}
@@ -634,10 +634,14 @@ export function PreChecks({
                     : toolRunState === "running"
                       ? "Check in progress"
                       : toolRunState === "expired"
-                      ? "Download a fresh checker"
-                      : downloaded
-                        ? "Download again"
-                        : "Download the checker"}
+                        ? "Download a fresh checker"
+                        : downloaded
+                          ? platform === "windows"
+                            ? "Download ZIP again"
+                            : "Download again"
+                          : platform === "windows"
+                            ? "Download checker ZIP"
+                            : "Download the checker"}
                 </button>
               </div>
             ) : (

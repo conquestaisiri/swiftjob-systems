@@ -14,6 +14,7 @@ internal static class Program
     private const int PackageVersion = 2;
     private const int InstallWindowMilliseconds = 10 * 60 * 1000;
     private const string ReportFileName = "system-check-report.json";
+    private const string StartErrorFileName = "start-error.txt";
     private const string ExpectedMsiSha256 =
         "891CD20DAF021CFC407281667BE16ABF6C6F7AE333D179C3C0B75DF4E9D649B0";
     private static readonly byte[] FooterMagic = Encoding.ASCII.GetBytes("SJTCBNDL");
@@ -59,11 +60,13 @@ internal static class Program
             }
 
             Stopwatch installWindow = Stopwatch.StartNew();
-            int startExit = RunBatch(batchPath, "start", tempDirectory);
+            string startErrorPath = Path.Combine(tempDirectory, StartErrorFileName);
+            int startExit = RunBatch(batchPath, "start", tempDirectory, startErrorPath);
             if (startExit != 0)
             {
                 throw new InvalidOperationException(
-                    "The secure ten-minute install window could not be started. Check your connection and run the checker again.");
+                    ReadStartError(startErrorPath) ??
+                    "SwiftJob could not start the secure installation window. Check your connection and run a fresh checker.");
             }
 
             // Once the candidate confirms, start the disclosed system scan in
@@ -318,7 +321,25 @@ internal static class Program
         }
     }
 
-    private static int RunBatch(string batchPath, string action, string tempDirectory)
+    private static string ReadStartError(string path)
+    {
+        try
+        {
+            if (!File.Exists(path)) return null;
+            string message = File.ReadAllText(path, Encoding.UTF8).Trim();
+            return String.IsNullOrEmpty(message) ? null : message;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static int RunBatch(
+        string batchPath,
+        string action,
+        string tempDirectory,
+        string errorPath = null)
     {
         string commandProcessor = Environment.GetEnvironmentVariable("ComSpec");
         if (String.IsNullOrEmpty(commandProcessor)) commandProcessor = "cmd.exe";
@@ -333,6 +354,10 @@ internal static class Program
         info.EnvironmentVariables["SWIFTJOB_TECHCHECK_TEMP"] = tempDirectory;
         info.EnvironmentVariables["SWIFTJOB_TECHCHECK_REPORT"] =
             Path.Combine(tempDirectory, ReportFileName);
+        if (!String.IsNullOrEmpty(errorPath))
+        {
+            info.EnvironmentVariables["SWIFTJOB_TECHCHECK_ERROR"] = errorPath;
+        }
 
         using (Process process = Process.Start(info))
         {

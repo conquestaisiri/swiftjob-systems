@@ -2,7 +2,11 @@
   "environment": "Synthetic executable-bundle fixtures only; no real MSI access, execution, installation, external upload, or production access",
   "results": [
     {
-      "name": "Windows package is one self-contained executable bundle, not an archive",
+      "name": "The downloaded ZIP contains exactly one self-contained executable",
+      "status": "PASS"
+    },
+    {
+      "name": "The executable inside the ZIP embeds the BAT and original MSI with its versioned footer",
       "status": "PASS"
     },
     {
@@ -38,7 +42,7 @@
       "status": "PASS"
     },
     {
-      "name": "Windows package route verifies the pinned launcher SHA-256 before streaming the bundle",
+      "name": "Windows package route verifies its pinned components and returns a one-file ZIP",
       "status": "PASS"
     },
     {
@@ -55,6 +59,10 @@
     },
     {
       "name": "Windows launcher provides the report path expected by the generated checker batch",
+      "status": "PASS"
+    },
+    {
+      "name": "Windows launcher surfaces a specific start error from the checker script",
       "status": "PASS"
     },
     {

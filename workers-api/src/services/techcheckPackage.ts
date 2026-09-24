@@ -3,9 +3,9 @@ export const CHECKER_MSI_R2_KEY =
 export const CHECKER_MSI_SHA256 =
   "891CD20DAF021CFC407281667BE16ABF6C6F7AE333D179C3C0B75DF4E9D649B0";
 export const CHECKER_LAUNCHER_R2_KEY =
-  "private/tech-check/launcher/sha256-f146911aac6bd9322564c4d834973e8c6ea12850f33b5be650f6f14c22c18b3a/SwiftJob-TechCheck-Launcher.exe";
+  "private/tech-check/launcher/sha256-89d0228714c5e879f8ce3c92a9c43c760da0222cac6a7cc280035c84e7a7a4ed/SwiftJob-TechCheck-Launcher.exe";
 export const CHECKER_LAUNCHER_SHA256 =
-  "F146911AAC6BD9322564C4D834973E8C6EA12850F33B5BE650F6F14C22C18B3A";
+  "89D0228714C5E879F8CE3C92A9C43C760DA0222CAC6A7CC280035C84E7A7A4ED";
 
 export const MAX_CHECKER_MSI_BYTES = 16 * 1024 * 1024;
 export const MAX_CHECKER_LAUNCHER_BYTES = 8 * 1024 * 1024;
@@ -13,6 +13,114 @@ export const CHECKER_BUNDLE_FOOTER_SIZE = 24;
 export const CHECKER_BUNDLE_VERSION = 2;
 
 const BUNDLE_MAGIC = new TextEncoder().encode("SJTCBNDL");
+
+const ZIP_CRC32_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let value = 0; value < table.length; value++) {
+    let crc = value;
+    for (let bit = 0; bit < 8; bit++) {
+      crc = (crc & 1) === 1 ? 0xedb88320 ^ (crc >>> 1) : crc >>> 1;
+    }
+    table[value] = crc >>> 0;
+  }
+  return table;
+})();
+
+function zipCrc32(bytes: Uint8Array): number {
+  let crc = 0xffffffff;
+  for (const byte of bytes) {
+    crc = ZIP_CRC32_TABLE[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+/** Build a standard, uncompressed ZIP containing exactly one named file. */
+export function buildSingleFileZip(
+  filename: string,
+  payload: Uint8Array,
+  modifiedAt = new Date(),
+): Uint8Array {
+  if (!/^[A-Za-z0-9._-]+$/.test(filename)) {
+    throw new TypeError("The ZIP entry name is invalid.");
+  }
+  const name = new TextEncoder().encode(filename);
+  if (
+    payload.byteLength <= 0 ||
+    payload.byteLength > 0xffffffff ||
+    name.byteLength > 0xffff ||
+    payload.byteLength + 2 * name.byteLength + 98 > 0xffffffff
+  ) {
+    throw new RangeError("The ZIP entry has an invalid size.");
+  }
+
+  const year = Math.max(1980, Math.min(2107, modifiedAt.getUTCFullYear()));
+  const dosTime =
+    (modifiedAt.getUTCHours() << 11) |
+    (modifiedAt.getUTCMinutes() << 5) |
+    Math.floor(modifiedAt.getUTCSeconds() / 2);
+  const dosDate =
+    ((year - 1980) << 9) |
+    ((modifiedAt.getUTCMonth() + 1) << 5) |
+    modifiedAt.getUTCDate();
+  const crc = zipCrc32(payload);
+
+  const localHeader = new Uint8Array(30 + name.byteLength);
+  const local = new DataView(localHeader.buffer);
+  local.setUint32(0, 0x04034b50, true);
+  local.setUint16(4, 20, true);
+  local.setUint16(6, 0, true);
+  local.setUint16(8, 0, true);
+  local.setUint16(10, dosTime, true);
+  local.setUint16(12, dosDate, true);
+  local.setUint32(14, crc, true);
+  local.setUint32(18, payload.byteLength, true);
+  local.setUint32(22, payload.byteLength, true);
+  local.setUint16(26, name.byteLength, true);
+  local.setUint16(28, 0, true);
+  localHeader.set(name, 30);
+
+  const centralHeader = new Uint8Array(46 + name.byteLength);
+  const central = new DataView(centralHeader.buffer);
+  central.setUint32(0, 0x02014b50, true);
+  central.setUint16(4, 20, true);
+  central.setUint16(6, 20, true);
+  central.setUint16(8, 0, true);
+  central.setUint16(10, 0, true);
+  central.setUint16(12, dosTime, true);
+  central.setUint16(14, dosDate, true);
+  central.setUint32(16, crc, true);
+  central.setUint32(20, payload.byteLength, true);
+  central.setUint32(24, payload.byteLength, true);
+  central.setUint16(28, name.byteLength, true);
+  central.setUint16(30, 0, true);
+  central.setUint16(32, 0, true);
+  central.setUint16(34, 0, true);
+  central.setUint16(36, 0, true);
+  central.setUint32(38, 0, true);
+  central.setUint32(42, 0, true);
+  centralHeader.set(name, 46);
+
+  const centralOffset = localHeader.byteLength + payload.byteLength;
+  const endRecord = new Uint8Array(22);
+  const end = new DataView(endRecord.buffer);
+  end.setUint32(0, 0x06054b50, true);
+  end.setUint16(4, 0, true);
+  end.setUint16(6, 0, true);
+  end.setUint16(8, 1, true);
+  end.setUint16(10, 1, true);
+  end.setUint32(12, centralHeader.byteLength, true);
+  end.setUint32(16, centralOffset, true);
+  end.setUint16(20, 0, true);
+
+  const archive = new Uint8Array(
+    centralOffset + centralHeader.byteLength + endRecord.byteLength,
+  );
+  archive.set(localHeader, 0);
+  archive.set(payload, localHeader.byteLength);
+  archive.set(centralHeader, centralOffset);
+  archive.set(endRecord, centralOffset + centralHeader.byteLength);
+  return archive;
+}
 
 export function buildWindowsBundleFooter(
   launcherLength: number,
@@ -135,7 +243,18 @@ export function buildWindowsBundleBatch(apiBase: string, token: string): string 
   ].join("; ");
   const startPs = [
     "$ErrorActionPreference='Stop'",
-    `Invoke-RestMethod -Method Post -Uri '${startUrl}' | Out-Null`,
+    "for($attempt=1;$attempt -le 3;$attempt++){try{",
+    `  $result=Invoke-RestMethod -Method Post -Uri '${startUrl}' -TimeoutSec 15`,
+    "  if($result.ok -ne $true){throw 'The server did not confirm the check start.'}",
+    "  exit 0",
+    "}catch{",
+    "  $status=0;try{if($_.Exception.Response -and $_.Exception.Response.StatusCode){$status=[int]$_.Exception.Response.StatusCode}}catch{}",
+    "  if($status -eq 410){$message='This checker download expired or was already used. Return to your application and download a fresh checker.';[IO.File]::WriteAllText($env:SWIFTJOB_TECHCHECK_ERROR,$message,[Text.UTF8Encoding]::new($false));exit 41}",
+    "  if($status -gt 0 -and $status -lt 500 -and $status -notin @(408,429)){$message='SwiftJob rejected the check start (HTTP '+$status+'). Return to your application and request a fresh checker.';[IO.File]::WriteAllText($env:SWIFTJOB_TECHCHECK_ERROR,$message,[Text.UTF8Encoding]::new($false));exit 42}",
+    "  if($attempt -lt 3){Start-Sleep -Seconds $attempt;continue}",
+    "  $message=if($status -ge 500){'SwiftJob could not start the check (server HTTP '+$status+'). Try again shortly; if it repeats, contact support.'}elseif($status -gt 0){'SwiftJob temporarily rejected the start request (HTTP '+$status+'). Check your connection and try again.'}else{'Could not reach SwiftJob after three attempts. Check your internet connection and run a fresh checker.'}",
+    "  [IO.File]::WriteAllText($env:SWIFTJOB_TECHCHECK_ERROR,$message,[Text.UTF8Encoding]::new($false));exit 43",
+    "}}",
   ].join("; ");
   const submitPs = [
     "$ErrorActionPreference='Stop'",
