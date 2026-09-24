@@ -11,3 +11,8 @@ export function matchesAdminLoginIdentifier(
     (accepted) => accepted?.trim().toLowerCase() === normalized,
   );
 }
+
+/** Compare the configured admin password without case sensitivity. */
+export function matchesAdminPassword(candidate: string, configured: string): boolean {
+  return candidate.toLowerCase() === configured.toLowerCase();
+}

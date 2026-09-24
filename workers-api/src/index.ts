@@ -23,7 +23,10 @@ import {
   type AssessmentResult,
 } from "./services/assessments";
 import { canAccessRoleAssessment } from "./services/assessmentAccess";
-import { matchesAdminLoginIdentifier } from "./services/adminLogin";
+import {
+  matchesAdminLoginIdentifier,
+  matchesAdminPassword,
+} from "./services/adminLogin";
 import { gradeAssessment } from "./services/assessmentAnswerKey";
 import {
   techCheckService,
@@ -1700,7 +1703,7 @@ app.post("/api/admin/login", adminLoginLimiter, async (c) => {
         ADMIN_EMAIL,
         ADMIN_USERNAME,
       ) ||
-      parsed.data.password !== ADMIN_PASSWORD
+      !matchesAdminPassword(parsed.data.password, ADMIN_PASSWORD)
     ) {
       console.warn({ identifier: parsed.data.email }, "Failed admin login attempt");
       return c.json({ error: "Invalid credentials" }, 401);
