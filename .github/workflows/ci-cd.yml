@@ -49,7 +49,7 @@ jobs:
           node AUDIT/runtime/auth-regression.mjs
           node AUDIT/runtime/application-regression.mjs
           node AUDIT/runtime/techcheck-regression.mjs
-          pnpm --filter @workspace/scripts exec tsx --test ../shared/mail-recipients.test.ts ../shared/application-questions.test.ts ../workers-api/src/services/assessmentAccess.test.ts ../workers-api/src/services/email.test.ts
+          pnpm --filter @workspace/scripts exec tsx --test ../shared/mail-recipients.test.ts ../shared/application-questions.test.ts ../workers-api/src/services/assessmentAccess.test.ts ../workers-api/src/services/adminLogin.test.ts ../workers-api/src/services/email.test.ts
 
   build-frontend:
     name: Build Frontend
@@ -120,6 +120,7 @@ jobs:
           HR_EMAIL: ${{ secrets.HR_EMAIL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
         run: |
           set -euo pipefail
@@ -132,6 +133,9 @@ jobs:
               exit 1
             fi
           done
+          if [ -n "${ADMIN_USERNAME:-}" ]; then
+            printf '%s' "$ADMIN_USERNAME" | pnpm exec wrangler secret put ADMIN_USERNAME --name swiftjob-workers-api
+          fi
 
   deploy-pages:
     name: Deploy Frontend to Cloudflare Pages

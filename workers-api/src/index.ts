@@ -23,6 +23,7 @@ import {
   type AssessmentResult,
 } from "./services/assessments";
 import { canAccessRoleAssessment } from "./services/assessmentAccess";
+import { matchesAdminLoginIdentifier } from "./services/adminLogin";
 import { gradeAssessment } from "./services/assessmentAnswerKey";
 import {
   techCheckService,
@@ -1662,7 +1663,7 @@ app.post("/api/auth/logout", async (c) => {
 // ADMIN AUTH (JWT)
 // ============================================
 const adminLoginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().min(1).max(254),
   password: z.string().min(1),
   turnstileToken: z.string().optional(),
 });
@@ -1671,11 +1672,11 @@ app.post("/api/admin/login", adminLoginLimiter, async (c) => {
   try {
     const body = await parseJson(c);
     if (body === null) {
-      return c.json({ error: "Email and password are required" }, 400);
+      return c.json({ error: "Admin email or username and password are required" }, 400);
     }
     const parsed = adminLoginSchema.safeParse(body);
     if (!parsed.success) {
-      return c.json({ error: "Email and password are required" }, 400);
+      return c.json({ error: "Admin email or username and password are required" }, 400);
     }
 
     const captchaOk = await verifyTurnstile(parsed.data.turnstileToken, c);
@@ -1683,7 +1684,7 @@ app.post("/api/admin/login", adminLoginLimiter, async (c) => {
       return c.json({ error: "Security check failed, please try again" }, 400);
     }
 
-    const { ADMIN_EMAIL, ADMIN_PASSWORD, JWT_SECRET } = getEnv();
+    const { ADMIN_EMAIL, ADMIN_USERNAME, ADMIN_PASSWORD, JWT_SECRET } = getEnv();
 
     if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
       throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD must be set");
@@ -1694,11 +1695,14 @@ app.post("/api/admin/login", adminLoginLimiter, async (c) => {
     }
 
     if (
-      parsed.data.email.trim().toLowerCase() !==
-        ADMIN_EMAIL.trim().toLowerCase() ||
+      !matchesAdminLoginIdentifier(
+        parsed.data.email,
+        ADMIN_EMAIL,
+        ADMIN_USERNAME,
+      ) ||
       parsed.data.password !== ADMIN_PASSWORD
     ) {
-      console.warn({ email: parsed.data.email }, "Failed admin login attempt");
+      console.warn({ identifier: parsed.data.email }, "Failed admin login attempt");
       return c.json({ error: "Invalid credentials" }, 401);
     }
 

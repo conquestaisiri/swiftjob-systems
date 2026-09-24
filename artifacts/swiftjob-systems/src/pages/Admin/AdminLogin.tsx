@@ -21,8 +21,10 @@ export function AdminLogin() {
     const fd = new FormData(form);
     const formEmail = (fd.get("email") as string | null)?.trim() || "";
     const formPassword = (fd.get("password") as string | null) || "";
-    const cleanEmail = (email.trim() || formEmail).trim();
-    const cleanPassword = password || formPassword;
+    // FormData reflects what is actually in the fields when autofill does not
+    // dispatch React change events; prefer it over potentially stale state.
+    const cleanEmail = (formEmail || email).trim();
+    const cleanPassword = formPassword || password;
     if (!cleanEmail || !cleanPassword) {
       setError("Please enter both email and password.");
       return;
@@ -120,19 +122,19 @@ export function AdminLogin() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="admin-email" className="block text-sm font-medium text-slate-700 mb-1">
-                Email
+                Email or username
               </label>
               <input
                 id="admin-email"
                 name="email"
-                type="email"
+                type="text"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
                   if (error) setError("");
                 }}
                 onInput={(e) => setEmail((e.target as HTMLInputElement).value)}
-                placeholder="your@email.com"
+                placeholder="Email or username"
                 autoComplete="username"
                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required

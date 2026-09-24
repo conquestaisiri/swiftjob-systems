@@ -35,11 +35,9 @@ const DARK_MODE_MINT = "#EEF9F0";
 const DARK_MODE_MINT_BORDER = "#D5E9D8";
 const DARK_MODE_MINT_TEXT = "#10251D";
 
-const LOGO_PATH = "/swiftjob-logo.png";
-const DARK_LOGO_PATH = "/swiftjob-logo-light.png";
-// Bump when the supplied artwork changes so mail clients cannot reuse an
-// earlier cached logo at the same URL.
-const LOGO_VERSION = "supplied-20260912";
+const EMAIL_LOGO_PATH = "/swiftjob-email-lockup.png";
+// Version the email asset URL to avoid stale copies in mail-client caches.
+const EMAIL_LOGO_VERSION = "white-lockup-20260924";
 const FALLBACK_BASE_URL = "https://swiftjob.online";
 // Last-resort contact address, used only when neither SUPPORT_EMAIL nor
 // HR_EMAIL is configured.
@@ -59,12 +57,8 @@ export function getSupportEmail(): string {
   );
 }
 
-function getLogoUrl(): string {
-  return `${getBaseUrl()}${LOGO_PATH}?v=${LOGO_VERSION}`;
-}
-
-function getDarkLogoUrl(): string {
-  return `${getBaseUrl()}${DARK_LOGO_PATH}?v=${LOGO_VERSION}`;
+function getEmailLogoUrl(): string {
+  return `${getBaseUrl()}${EMAIL_LOGO_PATH}?v=${EMAIL_LOGO_VERSION}`;
 }
 
 function esc(value: unknown): string {
@@ -220,8 +214,7 @@ function layout(opts: LayoutOptions): string {
     .email-status-value { color: #253029 !important; }
     .email-code { background: #F7F7F4 !important; color: #253029 !important; }
     .email-logo-bar { background: #FFFFFF !important; }
-    .email-logo-light-mode { display: inline-block !important; }
-    .email-logo-dark-mode { display: none !important; }
+    .email-logo-image { display: inline-block !important; }
     .email-button { background: #49634B !important; color: #FFFFFF !important; }
     /* Gmail iOS fully inverts colors and does not apply prefers-color-scheme.
        These Gmail-only blend layers preserve the approved label swatch/text. */
@@ -250,8 +243,6 @@ function layout(opts: LayoutOptions): string {
       .email-link { color: #B9D7B4 !important; }
       .email-content a:not(.email-button) { color: #B9D7B4 !important; }
       .email-logo-bar { background: #17221C !important; border-bottom-color: #8BB58D !important; }
-      .email-logo-light-mode { display: none !important; }
-      .email-logo-dark-mode { display: inline-block !important; }
       .email-button { background: #A9C7A6 !important; color: #10251D !important; }
       .email-callout { background: #20342A !important; border-left-color: #8BB58D !important; }
       .email-callout-info, .email-callout-success { background: #20342A !important; }
@@ -300,8 +291,6 @@ function layout(opts: LayoutOptions): string {
     [data-ogsc] .email-callout-error .email-callout-title, [data-ogsb] .email-callout-error .email-callout-title { color: #FFB0B0 !important; }
     [data-ogsc] .email-button, [data-ogsb] .email-button { background: #A9C7A6 !important; color: #10251D !important; }
     [data-ogsc] .email-logo-bar, [data-ogsb] .email-logo-bar { background: #17221C !important; border-bottom-color: #8BB58D !important; }
-    [data-ogsc] .email-logo-light-mode, [data-ogsb] .email-logo-light-mode { display: none !important; }
-    [data-ogsc] .email-logo-dark-mode, [data-ogsb] .email-logo-dark-mode { display: inline-block !important; }
     [data-ogsc] .email-copy, [data-ogsb] .email-copy,
     [data-ogsc] .email-callout-body, [data-ogsb] .email-callout-body,
     [data-ogsc] .email-step, [data-ogsb] .email-step { color: #EFF7F0 !important; }
@@ -324,8 +313,7 @@ function layout(opts: LayoutOptions): string {
         <table class="email-card email-surface" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${BRAND.white}" style="max-width: 600px; width: 100%; background:${BRAND.white}; border-radius: 14px; overflow: hidden; border: 1px solid ${BRAND.border};">
           <tr>
             <td class="email-logo-bar" bgcolor="${BRAND.white}" style="background:${BRAND.white}; background-color:${BRAND.white}; padding: 20px 32px; text-align: center; border-bottom: 3px solid ${BRAND.teal};">
-              <img class="email-logo-light-mode" src="${getLogoUrl()}" alt="SwiftJob" width="220" style="display:inline-block;max-width:220px;height:auto;border:0;" />
-              <img class="email-logo-dark-mode" src="${getDarkLogoUrl()}" alt="SwiftJob" width="220" style="display:none;max-width:220px;height:auto;border:0;" />
+              <img class="email-logo-image" src="${getEmailLogoUrl()}" alt="SwiftJob" width="220" style="display:inline-block;max-width:220px;height:auto;border:0;border-radius:10px;background:#FFFFFF;" />
             </td>
           </tr>
           <tr>

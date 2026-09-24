@@ -6,6 +6,7 @@ export interface Env {
   SUPPORT_EMAIL?: string;
   JWT_SECRET: string;
   ADMIN_EMAIL: string;
+  ADMIN_USERNAME?: string;
   ADMIN_PASSWORD: string;
   FRONTEND_URL: string;
   TURNSTILE_SECRET_KEY?: string;

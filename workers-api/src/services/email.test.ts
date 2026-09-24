@@ -24,14 +24,12 @@ function assertSharedEmailShell(html: string) {
   assert.match(html, /name="color-scheme" content="light dark"/);
   assert.match(html, /@media \(prefers-color-scheme: dark\)/);
   assert.match(html, /\[data-ogsc\]/);
-  assert.match(html, /email-logo-light-mode/);
-  assert.match(html, /email-logo-dark-mode/);
+  assert.match(html, /class="email-logo-image"/);
   assert.match(html, /#EEF9F0/);
   assert.match(html, /email-table-label/);
-  assert.match(html, /https:\/\/swiftjob\.online\/swiftjob-logo\.png/);
-  assert.match(html, /https:\/\/swiftjob\.online\/swiftjob-logo-light\.png/);
-  assert.match(html, /display:none;max-width:220px/);
-  assert.match(html, /display:inline-block;max-width:220px/);
+  assert.match(html, /https:\/\/swiftjob\.online\/swiftjob-email-lockup\.png\?v=white-lockup-20260924/);
+  assert.doesNotMatch(html, /email-logo-(?:light|dark)-mode|swiftjob-logo-light\.png/);
+  assert.equal((html.match(/class="email-logo-image"/g) ?? []).length, 1);
   assert.doesNotMatch(html, /undefined|null/);
 }
 
