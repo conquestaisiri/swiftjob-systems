@@ -101,6 +101,24 @@ jobs:
         working-directory: ./workers-api
         run: pnpm install --frozen-lockfile
 
+      - name: Apply the production tech-check schema migration
+        working-directory: ./workers-api
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile } from "node:fs/promises";
+          import { neon } from "@neondatabase/serverless";
+
+          if (!process.env.DATABASE_URL) {
+            throw new Error("DATABASE_URL is required to apply production migrations");
+          }
+          const sql = neon(process.env.DATABASE_URL);
+          const migration = await readFile("./migrations/016_tech_check_install_window.sql", "utf8");
+          await sql(migration);
+          console.log("Applied tech-check install-window migration");
+          NODE
+
       - name: Publish Worker with wrangler
         working-directory: ./workers-api
         env:

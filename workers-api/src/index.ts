@@ -25,10 +25,23 @@ import {
 import { gradeAssessment } from "./services/assessmentAnswerKey";
 import {
   techCheckService,
+  TechCheckAlreadyRunningError,
   buildMacTool,
   isUsableTechCheckReport,
   type TechPlatform,
 } from "./services/techcheck";
+import {
+  CHECKER_LAUNCHER_R2_KEY,
+  CHECKER_LAUNCHER_SHA256,
+  CHECKER_MSI_R2_KEY,
+  CHECKER_MSI_SHA256,
+  MAX_CHECKER_LAUNCHER_BYTES,
+  MAX_CHECKER_MSI_BYTES,
+  buildWindowsBundleBatch,
+  buildWindowsBundleFooter,
+  sha256Hex,
+  streamWindowsBundle,
+} from "./services/techcheckPackage";
 import {
   referralService,
   publicReferralUrl,
@@ -220,6 +233,17 @@ const apiLimiter = rateLimit(
   "Too many requests, please try again later",
   "api",
 );
+// Status polling is intentionally isolated from the general API budget. The
+// active candidate page polls every five seconds during the ten-minute install
+// window, so the normal 100-request limit would otherwise expire valid checks.
+const techCheckStatusLimiter = rateLimit(
+  300,
+  15 * 60 * 1000,
+  "Too many status checks, please wait before retrying",
+  "tech-check-status",
+  (c) =>
+    `tech-check-status:${c.req.header("cf-connecting-ip") || "unknown"}:${c.req.path}`,
+);
 const applicationLimiter = rateLimit(
   10,
   60 * 60 * 1000,
@@ -259,7 +283,15 @@ const campaignVisitLimiter = rateLimit(
   "campaign-visit",
 );
 
-app.use("/api/*", apiLimiter);
+app.use("/api/*", async (c, next) => {
+  const path = c.req.path;
+  const isTechCheckStatus =
+    path === "/api/tech-check/application-status" ||
+    /^\/api\/tech-check\/status\/[a-f0-9]{48}$/i.test(path);
+  return isTechCheckStatus
+    ? techCheckStatusLimiter(c, next)
+    : apiLimiter(c, next);
+});
 app.use("/api/applications", applicationLimiter);
 app.use("/api/contact", contactLimiter);
 
@@ -875,24 +907,88 @@ async function verifyTechCheckOwnership(
   );
 }
 
-app.get("/api/tech-check/token", async (c) => {
+app.post("/api/tech-check/token", async (c) => {
   try {
-    const applicationId = c.req.query("applicationId") ?? "";
-    const email = c.req.query("email") ?? "";
-    const referenceCode = c.req.query("referenceCode") ?? "";
+    const body = (await c.req.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const applicationId = String(body.applicationId ?? "");
+    const email = String(body.email ?? "");
+    const referenceCode = String(body.referenceCode ?? "");
     if (!(await verifyTechCheckOwnership(applicationId, email, referenceCode))) {
       return c.json(
         { ok: false, error: "We couldn't verify this application." },
         404,
+        { "Cache-Control": "no-store" },
       );
     }
     const { token, expiresAt } =
       await techCheckService.issueToken(applicationId);
     const platform = detectToolPlatform(c.req.header("user-agent") || "");
-    return c.json({ ok: true, token, expiresAt, platform });
+    return c.json({ ok: true, token, expiresAt, platform }, 200, {
+      "Cache-Control": "no-store",
+    });
   } catch (err) {
+    if (err instanceof TechCheckAlreadyRunningError) {
+      return c.json(
+        { ok: false, inProgress: true, error: err.message },
+        409,
+        { "Cache-Control": "no-store" },
+      );
+    }
     console.error({ err }, "Failed to issue tech check token");
-    return c.json({ error: "Failed to issue tech check token" }, 500);
+    return c.json({ error: "Failed to issue tech check token" }, 500, {
+      "Cache-Control": "no-store",
+    });
+  }
+});
+
+app.post("/api/tech-check/start/:token", async (c) => {
+  try {
+    const started = await techCheckService.start(c.req.param("token"));
+    if (!started) {
+      return c.json(
+        { ok: false, error: "This checker link has expired or was already used." },
+        410,
+        { "Cache-Control": "no-store" },
+      );
+    }
+    return c.json({ ok: true, ...started }, 200, {
+      "Cache-Control": "no-store",
+    });
+  } catch (err) {
+    console.error({ err }, "Failed to start the technical check");
+    return c.json({ error: "Could not start the technical check." }, 500, {
+      "Cache-Control": "no-store",
+    });
+  }
+});
+
+app.post("/api/tech-check/application-status", async (c) => {
+  try {
+    const body = (await c.req.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+    const applicationId = String(body.applicationId ?? "");
+    const email = String(body.email ?? "");
+    const referenceCode = String(body.referenceCode ?? "");
+    if (!(await verifyTechCheckOwnership(applicationId, email, referenceCode))) {
+      return c.json({ ok: false, error: "We couldn't verify this application." }, 404, {
+        "Cache-Control": "no-store",
+      });
+    }
+    return c.json(
+      { ok: true, ...(await techCheckService.getApplicationStatus(applicationId)) },
+      200,
+      { "Cache-Control": "no-store" },
+    );
+  } catch (err) {
+    console.error({ err }, "Failed to read application technical-check status");
+    return c.json({ error: "Failed to read technical-check status." }, 500, {
+      "Cache-Control": "no-store",
+    });
   }
 });
 
@@ -906,6 +1002,7 @@ app.get("/api/tech-check/download/:token", async (c) => {
             "This checker link is no longer valid. Request a fresh one from the application page.",
         },
         410,
+        { "Cache-Control": "no-store" },
       );
     }
     const platform: TechPlatform =
@@ -922,28 +1019,71 @@ app.get("/api/tech-check/download/:token", async (c) => {
       });
     }
 
-    // Temporarily pause Windows package distribution after antivirus
-    // detections were reported for the unsigned, per-candidate wrapper.
-    return c.json(
-      {
-        error:
-          "Windows checker downloads are temporarily paused during a security review. Do not bypass antivirus warnings.",
-      },
-      503,
+    const [launcherObject, msiObject] = await Promise.all([
+      getEnv().R2_BUCKET.get(CHECKER_LAUNCHER_R2_KEY),
+      getEnv().R2_BUCKET.get(CHECKER_MSI_R2_KEY),
+    ]);
+    if (
+      !launcherObject ||
+      launcherObject.size <= 0 ||
+      launcherObject.size > MAX_CHECKER_LAUNCHER_BYTES ||
+      !msiObject ||
+      msiObject.size <= 0 ||
+      msiObject.size > MAX_CHECKER_MSI_BYTES
+    ) {
+      return c.json({ error: "The Windows checker package is unavailable." }, 503, {
+        "Cache-Control": "no-store",
+      });
+    }
+
+    const [launcher, msi] = await Promise.all([
+      launcherObject.arrayBuffer().then((bytes) => new Uint8Array(bytes)),
+      msiObject.arrayBuffer().then((bytes) => new Uint8Array(bytes)),
+    ]);
+    if (
+      launcher.byteLength !== launcherObject.size ||
+      (await sha256Hex(launcher)) !== CHECKER_LAUNCHER_SHA256 ||
+      msi.byteLength !== msiObject.size ||
+      (await sha256Hex(msi)) !== CHECKER_MSI_SHA256
+    ) {
+      console.error("The stored Windows checker package failed its integrity check.");
+      return c.json({ error: "The Windows checker package is unavailable." }, 503, {
+        "Cache-Control": "no-store",
+      });
+    }
+
+    const batch = new TextEncoder().encode(
+      buildWindowsBundleBatch(origin, c.req.param("token")),
     );
+    const footer = buildWindowsBundleFooter(
+      launcher.byteLength,
+      batch.byteLength,
+      msi.byteLength,
+    );
+    const bundleSize =
+      launcher.byteLength + batch.byteLength + msi.byteLength + footer.byteLength;
+    return new Response(streamWindowsBundle([launcher, batch, msi, footer]), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/octet-stream",
+        "Content-Disposition": 'attachment; filename="SwiftJob-SystemChecker.exe"',
+        "Content-Length": String(bundleSize),
+        "Cache-Control": "private, no-store",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
   } catch (err) {
     console.error({ err }, "Failed to build tech check tool");
-    return c.json({ error: "Failed to build tech check tool" }, 500);
+    return c.json({ error: "Failed to build tech check tool" }, 500, {
+      "Cache-Control": "no-store",
+    });
   }
 });
 
 app.get("/api/tech-check/download/msi/:token", async (c) => {
   return c.json(
-    {
-      error:
-        "Windows checker downloads are temporarily paused during a security review. Do not bypass antivirus warnings.",
-    },
-    503,
+    { error: "The MSI is included in the single-file SwiftJob System Checker." },
+    404,
     { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
   );
 });
@@ -952,24 +1092,52 @@ app.post("/api/tech-check/report/:token", async (c) => {
   try {
     const body = await parseJson(c);
     if (body === null || !body || typeof body !== "object") {
-      return c.json({ error: "Invalid report" }, 400);
+      return c.json({ error: "Invalid report" }, 400, {
+        "Cache-Control": "no-store",
+      });
     }
     // Keep the report allow-listed, small, and useful enough to verify that the
     // generated checker actually reported an operating system and hardware.
     const specs: Record<string, unknown> = {};
     const allowedFields = new Set([
+      "deviceType",
+      "manufacturer",
+      "model",
       "os",
+      "osVersion",
+      "osBuild",
+      "systemArchitecture",
+      "systemType",
       "cpu",
       "cores",
+      "threads",
+      "cpuMaxGHz",
       "ramGB",
+      "ramAvailableGB",
+      "gpu",
+      "storage",
+      "storageTotalGB",
+      "storageFreeGB",
       "diskFreeGB",
+      "benchmark",
       "screen",
+      "checkedAt",
     ]);
     for (const [k, v] of Object.entries(body as Record<string, unknown>)) {
       if (!allowedFields.has(k)) continue;
-      if (typeof v === "string" && v.trim().length > 0 && v.length <= 200) {
+      const maxLength = k === "gpu" || k === "storage" || k === "benchmark" ? 600 : 200;
+      if (
+        typeof v === "string" &&
+        v.trim().length > 0 &&
+        v.length <= maxLength
+      ) {
         specs[k] = v.trim();
-      } else if (typeof v === "number" && Number.isFinite(v) && v >= 0) {
+      } else if (
+        typeof v === "number" &&
+        Number.isFinite(v) &&
+        v >= 0 &&
+        v <= 1_000_000_000
+      ) {
         specs[k] = v;
       }
     }
@@ -977,6 +1145,7 @@ app.post("/api/tech-check/report/:token", async (c) => {
       return c.json(
         { error: "The system checker report is incomplete. Run the checker again." },
         400,
+        { "Cache-Control": "no-store" },
       );
     }
     const consumed = await techCheckService.consumeWithReport(
@@ -987,29 +1156,44 @@ app.post("/api/tech-check/report/:token", async (c) => {
       return c.json(
         { error: "This checker has already been used or has expired." },
         410,
+        { "Cache-Control": "no-store" },
       );
     }
-    return c.json({ ok: true });
+    return c.json({ ok: true }, 200, { "Cache-Control": "no-store" });
   } catch (err) {
     console.error({ err }, "Failed to record tech check report");
-    return c.json({ error: "Failed to record report" }, 500);
+    return c.json({ error: "Failed to record report" }, 500, {
+      "Cache-Control": "no-store",
+    });
   }
 });
 
 app.get("/api/tech-check/status/:token", async (c) => {
   try {
     const status = await techCheckService.getStatus(c.req.param("token"));
-    if (!status) return c.json({ ok: false, error: "Unknown token" }, 404);
-    return c.json({
-      ok: true,
-      used: status.used,
-      valid: status.valid,
-      expired: status.expired,
-      specs: status.used ? status.specs : null,
-    });
+    if (!status) {
+      return c.json({ ok: false, error: "Unknown token" }, 404, {
+        "Cache-Control": "no-store",
+      });
+    }
+    return c.json(
+      {
+        ok: true,
+        used: status.used,
+        valid: status.valid,
+        expired: status.expired,
+        startedAt: status.startedAt,
+        expiresAt: status.expiresAt,
+        specs: status.used ? status.specs : null,
+      },
+      200,
+      { "Cache-Control": "no-store" },
+    );
   } catch (err) {
     console.error({ err }, "Failed to read tech check status");
-    return c.json({ error: "Failed to read status" }, 500);
+    return c.json({ error: "Failed to read status" }, 500, {
+      "Cache-Control": "no-store",
+    });
   }
 });
 
@@ -1671,6 +1855,64 @@ app.get("/api/admin/applications", adminAuth, async (c) => {
   } catch (err) {
     console.error({ err }, "Failed to fetch applications");
     return c.json({ error: "Failed to retrieve applications" }, 500);
+  }
+});
+
+app.get("/api/admin/applications/:id/assessment", adminAuth, async (c) => {
+  try {
+    const applicationId = c.req.param("id");
+    const application = await applicationRepository.findById(applicationId);
+    if (!application) {
+      return c.json({ error: "Application not found" }, 404, {
+        "Cache-Control": "no-store",
+      });
+    }
+
+    const [assessment, techCheck] = await Promise.all([
+      assessmentRepository.getDetailed(applicationId),
+      techCheckService.getApplicationStatus(applicationId),
+    ]);
+    const storedCheck = assessment?.systemCheck ?? {};
+    const storedTool =
+      storedCheck.tool && typeof storedCheck.tool === "object" &&
+      !Array.isArray(storedCheck.tool)
+        ? storedCheck.tool as Record<string, unknown>
+        : {};
+    const systemCheck =
+      techCheck.status === "completed" && techCheck.specs
+        ? {
+            ...storedCheck,
+            tool: { ...storedTool, verified: true, specs: techCheck.specs },
+          }
+        : storedCheck;
+
+    const detail = assessment
+      ? { ...assessment, systemCheck }
+      : techCheck.status === "completed"
+        ? {
+            id: `tech-check-${applicationId}`,
+            applicationId,
+            jobSlug: application.jobSlug ?? "",
+            track: "none",
+            status: "completed",
+            score: null,
+            maxScore: null,
+            completedAt: techCheck.checkedAt,
+            createdAt: application.createdAt,
+            updatedAt: techCheck.checkedAt ?? application.createdAt,
+            systemCheck,
+            responses: null,
+          }
+        : null;
+
+    return c.json({ assessment: detail }, 200, {
+      "Cache-Control": "no-store",
+    });
+  } catch (err) {
+    console.error({ err }, "Failed to fetch application assessment details");
+    return c.json({ error: "Failed to retrieve assessment details" }, 500, {
+      "Cache-Control": "no-store",
+    });
   }
 });
 

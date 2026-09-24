@@ -26,6 +26,7 @@ import { parseDateOnly } from "@/lib/utils";
 import { API_BASE } from "@/lib/adminApi";
 import { handleAdminUnauthorized } from "@/lib/adminAuth";
 import { TRACKS, type AssessmentTrack } from "@/lib/assessmentTracks";
+import { formatSystemSpecEntries, getTechCheckSpecs } from "@/lib/systemSpecs";
 
 const STATUS_COLORS: Record<string, string> = {
   New: "#6366f1",
@@ -1112,6 +1113,9 @@ function AssessmentDetailView({ detail }: { detail: AssessmentDetail }) {
     detail.maxScore && detail.score !== null
       ? Math.round((detail.score / detail.maxScore) * 100)
       : null;
+  const systemSpecEntries = formatSystemSpecEntries(
+    getTechCheckSpecs(detail.systemCheck),
+  );
 
   return (
     <div className="assessment-detail">
@@ -1133,6 +1137,35 @@ function AssessmentDetailView({ detail }: { detail: AssessmentDetail }) {
           : `Status: ${detail.status.replace("_", " ")}`}
         {detail.jobSlug ? ` · ${detail.jobSlug}` : ""}
       </p>
+
+      {systemSpecEntries.length > 0 && (
+        <section
+          className="assessment-question"
+          aria-labelledby="tech-check-system-specs-heading"
+          style={{ marginTop: 18 }}
+        >
+          <h5 id="tech-check-system-specs-heading">
+            Technical check — system specifications
+          </h5>
+          <dl
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              gap: "12px 20px",
+              margin: 0,
+            }}
+          >
+            {systemSpecEntries.map(({ label, value }) => (
+              <div key={label}>
+                <dt className="text-slate-500 text-sm">{label}</dt>
+                <dd className="text-slate-800 text-sm" style={{ margin: "2px 0 0", overflowWrap: "anywhere" }}>
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
 
       {config && detail.responses ? (
         <>
