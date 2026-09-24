@@ -15,8 +15,8 @@ check('Generated checkers do not bypass execution policy or collect hostname', (
   assert.equal(source.toLowerCase().includes('computername'), false);
   assert.equal(source.toLowerCase().includes('hostname'), false);
 });
-const retired = await h.request('/api/tech-check/download/msi/not-a-real-token');
-check('Combined installer endpoint is retired', () => assert.equal(retired.status, 410));
+const windowsMsi = await h.request('/api/tech-check/download/msi/not-a-real-token');
+check('Windows MSI downloads stay paused during the security review', () => assert.equal(windowsMsi.status, 503));
 
 console.log(JSON.stringify(checks, null, 2));
 await writeFile(new URL('../evidence/techcheck-regression.json', import.meta.url), JSON.stringify({ environment: 'Source assertions + Local PGlite Worker; no production access', results: checks }, null, 2));

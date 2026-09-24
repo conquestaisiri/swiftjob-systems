@@ -6,7 +6,7 @@
       "status": "PASS"
     },
     {
-      "name": "Combined installer endpoint is retired",
+      "name": "Windows MSI downloads stay paused during the security review",
       "status": "PASS"
     }
   ]
