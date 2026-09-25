@@ -25,6 +25,8 @@ const REQUIRED_TABLES = [
   "candidate_referral_links",
   "candidate_referrals",
   "email_unsubscriptions",
+  "email_delivery_events",
+  "email_provider_suppressions",
 ] as const;
 
 const REQUIRED_COLUMNS = [
@@ -37,6 +39,13 @@ const REQUIRED_COLUMNS = [
   ["jobs", "application_questions"],
   ["referrals", "content_overrides"],
   ["footprints", "meta"],
+  ["email_delivery_events", "provider_event_id"],
+  ["email_delivery_events", "email_id"],
+  ["email_delivery_events", "event_type"],
+  ["email_delivery_events", "occurred_at"],
+  ["email_provider_suppressions", "email"],
+  ["email_provider_suppressions", "reason"],
+  ["email_provider_suppressions", "source_event_id"],
 ] as const;
 
 let schemaPromise: Promise<void> | null = null;
@@ -58,8 +67,10 @@ async function verifySchema(): Promise<void> {
         AND ((table_name = 'applications' AND column_name IN ('job_slug', 'submission_key', 'campaign_slug', 'role_answers'))
         OR (table_name = 'referrals' AND column_name = 'content_overrides')
           OR (table_name = 'applications' AND column_name = 'referral_code')
-        OR (table_name = 'jobs' AND column_name IN ('referral_reward_cents', 'application_questions'))
-          OR (table_name = 'footprints' AND column_name = 'meta'))`,
+          OR (table_name = 'jobs' AND column_name IN ('referral_reward_cents', 'application_questions'))
+          OR (table_name = 'footprints' AND column_name = 'meta')
+          OR (table_name = 'email_delivery_events' AND column_name IN ('provider_event_id', 'email_id', 'event_type', 'occurred_at'))
+          OR (table_name = 'email_provider_suppressions' AND column_name IN ('email', 'reason', 'source_event_id')))`,
     [Array.from(REQUIRED_TABLES)],
   );
   const foundTables = new Set(

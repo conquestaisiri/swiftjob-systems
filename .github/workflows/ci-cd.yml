@@ -50,7 +50,7 @@ jobs:
           node AUDIT/runtime/application-regression.mjs
           node AUDIT/runtime/techcheck-regression.mjs
           node AUDIT/runtime/email-unsubscribe-regression.mjs
-          pnpm --filter @workspace/scripts exec tsx --test ../shared/mail-recipients.test.ts ../shared/application-questions.test.ts ../workers-api/src/services/assessmentAccess.test.ts ../workers-api/src/services/adminLogin.test.ts ../workers-api/src/services/email.test.ts ../workers-api/src/services/emailUnsubscribe.test.ts
+          pnpm --filter @workspace/scripts exec tsx --test ../shared/mail-recipients.test.ts ../shared/application-questions.test.ts ../workers-api/src/services/assessmentAccess.test.ts ../workers-api/src/services/adminLogin.test.ts ../workers-api/src/services/email.test.ts ../workers-api/src/services/emailUnsubscribe.test.ts ../workers-api/src/services/emailDelivery.test.ts
 
   build-frontend:
     name: Build Frontend
@@ -153,6 +153,12 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: node migrate.mjs migrations/017_email_unsubscriptions.sql
 
+      - name: Apply email delivery monitoring migration
+        working-directory: ./workers-api
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: node migrate.mjs migrations/018_email_delivery_events.sql
+
       - name: Publish Worker with wrangler
         working-directory: ./workers-api
         env:
@@ -173,6 +179,7 @@ jobs:
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          RESEND_WEBHOOK_SECRET: ${{ secrets.RESEND_WEBHOOK_SECRET }}
         run: |
           set -euo pipefail
           for var in DATABASE_URL RESEND_API_KEY EMAIL_FROM HR_EMAIL JWT_SECRET ADMIN_EMAIL ADMIN_PASSWORD; do
@@ -186,6 +193,9 @@ jobs:
           done
           if [ -n "${ADMIN_USERNAME:-}" ]; then
             printf '%s' "$ADMIN_USERNAME" | pnpm exec wrangler secret put ADMIN_USERNAME --name swiftjob-workers-api
+          fi
+          if [ -n "${RESEND_WEBHOOK_SECRET:-}" ]; then
+            printf '%s' "$RESEND_WEBHOOK_SECRET" | pnpm exec wrangler secret put RESEND_WEBHOOK_SECRET --name swiftjob-workers-api
           fi
 
   deploy-pages:

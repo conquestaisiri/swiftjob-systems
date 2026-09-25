@@ -1,6 +1,7 @@
 export interface Env {
   DATABASE_URL: string;
   RESEND_API_KEY: string;
+  RESEND_WEBHOOK_SECRET?: string;
   EMAIL_FROM: string;
   HR_EMAIL: string;
   SUPPORT_EMAIL?: string;

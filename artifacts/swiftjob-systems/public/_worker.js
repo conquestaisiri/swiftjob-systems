@@ -14,6 +14,16 @@ function replaceOrInsert(html, pattern, tag) {
   return html.replace(/<\/head>/i, `    ${tag}\n  </head>`);
 }
 
+function withStrictTransportSecurity(response) {
+  const headers = new Headers(response.headers);
+  headers.set("Strict-Transport-Security", "max-age=31536000");
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 function rewriteDocumentMetadata(response, requestUrl) {
   const contentType = response.headers.get("content-type") || "";
   if (!contentType.toLowerCase().includes("text/html")) return response;
@@ -64,14 +74,14 @@ export default {
         headers: { Accept: "application/xml" },
       });
       if (resp.ok) {
-        return new Response(resp.body, {
+        return withStrictTransportSecurity(new Response(resp.body, {
           status: resp.status,
           statusText: resp.statusText,
           headers: resp.headers,
-        });
+        }));
       }
       // Keep a build-time sitemap available if the API is temporarily down.
-      return env.ASSETS.fetch(request);
+      return withStrictTransportSecurity(await env.ASSETS.fetch(request));
     }
 
     if (url.pathname.startsWith("/api/")) {
@@ -114,14 +124,16 @@ export default {
         "Content-Type, Authorization, Idempotency-Key",
       );
 
-      return new Response(resp.body, {
+      return withStrictTransportSecurity(new Response(resp.body, {
         status: resp.status,
         statusText: resp.statusText,
         headers: respHeaders,
-      });
+      }));
     }
 
     const assetResponse = await env.ASSETS.fetch(request);
-    return rewriteDocumentMetadata(assetResponse, url);
+    return withStrictTransportSecurity(
+      await rewriteDocumentMetadata(assetResponse, url),
+    );
   },
 };

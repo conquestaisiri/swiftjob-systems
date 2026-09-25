@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { getEnv } from "../config";
 import { getPublicSiteUrl } from "./siteUrl";
 import { emailUnsubscribeService } from "./emailUnsubscribe";
+import { emailDeliveryService } from "./emailDelivery";
 export { getPublicSiteUrl } from "./siteUrl";
 
 // ============================================
@@ -138,6 +139,9 @@ async function sendEmail(opts: {
   tags?: Array<{ name: string; value: string }>;
 }): Promise<void> {
   const from = getFromAddress();
+  if (await emailDeliveryService.isSuppressed(opts.to)) {
+    throw new Error("Email recipient is suppressed after a permanent bounce or spam complaint");
+  }
   const maxAttempts = 3;
   const resend = getResend();
   // Reuse one provider idempotency key so a network timeout cannot create a

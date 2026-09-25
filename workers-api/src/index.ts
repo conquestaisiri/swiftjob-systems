@@ -12,6 +12,7 @@ import {
   getPublicSiteUrl,
 } from "./services/email";
 import { emailUnsubscribeService } from "./services/emailUnsubscribe";
+import { emailDeliveryService, readBoundedRequestBody } from "./services/emailDelivery";
 import { storageService } from "./services/storage";
 import { campaignService } from "./services/campaigns";
 import {
@@ -261,6 +262,12 @@ const emailUnsubscribeLimiter = rateLimit(
   "Too many email preference requests. Please try again later.",
   "email-unsubscribe",
 );
+const resendWebhookLimiter = rateLimit(
+  1000,
+  15 * 60 * 1000,
+  "Webhook request limit exceeded",
+  "resend-webhook",
+);
 const applicationLimiter = rateLimit(
   10,
   60 * 60 * 1000,
@@ -308,6 +315,9 @@ app.use("/api/*", async (c, next) => {
   if (path === "/api/email/unsubscribe") {
     return emailUnsubscribeLimiter(c, next);
   }
+  if (path === "/api/webhooks/resend") {
+    return resendWebhookLimiter(c, next);
+  }
   return isTechCheckStatus ? techCheckStatusLimiter(c, next) : apiLimiter(c, next);
 });
 app.use("/api/applications", applicationLimiter);
@@ -317,6 +327,38 @@ app.use("/api/contact", contactLimiter);
 app.get("/api/healthz", (c) =>
   c.json({ status: "ok", timestamp: new Date().toISOString() }),
 );
+
+// Resend signs the exact raw request body. Verify it before parsing, then
+// persist only the event identifiers and state needed for delivery health.
+app.post("/api/webhooks/resend", async (c) => {
+  const secret = getEnv().RESEND_WEBHOOK_SECRET;
+  if (!secret) {
+    console.error({ route: "/api/webhooks/resend" }, "Resend webhook secret is not configured");
+    return c.json({ error: "Webhook is not configured" }, 503);
+  }
+
+  let payload: string;
+  try {
+    payload = await readBoundedRequestBody(c.req.raw, 64 * 1024);
+  } catch {
+    return c.json({ error: "Invalid webhook request body" }, 413);
+  }
+
+  const verified = await emailDeliveryService.verifyWebhook(payload, {
+    id: c.req.header("svix-id"),
+    timestamp: c.req.header("svix-timestamp"),
+    signature: c.req.header("svix-signature"),
+  }, secret);
+  if (!verified) return c.json({ error: "Invalid webhook signature" }, 401);
+
+  try {
+    const result = await emailDeliveryService.processWebhook(verified);
+    return c.json({ received: true, ...result });
+  } catch (err) {
+    console.error({ err, eventType: verified.type }, "Could not persist Resend webhook event");
+    return c.json({ error: "Could not process webhook" }, 500);
+  }
+});
 
 function escapeHtmlAttribute(value: string): string {
   return value
@@ -2053,6 +2095,15 @@ app.get("/api/admin/stats", adminAuth, async (c) => {
   } catch (err) {
     console.error({ err }, "Failed to fetch stats");
     return c.json({ error: "Failed to retrieve statistics" }, 500);
+  }
+});
+
+app.get("/api/admin/email-delivery/summary", adminAuth, async (c) => {
+  try {
+    return c.json(await emailDeliveryService.summary());
+  } catch (err) {
+    console.error({ err }, "Failed to retrieve email delivery summary");
+    return c.json({ error: "Failed to retrieve email delivery summary" }, 500);
   }
 });
 
@@ -3928,4 +3979,16 @@ app.post("/api/admin/referrals/from-contacts", adminAuth, async (c) => {
   }
 });
 
-export default app;
+export default {
+  fetch(request, env, ctx) {
+    return app.fetch(request, env, ctx);
+  },
+  async scheduled(_controller, env, ctx) {
+    initEnv(env);
+    ctx.waitUntil(
+      emailDeliveryService.pruneExpiredEvents().catch((err: unknown) => {
+        console.error({ err }, "Failed to prune expired email delivery events");
+      }),
+    );
+  },
+} satisfies ExportedHandler<Env>;

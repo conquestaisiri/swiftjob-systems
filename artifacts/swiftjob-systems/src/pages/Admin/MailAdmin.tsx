@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { handleAdminUnauthorized, isUnauthorized } from "@/lib/adminAuth";
+import { adminFetch } from "@/lib/adminApi";
 import type { Job } from "@/data/jobs";
 import { parseMailRecipients } from "@/lib/mailRecipients";
 
@@ -37,6 +38,13 @@ interface SendResponse {
   results: SendResult[];
 }
 
+interface EmailDeliverySummary {
+  generatedAt: string;
+  periodDays: number;
+  events: Record<string, number>;
+  suppressedRecipients: number;
+}
+
 export function MailAdmin({ token }: { token: string }) {
   const [recipientsText, setRecipientsText] = useState("");
   const [mode, setMode] = useState<"referral" | "custom">("referral");
@@ -50,6 +58,9 @@ export function MailAdmin({ token }: { token: string }) {
   const [error, setError] = useState("");
   const [result, setResult] = useState<SendResponse | null>(null);
   const [picking, setPicking] = useState<"contacts" | "referrals" | null>(null);
+  const [deliverySummary, setDeliverySummary] = useState<EmailDeliverySummary | null>(null);
+  const [deliveryLoading, setDeliveryLoading] = useState(true);
+  const [deliveryError, setDeliveryError] = useState("");
 
   const recipientParse = parseMailRecipients(recipientsText);
   const recipients = recipientParse.recipients;
@@ -93,6 +104,30 @@ export function MailAdmin({ token }: { token: string }) {
       cancelled = true;
     };
   }, [mode]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setDeliveryLoading(true);
+    setDeliveryError("");
+    adminFetch("/api/admin/email-delivery/summary")
+      .then((res) => res.json() as Promise<EmailDeliverySummary>)
+      .then((summary) => {
+        if (!cancelled) setDeliverySummary(summary);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setDeliveryError(
+            err instanceof Error ? err.message : "Delivery summary is unavailable.",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setDeliveryLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   const handleSend = async () => {
     setError("");
@@ -176,6 +211,36 @@ export function MailAdmin({ token }: { token: string }) {
           {recipients.length} recipient{recipients.length === 1 ? "" : "s"}
         </span>
       </div>
+
+      <section className="admin-panel" aria-labelledby="email-delivery-title">
+        <h2 id="email-delivery-title" className="admin-panel-title">
+          Email delivery · last 30 days
+        </h2>
+        {deliveryLoading ? (
+          <p className="admin-panel-hint">Loading provider delivery events…</p>
+        ) : deliveryError ? (
+          <p className="admin-panel-hint" role="status">
+            Delivery tracking is not available yet. {deliveryError}
+          </p>
+        ) : deliverySummary ? (
+          <>
+            <div className="admin-stats-grid">
+              <div className="admin-stat-card"><Mail size={18} /><span>Accepted by Resend</span><strong>{deliverySummary.events["email.sent"] ?? 0}</strong></div>
+              <div className="admin-stat-card"><CheckCircle2 size={18} /><span>Delivered to mail server</span><strong>{deliverySummary.events["email.delivered"] ?? 0}</strong></div>
+              <div className="admin-stat-card"><AlertCircle size={18} /><span>Permanent bounces</span><strong>{deliverySummary.events["email.bounced"] ?? 0}</strong></div>
+              <div className="admin-stat-card"><AlertCircle size={18} /><span>Spam complaints</span><strong>{deliverySummary.events["email.complained"] ?? 0}</strong></div>
+              <div className="admin-stat-card"><Loader2 size={18} /><span>Delayed</span><strong>{deliverySummary.events["email.delivery_delayed"] ?? 0}</strong></div>
+              <div className="admin-stat-card"><X size={18} /><span>Failed or suppressed</span><strong>{(deliverySummary.events["email.failed"] ?? 0) + (deliverySummary.events["email.suppressed"] ?? 0)}</strong></div>
+              <div className="admin-stat-card"><UsersRound size={18} /><span>Suppressed addresses</span><strong>{deliverySummary.suppressedRecipients}</strong></div>
+            </div>
+            <p className="admin-panel-hint">
+              “Delivered” means the receiving mail server accepted the message; it does not confirm inbox placement. Counts are provider events, not a spam-folder guarantee.
+            </p>
+          </>
+        ) : (
+          <p className="admin-panel-hint">No delivery events are available yet.</p>
+        )}
+      </section>
 
       {error && (
         <div className="admin-alert">

@@ -7,6 +7,7 @@ import {
   integer,
   jsonb,
   pgEnum,
+  index,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
@@ -383,3 +384,33 @@ export const emailUnsubscriptions = pgTable("email_unsubscriptions", {
 });
 
 export type EmailUnsubscription = typeof emailUnsubscriptions.$inferSelect;
+
+// Keep provider delivery telemetry minimal: event identifiers and outcomes
+// only. Recipient addresses are stored separately only when a permanent
+// bounce or spam complaint requires a durable sending suppression.
+export const emailDeliveryEvents = pgTable(
+  "email_delivery_events",
+  {
+    providerEventId: text("provider_event_id").primaryKey(),
+    emailId: text("email_id").notNull(),
+    eventType: text("event_type").notNull(),
+    occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
+    receivedAt: timestamp("received_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    occurredAtIdx: index("email_delivery_events_occurred_at_idx").on(table.occurredAt),
+  }),
+);
+
+export const emailProviderSuppressions = pgTable("email_provider_suppressions", {
+  email: text("email").primaryKey(),
+  reason: text("reason").notNull(),
+  sourceEventId: text("source_event_id").notNull(),
+  suppressedAt: timestamp("suppressed_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export type EmailDeliveryEvent = typeof emailDeliveryEvents.$inferSelect;
