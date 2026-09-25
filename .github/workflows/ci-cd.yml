@@ -103,7 +103,7 @@ jobs:
         working-directory: ./workers-api
         run: pnpm install --frozen-lockfile
 
-      - name: Ensure a monitoring DMARC record exists for swiftjob.online
+      - name: Ensure an enforcing DMARC record exists for swiftjob.online
         env:
           CLOUDFLARE_DNS_API_TOKEN: ${{ secrets.CLOUDFLARE_DNS_API_TOKEN }}
           CLOUDFLARE_ZONE_ID: ${{ vars.SWIFTJOB_CLOUDFLARE_ZONE_ID }}
@@ -155,14 +155,14 @@ jobs:
           fi
 
           payload="$(jq -n --arg name '_dmarc.swiftjob.online' \
-            --arg content 'v=DMARC1; p=none; rua=mailto:dmarc@swiftjob.online; adkim=r; aspf=r' \
+            --arg content 'v=DMARC1; p=reject; rua=mailto:dmarc@swiftjob.online; adkim=r; aspf=r' \
             '{type:"TXT",name:$name,content:$content,ttl:3600}')"
           created="$(curl --silent --show-error --fail --request POST \
             --header "$auth_header" --header 'Content-Type: application/json' \
             --data "$payload" \
             "https://api.cloudflare.com/client/v4/zones/${zone_id}/dns_records" 2>/dev/null || true)"
           if [ "$(jq -r '.success // false' <<< "$created" 2>/dev/null || true)" = "true" ]; then
-            echo "Created the .online DMARC monitoring record with aggregate reports (p=none)."
+            echo "Created the .online DMARC enforcement record with aggregate reports (p=reject)."
           else
             echo "::warning::Cloudflare DNS write access is unavailable; DMARC record was not created."
           fi
