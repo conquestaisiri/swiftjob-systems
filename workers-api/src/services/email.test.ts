@@ -245,8 +245,8 @@ test("email identity, reply-to, and public links are pinned to swiftjob.online",
   assert.equal(getPublicSiteUrl(), "https://swiftjob.online");
 
   initEnv({
-    EMAIL_FROM: "Careers <careers@payservice.top>",
-    FRONTEND_URL: "https://payservice.top",
+    EMAIL_FROM: "Careers <careers@unrelated.invalid>",
+    FRONTEND_URL: "https://unrelated.invalid",
   } as Parameters<typeof initEnv>[0]);
   assert.throws(() => getFromAddress(), /verified swiftjob\.online domain/);
   assert.equal(getPublicSiteUrl(), "https://swiftjob.online");
