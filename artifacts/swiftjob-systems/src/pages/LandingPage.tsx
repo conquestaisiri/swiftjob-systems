@@ -164,7 +164,7 @@ export function LandingPage() {
         <section className="landing-v2-hero landing-v2-hero-centered">
           <div className="landing-v2-hero-copy">
             <span className="landing-v2-eyebrow">
-              <i /> Remote staffing, done properly
+              Remote staffing, done properly
             </span>
             <h1>
               Remote talent.
